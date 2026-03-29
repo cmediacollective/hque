@@ -1,31 +1,31 @@
 import { useState } from 'react'
 import AddCreatorForm from './AddCreatorForm'
 
-export default function CreatorDetail({ creator, onClose, onSaved, t }) {
+export default function CreatorDetail({ creator, onClose, onSaved }) {
   const [editing, setEditing] = useState(false)
 
   const displayType = (c) => {
-    if (c.types?.length) return c.types.join(' · ')
+    if (Array.isArray(c.types) && c.types.length) return c.types.join(' · ')
     return c.type || 'Influencer'
   }
 
   const row = (label, value) => value ? (
-    <div style={{ display: 'flex', padding: '12px 0', borderBottom: `0.5px solid ${t.borderLight}` }}>
-      <div style={{ width: '160px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: t.textMuted, flexShrink: 0, paddingTop: '1px' }}>{label}</div>
-      <div style={{ fontSize: '13px', color: t.textSecondary, flex: 1 }}>{value}</div>
+    <div style={{ display: 'flex', padding: '12px 0', borderBottom: '0.5px solid #2A2A2A' }}>
+      <div style={{ width: '160px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#777', flexShrink: 0, paddingTop: '1px' }}>{label}</div>
+      <div style={{ fontSize: '13px', color: '#CCC9C3', flex: 1 }}>{value}</div>
     </div>
   ) : null
 
   const stat = (label, value) => (
-    <div style={{ flex: 1, padding: '16px', background: t.bgStat, borderRadius: '1px' }}>
-      <div style={{ fontSize: '18px', color: t.textPrimary, fontWeight: 500, marginBottom: '4px' }}>{value || '—'}</div>
-      <div style={{ fontSize: '8px', color: t.textMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
+    <div style={{ flex: 1, padding: '14px', background: '#222', borderRadius: '1px' }}>
+      <div style={{ fontSize: '18px', color: '#F0ECE6', fontWeight: 500, marginBottom: '4px' }}>{value || '—'}</div>
+      <div style={{ fontSize: '8px', color: '#777', letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
     </div>
   )
 
   const rateRow = (label, value) => value ? (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `0.5px solid ${t.borderLight}` }}>
-      <div style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: t.textMuted }}>{label}</div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '0.5px solid #2A2A2A' }}>
+      <div style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#777' }}>{label}</div>
       <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>${value.toLocaleString()}</div>
     </div>
   ) : null
@@ -34,37 +34,37 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
     <>
       {editing && (
         <AddCreatorForm
-          t={t}
           existing={creator}
           onClose={() => setEditing(false)}
-          onSaved={() => { setEditing(false); onSaved(); }}
+          onSaved={() => { setEditing(false); onSaved() }}
         />
       )}
 
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
-        <div style={{ width: '560px', background: t.bgModal, height: '100vh', overflowY: 'auto', borderLeft: `0.5px solid ${t.border}`, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '560px', background: '#1A1A1A', height: '100vh', overflowY: 'auto', borderLeft: '0.5px solid #2A2A2A', display: 'flex', flexDirection: 'column' }}>
 
-          <div style={{ padding: '24px 28px', borderBottom: `0.5px solid ${t.borderLight}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: t.bgModal, zIndex: 1 }}>
+          <div style={{ padding: '24px 28px', borderBottom: '0.5px solid #2A2A2A', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: '#1A1A1A', zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {creator.photo_url
-                ? <img src={creator.photo_url} alt={creator.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${t.borderChip}` }} onError={e => e.target.style.display = 'none'} />
-                : <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: t.bgStat, border: `0.5px solid ${t.borderChip}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '20px', color: t.textPrimary, flexShrink: 0 }}>
+                ? <img src={creator.photo_url} alt={creator.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #3A3A3A' }} onError={e => e.target.style.display = 'none'} />
+                : <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#2A2A2A', border: '0.5px solid #3A3A3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F2EEE8', flexShrink: 0 }}>
                     {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
               }
               <div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(creator)}</div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: t.textPrimary, marginBottom: '2px' }}>{creator.name}</div>
-                <div style={{ fontSize: '12px', color: t.textHandle }}>{creator.handles?.instagram ? `@${creator.handles.instagram}` : ''}</div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '2px' }}>{creator.name}</div>
+                <div style={{ fontSize: '12px', color: '#777' }}>{creator.handles?.instagram ? `@${creator.handles.instagram}` : ''}</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 4px' }}>×</button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 4px' }}>×</button>
             </div>
           </div>
 
           <div style={{ padding: '28px', flex: 1 }}>
+
             <div style={{ display: 'flex', gap: '8px', marginBottom: '28px' }}>
               {stat('IG Followers', creator.ig_followers?.toLocaleString())}
               {stat('TikTok', creator.tiktok_followers?.toLocaleString())}
@@ -72,12 +72,12 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
               {stat('Eng Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
             </div>
 
-            {creator.niches?.length > 0 && (
+            {Array.isArray(creator.niches) && creator.niches.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: t.textMuted, marginBottom: '10px' }}>Niches</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Niches</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {creator.niches.map(n => (
-                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${t.borderChip}`, color: t.textSecondary, borderRadius: '1px' }}>{n}</span>
+                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: '0.5px solid #3A3A3A', color: '#999', borderRadius: '1px' }}>{n}</span>
                   ))}
                 </div>
               </div>
@@ -85,7 +85,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
 
             {(creator.rates?.feed || creator.rates?.reel || creator.rates?.story || creator.rates?.tiktok || creator.rates?.youtube) && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: t.textMuted, marginBottom: '10px' }}>Rates</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Rates</div>
                 {rateRow('IG Feed Post', creator.rates?.feed)}
                 {rateRow('IG Story', creator.rates?.story)}
                 {rateRow('IG Reel', creator.rates?.reel)}
@@ -95,7 +95,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
             )}
 
             <div style={{ marginBottom: '28px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: t.textMuted, marginBottom: '10px' }}>Details</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Details</div>
               {row('Tier', creator.tier)}
               {row('Primary Platform', creator.primary_platform)}
               {row('Location', creator.location)}
@@ -108,7 +108,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
 
             {(creator.contact_email || creator.manager_name || creator.manager_email) && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: t.textMuted, marginBottom: '10px' }}>Contact</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Contact</div>
                 {row('Creator Email', creator.contact_email)}
                 {row('Manager', creator.manager_name)}
                 {row('Manager Email', creator.manager_email)}
@@ -117,10 +117,11 @@ export default function CreatorDetail({ creator, onClose, onSaved, t }) {
 
             {creator.notes && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: t.textMuted, marginBottom: '10px' }}>Internal Notes</div>
-                <div style={{ fontSize: '13px', color: t.textSecondary, lineHeight: 1.7, padding: '14px', background: t.bgStat, borderRadius: '1px' }}>{creator.notes}</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Internal Notes</div>
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{creator.notes}</div>
               </div>
             )}
+
           </div>
         </div>
       </div>
