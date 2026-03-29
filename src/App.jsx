@@ -28,13 +28,14 @@ function App() {
           flexDirection: 'column',
           flexShrink: 0
         }}>
-          <div style={{ padding: '0 20px 24px', borderBottom: '0.5px solid #222222', marginBottom: '16px' }}>
-            <img src="/logo.svg" alt="HQue" style={{ width: '120px', height: 'auto', display: 'block', marginLeft: '-8px' }} />
-            <div style={{ fontSize: '7px', color: '#555', letterSpacing: '0.32em', textTransform: 'uppercase', marginTop: '4px' }}>Agency OS</div>
+          <div style={{ padding: '0 0 20px 0', borderBottom: '0.5px solid #222222', marginBottom: '16px', overflow: 'hidden' }}>
+            <div style={{ overflow: 'hidden', height: '40px', display: 'flex', alignItems: 'center', paddingLeft: '4px' }}>
+              <img src="/logo.svg" alt="HQue" style={{ width: '170px', marginTop: '-34px', marginBottom: '-34px', marginLeft: '-24px', display: 'block' }} />
+            </div>
           </div>
           {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
             <button key={key} onClick={() => setView(key)} style={{
-              padding: view === key ? '9px 20px 9px 18.5px' : '9px 20px',
+              padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
               fontSize: '10px',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
@@ -48,7 +49,7 @@ function App() {
               fontWeight: view === key ? '500' : '400'
             }}>{label}</button>
           ))}
-          <div style={{ marginTop: 'auto', padding: '0 20px' }}>
+          <div style={{ marginTop: 'auto', padding: '0 16px' }}>
             <div style={{ fontSize: '8px', color: '#555', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Organization</div>
             <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>C Media Collective</div>
           </div>

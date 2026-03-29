@@ -29,7 +29,12 @@ const sectionLabel = (text) => (
 )
 
 export default function AddCreatorForm({ onClose, onSaved, existing }) {
-  const [form, setForm] = useState(existing || {
+  const [form, setForm] = useState(existing ? {
+    ...existing,
+    rates: existing.rates || { feed: '', story: '', reel: '', tiktok: '', youtube: '' },
+    handles: existing.handles || { instagram: '', tiktok: '', youtube: '' },
+    niches: existing.niches || []
+  } : {
     name: '', type: '', tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
@@ -87,7 +92,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ background: '#0D0D0D', border: '0.5px solid #2A2A2A', width: '580px', maxHeight: '88vh', overflowY: 'auto', borderRadius: '2px' }}>
 
         <div style={{ padding: '20px 24px', borderBottom: '0.5px solid #1E1E1E', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: '#0D0D0D', zIndex: 1 }}>
@@ -96,7 +101,6 @@ export default function AddCreatorForm({ onClose, onSaved, existing }) {
         </div>
 
         <div style={{ padding: '24px' }}>
-
           {sectionLabel('Basic Info')}
           {field('Full Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Michelle Young' }))}
 

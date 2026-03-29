@@ -35,7 +35,7 @@ export default function TalentView() {
 
   const Avatar = ({ creator, size = 48 }) => (
     creator.photo_url
-      ? <img src={creator.photo_url} alt={creator.name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #333' }} onError={e => { e.target.style.display = 'none' }} />
+      ? <img src={creator.photo_url} alt={creator.name} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #333', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
       : <div style={{ width: size, height: size, borderRadius: '50%', background: '#1A1A1A', border: '0.5px solid #333', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: size * 0.28, color: '#F2EEE8', flexShrink: 0 }}>
           {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
         </div>
@@ -84,28 +84,29 @@ export default function TalentView() {
       {!loading && view === 'grid' && filtered.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1px', background: '#1A1A1A', flex: 1, overflowY: 'auto' }}>
           {filtered.map(c => (
-            <div key={c.id} onClick={() => setEditing(c)} style={{ background: '#0D0D0D', padding: '16px', cursor: 'pointer', transition: 'background 0.12s' }}
-              onMouseEnter={e => e.currentTarget.style.background = '#111'}
+            <div key={c.id} onClick={() => setEditing(c)}
+              style={{ background: '#0D0D0D', padding: '18px', cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#131313'}
               onMouseLeave={e => e.currentTarget.style.background = '#0D0D0D'}>
-              <div style={{ marginBottom: '12px' }}>
-                <Avatar creator={c} size={48} />
+              <div style={{ marginBottom: '14px' }}>
+                <Avatar creator={c} size={52} />
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{c.type || 'Influencer'}</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#F2EEE8', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-              <div style={{ fontSize: '10px', color: '#555', marginBottom: '8px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
-              <div style={{ fontSize: '9px', color: '#555', marginBottom: '12px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{c.niches?.join(' · ')}</div>
-              <div style={{ display: 'flex', paddingTop: '12px', borderTop: '0.5px solid #1A1A1A' }}>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '5px' }}>{c.type || 'Influencer'}</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: '#F0ECE6', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+              <div style={{ fontSize: '11px', color: '#777', marginBottom: '10px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
+              <div style={{ fontSize: '10px', color: '#666', marginBottom: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{c.niches?.join(' · ')}</div>
+              <div style={{ display: 'flex', paddingTop: '12px', borderTop: '0.5px solid #1E1E1E' }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#D8D4CC', fontWeight: 500 }}>{c.ig_followers?.toLocaleString() || '—'}</div>
-                  <div style={{ fontSize: '8px', color: '#555', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '2px' }}>Followers</div>
+                  <div style={{ fontSize: '13px', color: '#E0DCD6', fontWeight: 500 }}>{c.ig_followers?.toLocaleString() || '—'}</div>
+                  <div style={{ fontSize: '8px', color: '#666', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '12px', color: '#D8D4CC', fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
-                  <div style={{ fontSize: '8px', color: '#555', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '2px' }}>Eng Rate</div>
+                  <div style={{ fontSize: '13px', color: '#E0DCD6', fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
+                  <div style={{ fontSize: '8px', color: '#666', letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
                 </div>
               </div>
               {c.rates?.feed && (
-                <div style={{ fontSize: '9px', color: '#888', marginTop: '8px' }}>From <span style={{ color: '#5b7c99', fontWeight: 500 }}>${c.rates.feed.toLocaleString()}</span></div>
+                <div style={{ fontSize: '10px', color: '#888', marginTop: '10px' }}>From <span style={{ color: '#5b7c99', fontWeight: 500 }}>${c.rates.feed.toLocaleString()}</span></div>
               )}
             </div>
           ))}
@@ -120,20 +121,21 @@ export default function TalentView() {
             ))}
           </div>
           {filtered.map(c => (
-            <div key={c.id} onClick={() => setEditing(c)} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 80px', padding: '12px 28px', borderBottom: '0.5px solid #1A1A1A', cursor: 'pointer', alignItems: 'center' }}
+            <div key={c.id} onClick={() => setEditing(c)}
+              style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 80px', padding: '14px 28px', borderBottom: '0.5px solid #1A1A1A', cursor: 'pointer', alignItems: 'center', background: 'transparent' }}
               onMouseEnter={e => e.currentTarget.style.background = '#111'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Avatar creator={c} size={32} />
+                <Avatar creator={c} size={34} />
                 <div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#E8E4DE' }}>{c.name}</div>
-                  <div style={{ fontSize: '9px', color: '#555', marginTop: '1px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#EAE6E0' }}>{c.name}</div>
+                  <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
                 </div>
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '2px 8px', display: 'inline-block' }}>{c.type || '—'}</div>
-              <div style={{ fontSize: '12px', color: '#C8C4BE' }}>{c.ig_followers?.toLocaleString() || '—'}</div>
-              <div style={{ fontSize: '12px', color: '#888' }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
-              <div style={{ fontSize: '12px', color: '#5b7c99', textAlign: 'right', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '3px 8px', display: 'inline-block' }}>{c.type || '—'}</div>
+              <div style={{ fontSize: '13px', color: '#C8C4BE' }}>{c.ig_followers?.toLocaleString() || '—'}</div>
+              <div style={{ fontSize: '13px', color: '#999' }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
+              <div style={{ fontSize: '13px', color: '#5b7c99', textAlign: 'right', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>
             </div>
           ))}
         </div>
