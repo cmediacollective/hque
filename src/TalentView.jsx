@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 
-const TYPES = ['All Types', 'Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete']
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food']
+const TYPES = ['All Types', 'Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
+const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
 
 export default function TalentView() {
   const [creators, setCreators] = useState([])
@@ -22,7 +22,9 @@ export default function TalentView() {
     setLoading(false)
   }
 
-  const filtered = typeFilter === 'All Types' ? creators : creators.filter(c => c.type === typeFilter)
+  const filtered = typeFilter === 'All Types' ? creators : creators.filter(c => 
+    c.type === typeFilter || c.types?.includes(typeFilter)
+  )
 
   const chip = (label, active, onClick) => (
     <button onClick={onClick} style={{
@@ -40,6 +42,11 @@ export default function TalentView() {
           {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
         </div>
   )
+
+  const displayType = (c) => {
+    if (c.types?.length) return c.types.join(' · ')
+    return c.type || 'Influencer'
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
@@ -91,7 +98,7 @@ export default function TalentView() {
               <div style={{ marginBottom: '14px' }}>
                 <Avatar creator={c} size={52} />
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '5px' }}>{c.type || 'Influencer'}</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '5px' }}>{displayType(c)}</div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: '#F0ECE6', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
               <div style={{ fontSize: '11px', color: '#777', marginBottom: '10px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
               <div style={{ fontSize: '10px', color: '#666', marginBottom: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{c.niches?.join(' · ')}</div>
@@ -132,7 +139,7 @@ export default function TalentView() {
                   <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
                 </div>
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '3px 8px', display: 'inline-block' }}>{c.type || '—'}</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '3px 8px', display: 'inline-block' }}>{displayType(c)}</div>
               <div style={{ fontSize: '13px', color: '#C8C4BE' }}>{c.ig_followers?.toLocaleString() || '—'}</div>
               <div style={{ fontSize: '13px', color: '#999' }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
               <div style={{ fontSize: '13px', color: '#5b7c99', textAlign: 'right', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>

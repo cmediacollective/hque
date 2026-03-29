@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
 
-const TYPES = ['Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete']
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment']
+const TYPES = ['Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
+const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books']
 const PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Pinterest', 'LinkedIn']
 const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
@@ -28,14 +28,17 @@ const sectionLabel = (text) => (
   <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '20px 0 16px' }}>{text}</div>
 )
 
+const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
+
 export default function AddCreatorForm({ onClose, onSaved, existing }) {
   const [form, setForm] = useState(existing ? {
     ...existing,
+    types: existing.types || (existing.type ? [existing.type] : []),
     rates: existing.rates || { feed: '', story: '', reel: '', tiktok: '', youtube: '' },
     handles: existing.handles || { instagram: '', tiktok: '', youtube: '' },
     niches: existing.niches || []
   } : {
-    name: '', type: '', tier: '', primary_platform: '',
+    name: '', types: [], tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
     location: '', notes: '', photo_url: '',
@@ -48,17 +51,18 @@ export default function AddCreatorForm({ onClose, onSaved, existing }) {
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
   const setHandle = (key, val) => setForm(f => ({ ...f, handles: { ...f.handles, [key]: val } }))
   const setRate = (key, val) => setForm(f => ({ ...f, rates: { ...f.rates, [key]: val } }))
-  const toggleNiche = (n) => setForm(f => ({
-    ...f, niches: f.niches.includes(n) ? f.niches.filter(x => x !== n) : [...f.niches, n]
-  }))
+  const toggleType = (t) => setForm(f => ({ ...f, types: toggleChip(f.types, t) }))
+  const toggleNiche = (n) => setForm(f => ({ ...f, niches: toggleChip(f.niches, n) }))
 
   async function save() {
     if (!form.name) return setError('Name is required')
+    if (!form.types?.length) return setError('Select at least one type')
     setSaving(true)
     setError('')
 
     const payload = {
       ...form,
+      type: form.types[0],
       ig_followers: form.ig_followers ? parseInt(form.ig_followers) : null,
       tiktok_followers: form.tiktok_followers ? parseInt(form.tiktok_followers) : null,
       yt_subscribers: form.yt_subscribers ? parseInt(form.yt_subscribers) : null,
@@ -104,15 +108,25 @@ export default function AddCreatorForm({ onClose, onSaved, existing }) {
           {sectionLabel('Basic Info')}
           {field('Full Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Michelle Young' }))}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {field('Type', sel({ value: form.type, onChange: e => set('type', e.target.value) }, TYPES))}
-            {field('Tier', sel({ value: form.tier, onChange: e => set('tier', e.target.value) }, TIERS))}
-          </div>
+          {field('Type * (select all that apply)',
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {TYPES.map(t => (
+                <button key={t} onClick={() => toggleType(t)} style={{
+                  padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase',
+                  border: `0.5px solid ${form.types.includes(t) ? '#5b7c99' : '#2A2A2A'}`,
+                  color: form.types.includes(t) ? '#5b7c99' : '#666',
+                  background: 'none', cursor: 'pointer', borderRadius: '1px'
+                }}>{t}</button>
+              ))}
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {field('Tier', sel({ value: form.tier, onChange: e => set('tier', e.target.value) }, TIERS))}
             {field('Primary Platform', sel({ value: form.primary_platform, onChange: e => set('primary_platform', e.target.value) }, PLATFORMS))}
-            {field('Location', inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
           </div>
+
+          {field('Location', inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
 
           {field('Photo URL', inp({ value: form.photo_url, onChange: e => set('photo_url', e.target.value), placeholder: 'https://... paste any image link' }))}
           {form.photo_url && (
