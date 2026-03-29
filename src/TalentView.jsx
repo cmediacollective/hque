@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
+import CreatorDetail from './CreatorDetail'
 
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
@@ -11,7 +12,7 @@ export default function TalentView() {
   const [typeFilter, setTypeFilter] = useState('All Types')
   const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(null)
+  const [selected, setSelected] = useState(null)
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
 
@@ -66,6 +67,15 @@ export default function TalentView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
+      {/* Creator detail panel */}
+      {selected && (
+        <CreatorDetail
+          creator={selected}
+          onClose={() => setSelected(null)}
+          onSaved={() => { setSelected(null); fetchCreators(); }}
+        />
+      )}
+
       {/* Archive confirmation modal */}
       {archiving && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -86,14 +96,6 @@ export default function TalentView() {
             </div>
           </div>
         </div>
-      )}
-
-      {editing && (
-        <AddCreatorForm
-          existing={editing}
-          onClose={() => setEditing(null)}
-          onSaved={() => { setEditing(null); fetchCreators(); }}
-        />
       )}
 
       {/* Filter bar */}
@@ -142,7 +144,7 @@ export default function TalentView() {
               style={{ background: hovering === c.id ? '#131313' : '#0D0D0D', padding: '18px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
-              onClick={() => setEditing(c)}>
+              onClick={() => setSelected(c)}>
 
               {hovering === c.id && (
                 <button
@@ -189,7 +191,7 @@ export default function TalentView() {
               style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 80px 80px', padding: '14px 28px', borderBottom: '0.5px solid #1A1A1A', cursor: 'pointer', alignItems: 'center', background: hovering === c.id ? '#111' : 'transparent' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
-              onClick={() => setEditing(c)}>
+              onClick={() => setSelected(c)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Avatar creator={c} size={34} />
                 <div>
