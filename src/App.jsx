@@ -1,13 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 import TalentView from './TalentView'
 import WorkspaceView from './WorkspaceView'
+import Login from './Login'
 
 function App() {
   const [view, setView] = useState('talent')
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    setUser(null)
+  }
+
+  if (authLoading) return (
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ fontSize: '9px', color: '#444', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
+    </div>
+  )
+
+  if (!user) return <Login onLogin={setUser} />
 
   return (
     <div style={{
@@ -16,7 +43,7 @@ function App() {
       color: '#F2EEE8',
       fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif"
     }}>
-      {showForm && <AddCreatorForm onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1); }} />}
+      {showForm && <AddCreatorForm onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
 
       <div style={{ display: 'flex', height: '100vh' }}>
 
@@ -29,10 +56,8 @@ function App() {
           flexDirection: 'column',
           flexShrink: 0
         }}>
-          <div style={{ padding: '0 0 20px 0', borderBottom: '0.5px solid #2A2A2A', marginBottom: '16px', overflow: 'hidden' }}>
-            <div style={{ overflow: 'hidden', height: '40px', display: 'flex', alignItems: 'center', paddingLeft: '4px' }}>
-              <img src="/logo.svg" alt="HQue" style={{ width: '170px', marginTop: '-34px', marginBottom: '-34px', marginLeft: '-24px', display: 'block' }} />
-            </div>
+          <div style={{ padding: '0 0 20px 16px', borderBottom: '0.5px solid #2A2A2A', marginBottom: '16px' }}>
+            <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block' }} />
           </div>
           {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
             <button key={key} onClick={() => setView(key)} style={{
@@ -51,8 +76,9 @@ function App() {
             }}>{label}</button>
           ))}
           <div style={{ marginTop: 'auto', padding: '0 16px' }}>
-            <div style={{ fontSize: '8px', color: '#666', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Organization</div>
-            <div style={{ fontSize: '11px', color: '#aaa', marginTop: '4px' }}>C Media Collective</div>
+            <div style={{ fontSize: '8px', color: '#555', letterSpacing: '0.18em', textTransform: 'uppercase' }}>Signed in as</div>
+            <div style={{ fontSize: '11px', color: '#aaa', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+            <button onClick={handleLogout} style={{ marginTop: '10px', fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #2A2A2A', color: '#555', padding: '4px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
           </div>
         </nav>
 
