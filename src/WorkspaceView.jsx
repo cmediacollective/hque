@@ -4,6 +4,37 @@ import { supabase } from './supabase'
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
+function TaskForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState({ ...initial })
+  return (
+    <div style={{ background: '#222', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '12px', marginBottom: '6px' }}>
+      <textarea
+        value={form.title}
+        onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+        placeholder='Task title...'
+        autoFocus
+        style={{ width: '100%', background: 'none', border: 'none', color: '#F2EEE8', fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
+      />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '8px' }}>
+        <select value={form.priority || 'Medium'} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }}>
+          {PRIORITIES.map(p => <option key={p}>{p}</option>)}
+        </select>
+        <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }} />
+      </div>
+      <input
+        value={form.assigned_to || ''}
+        onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))}
+        placeholder='Assigned to...'
+        style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
+      />
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
+        <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: '0.5px solid #3A3A3A', color: '#777', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
 export default function WorkspaceView() {
   const [boards, setBoards] = useState([])
   const [activeBoard, setActiveBoard] = useState(null)
@@ -14,7 +45,6 @@ export default function WorkspaceView() {
   const [showNewTask, setShowNewTask] = useState(null)
   const [editingTask, setEditingTask] = useState(null)
   const [newBoardName, setNewBoardName] = useState('')
-  const [newTask, setNewTask] = useState({ title: '', priority: 'Medium', due_date: '', assigned_to: '' })
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
 
@@ -57,31 +87,30 @@ export default function WorkspaceView() {
     }
   }
 
-  async function createTask(columnId) {
-    if (!newTask.title.trim()) return
+  async function createTask(columnId, form) {
+    if (!form.title?.trim()) return
     const { error } = await supabase.from('tasks').insert([{
-      title: newTask.title,
-      priority: newTask.priority,
-      due_date: newTask.due_date || null,
-      assigned_to: newTask.assigned_to || null,
+      title: form.title,
+      priority: form.priority || 'Medium',
+      due_date: form.due_date || null,
+      assigned_to: form.assigned_to || null,
       column_id: columnId,
       board_id: activeBoard.id,
       org_id: '00000000-0000-0000-0000-000000000001',
       position: tasks.filter(t => t.column_id === columnId).length
     }])
     if (error) { console.error(error); return }
-    setNewTask({ title: '', priority: 'Medium', due_date: '', assigned_to: '' })
     setShowNewTask(null)
     fetchTasks()
   }
 
-  async function updateTask(task) {
+  async function updateTask(form) {
     const { error } = await supabase.from('tasks').update({
-      title: task.title,
-      priority: task.priority,
-      due_date: task.due_date || null,
-      assigned_to: task.assigned_to || null,
-    }).eq('id', task.id)
+      title: form.title,
+      priority: form.priority,
+      due_date: form.due_date || null,
+      assigned_to: form.assigned_to || null,
+    }).eq('id', form.id)
     if (error) console.error(error)
     else { setEditingTask(null); fetchTasks() }
   }
@@ -102,41 +131,10 @@ export default function WorkspaceView() {
     return '#777'
   }
 
-  const TaskForm = ({ initial, onSave, onCancel }) => {
-    const [form, setForm] = useState(initial)
-    return (
-      <div style={{ background: '#222', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '12px', marginBottom: '6px' }}>
-        <textarea
-          value={form.title}
-          onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-          placeholder='Task title...'
-          autoFocus
-          style={{ width: '100%', background: 'none', border: 'none', color: '#F2EEE8', fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
-        />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '8px' }}>
-          <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }}>
-            {PRIORITIES.map(p => <option key={p}>{p}</option>)}
-          </select>
-          <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }} />
-        </div>
-        <input
-          value={form.assigned_to || ''}
-          onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))}
-          placeholder='Assigned to...'
-          style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
-        />
-        <div style={{ display: 'flex', gap: '6px' }}>
-          <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
-          <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: '0.5px solid #3A3A3A', color: '#777', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
-      <div style={{ padding: '0 28px', display: 'flex', gap: '0', alignItems: 'center', borderBottom: '0.5px solid #2A2A2A', overflowX: 'auto', flexShrink: 0, background: '#1A1A1A' }}>
+      <div style={{ padding: '0 28px', display: 'flex', alignItems: 'center', borderBottom: '0.5px solid #2A2A2A', overflowX: 'auto', flexShrink: 0, background: '#1A1A1A' }}>
         {boards.map(b => (
           <button key={b.id} onClick={() => setActiveBoard(b)} style={{
             padding: '12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
@@ -199,14 +197,14 @@ export default function WorkspaceView() {
                       onDragEnd={() => setDragging(null)}
                       onClick={() => setEditingTask({ ...task })}
                       style={{ background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                      <div style={{ fontSize: '12px', color: '#D8D4CC', lineHeight: 1.45, marginBottom: '10px' }}>{task.title}</div>
+                      <div style={{ fontSize: '12px', color: '#D8D4CC', lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                          {task.due_date && <span style={{ fontSize: '9px', color: '#777', letterSpacing: '0.1em' }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
-                          {task.assigned_to && <span style={{ fontSize: '9px', color: '#888' }}>{task.assigned_to}</span>}
+                          {task.due_date && <span style={{ fontSize: '9px', color: '#777' }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                          {task.assigned_to && <span style={{ fontSize: '9px', color: '#888', background: '#2A2A2A', padding: '2px 6px', borderRadius: '1px' }}>{task.assigned_to}</span>}
                         </div>
-                        <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px' }}>×</button>
+                        <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: '#444', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
                       </div>
                     </div>
                   )
@@ -214,9 +212,9 @@ export default function WorkspaceView() {
 
                 {showNewTask === col.id ? (
                   <TaskForm
-                    initial={newTask}
+                    initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '' }}
                     onSave={(form) => createTask(col.id, form)}
-                    onCancel={() => { setShowNewTask(null); setNewTask({ title: '', priority: 'Medium', due_date: '', assigned_to: '' }) }}
+                    onCancel={() => setShowNewTask(null)}
                   />
                 ) : (
                   <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: '0.5px dashed #2A2A2A', color: '#555', cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
