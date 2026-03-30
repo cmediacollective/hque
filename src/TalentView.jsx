@@ -34,6 +34,7 @@ export default function TalentView({ dark = true }) {
       .from('creators')
       .select('*')
       .eq('status', showArchived ? 'archived' : 'active')
+      .order('name', { ascending: true })
     if (error) console.error(error)
     else setCreators(data || [])
     setLoading(false)
@@ -48,9 +49,12 @@ export default function TalentView({ dark = true }) {
     else { setArchiving(null); fetchCreators() }
   }
 
-  const filtered = typeFilter === 'All Types' ? creators : creators.filter(c =>
-    c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter))
-  )
+  const filtered = (typeFilter === 'All Types'
+    ? creators
+    : creators.filter(c =>
+        c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter))
+      )
+  ).sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 
   const chip = (label, active, onClick) => (
     <button onClick={onClick} style={{
