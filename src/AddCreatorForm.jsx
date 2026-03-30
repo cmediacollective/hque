@@ -107,7 +107,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
       <div style={{ background: bg, border: `0.5px solid ${border}`, width: '580px', maxHeight: '88vh', overflowY: 'auto', borderRadius: '2px' }}>
 
         <div style={{ padding: '20px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text }}>{existing ? 'Edit Creator' : 'Add Creator'}</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text }}>{existing ? 'Edit Talent' : 'Add Talent'}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: label, cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>x</button>
         </div>
 

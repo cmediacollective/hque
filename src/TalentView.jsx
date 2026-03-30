@@ -144,10 +144,10 @@ export default function TalentView({ dark = true }) {
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {showArchived ? 'No archived creators' : 'No creators yet'}
+            {showArchived ? 'No archived creators' : 'No talent yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted, letterSpacing: '0.08em' }}>
-            {showArchived ? 'Archived creators will appear here' : 'Click + Creator to add your first creator'}
+            {showArchived ? 'Archived creators will appear here' : 'Click + Talent to add your first creator'}
           </div>
         </div>
       )}
