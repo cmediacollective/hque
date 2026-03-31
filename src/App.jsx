@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 import TalentView from './TalentView'
 import WorkspaceView from './WorkspaceView'
+import CampaignView from './CampaignView'
 import Login from './Login'
 
 function App() {
@@ -77,7 +78,7 @@ function App() {
             <div>
               <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>C Media Collective</div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 'normal', color: text }}>
-                {view === 'talent' ? 'Talent Database' : view === 'workspace' ? 'Workspace' : view.charAt(0).toUpperCase() + view.slice(1)}
+                {view === 'talent' ? 'Talent Database' : view === 'workspace' ? 'Workspace' : view === 'campaigns' ? 'Campaigns' : 'Reports'}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -92,7 +93,7 @@ function App() {
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {view === 'talent' && <TalentView key={refresh} dark={dark} />}
             {view === 'workspace' && <WorkspaceView />}
-            {view === 'campaigns' && <div style={{ padding: '20px 28px', color: muted, fontSize: '13px' }}>Campaigns coming next...</div>}
+            {view === 'campaigns' && <CampaignView dark={dark} />}
             {view === 'reports' && <div style={{ padding: '20px 28px', color: muted, fontSize: '13px' }}>Reports coming next...</div>}
           </div>
         </main>

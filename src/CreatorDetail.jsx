@@ -1,13 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 
 export default function CreatorDetail({ creator, onClose, onSaved }) {
   const [editing, setEditing] = useState(false)
+  const [campaigns, setCampaigns] = useState([])
+
+  useEffect(() => { fetchCampaigns() }, [creator.id])
+
+  async function fetchCampaigns() {
+    const { data } = await supabase
+      .from('campaign_creators')
+      .select('campaign_id, campaigns(id, name, brand, status)')
+      .eq('creator_id', creator.id)
+    setCampaigns((data || []).map(d => d.campaigns).filter(Boolean))
+  }
 
   const displayType = (c) => {
     if (Array.isArray(c.types) && c.types.length) return c.types.join(' · ')
     return c.type || 'Influencer'
   }
+
+  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
 
   const row = (label, value) => value ? (
     <div style={{ display: 'flex', padding: '12px 0', borderBottom: '0.5px solid #2A2A2A' }}>
@@ -119,6 +133,23 @@ export default function CreatorDetail({ creator, onClose, onSaved }) {
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Internal Notes</div>
                 <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{creator.notes}</div>
+              </div>
+            )}
+
+            {campaigns.length > 0 && (
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Campaigns</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
+                  {campaigns.map(c => (
+                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#1A1A1A' }}>
+                      <div>
+                        <div style={{ fontSize: '13px', color: '#CCC9C3' }}>{c.name}</div>
+                        {c.brand && <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>{c.brand}</div>}
+                      </div>
+                      <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
