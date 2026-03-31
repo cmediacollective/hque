@@ -95,6 +95,15 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
               </>
             )}
 
+            {campaign.deliverables_link && (
+              <>
+                {section('Deliverables Link')}
+                <a href={campaign.deliverables_link} target='_blank' rel='noreferrer' style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px', fontSize: '12px', color: '#5b7c99', textDecoration: 'none' }}>
+                  <span>🔗</span> View Deliverables Folder
+                </a>
+              </>
+            )}
+
             {campaign.timeline && (
               <>
                 {section('Timeline')}
@@ -125,6 +134,13 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
                     </div>
                   )}
                 </div>
+              </>
+            )}
+
+            {campaign.notes && (
+              <>
+                {section('Notes')}
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{campaign.notes}</div>
               </>
             )}
 

@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
+import CampaignDetail from './CampaignDetail'
 
 export default function CreatorDetail({ creator, onClose, onSaved }) {
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
+  const [selectedCampaign, setSelectedCampaign] = useState(null)
 
   useEffect(() => { fetchCampaigns() }, [creator.id])
 
   async function fetchCampaigns() {
     const { data } = await supabase
       .from('campaign_creators')
-      .select('campaign_id, campaigns(id, name, brand, status)')
+      .select('campaign_id, campaigns(id, name, brand, status, budget, start_date, end_date, deliverables, deliverables_link, timeline, brief_url, contract_url, notes)')
       .eq('creator_id', creator.id)
     setCampaigns((data || []).map(d => d.campaigns).filter(Boolean))
   }
@@ -51,6 +53,14 @@ export default function CreatorDetail({ creator, onClose, onSaved }) {
           existing={creator}
           onClose={() => setEditing(false)}
           onSaved={() => { setEditing(false); onSaved() }}
+        />
+      )}
+
+      {selectedCampaign && (
+        <CampaignDetail
+          campaign={selectedCampaign}
+          onClose={() => setSelectedCampaign(null)}
+          onSaved={() => { setSelectedCampaign(null); fetchCampaigns() }}
         />
       )}
 
@@ -141,12 +151,19 @@ export default function CreatorDetail({ creator, onClose, onSaved }) {
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Campaigns</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
                   {campaigns.map(c => (
-                    <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#1A1A1A' }}>
+                    <div key={c.id}
+                      onClick={() => setSelectedCampaign(c)}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#1A1A1A', cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#222'}
+                      onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}>
                       <div>
                         <div style={{ fontSize: '13px', color: '#CCC9C3' }}>{c.name}</div>
                         {c.brand && <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>{c.brand}</div>}
                       </div>
-                      <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
+                        <span style={{ fontSize: '16px', color: '#444' }}>›</span>
+                      </div>
                     </div>
                   ))}
                 </div>

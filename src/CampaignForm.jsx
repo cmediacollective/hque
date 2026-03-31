@@ -18,13 +18,15 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
     start_date: existing.start_date || '',
     end_date: existing.end_date || '',
     deliverables: existing.deliverables || '',
+    deliverables_link: existing.deliverables_link || '',
     timeline: existing.timeline || '',
     brief_url: existing.brief_url || '',
-    contract_url: existing.contract_url || ''
+    contract_url: existing.contract_url || '',
+    notes: existing.notes || ''
   } : {
     name: '', brand: '', status: 'Pitch', budget: '',
-    start_date: '', end_date: '', deliverables: '', timeline: '',
-    brief_url: '', contract_url: ''
+    start_date: '', end_date: '', deliverables: '', deliverables_link: '',
+    timeline: '', brief_url: '', contract_url: '', notes: ''
   })
 
   const [creators, setCreators] = useState([])
@@ -78,9 +80,11 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       deliverables: form.deliverables || null,
+      deliverables_link: form.deliverables_link || null,
       timeline: form.timeline || null,
       brief_url: form.brief_url || null,
       contract_url: form.contract_url || null,
+      notes: form.notes || null,
       org_id: '00000000-0000-0000-0000-000000000001'
     }
 
@@ -147,14 +151,21 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
             <textarea value={form.deliverables} onChange={e => set('deliverables', e.target.value)} placeholder='e.g. 2x IG Reels, 4x Stories, 1x TikTok...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '80px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
           )}
 
+          {field('Deliverables Link', inp({ value: form.deliverables_link, onChange: e => set('deliverables_link', e.target.value), placeholder: 'https://drive.google.com/...' }))}
+
           {field('Timeline',
-            <textarea value={form.timeline} onChange={e => set('timeline', e.target.value)} placeholder='e.g. Content due May 1, go live May 7-14...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '80px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            <textarea value={form.timeline} onChange={e => set('timeline', e.target.value)} placeholder='e.g. Content due May 1, go live May 7–14...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '80px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
           )}
 
           {sectionLabel('Documents')}
           <div style={{ fontSize: '10px', color: labelColor, marginBottom: '12px', lineHeight: 1.6 }}>Paste a Google Drive share link. Make sure sharing is set to "Anyone with the link can view."</div>
           {field('Brief URL', inp({ value: form.brief_url, onChange: e => set('brief_url', e.target.value), placeholder: 'https://drive.google.com/file/d/...' }))}
           {field('Contract URL', inp({ value: form.contract_url, onChange: e => set('contract_url', e.target.value), placeholder: 'https://drive.google.com/file/d/...' }))}
+
+          {sectionLabel('Notes')}
+          {field('Internal Notes',
+            <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='Any internal notes about this campaign...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '100px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+          )}
 
           {sectionLabel('Assign Talent')}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '20px' }}>
