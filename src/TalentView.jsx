@@ -17,6 +17,7 @@ export default function TalentView({ dark = true }) {
   const [selectedCampaign, setSelectedCampaign] = useState(null)
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
+  const [search, setSearch] = useState('')
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#1A1A1A' : '#FFFFFF'
@@ -56,7 +57,16 @@ export default function TalentView({ dark = true }) {
     : creators.filter(c =>
         c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter))
       )
-  ).sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+  )
+  .filter(c => {
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return (
+      c.name?.toLowerCase().includes(q) ||
+      c.handles?.instagram?.toLowerCase().includes(q)
+    )
+  })
+  .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 
   const chip = (label, active, onClick) => (
     <button onClick={onClick} style={{
@@ -136,7 +146,7 @@ export default function TalentView({ dark = true }) {
           {filtered.length} {showArchived ? 'archived' : 'creators'}
         </span>
         <button
-          onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types') }}
+          onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setSearch('') }}
           style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, borderRadius: '1px', cursor: 'pointer', color: showArchived ? '#5b7c99' : muted, background: 'none', whiteSpace: 'nowrap', marginLeft: '8px', flexShrink: 0 }}>
           {showArchived ? '<- Active Roster' : 'Archived'}
         </button>
@@ -152,6 +162,15 @@ export default function TalentView({ dark = true }) {
         </div>
       </div>
 
+      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder='Search by name or @handle...'
+          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
+        />
+      </div>
+
       {loading && (
         <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>
       )}
@@ -159,10 +178,10 @@ export default function TalentView({ dark = true }) {
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {showArchived ? 'No archived creators' : 'No talent yet'}
+            {search ? 'No results' : showArchived ? 'No archived creators' : 'No talent yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted, letterSpacing: '0.08em' }}>
-            {showArchived ? 'Archived creators will appear here' : 'Click + Talent to add your first creator'}
+            {search ? `Nothing matched "${search}"` : showArchived ? 'Archived creators will appear here' : 'Click + Talent to add your first creator'}
           </div>
         </div>
       )}

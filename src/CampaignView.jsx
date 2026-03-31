@@ -23,6 +23,7 @@ export default function CampaignView({ dark = true }) {
   const [showForm, setShowForm] = useState(false)
   const [hovering, setHovering] = useState(null)
   const [creatorCounts, setCreatorCounts] = useState({})
+  const [search, setSearch] = useState('')
 
   useEffect(() => { fetchCampaigns() }, [])
 
@@ -48,7 +49,17 @@ export default function CampaignView({ dark = true }) {
     setCreatorCounts(counts)
   }
 
-  const filtered = statusFilter === 'All' ? campaigns : campaigns.filter(c => c.status === statusFilter)
+  const filtered = campaigns
+    .filter(c => statusFilter === 'All' || c.status === statusFilter)
+    .filter(c => {
+      if (!search.trim()) return true
+      const q = search.toLowerCase()
+      return (
+        c.name?.toLowerCase().includes(q) ||
+        c.brand?.toLowerCase().includes(q)
+      )
+    })
+
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
 
@@ -89,14 +100,27 @@ export default function CampaignView({ dark = true }) {
         <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', marginLeft: '8px' }}>+ Campaign</button>
       </div>
 
+      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder='Search by campaign name or brand...'
+          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
+        />
+      </div>
+
       {loading && (
         <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>
       )}
 
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No campaigns yet</div>
-          <div style={{ fontSize: '12px', color: muted }}>Click + Campaign to create your first one</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
+            {search ? 'No results' : 'No campaigns yet'}
+          </div>
+          <div style={{ fontSize: '12px', color: muted }}>
+            {search ? `Nothing matched "${search}"` : 'Click + Campaign to create your first one'}
+          </div>
         </div>
       )}
 
