@@ -11,6 +11,7 @@ export default function TalentView({ dark = true }) {
   const [creators, setCreators] = useState([])
   const [view, setView] = useState('grid')
   const [typeFilter, setTypeFilter] = useState('All Types')
+  const [nicheFilter, setNicheFilter] = useState(null)
   const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
@@ -59,6 +60,10 @@ export default function TalentView({ dark = true }) {
       )
   )
   .filter(c => {
+    if (!nicheFilter) return true
+    return Array.isArray(c.niches) && c.niches.includes(nicheFilter)
+  })
+  .filter(c => {
     if (!search.trim()) return true
     const q = search.toLowerCase()
     return (
@@ -73,7 +78,8 @@ export default function TalentView({ dark = true }) {
       padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em',
       textTransform: 'uppercase', border: `0.5px solid ${active ? '#5b7c99' : border2}`,
       borderRadius: '1px', cursor: 'pointer', color: active ? '#5b7c99' : muted,
-      background: 'none', whiteSpace: 'nowrap', fontWeight: active ? '500' : '400'
+      background: 'none', whiteSpace: 'nowrap', fontWeight: active ? '500' : '400',
+      flexShrink: 0
     }}>{label}</button>
   )
 
@@ -138,36 +144,52 @@ export default function TalentView({ dark = true }) {
         </div>
       )}
 
-      <div style={{ padding: '12px 28px', display: 'flex', gap: '6px', alignItems: 'center', borderBottom: `0.5px solid ${border}`, overflowX: 'auto', background: bg }}>
-        {!showArchived && TYPES.map(t => chip(t, typeFilter === t, () => setTypeFilter(t)))}
-        {!showArchived && <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 4px', flexShrink: 0 }} />}
-        {!showArchived && NICHES.map(n => chip(n, false, () => {}))}
-        <span style={{ marginLeft: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', paddingLeft: '12px', whiteSpace: 'nowrap' }}>
-          {filtered.length} {showArchived ? 'archived' : 'creators'}
-        </span>
-        <button
-          onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setSearch('') }}
-          style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, borderRadius: '1px', cursor: 'pointer', color: showArchived ? '#5b7c99' : muted, background: 'none', whiteSpace: 'nowrap', marginLeft: '8px', flexShrink: 0 }}>
-          {showArchived ? '<- Active Roster' : 'Archived'}
-        </button>
-        <div style={{ display: 'flex', border: `0.5px solid ${border2}`, borderRadius: '2px', overflow: 'hidden', marginLeft: '8px', flexShrink: 0 }}>
-          {['grid', 'list'].map(v => (
-            <button key={v} onClick={() => setView(v)} style={{
-              padding: '5px 12px', fontSize: '9px',
-              background: view === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none',
-              border: 'none', color: view === v ? text : muted, cursor: 'pointer',
-              borderRight: v === 'grid' ? `0.5px solid ${border2}` : 'none', letterSpacing: '0.1em'
-            }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
-          ))}
-        </div>
+      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
+        {!showArchived && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+            {TYPES.map(t => chip(t, typeFilter === t, () => setTypeFilter(t)))}
+            <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 2px', flexShrink: 0 }} />
+            {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+              <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
+                {filtered.length} {showArchived ? 'archived' : 'creators'}
+              </span>
+              <button
+                onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }}
+                style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border2}`, borderRadius: '1px', cursor: 'pointer', color: muted, background: 'none', whiteSpace: 'nowrap' }}>
+                Archived
+              </button>
+              <div style={{ display: 'flex', border: `0.5px solid ${border2}`, borderRadius: '2px', overflow: 'hidden' }}>
+                {['grid', 'list'].map(v => (
+                  <button key={v} onClick={() => setView(v)} style={{
+                    padding: '5px 12px', fontSize: '9px',
+                    background: view === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none',
+                    border: 'none', color: view === v ? text : muted, cursor: 'pointer',
+                    borderRight: v === 'grid' ? `0.5px solid ${border2}` : 'none', letterSpacing: '0.1em'
+                  }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {showArchived && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em' }}>{filtered.length} archived</span>
+            <button
+              onClick={() => { setShowArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }}
+              style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>
+              &lt;- Active Roster
+            </button>
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+      <div style={{ padding: '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder='Search by name or @handle...'
-          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
+          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
         />
       </div>
 
