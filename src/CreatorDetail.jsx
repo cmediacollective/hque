@@ -9,11 +9,20 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   useEffect(() => { fetchCampaigns() }, [creator.id])
 
   async function fetchCampaigns() {
-    const { data } = await supabase
+    const { data: links } = await supabase
       .from('campaign_creators')
-      .select('campaign_id, campaigns(id, name, brand, status, budget, start_date, end_date, deliverables, deliverables_link, timeline, brief_url, contract_url, notes)')
+      .select('campaign_id')
       .eq('creator_id', creator.id)
-    setCampaigns((data || []).map(d => d.campaigns).filter(Boolean))
+
+    if (!links || links.length === 0) return
+
+    const ids = links.map(l => l.campaign_id)
+    const { data: camps } = await supabase
+      .from('campaigns')
+      .select('id, name, brand, status, budget, start_date, end_date, deliverables, deliverables_link, timeline, brief_url, contract_url, notes')
+      .in('id', ids)
+
+    setCampaigns(camps || [])
   }
 
   const displayType = (c) => {
