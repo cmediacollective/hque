@@ -29,11 +29,20 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
   useEffect(() => { fetchCreators() }, [campaign.id])
 
   async function fetchCreators() {
-    const { data } = await supabase
+    const { data: links } = await supabase
       .from('campaign_creators')
-      .select('creator_id, creators(id, name, photo_url, handles)')
+      .select('creator_id')
       .eq('campaign_id', campaign.id)
-    setCreators((data || []).map(d => d.creators).filter(Boolean))
+
+    if (!links || links.length === 0) return setCreators([])
+
+    const ids = links.map(l => l.creator_id)
+    const { data } = await supabase
+      .from('creators')
+      .select('id, name, photo_url, handles')
+      .in('id', ids)
+
+    setCreators(data || [])
   }
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
@@ -61,12 +70,18 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
 
           <div style={{ padding: '24px 28px', borderBottom: '0.5px solid #2A2A2A', position: 'sticky', top: 0, background: '#1A1A1A', zIndex: 1 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px' }}>{campaign.brand || 'Campaign'}</div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '12px' }}>{campaign.name}</div>
-                <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                {campaign.brand_logo_url
+                  ? <img src={campaign.brand_logo_url} alt={campaign.brand} style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '2px', border: '0.5px solid #3A3A3A', background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: '#2A2A2A', border: '0.5px solid #3A3A3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>🏷</div>
+                }
+                <div>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{campaign.brand || 'Campaign'}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '10px' }}>{campaign.name}</div>
+                  <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
                 <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
               </div>

@@ -13,6 +13,7 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
   const [form, setForm] = useState(existing ? {
     name: existing.name || '',
     brand: existing.brand || '',
+    brand_logo_url: existing.brand_logo_url || '',
     status: existing.status || 'Pitch',
     budget: existing.budget || '',
     start_date: existing.start_date || '',
@@ -24,7 +25,7 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
     contract_url: existing.contract_url || '',
     notes: existing.notes || ''
   } : {
-    name: '', brand: '', status: 'Pitch', budget: '',
+    name: '', brand: '', brand_logo_url: '', status: 'Pitch', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
     timeline: '', brief_url: '', contract_url: '', notes: ''
   })
@@ -75,6 +76,7 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
     const payload = {
       name: form.name,
       brand: form.brand || null,
+      brand_logo_url: form.brand_logo_url || null,
       status: form.status,
       budget: form.budget ? parseFloat(form.budget) : null,
       start_date: form.start_date || null,
@@ -127,6 +129,13 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
           {sectionLabel('Campaign Info')}
           {field('Campaign Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Summer Wellness Campaign' }))}
           {field('Brand', inp({ value: form.brand, onChange: e => set('brand', e.target.value), placeholder: 'e.g. Lululemon' }))}
+          {field('Brand Logo URL', inp({ value: form.brand_logo_url, onChange: e => set('brand_logo_url', e.target.value), placeholder: 'https://...' }))}
+
+          {form.brand_logo_url && (
+            <div style={{ marginTop: '-8px', marginBottom: '16px' }}>
+              <img src={form.brand_logo_url} alt='brand logo preview' style={{ width: '56px', height: '56px', borderRadius: '2px', objectFit: 'contain', border: `0.5px solid ${border}`, background: '#fff', padding: '4px' }} onError={e => e.target.style.display = 'none'} />
+            </div>
+          )}
 
           {field('Status',
             <div style={{ display: 'flex', gap: '6px' }}>
