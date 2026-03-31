@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
+import CampaignDetail from './CampaignDetail'
 
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
@@ -13,6 +14,7 @@ export default function TalentView({ dark = true }) {
   const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [selectedCampaign, setSelectedCampaign] = useState(null)
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
 
@@ -92,7 +94,16 @@ export default function TalentView({ dark = true }) {
           creator={selected}
           onClose={() => setSelected(null)}
           onSaved={() => { setSelected(null); fetchCreators() }}
+          onOpenCampaign={(campaign) => setSelectedCampaign(campaign)}
+        />
+      )}
+
+      {selectedCampaign && (
+        <CampaignDetail
+          campaign={selectedCampaign}
           dark={dark}
+          onClose={() => setSelectedCampaign(null)}
+          onSaved={() => setSelectedCampaign(null)}
         />
       )}
 

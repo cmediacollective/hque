@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
-import CampaignDetail from './CampaignDetail'
 
-export default function CreatorDetail({ creator, onClose, onSaved }) {
+export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign }) {
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
-  const [selectedCampaign, setSelectedCampaign] = useState(null)
 
   useEffect(() => { fetchCampaigns() }, [creator.id])
 
@@ -53,14 +51,6 @@ export default function CreatorDetail({ creator, onClose, onSaved }) {
           existing={creator}
           onClose={() => setEditing(false)}
           onSaved={() => { setEditing(false); onSaved() }}
-        />
-      )}
-
-      {selectedCampaign && (
-        <CampaignDetail
-          campaign={selectedCampaign}
-          onClose={() => setSelectedCampaign(null)}
-          onSaved={() => { setSelectedCampaign(null); fetchCampaigns() }}
         />
       )}
 
@@ -152,7 +142,7 @@ export default function CreatorDetail({ creator, onClose, onSaved }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
                   {campaigns.map(c => (
                     <div key={c.id}
-                      onClick={() => setSelectedCampaign(c)}
+                      onClick={() => { onClose(); onOpenCampaign(c) }}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#1A1A1A', cursor: 'pointer' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#222'}
                       onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}>
