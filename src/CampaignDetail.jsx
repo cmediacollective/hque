@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 
 const PAYMENT_METHODS = ['PayPal', 'Venmo', 'Wire Transfer', 'Check', 'ACH', 'Other']
+const ROLES = ['Post', 'Content Only', 'Host', 'Event', 'Gifting', 'UGC', 'Other']
 
 function DocPreview({ url, label, onClose }) {
   const embedUrl = url.includes('drive.google.com')
@@ -22,18 +23,25 @@ function DocPreview({ url, label, onClose }) {
   )
 }
 
-function PaymentEditor({ link, onSave, onCancel }) {
+function TalentEditor({ link, onSave, onCancel }) {
   const [form, setForm] = useState({
     payment_status: link.payment_status || 'Pending',
     payment_method: link.payment_method || '',
-    payment_date: link.payment_date || ''
+    payment_date: link.payment_date || '',
+    role: link.role || '',
+    views: link.views || '',
+    likes: link.likes || '',
+    reach: link.reach || '',
+    performance_notes: link.performance_notes || ''
   })
 
   return (
-    <div style={{ background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '14px', marginTop: '1px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+    <div style={{ background: '#141414', border: '0.5px solid #3A3A3A', padding: '16px', marginTop: '1px' }}>
+
+      <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>Payment</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Status</div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Status</div>
           <div style={{ display: 'flex', gap: '4px' }}>
             {['Pending', 'Paid'].map(s => (
               <button key={s} onClick={() => setForm(f => ({ ...f, payment_status: s }))} style={{
@@ -46,17 +54,45 @@ function PaymentEditor({ link, onSave, onCancel }) {
           </div>
         </div>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Method</div>
-          <select value={form.payment_method} onChange={e => setForm(f => ({ ...f, payment_method: e.target.value }))} style={{ width: '100%', background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Method</div>
+          <select value={form.payment_method} onChange={e => setForm(f => ({ ...f, payment_method: e.target.value }))} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }}>
             <option value=''>Select...</option>
             {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </div>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Date Paid</div>
-          <input type='date' value={form.payment_date} onChange={e => setForm(f => ({ ...f, payment_date: e.target.value }))} style={{ width: '100%', background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }} />
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Date Paid</div>
+          <input type='date' value={form.payment_date} onChange={e => setForm(f => ({ ...f, payment_date: e.target.value }))} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }} />
         </div>
       </div>
+
+      <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>Role & Performance</div>
+      <div>
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Role</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
+          {ROLES.map(r => (
+            <button key={r} onClick={() => setForm(f => ({ ...f, role: f.role === r ? '' : r }))} style={{
+              padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase',
+              border: `0.5px solid ${form.role === r ? '#5b7c99' : '#3A3A3A'}`,
+              color: form.role === r ? '#5b7c99' : '#777',
+              background: 'none', cursor: 'pointer', borderRadius: '1px'
+            }}>{r}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+        {[['Views', 'views'], ['Likes', 'likes'], ['Reach', 'reach']].map(([lbl, key]) => (
+          <div key={key}>
+            <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>{lbl}</div>
+            <input type='number' value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder='0' style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+        ))}
+      </div>
+      <div style={{ marginBottom: '14px' }}>
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Performance Notes</div>
+        <textarea value={form.performance_notes} onChange={e => setForm(f => ({ ...f, performance_notes: e.target.value }))} placeholder='e.g. Strong engagement, comment section very positive...' style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', height: '70px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+      </div>
+
       <div style={{ display: 'flex', gap: '6px' }}>
         <button onClick={() => onSave(form)} style={{ padding: '5px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Save</button>
         <button onClick={onCancel} style={{ padding: '5px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#777', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
@@ -69,14 +105,14 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
   const [editing, setEditing] = useState(false)
   const [creatorLinks, setCreatorLinks] = useState([])
   const [preview, setPreview] = useState(null)
-  const [editingPayment, setEditingPayment] = useState(null)
+  const [editingLink, setEditingLink] = useState(null)
 
   useEffect(() => { fetchCreators() }, [campaign.id])
 
   async function fetchCreators() {
     const { data: links } = await supabase
       .from('campaign_creators')
-      .select('id, creator_id, payment_status, payment_method, payment_date')
+      .select('id, creator_id, payment_status, payment_method, payment_date, role, views, likes, reach, performance_notes')
       .eq('campaign_id', campaign.id)
 
     if (!links || links.length === 0) return setCreatorLinks([])
@@ -95,13 +131,18 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
     setCreatorLinks(merged)
   }
 
-  async function savePayment(linkId, form) {
+  async function saveLink(linkId, form) {
     await supabase.from('campaign_creators').update({
       payment_status: form.payment_status,
       payment_method: form.payment_method || null,
-      payment_date: form.payment_date || null
+      payment_date: form.payment_date || null,
+      role: form.role || null,
+      views: form.views ? parseInt(form.views) : null,
+      likes: form.likes ? parseInt(form.likes) : null,
+      reach: form.reach ? parseInt(form.reach) : null,
+      performance_notes: form.performance_notes || null
     }).eq('id', linkId)
-    setEditingPayment(null)
+    setEditingLink(null)
     fetchCreators()
   }
 
@@ -234,28 +275,41 @@ export default function CampaignDetail({ campaign, onClose, onSaved, dark = true
                         }
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '13px', color: '#F0ECE6' }}>{link.creator.name}</div>
-                          {link.creator.handles?.instagram && <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>@{link.creator.handles.instagram}</div>}
+                          <div style={{ display: 'flex', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
+                            {link.creator.handles?.instagram && <span style={{ fontSize: '10px', color: '#777' }}>@{link.creator.handles.instagram}</span>}
+                            {link.role && <span style={{ fontSize: '9px', color: '#5b7c99', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{link.role}</span>}
+                          </div>
+                          {(link.views || link.likes || link.reach) && (
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '5px' }}>
+                              {link.views && <span style={{ fontSize: '10px', color: '#777' }}>{link.views.toLocaleString()} views</span>}
+                              {link.likes && <span style={{ fontSize: '10px', color: '#777' }}>{link.likes.toLocaleString()} likes</span>}
+                              {link.reach && <span style={{ fontSize: '10px', color: '#777' }}>{link.reach.toLocaleString()} reach</span>}
+                            </div>
+                          )}
+                          {link.performance_notes && (
+                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic' }}>{link.performance_notes}</div>
+                          )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                           {link.payment_status === 'Paid' && link.payment_date && (
                             <span style={{ fontSize: '9px', color: '#777' }}>{formatPaymentDate(link.payment_date)}</span>
                           )}
                           {link.payment_status === 'Paid' && link.payment_method && (
                             <span style={{ fontSize: '9px', color: '#777' }}>{link.payment_method}</span>
                           )}
-                          <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(link.payment_status)}`, color: paymentColor(link.payment_status), borderRadius: '1px', flexShrink: 0 }}>{link.payment_status || 'Pending'}</span>
+                          <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(link.payment_status)}`, color: paymentColor(link.payment_status), borderRadius: '1px' }}>{link.payment_status || 'Pending'}</span>
                           <button
-                            onClick={() => setEditingPayment(editingPayment === link.id ? null : link.id)}
+                            onClick={() => setEditingLink(editingLink === link.id ? null : link.id)}
                             style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#666', cursor: 'pointer', borderRadius: '1px' }}>
-                            {editingPayment === link.id ? 'Cancel' : 'Edit'}
+                            {editingLink === link.id ? 'Cancel' : 'Edit'}
                           </button>
                         </div>
                       </div>
-                      {editingPayment === link.id && (
-                        <PaymentEditor
+                      {editingLink === link.id && (
+                        <TalentEditor
                           link={link}
-                          onSave={(form) => savePayment(link.id, form)}
-                          onCancel={() => setEditingPayment(null)}
+                          onSave={(form) => saveLink(link.id, form)}
+                          onCancel={() => setEditingLink(null)}
                         />
                       )}
                     </div>

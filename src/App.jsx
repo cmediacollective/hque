@@ -4,6 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 import TalentView from './TalentView'
 import WorkspaceView from './WorkspaceView'
 import CampaignView from './CampaignView'
+import ReportsView from './ReportsView'
 import Login from './Login'
 
 function App() {
@@ -94,7 +95,7 @@ function App() {
             {view === 'talent' && <TalentView key={refresh} dark={dark} />}
             {view === 'workspace' && <WorkspaceView />}
             {view === 'campaigns' && <CampaignView dark={dark} />}
-            {view === 'reports' && <div style={{ padding: '20px 28px', color: muted, fontSize: '13px' }}>Reports coming next...</div>}
+            {view === 'reports' && <ReportsView dark={dark} />}
           </div>
         </main>
 
