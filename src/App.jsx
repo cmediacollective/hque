@@ -5,6 +5,7 @@ import TalentView from './TalentView'
 import WorkspaceView from './WorkspaceView'
 import CampaignView from './CampaignView'
 import ReportsView from './ReportsView'
+import SettingsView from './SettingsView'
 import Login from './Login'
 
 function App() {
@@ -47,10 +48,7 @@ function App() {
       .eq('status', 'active')
       .order('name', { ascending: true })
 
-    if (!creators || creators.length === 0) {
-      setExporting(false)
-      return
-    }
+    if (!creators || creators.length === 0) { setExporting(false); return }
 
     const toImg = (url, name) => url
       ? `<img src="${url}" alt="${name}" style="width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid #e0e0e0;display:block;" onerror="this.style.display='none'" />`
@@ -59,41 +57,9 @@ function App() {
     const rows = creators.map(c => {
       const type = Array.isArray(c.types) && c.types.length ? c.types.join(', ') : (c.type || '—')
       const niches = Array.isArray(c.niches) && c.niches.length ? c.niches.join(', ') : '—'
-      const handles = [
-        c.handles?.instagram && `IG: @${c.handles.instagram}`,
-        c.handles?.tiktok && `TK: @${c.handles.tiktok}`,
-        c.handles?.youtube && `YT: ${c.handles.youtube}`
-      ].filter(Boolean).join('<br>')
-      const rates = [
-        c.rates?.feed && `Feed: $${Number(c.rates.feed).toLocaleString()}`,
-        c.rates?.reel && `Reel: $${Number(c.rates.reel).toLocaleString()}`,
-        c.rates?.story && `Story: $${Number(c.rates.story).toLocaleString()}`,
-        c.rates?.tiktok && `TikTok: $${Number(c.rates.tiktok).toLocaleString()}`,
-        c.rates?.youtube && `YouTube: $${Number(c.rates.youtube).toLocaleString()}`
-      ].filter(Boolean).join('<br>')
-
-      return `
-        <tr>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;">${toImg(c.photo_url, c.name)}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;">
-            <div style="font-family:Georgia,serif;font-size:15px;color:#1a1a1a;margin-bottom:3px;">${c.name || '—'}</div>
-            <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.1em;">${type}</div>
-          </td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${niches}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${handles || '—'}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.ig_followers ? Number(c.ig_followers).toLocaleString() : '—'}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.engagement_rate ? `${c.engagement_rate}%` : '—'}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${rates || '—'}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.location || '—'}</td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">
-            ${c.manager_name ? `<div>${c.manager_name}</div>` : ''}
-            ${c.manager_email ? `<div style="color:#888;">${c.manager_email}</div>` : ''}
-            ${c.contact_email ? `<div style="color:#888;">${c.contact_email}</div>` : ''}
-            ${!c.manager_name && !c.manager_email && !c.contact_email ? '—' : ''}
-          </td>
-          <td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.tier || '—'}</td>
-        </tr>
-      `
+      const handles = [c.handles?.instagram && `IG: @${c.handles.instagram}`, c.handles?.tiktok && `TK: @${c.handles.tiktok}`, c.handles?.youtube && `YT: ${c.handles.youtube}`].filter(Boolean).join('<br>')
+      const rates = [c.rates?.feed && `Feed: $${Number(c.rates.feed).toLocaleString()}`, c.rates?.reel && `Reel: $${Number(c.rates.reel).toLocaleString()}`, c.rates?.story && `Story: $${Number(c.rates.story).toLocaleString()}`, c.rates?.tiktok && `TikTok: $${Number(c.rates.tiktok).toLocaleString()}`, c.rates?.youtube && `YouTube: $${Number(c.rates.youtube).toLocaleString()}`].filter(Boolean).join('<br>')
+      return `<tr><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;">${toImg(c.photo_url, c.name)}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a1a1a;margin-bottom:3px;">${c.name || '—'}</div><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.1em;">${type}</div></td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${niches}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${handles || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.ig_followers ? Number(c.ig_followers).toLocaleString() : '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.engagement_rate ? `${c.engagement_rate}%` : '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${rates || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.location || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.manager_name ? `<div>${c.manager_name}</div>` : ''}${c.manager_email ? `<div style="color:#888;">${c.manager_email}</div>` : ''}${c.contact_email ? `<div style="color:#888;">${c.contact_email}</div>` : ''}${!c.manager_name && !c.manager_email && !c.contact_email ? '—' : ''}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.tier || '—'}</td></tr>`
     }).join('')
 
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Talent Roster — C Media Collective</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}tr{page-break-inside:avoid;}}</style></head><body><div style="padding:40px 48px;"><div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #1a1a1a;"><div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin-bottom:8px;">C Media Collective</div><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Talent Roster</div></div><div style="text-align:right;"><div style="font-size:11px;color:#999;">${creators.length} creators</div><div style="font-size:11px;color:#999;">${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8f8f8;"><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Photo</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Name</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Niches</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Handles</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Followers</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Eng Rate</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Rates</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Location</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Contact</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Tier</th></tr></thead><tbody>${rows}</tbody></table></div></body></html>`
@@ -127,17 +93,26 @@ function App() {
             <button key={key} onClick={() => setView(key)} style={{
               padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
               fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: view === key ? text : muted,
-              background: 'none', border: 'none',
+              color: view === key ? text : muted, background: 'none', border: 'none',
               borderLeft: view === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
               textAlign: 'left', cursor: 'pointer', width: '100%',
               fontWeight: view === key ? '500' : '400'
             }}>{label}</button>
           ))}
-          <div style={{ marginTop: 'auto', padding: '0 16px' }}>
-            <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Signed in as</div>
-            <div style={{ fontSize: '11px', color: muted, marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-            <button onClick={handleLogout} style={{ marginTop: '10px', fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, padding: '4px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
+          <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
+            <button onClick={() => setView('settings')} style={{
+              width: '100%', textAlign: 'left',
+              padding: view === 'settings' ? '9px 20px 9px 14.5px' : '9px 16px',
+              fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
+              color: view === 'settings' ? text : subtle, background: 'none', border: 'none',
+              borderLeft: view === 'settings' ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+              cursor: 'pointer', fontWeight: view === 'settings' ? '500' : '400'
+            }}>Settings</button>
+            <div style={{ padding: '12px 16px 0' }}>
+              <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Signed in as</div>
+              <div style={{ fontSize: '11px', color: muted, marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+              <button onClick={handleLogout} style={{ marginTop: '10px', fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, padding: '4px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
+            </div>
           </div>
         </nav>
 
@@ -146,7 +121,7 @@ function App() {
             <div>
               <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>C Media Collective</div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 'normal', color: text }}>
-                {view === 'talent' ? 'Talent Database' : view === 'workspace' ? 'Workspace' : view === 'campaigns' ? 'Campaigns' : 'Reports'}
+                {view === 'talent' ? 'Talent Database' : view === 'workspace' ? 'Workspace' : view === 'campaigns' ? 'Campaigns' : view === 'reports' ? 'Reports' : 'Settings'}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -169,6 +144,7 @@ function App() {
             {view === 'workspace' && <WorkspaceView />}
             {view === 'campaigns' && <CampaignView dark={dark} />}
             {view === 'reports' && <ReportsView dark={dark} />}
+            {view === 'settings' && <SettingsView dark={dark} user={user} />}
           </div>
         </main>
 
