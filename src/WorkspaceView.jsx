@@ -37,6 +37,7 @@ function TaskForm({ initial, onSave, onCancel }) {
 
 export default function WorkspaceView() {
   const [boards, setBoards] = useState([])
+  const [archivedBoards, setArchivedBoards] = useState([])
   const [activeBoard, setActiveBoard] = useState(null)
   const [columns, setColumns] = useState([])
   const [tasks, setTasks] = useState([])
@@ -47,14 +48,19 @@ export default function WorkspaceView() {
   const [newBoardName, setNewBoardName] = useState('')
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
+  const [showArchived, setShowArchived] = useState(false)
+  const [archiving, setArchiving] = useState(null)
 
   useEffect(() => { fetchBoards() }, [])
   useEffect(() => { if (activeBoard) { fetchColumns(); fetchTasks() } }, [activeBoard])
 
   async function fetchBoards() {
     const { data } = await supabase.from('boards').select('*').eq('org_id', '00000000-0000-0000-0000-000000000001')
-    setBoards(data || [])
-    if (data?.length) setActiveBoard(data[0])
+    const active = (data || []).filter(b => b.status !== 'archived')
+    const archived = (data || []).filter(b => b.status === 'archived')
+    setBoards(active)
+    setArchivedBoards(archived)
+    if (active?.length) setActiveBoard(active[0])
     else setLoading(false)
   }
 
@@ -74,7 +80,8 @@ export default function WorkspaceView() {
     if (!newBoardName.trim()) return
     const { data } = await supabase.from('boards').insert([{
       name: newBoardName,
-      org_id: '00000000-0000-0000-0000-000000000001'
+      org_id: '00000000-0000-0000-0000-000000000001',
+      status: 'active'
     }]).select().single()
     if (data) {
       await supabase.from('board_columns').insert(
@@ -85,6 +92,13 @@ export default function WorkspaceView() {
       setBoards(b => [...b, data])
       setActiveBoard(data)
     }
+  }
+
+  async function archiveBoard(board, restore = false) {
+    await supabase.from('boards').update({ status: restore ? 'active' : 'archived' }).eq('id', board.id)
+    setArchiving(null)
+    if (!restore && activeBoard?.id === board.id) setActiveBoard(null)
+    fetchBoards()
   }
 
   async function createTask(columnId, form) {
@@ -134,15 +148,49 @@ export default function WorkspaceView() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
+      {archiving && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#222', border: '0.5px solid #2A2A2A', padding: '32px', width: '380px', borderRadius: '2px', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: '#F0ECE6' }}>
+              {archiving.restore ? 'Restore board?' : 'Archive board?'}
+            </div>
+            <div style={{ fontSize: '12px', color: '#999', marginBottom: '24px' }}>
+              {archiving.restore
+                ? `"${archiving.board.name}" will be moved back to your active boards.`
+                : `"${archiving.board.name}" will be hidden but can be restored anytime.`}
+            </div>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+              <button onClick={() => archiveBoard(archiving.board, archiving.restore)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                {archiving.restore ? 'Restore' : 'Archive'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ padding: '0 28px', display: 'flex', alignItems: 'center', borderBottom: '0.5px solid #2A2A2A', overflowX: 'auto', flexShrink: 0, background: '#1A1A1A' }}>
-        {boards.map(b => (
-          <button key={b.id} onClick={() => setActiveBoard(b)} style={{
-            padding: '12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
-            background: 'none', border: 'none', borderBottom: activeBoard?.id === b.id ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-            color: activeBoard?.id === b.id ? '#F2EEE8' : '#777', cursor: 'pointer', whiteSpace: 'nowrap'
-          }}>{b.name}</button>
+        {!showArchived && boards.map(b => (
+          <div key={b.id} style={{ display: 'flex', alignItems: 'center', borderBottom: activeBoard?.id === b.id ? '1.5px solid #5b7c99' : '1.5px solid transparent' }}>
+            <button onClick={() => setActiveBoard(b)} style={{
+              padding: '12px 12px 12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
+              background: 'none', border: 'none',
+              color: activeBoard?.id === b.id ? '#F2EEE8' : '#777', cursor: 'pointer', whiteSpace: 'nowrap'
+            }}>{b.name}</button>
+            {activeBoard?.id === b.id && (
+              <button onClick={() => setArchiving({ board: b, restore: false })} style={{ padding: '2px 6px', marginRight: '8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#555', cursor: 'pointer', borderRadius: '1px' }}>Archive</button>
+            )}
+          </div>
         ))}
-        {showNewBoard ? (
+
+        {showArchived && archivedBoards.map(b => (
+          <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px' }}>
+            <span style={{ fontSize: '10px', color: '#666', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{b.name}</span>
+            <button onClick={() => setArchiving({ board: b, restore: true })} style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Restore</button>
+          </div>
+        ))}
+
+        {showNewBoard && !showArchived ? (
           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', padding: '8px 0 8px 12px' }}>
             <input
               value={newBoardName}
@@ -155,19 +203,33 @@ export default function WorkspaceView() {
             <button onClick={createBoard} style={{ padding: '5px 10px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Add</button>
             <button onClick={() => setShowNewBoard(false)} style={{ padding: '5px 10px', fontSize: '9px', background: 'none', border: '0.5px solid #3A3A3A', color: '#777', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
           </div>
-        ) : (
+        ) : !showArchived && (
           <button onClick={() => setShowNewBoard(true)} style={{ padding: '12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: '#666', cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Board</button>
         )}
+
+        <div style={{ marginLeft: 'auto', flexShrink: 0, padding: '8px 0' }}>
+          <button
+            onClick={() => { setShowArchived(a => !a); if (!showArchived) setActiveBoard(null) }}
+            style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showArchived ? '#5b7c99' : '#3A3A3A'}`, color: showArchived ? '#5b7c99' : '#666', cursor: 'pointer', borderRadius: '1px' }}>
+            {showArchived ? '<- Active' : `Archived${archivedBoards.length ? ` (${archivedBoards.length})` : ''}`}
+          </button>
+        </div>
       </div>
 
-      {!activeBoard && (
+      {!activeBoard && !showArchived && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#666', marginBottom: '10px' }}>No boards yet</div>
           <div style={{ fontSize: '12px', color: '#666' }}>Click + Board to create your first board</div>
         </div>
       )}
 
-      {activeBoard && (
+      {showArchived && archivedBoards.length === 0 && (
+        <div style={{ padding: '80px 28px', textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#666', marginBottom: '10px' }}>No archived boards</div>
+        </div>
+      )}
+
+      {activeBoard && !showArchived && (
         <div style={{ display: 'flex', gap: '1px', background: '#2A2A2A', flex: 1, overflow: 'hidden' }}>
           {columns.map(col => (
             <div key={col.id}

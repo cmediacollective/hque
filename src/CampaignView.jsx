@@ -24,8 +24,10 @@ export default function CampaignView({ dark = true }) {
   const [hovering, setHovering] = useState(null)
   const [creatorCounts, setCreatorCounts] = useState({})
   const [search, setSearch] = useState('')
+  const [showArchived, setShowArchived] = useState(false)
+  const [archiving, setArchiving] = useState(null)
 
-  useEffect(() => { fetchCampaigns() }, [])
+  useEffect(() => { fetchCampaigns() }, [showArchived])
 
   async function fetchCampaigns() {
     setLoading(true)
@@ -33,6 +35,7 @@ export default function CampaignView({ dark = true }) {
       .from('campaigns')
       .select('*')
       .eq('org_id', '00000000-0000-0000-0000-000000000001')
+      .eq('archived', showArchived)
       .order('created_at', { ascending: false })
     setCampaigns(data || [])
     if (data?.length) fetchCreatorCounts(data.map(c => c.id))
@@ -40,13 +43,16 @@ export default function CampaignView({ dark = true }) {
   }
 
   async function fetchCreatorCounts(ids) {
-    const { data } = await supabase
-      .from('campaign_creators')
-      .select('campaign_id')
-      .in('campaign_id', ids)
+    const { data } = await supabase.from('campaign_creators').select('campaign_id').in('campaign_id', ids)
     const counts = {}
     ;(data || []).forEach(r => { counts[r.campaign_id] = (counts[r.campaign_id] || 0) + 1 })
     setCreatorCounts(counts)
+  }
+
+  async function archiveCampaign(campaign, restore = false) {
+    await supabase.from('campaigns').update({ archived: !restore }).eq('id', campaign.id)
+    setArchiving(null)
+    fetchCampaigns()
   }
 
   const filtered = campaigns
@@ -54,10 +60,7 @@ export default function CampaignView({ dark = true }) {
     .filter(c => {
       if (!search.trim()) return true
       const q = search.toLowerCase()
-      return (
-        c.name?.toLowerCase().includes(q) ||
-        c.brand?.toLowerCase().includes(q)
-      )
+      return c.name?.toLowerCase().includes(q) || c.brand?.toLowerCase().includes(q)
     })
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
@@ -92,20 +95,46 @@ export default function CampaignView({ dark = true }) {
         />
       )}
 
+      {archiving && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, padding: '32px', width: '380px', borderRadius: '2px', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
+              {showArchived ? 'Restore campaign?' : 'Archive campaign?'}
+            </div>
+            <div style={{ fontSize: '12px', color: muted, marginBottom: '24px' }}>
+              {showArchived
+                ? `"${archiving.name}" will be moved back to your active campaigns.`
+                : `"${archiving.name}" will be hidden but can be restored anytime.`}
+            </div>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+              <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+              <button onClick={() => archiveCampaign(archiving, showArchived)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                {showArchived ? 'Restore' : 'Archive'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ padding: '12px 28px', display: 'flex', gap: '6px', alignItems: 'center', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-        {STATUSES.map(s => chip(s, statusFilter === s, () => setStatusFilter(s)))}
-        <span style={{ marginLeft: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em' }}>
+        {!showArchived && STATUSES.map(s => chip(s, statusFilter === s, () => setStatusFilter(s)))}
+        <span style={{ marginLeft: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
           {filtered.length} campaigns
         </span>
-        <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', marginLeft: '8px' }}>+ Campaign</button>
+        <button
+          onClick={() => { setShowArchived(a => !a); setStatusFilter('All'); setSearch('') }}
+          style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, borderRadius: '1px', cursor: 'pointer', color: showArchived ? '#5b7c99' : muted, background: 'none', whiteSpace: 'nowrap' }}>
+          {showArchived ? '<- Active' : 'Archived'}
+        </button>
+        {!showArchived && <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>}
       </div>
 
-      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+      <div style={{ padding: '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder='Search by campaign name or brand...'
-          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
+          placeholder={showArchived ? 'Search archived campaigns...' : 'Search by campaign name or brand...'}
+          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
         />
       </div>
 
@@ -116,10 +145,10 @@ export default function CampaignView({ dark = true }) {
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {search ? 'No results' : 'No campaigns yet'}
+            {search ? 'No results' : showArchived ? 'No archived campaigns' : 'No campaigns yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted }}>
-            {search ? `Nothing matched "${search}"` : 'Click + Campaign to create your first one'}
+            {search ? `Nothing matched "${search}"` : showArchived ? 'Archived campaigns will appear here' : 'Click + Campaign to create your first one'}
           </div>
         </div>
       )}
@@ -128,10 +157,18 @@ export default function CampaignView({ dark = true }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start' }}>
           {filtered.map(c => (
             <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: '24px', cursor: 'pointer' }}
+              style={{ background: hovering === c.id ? cardHover : card, padding: '24px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
+
+              {hovering === c.id && (
+                <button
+                  onClick={e => { e.stopPropagation(); setArchiving(c) }}
+                  style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: `0.5px solid ${border2}`, color: muted, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
+                  {showArchived ? 'Restore' : 'Archive'}
+                </button>
+              )}
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 {c.brand_logo_url
