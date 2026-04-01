@@ -162,14 +162,6 @@ export default function CampaignView({ dark = true }) {
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
 
-              {hovering === c.id && (
-                <button
-                  onClick={e => { e.stopPropagation(); setArchiving(c) }}
-                  style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: `0.5px solid ${border2}`, color: muted, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
-                  {showArchived ? 'Restore' : 'Archive'}
-                </button>
-              )}
-
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 {c.brand_logo_url
                   ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px' }} onError={e => e.target.style.display = 'none'} />
@@ -177,8 +169,13 @@ export default function CampaignView({ dark = true }) {
                 }
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                   <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px' }}>{c.status}</span>
-                  {creatorCounts[c.id] > 0 && (
-                    <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>{creatorCounts[c.id]} talent</span>
+                  {creatorCounts[c.id] > 0 && <span style={{ fontSize: '9px', color: subtle }}>{creatorCounts[c.id]} talent</span>}
+                  {hovering === c.id && (
+                    <button
+                      onClick={e => { e.stopPropagation(); setArchiving(c) }}
+                      style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                      {showArchived ? 'Restore' : 'Archive'}
+                    </button>
                   )}
                 </div>
               </div>
@@ -195,9 +192,7 @@ export default function CampaignView({ dark = true }) {
                 )}
                 {(c.start_date || c.end_date) && (
                   <div>
-                    <div style={{ fontSize: '12px', color: muted }}>
-                      {[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}
-                    </div>
+                    <div style={{ fontSize: '12px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</div>
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Dates</div>
                   </div>
                 )}
