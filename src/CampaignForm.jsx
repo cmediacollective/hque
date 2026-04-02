@@ -9,6 +9,8 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
   const inputBg = dark ? '#141414' : '#F5F3EF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const labelColor = dark ? '#666' : '#888'
+  const dropBg = dark ? '#1A1A1A' : '#FFFFFF'
+  const dropHover = dark ? '#2A2A2A' : '#F5F3EF'
 
   const [form, setForm] = useState(existing ? {
     name: existing.name || '',
@@ -32,6 +34,8 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
 
   const [creators, setCreators] = useState([])
   const [selectedCreators, setSelectedCreators] = useState([])
+  const [talentSearch, setTalentSearch] = useState('')
+  const [showDropdown, setShowDropdown] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -41,7 +45,7 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
   }, [])
 
   async function fetchCreators() {
-    const { data } = await supabase.from('creators').select('id, name, photo_url').eq('status', 'active').order('name')
+    const { data } = await supabase.from('creators').select('id, name, photo_url, handles').eq('status', 'active').order('name')
     setCreators(data || [])
   }
 
@@ -51,7 +55,24 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
   }
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
-  const toggleCreator = (id) => setSelectedCreators(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+
+  const addCreator = (id) => {
+    if (!selectedCreators.includes(id)) setSelectedCreators(s => [...s, id])
+    setTalentSearch('')
+    setShowDropdown(false)
+  }
+
+  const removeCreator = (id) => setSelectedCreators(s => s.filter(x => x !== id))
+
+  const searchResults = talentSearch.trim()
+    ? creators.filter(c =>
+        !selectedCreators.includes(c.id) &&
+        (c.name?.toLowerCase().includes(talentSearch.toLowerCase()) ||
+         c.handles?.instagram?.toLowerCase().includes(talentSearch.toLowerCase()))
+      )
+    : []
+
+  const selectedCreatorObjects = creators.filter(c => selectedCreators.includes(c.id))
 
   const field = (lbl, children) => (
     <div style={{ marginBottom: '16px' }}>
@@ -177,23 +198,54 @@ export default function CampaignForm({ onClose, onSaved, existing, dark = true }
           )}
 
           {sectionLabel('Assign Talent')}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '20px' }}>
-            {creators.map(c => {
-              const selected = selectedCreators.includes(c.id)
-              return (
-                <button key={c.id} onClick={() => toggleCreator(c.id)} style={{
-                  display: 'flex', alignItems: 'center', gap: '6px',
-                  padding: '5px 10px', fontSize: '11px',
-                  border: `0.5px solid ${selected ? '#5b7c99' : border}`,
-                  color: selected ? '#5b7c99' : labelColor,
-                  background: 'none', cursor: 'pointer', borderRadius: '1px'
-                }}>
-                  {c.photo_url && <img src={c.photo_url} alt={c.name} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />}
-                  {c.name}
-                </button>
-              )
-            })}
-            {creators.length === 0 && <div style={{ fontSize: '11px', color: labelColor }}>No active talent yet — add some first.</div>}
+
+          {selectedCreatorObjects.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+              {selectedCreatorObjects.map(c => (
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px 4px 6px', border: `0.5px solid #5b7c99`, borderRadius: '1px', background: 'none' }}>
+                  {c.photo_url && <img src={c.photo_url} alt={c.name} style={{ width: '16px', height: '16px', borderRadius: '50%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />}
+                  <span style={{ fontSize: '11px', color: '#5b7c99' }}>{c.name}</span>
+                  <button onClick={() => removeCreator(c.id)} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 0 0 2px' }}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{ position: 'relative', marginBottom: '20px' }}>
+            <input
+              value={talentSearch}
+              onChange={e => { setTalentSearch(e.target.value); setShowDropdown(true) }}
+              onFocus={() => setShowDropdown(true)}
+              onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+              placeholder='Search talent by name or @handle...'
+              style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
+            />
+            {showDropdown && searchResults.length > 0 && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: dropBg, border: `0.5px solid ${border}`, borderTop: 'none', zIndex: 10, maxHeight: '200px', overflowY: 'auto' }}>
+                {searchResults.map(c => (
+                  <div
+                    key={c.id}
+                    onMouseDown={() => addCreator(c.id)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.background = dropHover}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    {c.photo_url
+                      ? <img src={c.photo_url} alt={c.name} style={{ width: '28px', height: '28px', borderRadius: '2px', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                      : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '10px', color: text, flexShrink: 0 }}>{c.name?.split(' ').map(n => n[0]).join('').slice(0,2)}</div>
+                    }
+                    <div>
+                      <div style={{ fontSize: '12px', color: text }}>{c.name}</div>
+                      {c.handles?.instagram && <div style={{ fontSize: '10px', color: labelColor }}>@{c.handles.instagram}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {showDropdown && talentSearch.trim() && searchResults.length === 0 && (
+              <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: dropBg, border: `0.5px solid ${border}`, borderTop: 'none', zIndex: 10, padding: '12px', fontSize: '11px', color: labelColor }}>
+                No talent found matching "{talentSearch}"
+              </div>
+            )}
           </div>
 
           {error && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '12px' }}>{error}</div>}
