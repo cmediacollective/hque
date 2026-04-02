@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 
 const ORG_ID = '00000000-0000-0000-0000-000000000001'
 
-export default function SettingsView({ dark = true, user }) {
+export default function SettingsView({ dark = true, user, onAgencyNameChange }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -54,6 +54,7 @@ export default function SettingsView({ dark = true, user }) {
     } else {
       await supabase.from('org_settings').insert([{ ...agencyForm, org_id: ORG_ID }])
     }
+    if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
     setTimeout(() => setAgencySaved(false), 2000)
@@ -134,7 +135,7 @@ export default function SettingsView({ dark = true, user }) {
         {activeTab === 'agency' && (
           <div>
             {sectionTitle('Agency Info')}
-            {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. C Media Collective' }))}
+            {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective' }))}
             {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email' }))}
             {field('Phone', inp({ value: agencyForm.agency_phone, onChange: e => setAgencyForm(f => ({ ...f, agency_phone: e.target.value })), placeholder: '+1 (000) 000-0000' }))}
             {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://yoursite.com' }))}
