@@ -18,7 +18,7 @@ export default function SettingsView({ dark = true, user }) {
   const [agencySaving, setAgencySaving] = useState(false)
   const [agencySaved, setAgencySaved] = useState(false)
 
-  const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' })
+  const [pwForm, setPwForm] = useState({ newPw: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
   const [pwError, setPwError] = useState('')
   const [pwSuccess, setPwSuccess] = useState(false)
@@ -42,8 +42,8 @@ export default function SettingsView({ dark = true, user }) {
   }
 
   async function fetchTeam() {
-    const { data } = await supabase.auth.admin?.listUsers?.()
-    if (data?.users) setTeamMembers(data.users)
+    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: true })
+    setTeamMembers(data || [])
   }
 
   async function saveAgency() {
@@ -70,7 +70,7 @@ export default function SettingsView({ dark = true, user }) {
     setPwSaving(false)
     if (error) return setPwError(error.message)
     setPwSuccess(true)
-    setPwForm({ current: '', newPw: '', confirm: '' })
+    setPwForm({ newPw: '', confirm: '' })
     setTimeout(() => setPwSuccess(false), 3000)
   }
 
@@ -86,15 +86,20 @@ export default function SettingsView({ dark = true, user }) {
     setTimeout(() => setInviteMsg(''), 4000)
   }
 
-  const inp = (props) => (
-    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-  )
+  async function updateRole(id, role) {
+    await supabase.from('profiles').update({ role }).eq('id', id)
+    fetchTeam()
+  }
 
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
       <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{label}</div>
       {children}
     </div>
+  )
+
+  const inp = (props) => (
+    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
   )
 
   const sectionTitle = (t) => (
@@ -148,7 +153,7 @@ export default function SettingsView({ dark = true, user }) {
         {activeTab === 'team' && (
           <div>
             {sectionTitle('Team')}
-            <div style={{ marginBottom: '28px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+            <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
               <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <input
@@ -167,17 +172,28 @@ export default function SettingsView({ dark = true, user }) {
               <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in. No password needed on their end.</div>
             </div>
 
-            <div style={{ padding: '16px 20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Current user</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
-                  {user?.email?.charAt(0).toUpperCase()}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
+              {teamMembers.map(member => (
+                <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.id === user?.id ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                    {member.email?.charAt(0).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.email}</div>
+                    {member.id === user?.id && <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>You</div>}
+                  </div>
+                  <select
+                    value={member.role || 'member'}
+                    onChange={e => updateRole(member.id, e.target.value)}
+                    style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
+                    <option value='admin'>Admin</option>
+                    <option value='member'>Member</option>
+                  </select>
                 </div>
-                <div>
-                  <div style={{ fontSize: '13px', color: text }}>{user?.email}</div>
-                  <div style={{ fontSize: '10px', color: subtle, marginTop: '2px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Admin</div>
-                </div>
-              </div>
+              ))}
+              {teamMembers.length === 0 && (
+                <div style={{ padding: '20px', background: card, fontSize: '12px', color: subtle }}>No team members yet.</div>
+              )}
             </div>
           </div>
         )}
