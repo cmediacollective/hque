@@ -2,11 +2,106 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 
+const METHODS = ['Email', 'Instagram DM', 'Phone', 'WhatsApp', 'Other']
+const STATUSES = ['Contacted', 'Responded', 'Declined', 'Booked']
+
+function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark }) {
+  const border = dark ? '#3A3A3A' : '#C4BFB8'
+  const inputBg = dark ? '#141414' : '#F5F3EF'
+  const text = dark ? '#F2EEE8' : '#1A1A1A'
+  const subtle = dark ? '#777' : '#888'
+
+  const [form, setForm] = useState({
+    campaign_id: '',
+    contacted_at: new Date().toISOString().split('T')[0],
+    method: 'Email',
+    status: 'Contacted',
+    notes: ''
+  })
+  const [saving, setSaving] = useState(false)
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  async function save() {
+    setSaving(true)
+    await supabase.from('outreach_logs').insert([{
+      creator_id: creatorId,
+      campaign_id: form.campaign_id || null,
+      contacted_at: form.contacted_at,
+      method: form.method,
+      status: form.status,
+      notes: form.notes || null,
+      org_id: '00000000-0000-0000-0000-000000000001'
+    }])
+    setSaving(false)
+    onSaved()
+  }
+
+  function composeEmail() {
+    const campaign = campaigns.find(c => c.id === form.campaign_id)
+    const subject = campaign ? `Partnership Opportunity — ${campaign.name}` : 'Partnership Opportunity'
+    const body = form.notes || ''
+    window.open(`mailto:${creatorEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank')
+    save()
+  }
+
+  const inpStyle = { width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }
+
+  return (
+    <div style={{ background: dark ? '#141414' : '#F8F6F2', border: `0.5px solid ${border}`, borderRadius: '1px', padding: '16px', marginBottom: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+        <div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Campaign</div>
+          <select value={form.campaign_id} onChange={e => set('campaign_id', e.target.value)} style={{ ...inpStyle }}>
+            <option value=''>No campaign</option>
+            {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Date</div>
+          <input type='date' value={form.contacted_at} onChange={e => set('contacted_at', e.target.value)} style={inpStyle} />
+        </div>
+        <div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Method</div>
+          <select value={form.method} onChange={e => set('method', e.target.value)} style={inpStyle}>
+            {METHODS.map(m => <option key={m}>{m}</option>)}
+          </select>
+        </div>
+        <div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Status</div>
+          <select value={form.status} onChange={e => set('status', e.target.value)} style={inpStyle}>
+            {STATUSES.map(s => <option key={s}>{s}</option>)}
+          </select>
+        </div>
+      </div>
+      <div style={{ marginBottom: '12px' }}>
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Notes / Message Summary</div>
+        <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='e.g. Pitched summer campaign, waiting to hear back...' style={{ ...inpStyle, height: '70px', resize: 'vertical', fontFamily: 'inherit' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '6px' }}>
+        {form.method === 'Email' && (
+          <button onClick={composeEmail} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+            Compose & Log
+          </button>
+        )}
+        <button onClick={save} disabled={saving} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: form.method === 'Email' ? 'none' : '#5b7c99', border: `0.5px solid ${form.method === 'Email' ? border : 'none'}`, color: form.method === 'Email' ? subtle : '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Saving...' : 'Log Only'}
+        </button>
+        <button onClick={onCancel} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
 export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign }) {
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
+  const [allCampaigns, setAllCampaigns] = useState([])
+  const [outreachLogs, setOutreachLogs] = useState([])
+  const [showOutreachForm, setShowOutreachForm] = useState(false)
+  const dark = true
 
-  useEffect(() => { fetchCampaigns() }, [creator.id])
+  useEffect(() => { fetchCampaigns(); fetchAllCampaigns(); fetchOutreach() }, [creator.id])
 
   async function fetchCampaigns() {
     const { data: links } = await supabase
@@ -30,14 +125,40 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     setCampaigns(merged)
   }
 
-  const displayType = (c) => {
-    if (Array.isArray(c.types) && c.types.length) return c.types.join(' · ')
-    return c.type || 'Influencer'
+  async function fetchAllCampaigns() {
+    const { data } = await supabase
+      .from('campaigns')
+      .select('id, name, brand')
+      .eq('org_id', '00000000-0000-0000-0000-000000000001')
+      .eq('archived', false)
+      .order('name')
+    setAllCampaigns(data || [])
+  }
+
+  async function fetchOutreach() {
+    const { data } = await supabase
+      .from('outreach_logs')
+      .select('*, campaigns(name, brand)')
+      .eq('creator_id', creator.id)
+      .order('contacted_at', { ascending: false })
+    setOutreachLogs(data || [])
   }
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
   const paymentColor = (s) => s === 'Paid' ? '#5C9E52' : '#888'
+  const outreachStatusColor = (s) => {
+    if (s === 'Booked') return '#5C9E52'
+    if (s === 'Responded') return '#5b7c99'
+    if (s === 'Declined') return '#c0392b'
+    return '#888'
+  }
   const formatPaymentDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null
+  const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+
+  const displayType = (c) => {
+    if (Array.isArray(c.types) && c.types.length) return c.types.join(' · ')
+    return c.type || 'Influencer'
+  }
 
   const row = (label, value) => value ? (
     <div style={{ display: 'flex', padding: '12px 0', borderBottom: '0.5px solid #2A2A2A' }}>
@@ -59,6 +180,13 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
       <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>${value.toLocaleString()}</div>
     </div>
   ) : null
+
+  const sectionHeader = (label, action) => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666' }}>{label}</div>
+      {action}
+    </div>
+  )
 
   return (
     <>
@@ -151,6 +279,47 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                 <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{creator.notes}</div>
               </div>
             )}
+
+            <div style={{ marginBottom: '28px' }}>
+              {sectionHeader('Outreach Log',
+                <button onClick={() => setShowOutreachForm(f => !f)} style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: showOutreachForm ? 'none' : '#5b7c99', border: `0.5px solid ${showOutreachForm ? '#3A3A3A' : 'none'}`, color: showOutreachForm ? '#777' : '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                  {showOutreachForm ? 'Cancel' : '+ Log Outreach'}
+                </button>
+              )}
+
+              {showOutreachForm && (
+                <OutreachForm
+                  creatorId={creator.id}
+                  creatorEmail={creator.contact_email || creator.manager_email || ''}
+                  campaigns={allCampaigns}
+                  dark={dark}
+                  onSaved={() => { setShowOutreachForm(false); fetchOutreach() }}
+                  onCancel={() => setShowOutreachForm(false)}
+                />
+              )}
+
+              {outreachLogs.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
+                  {outreachLogs.map(log => (
+                    <div key={log.id} style={{ background: '#1A1A1A', padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '11px', color: '#CCC9C3' }}>{formatDate(log.contacted_at)}</span>
+                          <span style={{ fontSize: '9px', color: '#666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{log.method}</span>
+                          {log.campaigns && (
+                            <span style={{ fontSize: '9px', color: '#5b7c99' }}>{log.campaigns.name}</span>
+                          )}
+                        </div>
+                        <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${outreachStatusColor(log.status)}`, color: outreachStatusColor(log.status), borderRadius: '1px', flexShrink: 0 }}>{log.status}</span>
+                      </div>
+                      {log.notes && <div style={{ fontSize: '11px', color: '#777', lineHeight: 1.6 }}>{log.notes}</div>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontSize: '12px', color: '#555', fontStyle: 'italic' }}>No outreach logged yet.</div>
+              )}
+            </div>
 
             {campaigns.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
