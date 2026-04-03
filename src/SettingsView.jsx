@@ -34,27 +34,20 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
   const [inviting, setInviting] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
+  const [currentUserRole, setCurrentUserRole] = useState('member')
 
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
 
   async function fetchAvatar() {
-    const { data } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
-    if (data?.avatar_url) {
-      setAvatarUrl(data.avatar_url)
-      onAvatarChange?.(data.avatar_url)
-    }
+    const { data } = await supabase.from('profiles').select('avatar_url, role').eq('id', user.id).single()
+    if (data?.avatar_url) { setAvatarUrl(data.avatar_url); onAvatarChange?.(data.avatar_url) }
+    if (data?.role) setCurrentUserRole(data.role)
   }
 
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', ORG_ID).single()
     if (data) {
-      setAgencyForm({
-        agency_name: data.agency_name || '',
-        agency_email: data.agency_email || '',
-        agency_phone: data.agency_phone || '',
-        agency_website: data.agency_website || '',
-        agency_logo_url: data.agency_logo_url || ''
-      })
+      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_phone: data.agency_phone || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '' })
       setSenderAccounts(data.sender_accounts || [])
     }
   }
@@ -70,16 +63,12 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
     if (file.size > 5 * 1024 * 1024) return setUploadMsg('File must be under 5MB')
     setUploading(true)
     setUploadMsg('')
-
     const ext = file.name.split('.').pop()
     const path = `${user.id}/avatar.${ext}`
-
     const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
     if (uploadError) { setUploading(false); return setUploadMsg('Upload failed: ' + uploadError.message) }
-
     const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
     const urlWithBust = `${publicUrl}?t=${Date.now()}`
-
     await supabase.from('profiles').update({ avatar_url: urlWithBust }).eq('id', user.id)
     setAvatarUrl(urlWithBust)
     onAvatarChange?.(urlWithBust)
@@ -92,11 +81,8 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
     setAgencySaving(true)
     const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', ORG_ID).single()
     const payload = { ...agencyForm, sender_accounts: senderAccounts }
-    if (existing) {
-      await supabase.from('org_settings').update(payload).eq('org_id', ORG_ID)
-    } else {
-      await supabase.from('org_settings').insert([{ ...payload, org_id: ORG_ID }])
-    }
+    if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', ORG_ID) }
+    else { await supabase.from('org_settings').insert([{ ...payload, org_id: ORG_ID }]) }
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
@@ -109,9 +95,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
     setNewSender({ label: '', email: '', gmail_index: '0' })
   }
 
-  function removeSender(idx) {
-    setSenderAccounts(s => s.filter((_, i) => i !== idx))
-  }
+  function removeSender(idx) { setSenderAccounts(s => s.filter((_, i) => i !== idx)) }
 
   async function changePassword() {
     setPwError('')
@@ -144,6 +128,8 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
     await supabase.from('profiles').update({ role }).eq('id', id)
     fetchTeam()
   }
+
+  const roleColor = (r) => r === 'owner' ? '#5b7c99' : r === 'admin' ? '#888' : '#666'
 
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
@@ -203,7 +189,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
                 }
                 <div>
                   <div style={{ fontSize: '14px', color: text, marginBottom: '4px' }}>{user?.email}</div>
-                  <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '14px' }}>Admin</div>
+                  <div style={{ fontSize: '10px', color: roleColor(currentUserRole), letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '14px' }}>{currentUserRole}</div>
                   <input ref={fileRef} type='file' accept='image/*' onChange={uploadAvatar} style={{ display: 'none' }} />
                   <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: uploading ? 0.7 : 1 }}>
                     {uploading ? 'Uploading...' : avatarUrl ? 'Change Photo' : 'Upload Photo'}
@@ -264,8 +250,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
               </div>
             </div>
             <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', marginBottom: '24px' }}>+ Add Account</button>
-
-            <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1 }}>
+            <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1, display: 'block' }}>
               {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
@@ -291,7 +276,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
                   {member.avatar_url
                     ? <img src={member.avatar_url} alt={member.email} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                    : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.id === user?.id ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                    : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.role === 'owner' ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
                         {member.email?.charAt(0).toUpperCase()}
                       </div>
                   }
@@ -299,10 +284,18 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
                     <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.email}</div>
                     {member.id === user?.id && <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>You</div>}
                   </div>
-                  <select value={member.role || 'member'} onChange={e => updateRole(member.id, e.target.value)} style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
-                    <option value='admin'>Admin</option>
-                    <option value='member'>Member</option>
-                  </select>
+                  {member.role === 'owner' ? (
+                    <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', border: '0.5px solid #5b7c99', padding: '3px 8px', borderRadius: '1px' }}>Owner</span>
+                  ) : (
+                    <select
+                      value={member.role || 'member'}
+                      onChange={e => updateRole(member.id, e.target.value)}
+                      disabled={currentUserRole !== 'owner' && currentUserRole !== 'admin'}
+                      style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
+                      <option value='admin'>Admin</option>
+                      <option value='member'>Member</option>
+                    </select>
+                  )}
                 </div>
               ))}
               {teamMembers.length === 0 && <div style={{ padding: '20px', background: card, fontSize: '12px', color: subtle }}>No team members yet.</div>}
