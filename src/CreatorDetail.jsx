@@ -141,6 +141,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   const [allCampaigns, setAllCampaigns] = useState([])
   const [outreachLogs, setOutreachLogs] = useState([])
   const [showOutreachForm, setShowOutreachForm] = useState(false)
+  const [hoveredLog, setHoveredLog] = useState(null)
   const dark = true
 
   useEffect(() => { fetchCampaigns(); fetchAllCampaigns(); fetchOutreach() }, [creator.id])
@@ -177,6 +178,11 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
       .eq('creator_id', creator.id)
       .order('contacted_at', { ascending: false })
     setOutreachLogs(data || [])
+  }
+
+  async function deleteOutreach(id) {
+    await supabase.from('outreach_logs').delete().eq('id', id)
+    fetchOutreach()
   }
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
@@ -336,14 +342,22 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               {outreachLogs.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
                   {outreachLogs.map(log => (
-                    <div key={log.id} style={{ background: '#1A1A1A', padding: '12px 14px' }}>
+                    <div key={log.id}
+                      style={{ background: hoveredLog === log.id ? '#222' : '#1A1A1A', padding: '12px 14px', position: 'relative' }}
+                      onMouseEnter={() => setHoveredLog(log.id)}
+                      onMouseLeave={() => setHoveredLog(null)}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '11px', color: '#CCC9C3' }}>{formatDate(log.contacted_at)}</span>
                           <span style={{ fontSize: '9px', color: '#666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{log.method}</span>
                           {log.campaigns && <span style={{ fontSize: '9px', color: '#5b7c99' }}>{log.campaigns.name}</span>}
                         </div>
-                        <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${outreachStatusColor(log.status)}`, color: outreachStatusColor(log.status), borderRadius: '1px', flexShrink: 0 }}>{log.status}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                          <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${outreachStatusColor(log.status)}`, color: outreachStatusColor(log.status), borderRadius: '1px' }}>{log.status}</span>
+                          {hoveredLog === log.id && (
+                            <button onClick={() => deleteOutreach(log.id)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px' }} title='Delete'>×</button>
+                          )}
+                        </div>
                       </div>
                       {log.notes && <div style={{ fontSize: '11px', color: '#777', lineHeight: 1.6 }}>{log.notes}</div>}
                     </div>
