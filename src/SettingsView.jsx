@@ -15,6 +15,8 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
 
   const [activeTab, setActiveTab] = useState('agency')
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_phone: '', agency_website: '', agency_logo_url: '' })
+  const [senderAccounts, setSenderAccounts] = useState([])
+  const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
   const [agencySaved, setAgencySaved] = useState(false)
 
@@ -32,13 +34,16 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
 
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', ORG_ID).single()
-    if (data) setAgencyForm({
-      agency_name: data.agency_name || '',
-      agency_email: data.agency_email || '',
-      agency_phone: data.agency_phone || '',
-      agency_website: data.agency_website || '',
-      agency_logo_url: data.agency_logo_url || ''
-    })
+    if (data) {
+      setAgencyForm({
+        agency_name: data.agency_name || '',
+        agency_email: data.agency_email || '',
+        agency_phone: data.agency_phone || '',
+        agency_website: data.agency_website || '',
+        agency_logo_url: data.agency_logo_url || ''
+      })
+      setSenderAccounts(data.sender_accounts || [])
+    }
   }
 
   async function fetchTeam() {
@@ -49,15 +54,26 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
   async function saveAgency() {
     setAgencySaving(true)
     const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', ORG_ID).single()
+    const payload = { ...agencyForm, sender_accounts: senderAccounts }
     if (existing) {
-      await supabase.from('org_settings').update({ ...agencyForm }).eq('org_id', ORG_ID)
+      await supabase.from('org_settings').update(payload).eq('org_id', ORG_ID)
     } else {
-      await supabase.from('org_settings').insert([{ ...agencyForm, org_id: ORG_ID }])
+      await supabase.from('org_settings').insert([{ ...payload, org_id: ORG_ID }])
     }
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
     setTimeout(() => setAgencySaved(false), 2000)
+  }
+
+  function addSender() {
+    if (!newSender.email.trim() || !newSender.label.trim()) return
+    setSenderAccounts(s => [...s, { ...newSender, gmail_index: parseInt(newSender.gmail_index) }])
+    setNewSender({ label: '', email: '', gmail_index: '0' })
+  }
+
+  function removeSender(idx) {
+    setSenderAccounts(s => s.filter((_, i) => i !== idx))
   }
 
   async function changePassword() {
@@ -107,6 +123,10 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
     <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '20px' }}>{t}</div>
   )
 
+  const sectionDivider = (t) => (
+    <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '24px 0 14px' }}>{t}</div>
+  )
+
   const tabs = [
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
@@ -130,7 +150,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
         ))}
       </div>
 
-      <div style={{ flex: 1, padding: '32px 40px', maxWidth: '560px' }}>
+      <div style={{ flex: 1, padding: '32px 40px', maxWidth: '600px' }}>
 
         {activeTab === 'agency' && (
           <div>
@@ -145,6 +165,42 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
                 <img src={agencyForm.agency_logo_url} alt='logo preview' style={{ height: '40px', objectFit: 'contain', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
               </div>
             )}
+
+            {sectionDivider('Sender Email Accounts')}
+            <div style={{ fontSize: '11px', color: subtle, marginBottom: '14px', lineHeight: 1.6 }}>
+              Add the Gmail accounts you send outreach from. The Gmail Index is which account slot it's in — check by going to mail.google.com and switching accounts. First account = 0, second = 1, etc.
+            </div>
+
+            {senderAccounts.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden', marginBottom: '12px' }}>
+                {senderAccounts.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: card }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '13px', color: text }}>{s.label}</div>
+                      <div style={{ fontSize: '11px', color: muted, marginTop: '2px' }}>{s.email} · Gmail account #{s.gmail_index}</div>
+                    </div>
+                    <button onClick={() => removeSender(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '8px', marginBottom: '16px' }}>
+              <div>
+                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Label</div>
+                <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Gmail Address</div>
+                <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Index</div>
+                <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+            </div>
+            <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', marginBottom: '24px' }}>+ Add Account</button>
+
             <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1 }}>
               {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
             </button>

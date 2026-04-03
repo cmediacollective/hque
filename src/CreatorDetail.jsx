@@ -4,6 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 
 const METHODS = ['Email', 'Instagram DM', 'Phone', 'WhatsApp', 'Other']
 const STATUSES = ['Contacted', 'Responded', 'Declined', 'Booked']
+const ORG_ID = '00000000-0000-0000-0000-000000000001'
 
 function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark }) {
   const border = dark ? '#3A3A3A' : '#C4BFB8'
@@ -18,7 +19,18 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
     status: 'Contacted',
     notes: ''
   })
+  const [senderAccounts, setSenderAccounts] = useState([])
+  const [selectedSender, setSelectedSender] = useState(null)
   const [saving, setSaving] = useState(false)
+
+  useEffect(() => { fetchSenders() }, [])
+
+  async function fetchSenders() {
+    const { data } = await supabase.from('org_settings').select('sender_accounts').eq('org_id', ORG_ID).single()
+    const accounts = data?.sender_accounts || []
+    setSenderAccounts(accounts)
+    if (accounts.length) setSelectedSender(accounts[0])
+  }
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -31,17 +43,20 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
       method: form.method,
       status: form.status,
       notes: form.notes || null,
-      org_id: '00000000-0000-0000-0000-000000000001'
+      org_id: ORG_ID
     }])
     setSaving(false)
     onSaved()
   }
 
-  function composeEmail() {
+  function composeGmail() {
     const campaign = campaigns.find(c => c.id === form.campaign_id)
     const subject = campaign ? `Partnership Opportunity — ${campaign.name}` : 'Partnership Opportunity'
     const body = form.notes || ''
-    window.open(`mailto:${creatorEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank')
+    const idx = selectedSender?.gmail_index ?? 0
+    const to = creatorEmail || ''
+    const url = `https://mail.google.com/mail/u/${idx}/#compose?to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(url, '_blank')
     save()
   }
 
@@ -52,7 +67,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
         <div>
           <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Campaign</div>
-          <select value={form.campaign_id} onChange={e => set('campaign_id', e.target.value)} style={{ ...inpStyle }}>
+          <select value={form.campaign_id} onChange={e => set('campaign_id', e.target.value)} style={inpStyle}>
             <option value=''>No campaign</option>
             {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -74,17 +89,44 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
           </select>
         </div>
       </div>
+
+      {form.method === 'Email' && senderAccounts.length > 0 && (
+        <div style={{ marginBottom: '10px' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Send From</div>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {senderAccounts.map((a, i) => (
+              <button key={i} onClick={() => setSelectedSender(a)} style={{
+                padding: '5px 12px', fontSize: '10px',
+                border: `0.5px solid ${selectedSender?.email === a.email ? '#5b7c99' : border}`,
+                color: selectedSender?.email === a.email ? '#5b7c99' : subtle,
+                background: 'none', cursor: 'pointer', borderRadius: '1px'
+              }}>
+                <div style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{a.label}</div>
+                <div style={{ fontSize: '10px', marginTop: '1px' }}>{a.email}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {form.method === 'Email' && senderAccounts.length === 0 && (
+        <div style={{ fontSize: '11px', color: '#5b7c99', marginBottom: '10px', lineHeight: 1.6 }}>
+          💡 Add sender accounts in Settings → Agency Info to enable Gmail compose.
+        </div>
+      )}
+
       <div style={{ marginBottom: '12px' }}>
         <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Notes / Message Summary</div>
         <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='e.g. Pitched summer campaign, waiting to hear back...' style={{ ...inpStyle, height: '70px', resize: 'vertical', fontFamily: 'inherit' }} />
       </div>
+
       <div style={{ display: 'flex', gap: '6px' }}>
-        {form.method === 'Email' && (
-          <button onClick={composeEmail} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
-            Compose & Log
+        {form.method === 'Email' && senderAccounts.length > 0 && (
+          <button onClick={composeGmail} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+            Open Gmail & Log
           </button>
         )}
-        <button onClick={save} disabled={saving} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: form.method === 'Email' ? 'none' : '#5b7c99', border: `0.5px solid ${form.method === 'Email' ? border : 'none'}`, color: form.method === 'Email' ? subtle : '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
+        <button onClick={save} disabled={saving} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: form.method === 'Email' && senderAccounts.length > 0 ? 'none' : '#5b7c99', border: `0.5px solid ${form.method === 'Email' && senderAccounts.length > 0 ? border : 'transparent'}`, color: form.method === 'Email' && senderAccounts.length > 0 ? subtle : '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
           {saving ? 'Saving...' : 'Log Only'}
         </button>
         <button onClick={onCancel} style={{ padding: '6px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
@@ -108,20 +150,13 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
       .from('campaign_creators')
       .select('campaign_id, payment_status, payment_method, payment_date')
       .eq('creator_id', creator.id)
-
     if (!links || links.length === 0) return
-
     const ids = links.map(l => l.campaign_id)
     const { data: camps } = await supabase
       .from('campaigns')
       .select('id, name, brand, status, budget, start_date, end_date, deliverables, deliverables_link, timeline, brief_url, contract_url, notes, brand_logo_url')
       .in('id', ids)
-
-    const merged = (camps || []).map(c => ({
-      ...c,
-      ...links.find(l => l.campaign_id === c.id)
-    }))
-
+    const merged = (camps || []).map(c => ({ ...c, ...links.find(l => l.campaign_id === c.id) }))
     setCampaigns(merged)
   }
 
@@ -129,7 +164,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     const { data } = await supabase
       .from('campaigns')
       .select('id, name, brand')
-      .eq('org_id', '00000000-0000-0000-0000-000000000001')
+      .eq('org_id', ORG_ID)
       .eq('archived', false)
       .order('name')
     setAllCampaigns(data || [])
@@ -306,9 +341,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '11px', color: '#CCC9C3' }}>{formatDate(log.contacted_at)}</span>
                           <span style={{ fontSize: '9px', color: '#666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{log.method}</span>
-                          {log.campaigns && (
-                            <span style={{ fontSize: '9px', color: '#5b7c99' }}>{log.campaigns.name}</span>
-                          )}
+                          {log.campaigns && <span style={{ fontSize: '9px', color: '#5b7c99' }}>{log.campaigns.name}</span>}
                         </div>
                         <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${outreachStatusColor(log.status)}`, color: outreachStatusColor(log.status), borderRadius: '1px', flexShrink: 0 }}>{log.status}</span>
                       </div>
@@ -317,7 +350,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                   ))}
                 </div>
               ) : (
-                <div style={{ fontSize: '12px', color: '#555', fontStyle: 'italic' }}>No outreach logged yet.</div>
+                !showOutreachForm && <div style={{ fontSize: '12px', color: '#555', fontStyle: 'italic' }}>No outreach logged yet.</div>
               )}
             </div>
 
