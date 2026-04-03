@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
 const ORG_ID = '00000000-0000-0000-0000-000000000001'
 
-export default function SettingsView({ dark = true, user, onAgencyNameChange }) {
+export default function SettingsView({ dark = true, user, onAgencyNameChange, onAvatarChange }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -13,12 +13,17 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
 
-  const [activeTab, setActiveTab] = useState('agency')
+  const [activeTab, setActiveTab] = useState('profile')
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_phone: '', agency_website: '', agency_logo_url: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
   const [agencySaved, setAgencySaved] = useState(false)
+
+  const [avatarUrl, setAvatarUrl] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadMsg, setUploadMsg] = useState('')
+  const fileRef = useRef(null)
 
   const [pwForm, setPwForm] = useState({ newPw: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
@@ -30,7 +35,15 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
   const [inviteMsg, setInviteMsg] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
 
-  useEffect(() => { fetchAgency(); fetchTeam() }, [])
+  useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
+
+  async function fetchAvatar() {
+    const { data } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
+    if (data?.avatar_url) {
+      setAvatarUrl(data.avatar_url)
+      onAvatarChange?.(data.avatar_url)
+    }
+  }
 
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', ORG_ID).single()
@@ -49,6 +62,30 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
   async function fetchTeam() {
     const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: true })
     setTeamMembers(data || [])
+  }
+
+  async function uploadAvatar(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) return setUploadMsg('File must be under 5MB')
+    setUploading(true)
+    setUploadMsg('')
+
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/avatar.${ext}`
+
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (uploadError) { setUploading(false); return setUploadMsg('Upload failed: ' + uploadError.message) }
+
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`
+
+    await supabase.from('profiles').update({ avatar_url: urlWithBust }).eq('id', user.id)
+    setAvatarUrl(urlWithBust)
+    onAvatarChange?.(urlWithBust)
+    setUploading(false)
+    setUploadMsg('Photo updated!')
+    setTimeout(() => setUploadMsg(''), 3000)
   }
 
   async function saveAgency() {
@@ -128,6 +165,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
   )
 
   const tabs = [
+    { key: 'profile', label: 'Profile' },
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
@@ -151,6 +189,32 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
       </div>
 
       <div style={{ flex: 1, padding: '32px 40px', maxWidth: '600px' }}>
+
+        {activeTab === 'profile' && (
+          <div>
+            {sectionTitle('Profile')}
+            <div style={{ padding: '28px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt='avatar' style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} />
+                  : <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                }
+                <div>
+                  <div style={{ fontSize: '14px', color: text, marginBottom: '4px' }}>{user?.email}</div>
+                  <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '14px' }}>Admin</div>
+                  <input ref={fileRef} type='file' accept='image/*' onChange={uploadAvatar} style={{ display: 'none' }} />
+                  <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: uploading ? 0.7 : 1 }}>
+                    {uploading ? 'Uploading...' : avatarUrl ? 'Change Photo' : 'Upload Photo'}
+                  </button>
+                  {uploadMsg && <div style={{ fontSize: '11px', color: uploadMsg.startsWith('Upload failed') ? '#e74c3c' : '#5C9E52', marginTop: '8px' }}>{uploadMsg}</div>}
+                </div>
+              </div>
+              <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6 }}>JPG, PNG or GIF. Max 5MB. Your photo appears in the sidebar and team list.</div>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'agency' && (
           <div>
@@ -213,14 +277,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
             <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
               <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  value={inviteEmail}
-                  onChange={e => setInviteEmail(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && inviteUser()}
-                  placeholder='teammate@email.com'
-                  type='email'
-                  style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }}
-                />
+                <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
                 <button onClick={inviteUser} disabled={inviting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: inviting ? 0.7 : 1, whiteSpace: 'nowrap' }}>
                   {inviting ? 'Sending...' : 'Send Invite'}
                 </button>
@@ -232,25 +289,23 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
               {teamMembers.map(member => (
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.id === user?.id ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
-                    {member.email?.charAt(0).toUpperCase()}
-                  </div>
+                  {member.avatar_url
+                    ? <img src={member.avatar_url} alt={member.email} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                    : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.id === user?.id ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                        {member.email?.charAt(0).toUpperCase()}
+                      </div>
+                  }
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.email}</div>
                     {member.id === user?.id && <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>You</div>}
                   </div>
-                  <select
-                    value={member.role || 'member'}
-                    onChange={e => updateRole(member.id, e.target.value)}
-                    style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
+                  <select value={member.role || 'member'} onChange={e => updateRole(member.id, e.target.value)} style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
                     <option value='admin'>Admin</option>
                     <option value='member'>Member</option>
                   </select>
                 </div>
               ))}
-              {teamMembers.length === 0 && (
-                <div style={{ padding: '20px', background: card, fontSize: '12px', color: subtle }}>No team members yet.</div>
-              )}
+              {teamMembers.length === 0 && <div style={{ padding: '20px', background: card, fontSize: '12px', color: subtle }}>No team members yet.</div>}
             </div>
           </div>
         )}
@@ -276,9 +331,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange }) 
             <div style={{ padding: '32px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px', textAlign: 'center' }}>
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>💳</div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Billing coming soon</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, maxWidth: '320px', margin: '0 auto' }}>
-                Stripe integration is on the roadmap. Once connected, you'll be able to manage your subscription and payment method here.
-              </div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, maxWidth: '320px', margin: '0 auto' }}>Stripe integration is on the roadmap. Once connected, you'll be able to manage your subscription and payment method here.</div>
             </div>
           </div>
         )}

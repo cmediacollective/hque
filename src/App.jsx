@@ -19,6 +19,7 @@ function App() {
   const [dark, setDark] = useState(true)
   const [exporting, setExporting] = useState(false)
   const [agencyName, setAgencyName] = useState('cMedia Collective')
+  const [avatarUrl, setAvatarUrl] = useState(null)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -38,11 +39,21 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  useEffect(() => { if (user) fetchAgencyName() }, [user])
+  useEffect(() => {
+    if (user) {
+      fetchAgencyName()
+      fetchAvatar()
+    }
+  }, [user])
 
   async function fetchAgencyName() {
     const { data } = await supabase.from('org_settings').select('agency_name').eq('org_id', ORG_ID).single()
     if (data?.agency_name) setAgencyName(data.agency_name)
+  }
+
+  async function fetchAvatar() {
+    const { data } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
+    if (data?.avatar_url) setAvatarUrl(data.avatar_url)
   }
 
   async function handleLogout() {
@@ -52,12 +63,7 @@ function App() {
 
   async function handleExport() {
     setExporting(true)
-    const { data: creators } = await supabase
-      .from('creators')
-      .select('*')
-      .eq('status', 'active')
-      .order('name', { ascending: true })
-
+    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
     if (!creators || creators.length === 0) { setExporting(false); return }
 
     const toImg = (url, name) => url
@@ -99,6 +105,7 @@ function App() {
           <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
             <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
           </div>
+
           {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
             <button key={key} onClick={() => setView(key)} style={{
               padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
@@ -109,6 +116,7 @@ function App() {
               fontWeight: view === key ? '500' : '400'
             }}>{label}</button>
           ))}
+
           <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
             <button onClick={() => setView('settings')} style={{
               width: '100%', textAlign: 'left',
@@ -118,10 +126,18 @@ function App() {
               borderLeft: view === 'settings' ? '1.5px solid #5b7c99' : '1.5px solid transparent',
               cursor: 'pointer', fontWeight: view === 'settings' ? '500' : '400'
             }}>Settings</button>
-            <div style={{ padding: '12px 16px 0' }}>
-              <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Signed in as</div>
-              <div style={{ fontSize: '11px', color: muted, marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-              <button onClick={handleLogout} style={{ marginTop: '10px', fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, padding: '4px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
+
+            <div style={{ padding: '12px 16px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt='avatar' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}`, flexShrink: 0, cursor: 'pointer' }} onClick={() => setView('settings')} onError={e => e.target.style.display = 'none'} />
+                : <div onClick={() => setView('settings')} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0, cursor: 'pointer' }}>
+                    {user?.email?.charAt(0).toUpperCase()}
+                  </div>
+              }
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
+              </div>
             </div>
           </div>
         </nav>
@@ -154,7 +170,7 @@ function App() {
             {view === 'workspace' && <WorkspaceView />}
             {view === 'campaigns' && <CampaignView dark={dark} />}
             {view === 'reports' && <ReportsView dark={dark} />}
-            {view === 'settings' && <SettingsView dark={dark} user={user} onAgencyNameChange={setAgencyName} />}
+            {view === 'settings' && <SettingsView dark={dark} user={user} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
           </div>
         </main>
 
