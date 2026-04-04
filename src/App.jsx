@@ -9,9 +9,13 @@ import SettingsView from './SettingsView'
 import Onboarding from './Onboarding'
 import Login from './Login'
 import SignUp from './SignUp'
+import TrialBanner from './TrialBanner'
+import TalentInquiry from './TalentInquiry'
+import InquiriesView from './InquiriesView'
 
 function App() {
   const [view, setView] = useState('talent')
+  const [talentTab, setTalentTab] = useState('roster') // roster | inquiries
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -23,6 +27,7 @@ function App() {
   const [orgId, setOrgId] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [trialEndsAt, setTrialEndsAt] = useState(null)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -31,7 +36,11 @@ function App() {
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
 
+  // Check if this is a public inquiry page
+  const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
+
   useEffect(() => {
+    if (isInquiryPage) return
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setAuthLoading(false)
@@ -48,15 +57,8 @@ function App() {
 
   async function fetchProfile() {
     setProfileLoading(true)
-    const { data } = await supabase
-      .from('profiles')
-      .select('org_id, avatar_url')
-      .eq('id', user.id)
-      .single()
-    if (data?.org_id) {
-      setOrgId(data.org_id)
-      fetchAgencyName(data.org_id)
-    }
+    const { data } = await supabase.from('profiles').select('org_id, avatar_url').eq('id', user.id).single()
+    if (data?.org_id) { setOrgId(data.org_id); fetchAgencyName(data.org_id) }
     if (data?.avatar_url) setAvatarUrl(data.avatar_url)
     setProfileLoading(false)
   }
@@ -64,6 +66,8 @@ function App() {
   async function fetchAgencyName(oid) {
     const { data } = await supabase.from('org_settings').select('agency_name').eq('org_id', oid).single()
     if (data?.agency_name) setAgencyName(data.agency_name)
+    const { data: org } = await supabase.from('organizations').select('trial_ends_at').eq('id', oid).single()
+    if (org?.trial_ends_at) setTrialEndsAt(org.trial_ends_at)
   }
 
   function handleOnboardingComplete(newOrgId, newAgencyName) {
@@ -82,11 +86,7 @@ function App() {
     setExporting(true)
     const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
     if (!creators || creators.length === 0) { setExporting(false); return }
-
-    const toImg = (url, name) => url
-      ? `<img src="${url}" alt="${name}" style="width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid #e0e0e0;display:block;" onerror="this.style.display='none'" />`
-      : `<div style="width:64px;height:64px;border-radius:4px;border:1px solid #e0e0e0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:20px;color:#999;">${name?.split(' ').map(n => n[0]).join('').slice(0,2)}</div>`
-
+    const toImg = (url, name) => url ? `<img src="${url}" alt="${name}" style="width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid #e0e0e0;display:block;" onerror="this.style.display='none'" />` : `<div style="width:64px;height:64px;border-radius:4px;border:1px solid #e0e0e0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:20px;color:#999;">${name?.split(' ').map(n => n[0]).join('').slice(0,2)}</div>`
     const rows = creators.map(c => {
       const type = Array.isArray(c.types) && c.types.length ? c.types.join(', ') : (c.type || '—')
       const niches = Array.isArray(c.niches) && c.niches.length ? c.niches.join(', ') : '—'
@@ -94,15 +94,16 @@ function App() {
       const rates = [c.rates?.feed && `Feed: $${Number(c.rates.feed).toLocaleString()}`, c.rates?.reel && `Reel: $${Number(c.rates.reel).toLocaleString()}`, c.rates?.story && `Story: $${Number(c.rates.story).toLocaleString()}`, c.rates?.tiktok && `TikTok: $${Number(c.rates.tiktok).toLocaleString()}`, c.rates?.youtube && `YouTube: $${Number(c.rates.youtube).toLocaleString()}`].filter(Boolean).join('<br>')
       return `<tr><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;">${toImg(c.photo_url, c.name)}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;"><div style="font-family:Georgia,serif;font-size:15px;color:#1a1a1a;margin-bottom:3px;">${c.name || '—'}</div><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.1em;">${type}</div></td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${niches}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${handles || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.ig_followers ? Number(c.ig_followers).toLocaleString() : '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#1a1a1a;">${c.engagement_rate ? `${c.engagement_rate}%` : '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${rates || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.location || '—'}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.manager_name ? `<div>${c.manager_name}</div>` : ''}${c.manager_email ? `<div style="color:#888;">${c.manager_email}</div>` : ''}${c.contact_email ? `<div style="color:#888;">${c.contact_email}</div>` : ''}${!c.manager_name && !c.manager_email && !c.contact_email ? '—' : ''}</td><td style="padding:14px 12px;vertical-align:top;border-bottom:1px solid #f0f0f0;font-size:11px;color:#555;">${c.tier || '—'}</td></tr>`
     }).join('')
-
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Talent Roster — ${agencyName}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}tr{page-break-inside:avoid;}}</style></head><body><div style="padding:40px 48px;"><div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #1a1a1a;"><div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin-bottom:8px;">${agencyName}</div><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Talent Roster</div></div><div style="text-align:right;"><div style="font-size:11px;color:#999;">${creators.length} creators</div><div style="font-size:11px;color:#999;">${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8f8f8;"><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Photo</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Name</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Niches</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Handles</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Followers</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Eng Rate</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Rates</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Location</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Contact</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Tier</th></tr></thead><tbody>${rows}</tbody></table></div></body></html>`
-
     const win = window.open('', '_blank')
     win.document.write(html)
     win.document.close()
     setTimeout(() => { win.print() }, 500)
     setExporting(false)
   }
+
+  // Show public inquiry page
+  if (isInquiryPage) return <TalentInquiry />
 
   if (authLoading || profileLoading) return (
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -169,19 +170,35 @@ function App() {
               <button onClick={() => setDark(d => !d)} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
                 {dark ? 'Light' : 'Dark'}
               </button>
-              {view === 'talent' && (
+              {view === 'talent' && talentTab === 'roster' && (
                 <button onClick={handleExport} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
                   {exporting ? 'Exporting...' : 'Export PDF'}
                 </button>
               )}
-              {view === 'talent' && (
+              {view === 'talent' && talentTab === 'roster' && (
                 <button onClick={() => setShowForm(true)} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
               )}
             </div>
           </div>
 
+          {view === 'talent' && (
+            <div style={{ display: 'flex', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+              {[['roster', 'Roster'], ['inquiries', 'Inquiries']].map(([key, label]) => (
+                <button key={key} onClick={() => setTalentTab(key)} style={{
+                  padding: '10px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
+                  background: 'none', border: 'none',
+                  borderBottom: talentTab === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+                  color: talentTab === key ? text : muted, cursor: 'pointer'
+                }}>{label}</button>
+              ))}
+            </div>
+          )}
+
+          <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
+
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {view === 'talent' && <TalentView key={refresh} dark={dark} orgId={orgId} />}
+            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} />}
+            {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
