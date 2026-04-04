@@ -53,7 +53,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   async function fetchTeam() {
-    const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: true })
+    const { data } = await supabase.from('profiles').select('*').eq('org_id', orgId).order('created_at', { ascending: true })
     setTeamMembers(data || [])
   }
 
