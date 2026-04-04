@@ -19,10 +19,29 @@ export default function Onboarding({ user, onComplete }) {
       .select()
       .single()
 
-    if (orgErr) { setSaving(false); return setError(orgErr.message) }
+    if (orgErr) {
+      setSaving(false)
+      return setError('Org error: ' + orgErr.message)
+    }
 
-    await supabase.from('org_settings').insert([{ org_id: org.id, agency_name: agencyName }])
-    await supabase.from('profiles').update({ org_id: org.id, role: 'owner' }).eq('id', user.id)
+    const { error: settingsErr } = await supabase
+      .from('org_settings')
+      .insert([{ org_id: org.id, agency_name: agencyName }])
+
+    if (settingsErr) {
+      setSaving(false)
+      return setError('Settings error: ' + settingsErr.message)
+    }
+
+    const { error: profileErr } = await supabase
+      .from('profiles')
+      .update({ org_id: org.id, role: 'owner' })
+      .eq('id', user.id)
+
+    if (profileErr) {
+      setSaving(false)
+      return setError('Profile error: ' + profileErr.message)
+    }
 
     setSaving(false)
     onComplete(org.id, agencyName)
