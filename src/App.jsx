@@ -8,6 +8,7 @@ import ReportsView from './ReportsView'
 import SettingsView from './SettingsView'
 import Onboarding from './Onboarding'
 import Login from './Login'
+import SignUp from './SignUp'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -21,6 +22,7 @@ function App() {
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
+  const [showSignUp, setShowSignUp] = useState(false)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -51,7 +53,6 @@ function App() {
       .select('org_id, avatar_url')
       .eq('id', user.id)
       .single()
-
     if (data?.org_id) {
       setOrgId(data.org_id)
       fetchAgencyName(data.org_id)
@@ -61,11 +62,7 @@ function App() {
   }
 
   async function fetchAgencyName(oid) {
-    const { data } = await supabase
-      .from('org_settings')
-      .select('agency_name')
-      .eq('org_id', oid)
-      .single()
+    const { data } = await supabase.from('org_settings').select('agency_name').eq('org_id', oid).single()
     if (data?.agency_name) setAgencyName(data.agency_name)
   }
 
@@ -83,12 +80,7 @@ function App() {
   async function handleExport() {
     if (!orgId) return
     setExporting(true)
-    const { data: creators } = await supabase
-      .from('creators')
-      .select('*')
-      .eq('status', 'active')
-      .order('name', { ascending: true })
-
+    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
     if (!creators || creators.length === 0) { setExporting(false); return }
 
     const toImg = (url, name) => url
@@ -118,8 +110,8 @@ function App() {
     </div>
   )
 
-  if (!user) return <Login onLogin={setUser} />
-
+  if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
+  if (!user) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
 
   return (
@@ -127,7 +119,6 @@ function App() {
       {showForm && <AddCreatorForm orgId={orgId} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
 
       <div style={{ display: 'flex', height: '100vh' }}>
-
         <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
           <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
             <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
@@ -197,7 +188,6 @@ function App() {
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
           </div>
         </main>
-
       </div>
     </div>
   )
