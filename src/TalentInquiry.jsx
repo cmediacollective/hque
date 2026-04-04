@@ -231,7 +231,7 @@ export default function TalentInquiry() {
 
           <div style={{ padding: '16px', background: '#F8F6F2', border: '0.5px solid #D4CFC8', borderRadius: '1px', marginBottom: '24px' }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-              <input type='checkbox' checked={form.hque_opted_in} onChange={e => set('hque_opted_in', e.target.checked)} style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div onClick={() => set('hque_opted_in', !form.hque_opted_in)} style={{ width: '16px', height: '16px', borderRadius: '2px', border: form.hque_opted_in ? '0.5px solid #5b7c99' : '0.5px solid #C4BFB8', background: form.hque_opted_in ? '#5b7c99' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}>{form.hque_opted_in && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}</div>
               <div style={{ fontSize: '12px', color: '#888', lineHeight: 1.6 }}>
                 I'd like to receive talent opportunities and updates from HQue. You can unsubscribe at any time.
               </div>
