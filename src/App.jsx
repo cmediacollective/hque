@@ -191,7 +191,7 @@ function App() {
 
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             {view === 'talent' && <TalentView key={refresh} dark={dark} orgId={orgId} />}
-            {view === 'workspace' && <WorkspaceView orgId={orgId} />}
+            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
