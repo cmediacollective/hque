@@ -19,7 +19,7 @@ export default function Onboarding({ user, onComplete }) {
       .select()
       .single()
 
-    if (orgErr) { setSaving(false); return setError('Something went wrong. Please try again.') }
+    if (orgErr) { setSaving(false); return setError(orgErr.message) }
 
     await supabase.from('org_settings').insert([{ org_id: org.id, agency_name: agencyName }])
     await supabase.from('profiles').update({ org_id: org.id, role: 'owner' }).eq('id', user.id)
