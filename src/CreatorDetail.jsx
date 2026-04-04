@@ -6,7 +6,7 @@ const METHODS = ['Email', 'Instagram DM', 'Phone', 'WhatsApp', 'Other']
 const STATUSES = ['Contacted', 'Responded', 'Declined', 'Booked']
 
 
-function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark }) {
+function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark, orgId }) {
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const inputBg = dark ? '#141414' : '#F5F3EF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
@@ -135,7 +135,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
   )
 }
 
-export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign }) {
+export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId }) {
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
   const [allCampaigns, setAllCampaigns] = useState([])
@@ -201,10 +201,13 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     return c.type || 'Influencer'
   }
 
-  const row = (label, value) => value ? (
+  const row = (label, value, href) => value ? (
     <div style={{ display: 'flex', padding: '12px 0', borderBottom: '0.5px solid #2A2A2A' }}>
       <div style={{ width: '160px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#777', flexShrink: 0, paddingTop: '1px' }}>{label}</div>
-      <div style={{ fontSize: '13px', color: '#CCC9C3', flex: 1 }}>{value}</div>
+      {href
+        ? <a href={href} target='_blank' rel='noreferrer' style={{ fontSize: '13px', color: '#5b7c99', flex: 1, textDecoration: 'none', cursor: 'pointer' }} onMouseEnter={e => e.target.style.textDecoration = 'underline'} onMouseLeave={e => e.target.style.textDecoration = 'none'}>{value}</a>
+        : <div style={{ fontSize: '13px', color: '#CCC9C3', flex: 1 }}>{value}</div>
+      }
     </div>
   ) : null
 
@@ -298,19 +301,17 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               {row('Tier', creator.tier)}
               {row('Primary Platform', creator.primary_platform)}
               {row('Location', creator.location)}
-              {row('Handles', [
-                creator.handles?.instagram && `IG: @${creator.handles.instagram}`,
-                creator.handles?.tiktok && `TK: @${creator.handles.tiktok}`,
-                creator.handles?.youtube && `YT: ${creator.handles.youtube}`
-              ].filter(Boolean).join('  ·  '))}
+              {creator.handles?.instagram && row('Instagram', `@${creator.handles.instagram}`, `https://instagram.com/${creator.handles.instagram}`)}
+              {creator.handles?.tiktok && row('TikTok', `@${creator.handles.tiktok}`, `https://tiktok.com/@${creator.handles.tiktok}`)}
+              {creator.handles?.youtube && row('YouTube', creator.handles.youtube, `https://youtube.com/${creator.handles.youtube}`)}
             </div>
 
             {(creator.contact_email || creator.manager_name || creator.manager_email) && (
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Contact</div>
-                {row('Creator Email', creator.contact_email)}
+                {row('Creator Email', creator.contact_email, `https://mail.google.com/mail/?view=cm&to=${creator.contact_email}`)}
                 {row('Manager', creator.manager_name)}
-                {row('Manager Email', creator.manager_email)}
+                {row('Manager Email', creator.manager_email, `https://mail.google.com/mail/?view=cm&to=${creator.manager_email}`)}
               </div>
             )}
 
@@ -334,6 +335,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                   creatorEmail={creator.contact_email || creator.manager_email || ''}
                   campaigns={allCampaigns}
                   dark={dark}
+                  orgId={orgId}
                   onSaved={() => { setShowOutreachForm(false); fetchOutreach() }}
                   onCancel={() => setShowOutreachForm(false)}
                 />
