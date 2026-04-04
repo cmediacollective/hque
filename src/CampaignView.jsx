@@ -81,6 +81,7 @@ export default function CampaignView({ dark = true, orgId }) {
       {showForm && (
         <CampaignForm
           dark={dark}
+          orgId={orgId}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); fetchCampaigns() }}
         />
@@ -90,6 +91,7 @@ export default function CampaignView({ dark = true, orgId }) {
         <CampaignDetail
           campaign={selected}
           dark={dark}
+          orgId={orgId}
           onClose={() => setSelected(null)}
           onSaved={() => { setSelected(null); fetchCampaigns() }}
         />

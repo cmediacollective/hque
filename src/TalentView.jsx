@@ -108,6 +108,7 @@ export default function TalentView({ dark = true, orgId }) {
       {selected && (
         <CreatorDetail
           creator={selected}
+          orgId={orgId}
           onClose={() => setSelected(null)}
           onSaved={() => { setSelected(null); fetchCreators() }}
           onOpenCampaign={(campaign) => setSelectedCampaign(campaign)}
@@ -118,6 +119,7 @@ export default function TalentView({ dark = true, orgId }) {
         <CampaignDetail
           campaign={selectedCampaign}
           dark={dark}
+          orgId={orgId}
           onClose={() => setSelectedCampaign(null)}
           onSaved={() => setSelectedCampaign(null)}
         />
