@@ -6,6 +6,7 @@ import WorkspaceView from './WorkspaceView'
 import CampaignView from './CampaignView'
 import ReportsView from './ReportsView'
 import SettingsView from './SettingsView'
+import Onboarding from './Onboarding'
 import Login from './Login'
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
   const [agencyName, setAgencyName] = useState('HQue')
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -39,12 +41,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (user) {
-      fetchProfile()
-    }
+    if (user) fetchProfile()
   }, [user])
 
   async function fetchProfile() {
+    setProfileLoading(true)
     const { data } = await supabase
       .from('profiles')
       .select('org_id, avatar_url')
@@ -56,6 +57,7 @@ function App() {
       fetchAgencyName(data.org_id)
     }
     if (data?.avatar_url) setAvatarUrl(data.avatar_url)
+    setProfileLoading(false)
   }
 
   async function fetchAgencyName(oid) {
@@ -65,6 +67,11 @@ function App() {
       .eq('org_id', oid)
       .single()
     if (data?.agency_name) setAgencyName(data.agency_name)
+  }
+
+  function handleOnboardingComplete(newOrgId, newAgencyName) {
+    setOrgId(newOrgId)
+    setAgencyName(newAgencyName)
   }
 
   async function handleLogout() {
@@ -105,19 +112,15 @@ function App() {
     setExporting(false)
   }
 
-  if (authLoading) return (
-    <div style={{ background: bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
+  if (authLoading || profileLoading) return (
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ fontSize: '9px', color: '#555', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
     </div>
   )
 
   if (!user) return <Login onLogin={setUser} />
 
-  if (user && !orgId) return (
-    <div style={{ background: bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Setting up your workspace...</div>
-    </div>
-  )
+  if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
 
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
