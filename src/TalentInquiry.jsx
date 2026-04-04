@@ -12,6 +12,7 @@ export default function TalentInquiry() {
   const [photoPreview, setPhotoPreview] = useState(null)
   const [photoFile, setPhotoFile] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
   const fileRef = useRef(null)
   const [form, setForm] = useState({
     name: '', email: '', photo_url: '',
@@ -46,16 +47,25 @@ export default function TalentInquiry() {
     if (!file) return
     setPhotoFile(file)
     setPhotoPreview(URL.createObjectURL(file))
+    setUploadError('')
   }
 
   async function uploadPhoto() {
     if (!photoFile) return null
     setUploading(true)
+    setUploadError('')
     const ext = photoFile.name.split('.').pop()
     const path = `inquiry-${Date.now()}.${ext}`
-    const { error: uploadErr } = await supabase.storage.from('avatars').upload(path, photoFile, { upsert: true })
-    if (uploadErr) { setUploading(false); return null }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    console.log('Uploading to inquiry-photos:', path)
+    const { data, error: uploadErr } = await supabase.storage.from('inquiry-photos').upload(path, photoFile, { upsert: true })
+    console.log('Upload result:', data, uploadErr)
+    if (uploadErr) {
+      setUploadError('Photo upload failed: ' + uploadErr.message)
+      setUploading(false)
+      return null
+    }
+    const { data: { publicUrl } } = supabase.storage.from('inquiry-photos').getPublicUrl(path)
+    console.log('Public URL:', publicUrl)
     setUploading(false)
     return publicUrl
   }
@@ -179,6 +189,7 @@ export default function TalentInquiry() {
                     {photoPreview ? 'Change Photo' : 'Upload Photo'}
                   </button>
                   <div style={{ fontSize: '10px', color: '#aaa' }}>JPG or PNG, max 5MB</div>
+                  {uploadError && <div style={{ fontSize: '10px', color: '#e74c3c', marginTop: '4px' }}>{uploadError}</div>}
                 </div>
               </div>
             </div>
