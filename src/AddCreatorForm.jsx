@@ -8,7 +8,7 @@ const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
-export default function AddCreatorForm({ onClose, onSaved, existing, dark = true }) {
+export default function AddCreatorForm({ onClose, onSaved, existing, dark = true, orgId }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
   const inputBg = dark ? '#141414' : '#F5F3EF'
@@ -86,7 +86,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
         tiktok: form.handles.tiktok?.replace('@', ''),
         youtube: form.handles.youtube?.replace('@', ''),
       },
-      org_id: '00000000-0000-0000-0000-000000000001'
+      org_id: orgId
     }
 
     let err

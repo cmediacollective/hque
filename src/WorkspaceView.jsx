@@ -35,7 +35,7 @@ function TaskForm({ initial, onSave, onCancel }) {
   )
 }
 
-export default function WorkspaceView() {
+export default function WorkspaceView({ orgId }) {
   const [boards, setBoards] = useState([])
   const [archivedBoards, setArchivedBoards] = useState([])
   const [activeBoard, setActiveBoard] = useState(null)
@@ -55,7 +55,7 @@ export default function WorkspaceView() {
   useEffect(() => { if (activeBoard) { fetchColumns(); fetchTasks() } }, [activeBoard])
 
   async function fetchBoards() {
-    const { data } = await supabase.from('boards').select('*').eq('org_id', '00000000-0000-0000-0000-000000000001')
+    const { data } = await supabase.from('boards').select('*').eq('org_id', orgId)
     const active = (data || []).filter(b => b.status !== 'archived')
     const archived = (data || []).filter(b => b.status === 'archived')
     setBoards(active)
@@ -71,7 +71,7 @@ export default function WorkspaceView() {
 
   async function fetchTasks() {
     setLoading(true)
-    const { data } = await supabase.from('tasks').select('*').eq('org_id', '00000000-0000-0000-0000-000000000001').order('position')
+    const { data } = await supabase.from('tasks').select('*').eq('org_id', orgId).order('position')
     setTasks(data || [])
     setLoading(false)
   }
@@ -80,7 +80,7 @@ export default function WorkspaceView() {
     if (!newBoardName.trim()) return
     const { data } = await supabase.from('boards').insert([{
       name: newBoardName,
-      org_id: '00000000-0000-0000-0000-000000000001',
+      org_id: orgId,
       status: 'active'
     }]).select().single()
     if (data) {
@@ -110,7 +110,7 @@ export default function WorkspaceView() {
       assigned_to: form.assigned_to || null,
       column_id: columnId,
       board_id: activeBoard.id,
-      org_id: '00000000-0000-0000-0000-000000000001',
+      org_id: orgId,
       position: tasks.filter(t => t.column_id === columnId).length
     }])
     if (error) { console.error(error); return }

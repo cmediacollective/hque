@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
-const ORG_ID = '00000000-0000-0000-0000-000000000001'
 
-export default function SettingsView({ dark = true, user, onAgencyNameChange, onAvatarChange }) {
+
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -45,7 +45,7 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
   }
 
   async function fetchAgency() {
-    const { data } = await supabase.from('org_settings').select('*').eq('org_id', ORG_ID).single()
+    const { data } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (data) {
       setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_phone: data.agency_phone || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '' })
       setSenderAccounts(data.sender_accounts || [])
@@ -79,10 +79,10 @@ export default function SettingsView({ dark = true, user, onAgencyNameChange, on
 
   async function saveAgency() {
     setAgencySaving(true)
-    const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', ORG_ID).single()
+    const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', orgId).single()
     const payload = { ...agencyForm, sender_accounts: senderAccounts }
-    if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', ORG_ID) }
-    else { await supabase.from('org_settings').insert([{ ...payload, org_id: ORG_ID }]) }
+    if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', orgId) }
+    else { await supabase.from('org_settings').insert([{ ...payload, org_id: orgId }]) }
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)

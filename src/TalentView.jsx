@@ -7,7 +7,7 @@ import CampaignDetail from './CampaignDetail'
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
 
-export default function TalentView({ dark = true }) {
+export default function TalentView({ dark = true, orgId }) {
   const [creators, setCreators] = useState([])
   const [view, setView] = useState('grid')
   const [typeFilter, setTypeFilter] = useState('All Types')

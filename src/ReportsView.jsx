@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
-export default function ReportsView({ dark = true }) {
+export default function ReportsView({ dark = true, orgId }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -21,7 +21,7 @@ export default function ReportsView({ dark = true }) {
   async function fetchAll() {
     setLoading(true)
     const [{ data: camps }, { data: lnks }, { data: crs }] = await Promise.all([
-      supabase.from('campaigns').select('*').eq('org_id', '00000000-0000-0000-0000-000000000001').order('created_at', { ascending: false }),
+      supabase.from('campaigns').select('*').eq('org_id', orgId).order('created_at', { ascending: false }),
       supabase.from('campaign_creators').select('*'),
       supabase.from('creators').select('id, name, photo_url, handles')
     ])

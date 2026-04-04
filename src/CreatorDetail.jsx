@@ -4,7 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 
 const METHODS = ['Email', 'Instagram DM', 'Phone', 'WhatsApp', 'Other']
 const STATUSES = ['Contacted', 'Responded', 'Declined', 'Booked']
-const ORG_ID = '00000000-0000-0000-0000-000000000001'
+
 
 function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark }) {
   const border = dark ? '#3A3A3A' : '#C4BFB8'
@@ -26,7 +26,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
   useEffect(() => { fetchSenders() }, [])
 
   async function fetchSenders() {
-    const { data } = await supabase.from('org_settings').select('sender_accounts').eq('org_id', ORG_ID).single()
+    const { data } = await supabase.from('org_settings').select('sender_accounts').eq('org_id', orgId).single()
     const accounts = data?.sender_accounts || []
     setSenderAccounts(accounts)
     if (accounts.length) setSelectedSender(accounts[0])
@@ -43,7 +43,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
       method: form.method,
       status: form.status,
       notes: form.notes || null,
-      org_id: ORG_ID
+      org_id: orgId
     }])
     setSaving(false)
     onSaved()
@@ -165,7 +165,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     const { data } = await supabase
       .from('campaigns')
       .select('id, name, brand')
-      .eq('org_id', ORG_ID)
+      .eq('org_id', orgId)
       .eq('archived', false)
       .order('name')
     setAllCampaigns(data || [])

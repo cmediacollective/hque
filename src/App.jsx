@@ -8,8 +8,6 @@ import ReportsView from './ReportsView'
 import SettingsView from './SettingsView'
 import Login from './Login'
 
-const ORG_ID = '00000000-0000-0000-0000-000000000001'
-
 function App() {
   const [view, setView] = useState('talent')
   const [showForm, setShowForm] = useState(false)
@@ -18,8 +16,9 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [dark, setDark] = useState(true)
   const [exporting, setExporting] = useState(false)
-  const [agencyName, setAgencyName] = useState('cMedia Collective')
+  const [agencyName, setAgencyName] = useState('HQue')
   const [avatarUrl, setAvatarUrl] = useState(null)
+  const [orgId, setOrgId] = useState(null)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -41,29 +40,48 @@ function App() {
 
   useEffect(() => {
     if (user) {
-      fetchAgencyName()
-      fetchAvatar()
+      fetchProfile()
     }
   }, [user])
 
-  async function fetchAgencyName() {
-    const { data } = await supabase.from('org_settings').select('agency_name').eq('org_id', ORG_ID).single()
-    if (data?.agency_name) setAgencyName(data.agency_name)
+  async function fetchProfile() {
+    const { data } = await supabase
+      .from('profiles')
+      .select('org_id, avatar_url')
+      .eq('id', user.id)
+      .single()
+
+    if (data?.org_id) {
+      setOrgId(data.org_id)
+      fetchAgencyName(data.org_id)
+    }
+    if (data?.avatar_url) setAvatarUrl(data.avatar_url)
   }
 
-  async function fetchAvatar() {
-    const { data } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
-    if (data?.avatar_url) setAvatarUrl(data.avatar_url)
+  async function fetchAgencyName(oid) {
+    const { data } = await supabase
+      .from('org_settings')
+      .select('agency_name')
+      .eq('org_id', oid)
+      .single()
+    if (data?.agency_name) setAgencyName(data.agency_name)
   }
 
   async function handleLogout() {
     await supabase.auth.signOut()
     setUser(null)
+    setOrgId(null)
   }
 
   async function handleExport() {
+    if (!orgId) return
     setExporting(true)
-    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
+    const { data: creators } = await supabase
+      .from('creators')
+      .select('*')
+      .eq('status', 'active')
+      .order('name', { ascending: true })
+
     if (!creators || creators.length === 0) { setExporting(false); return }
 
     const toImg = (url, name) => url
@@ -95,9 +113,15 @@ function App() {
 
   if (!user) return <Login onLogin={setUser} />
 
+  if (user && !orgId) return (
+    <div style={{ background: bg, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Setting up your workspace...</div>
+    </div>
+  )
+
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
-      {showForm && <AddCreatorForm onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
+      {showForm && <AddCreatorForm orgId={orgId} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
 
       <div style={{ display: 'flex', height: '100vh' }}>
 
@@ -105,7 +129,6 @@ function App() {
           <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
             <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
           </div>
-
           {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
             <button key={key} onClick={() => setView(key)} style={{
               padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
@@ -116,7 +139,6 @@ function App() {
               fontWeight: view === key ? '500' : '400'
             }}>{label}</button>
           ))}
-
           <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
             <button onClick={() => setView('settings')} style={{
               width: '100%', textAlign: 'left',
@@ -126,7 +148,6 @@ function App() {
               borderLeft: view === 'settings' ? '1.5px solid #5b7c99' : '1.5px solid transparent',
               cursor: 'pointer', fontWeight: view === 'settings' ? '500' : '400'
             }}>Settings</button>
-
             <div style={{ padding: '12px 16px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
               {avatarUrl
                 ? <img src={avatarUrl} alt='avatar' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}`, flexShrink: 0, cursor: 'pointer' }} onClick={() => setView('settings')} onError={e => e.target.style.display = 'none'} />
@@ -166,11 +187,11 @@ function App() {
           </div>
 
           <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {view === 'talent' && <TalentView key={refresh} dark={dark} />}
-            {view === 'workspace' && <WorkspaceView />}
-            {view === 'campaigns' && <CampaignView dark={dark} />}
-            {view === 'reports' && <ReportsView dark={dark} />}
-            {view === 'settings' && <SettingsView dark={dark} user={user} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
+            {view === 'talent' && <TalentView key={refresh} dark={dark} orgId={orgId} />}
+            {view === 'workspace' && <WorkspaceView orgId={orgId} />}
+            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}
+            {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
+            {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
           </div>
         </main>
 

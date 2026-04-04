@@ -5,7 +5,7 @@ import CampaignDetail from './CampaignDetail'
 
 const STATUSES = ['All', 'Pitch', 'Active', 'Completed']
 
-export default function CampaignView({ dark = true }) {
+export default function CampaignView({ dark = true, orgId }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#1A1A1A' : '#FFFFFF'
   const cardHover = dark ? '#222' : '#F0EDE8'
@@ -34,7 +34,7 @@ export default function CampaignView({ dark = true }) {
     const { data } = await supabase
       .from('campaigns')
       .select('*')
-      .eq('org_id', '00000000-0000-0000-0000-000000000001')
+      .eq('org_id', orgId)
       .eq('archived', showArchived)
       .order('created_at', { ascending: false })
     setCampaigns(data || [])
