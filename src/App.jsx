@@ -15,7 +15,7 @@ import InquiriesView from './InquiriesView'
 
 function App() {
   const [view, setView] = useState('talent')
-  const [talentTab, setTalentTab] = useState('roster') // roster | inquiries
+  const [talentTab, setTalentTab] = useState('roster')
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -28,6 +28,7 @@ function App() {
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
@@ -36,8 +37,13 @@ function App() {
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
 
-  // Check if this is a public inquiry page
   const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     if (isInquiryPage) return
@@ -51,9 +57,7 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  useEffect(() => {
-    if (user) fetchProfile()
-  }, [user])
+  useEffect(() => { if (user) fetchProfile() }, [user])
 
   async function fetchProfile() {
     setProfileLoading(true)
@@ -102,7 +106,6 @@ function App() {
     setExporting(false)
   }
 
-  // Show public inquiry page
   if (isInquiryPage) return <TalentInquiry />
 
   if (authLoading || profileLoading) return (
@@ -115,68 +118,99 @@ function App() {
   if (!user) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
 
+  const navItems = [
+    { key: 'talent', label: 'Talent', icon: '👤' },
+    { key: 'campaigns', label: 'Campaigns', icon: '📋' },
+    { key: 'workspace', label: 'Workspace', icon: '⬜' },
+    { key: 'reports', label: 'Reports', icon: '📊' },
+    { key: 'settings', label: 'Settings', icon: '⚙️' },
+  ]
+
+  const viewLabel = navItems.find(n => n.key === view)?.label || 'HQue'
+
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       {showForm && <AddCreatorForm orgId={orgId} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
 
       <div style={{ display: 'flex', height: '100vh' }}>
-        <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-          <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-            <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
-          </div>
-          {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
-            <button key={key} onClick={() => setView(key)} style={{
-              padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
-              fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: view === key ? text : muted, background: 'none', border: 'none',
-              borderLeft: view === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-              textAlign: 'left', cursor: 'pointer', width: '100%',
-              fontWeight: view === key ? '500' : '400'
-            }}>{label}</button>
-          ))}
-          <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
-            <button onClick={() => setView('settings')} style={{
-              width: '100%', textAlign: 'left',
-              padding: view === 'settings' ? '9px 20px 9px 14.5px' : '9px 16px',
-              fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
-              color: view === 'settings' ? text : subtle, background: 'none', border: 'none',
-              borderLeft: view === 'settings' ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-              cursor: 'pointer', fontWeight: view === 'settings' ? '500' : '400'
-            }}>Settings</button>
-            <div style={{ padding: '12px 16px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              {avatarUrl
-                ? <img src={avatarUrl} alt='avatar' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}`, flexShrink: 0, cursor: 'pointer' }} onClick={() => setView('settings')} onError={e => e.target.style.display = 'none'} />
-                : <div onClick={() => setView('settings')} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0, cursor: 'pointer' }}>
-                    {user?.email?.charAt(0).toUpperCase()}
-                  </div>
-              }
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
-                <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
+
+        {/* Desktop sidebar */}
+        {!isMobile && (
+          <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
+              <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
+            </div>
+            {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
+              <button key={key} onClick={() => setView(key)} style={{
+                padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
+                fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: view === key ? text : muted, background: 'none', border: 'none',
+                borderLeft: view === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+                textAlign: 'left', cursor: 'pointer', width: '100%',
+                fontWeight: view === key ? '500' : '400'
+              }}>{label}</button>
+            ))}
+            <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
+              <button onClick={() => setView('settings')} style={{
+                width: '100%', textAlign: 'left',
+                padding: view === 'settings' ? '9px 20px 9px 14.5px' : '9px 16px',
+                fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
+                color: view === 'settings' ? text : subtle, background: 'none', border: 'none',
+                borderLeft: view === 'settings' ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+                cursor: 'pointer', fontWeight: view === 'settings' ? '500' : '400'
+              }}>Settings</button>
+              <div style={{ padding: '12px 16px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {avatarUrl
+                  ? <img src={avatarUrl} alt='avatar' style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}`, flexShrink: 0, cursor: 'pointer' }} onClick={() => setView('settings')} onError={e => e.target.style.display = 'none'} />
+                  : <div onClick={() => setView('settings')} style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0, cursor: 'pointer' }}>
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                }
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                  <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
+                </div>
               </div>
             </div>
-          </div>
-        </nav>
+          </nav>
+        )}
 
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bg }}>
-          <div style={{ padding: '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+
+          {/* Header */}
+          <div style={{ padding: isMobile ? '12px 16px' : '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: isMobile ? 'center' : 'flex-end', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{agencyName}</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 'normal', color: text }}>
-                {view === 'talent' ? 'Talent Database' : view === 'workspace' ? 'Workspace' : view === 'campaigns' ? 'Campaigns' : view === 'reports' ? 'Reports' : 'Settings'}
-              </div>
+              {isMobile
+                ? <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
+                : <>
+                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{agencyName}</div>
+                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
+                  </>
+              }
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <button onClick={() => setDark(d => !d)} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-                {dark ? 'Light' : 'Dark'}
-              </button>
-              {view === 'talent' && talentTab === 'roster' && (
+              {!isMobile && (
+                <button onClick={() => setDark(d => !d)} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                  {dark ? 'Light' : 'Dark'}
+                </button>
+              )}
+              {view === 'talent' && talentTab === 'roster' && !isMobile && (
                 <button onClick={handleExport} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
                   {exporting ? 'Exporting...' : 'Export PDF'}
                 </button>
               )}
               {view === 'talent' && talentTab === 'roster' && (
-                <button onClick={() => setShowForm(true)} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
+                <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
+              )}
+              {isMobile && (
+                <button onClick={() => setView('settings')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
+                  {avatarUrl
+                    ? <img src={avatarUrl} alt='avatar' style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}` }} />
+                    : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif' }}>
+                        {user?.email?.charAt(0).toUpperCase()}
+                      </div>
+                  }
+                </button>
               )}
             </div>
           </div>
@@ -185,7 +219,7 @@ function App() {
             <div style={{ display: 'flex', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
               {[['roster', 'Roster'], ['inquiries', 'Inquiries']].map(([key, label]) => (
                 <button key={key} onClick={() => setTalentTab(key)} style={{
-                  padding: '10px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
+                  padding: isMobile ? '8px 16px' : '10px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
                   background: 'none', border: 'none',
                   borderBottom: talentTab === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
                   color: talentTab === key ? text : muted, cursor: 'pointer'
@@ -196,8 +230,8 @@ function App() {
 
           <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
 
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} />}
+          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '60px' : '0' }}>
+            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}
@@ -206,6 +240,24 @@ function App() {
           </div>
         </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      {isMobile && (
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
+          {navItems.map(item => (
+            <button key={item.key} onClick={() => setView(item.key)} style={{
+              flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'
+            }}>
+              <span style={{ fontSize: '18px', lineHeight: 1 }}>{item.icon}</span>
+              <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: view === item.key ? '#5b7c99' : muted }}>
+                {item.label}
+              </span>
+              {view === item.key && <div style={{ width: '20px', height: '1.5px', background: '#5b7c99', borderRadius: '1px' }} />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

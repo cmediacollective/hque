@@ -7,7 +7,7 @@ import CampaignDetail from './CampaignDetail'
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
 
-export default function TalentView({ dark = true, orgId }) {
+export default function TalentView({ dark = true, orgId, isMobile = false }) {
   const [creators, setCreators] = useState([])
   const [view, setView] = useState('grid')
   const [typeFilter, setTypeFilter] = useState('All Types')
@@ -45,31 +45,20 @@ export default function TalentView({ dark = true, orgId }) {
   }
 
   async function archiveCreator(id, restore = false) {
-    const { error } = await supabase
-      .from('creators')
-      .update({ status: restore ? 'active' : 'archived' })
-      .eq('id', id)
+    const { error } = await supabase.from('creators').update({ status: restore ? 'active' : 'archived' }).eq('id', id)
     if (error) console.error(error)
     else { setArchiving(null); fetchCreators() }
   }
 
   const filtered = (typeFilter === 'All Types'
     ? creators
-    : creators.filter(c =>
-        c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter))
-      )
+    : creators.filter(c => c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter)))
   )
-  .filter(c => {
-    if (!nicheFilter) return true
-    return Array.isArray(c.niches) && c.niches.includes(nicheFilter)
-  })
+  .filter(c => !nicheFilter || (Array.isArray(c.niches) && c.niches.includes(nicheFilter)))
   .filter(c => {
     if (!search.trim()) return true
     const q = search.toLowerCase()
-    return (
-      c.name?.toLowerCase().includes(q) ||
-      c.handles?.instagram?.toLowerCase().includes(q)
-    )
+    return c.name?.toLowerCase().includes(q) || c.handles?.instagram?.toLowerCase().includes(q)
   })
   .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
 
@@ -102,6 +91,8 @@ export default function TalentView({ dark = true, orgId }) {
     return c.type || 'Influencer'
   }
 
+  const cols = isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))'
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
@@ -126,15 +117,13 @@ export default function TalentView({ dark = true, orgId }) {
       )}
 
       {archiving && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, padding: '32px', width: '380px', borderRadius: '2px', textAlign: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, padding: '32px', width: '100%', maxWidth: '380px', borderRadius: '2px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
               {showArchived ? 'Restore creator?' : 'Archive creator?'}
             </div>
             <div style={{ fontSize: '12px', color: muted, marginBottom: '24px' }}>
-              {showArchived
-                ? `${archiving.name} will be moved back to your active roster.`
-                : `${archiving.name} will be hidden from your roster but can be restored anytime.`}
+              {showArchived ? `${archiving.name} will be moved back to your active roster.` : `${archiving.name} will be hidden from your roster but can be restored anytime.`}
             </div>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
               <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
@@ -146,58 +135,38 @@ export default function TalentView({ dark = true, orgId }) {
         </div>
       )}
 
-      <div style={{ padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
+      <div style={{ padding: isMobile ? '8px 12px' : '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
         {!showArchived && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
             {TYPES.map(t => chip(t, typeFilter === t, () => setTypeFilter(t)))}
             <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 2px', flexShrink: 0 }} />
             {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-              <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
-                {filtered.length} {showArchived ? 'archived' : 'creators'}
-              </span>
-              <button
-                onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }}
-                style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border2}`, borderRadius: '1px', cursor: 'pointer', color: muted, background: 'none', whiteSpace: 'nowrap' }}>
-                Archived
-              </button>
-              <div style={{ display: 'flex', border: `0.5px solid ${border2}`, borderRadius: '2px', overflow: 'hidden' }}>
-                {['grid', 'list'].map(v => (
-                  <button key={v} onClick={() => setView(v)} style={{
-                    padding: '5px 12px', fontSize: '9px',
-                    background: view === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none',
-                    border: 'none', color: view === v ? text : muted, cursor: 'pointer',
-                    borderRight: v === 'grid' ? `0.5px solid ${border2}` : 'none', letterSpacing: '0.1em'
-                  }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
-                ))}
+            {!isMobile && (
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{filtered.length} creators</span>
+                <button onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border2}`, borderRadius: '1px', cursor: 'pointer', color: muted, background: 'none', whiteSpace: 'nowrap' }}>Archived</button>
+                <div style={{ display: 'flex', border: `0.5px solid ${border2}`, borderRadius: '2px', overflow: 'hidden' }}>
+                  {['grid', 'list'].map(v => (
+                    <button key={v} onClick={() => setView(v)} style={{ padding: '5px 12px', fontSize: '9px', background: view === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: 'none', color: view === v ? text : muted, cursor: 'pointer', borderRight: v === 'grid' ? `0.5px solid ${border2}` : 'none', letterSpacing: '0.1em' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
         {showArchived && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em' }}>{filtered.length} archived</span>
-            <button
-              onClick={() => { setShowArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }}
-              style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>
-              &lt;- Active Roster
-            </button>
+            <button onClick={() => { setShowArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>&lt;- Active Roster</button>
           </div>
         )}
       </div>
 
-      <div style={{ padding: '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder='Search by name or @handle...'
-          style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
-        />
+      <div style={{ padding: isMobile ? '6px 12px' : '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search by name or @handle...' style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
       </div>
 
-      {loading && (
-        <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>
-      )}
+      {loading && <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>}
 
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
@@ -210,49 +179,46 @@ export default function TalentView({ dark = true, orgId }) {
         </div>
       )}
 
-      {!loading && view === 'grid' && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto' }}>
+      {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '1px', background: gridBg, flex: 1, overflowY: 'auto' }}>
           {filtered.map(c => (
             <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: '18px', cursor: 'pointer', position: 'relative' }}
+              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '18px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
 
-              {hovering === c.id && (
-                <button
-                  onClick={e => { e.stopPropagation(); setArchiving(c) }}
-                  style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: `0.5px solid ${border2}`, color: muted, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
+              {hovering === c.id && !isMobile && (
+                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: `0.5px solid ${border2}`, color: muted, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
                   {showArchived ? 'Restore' : 'Archive'}
                 </button>
               )}
 
-              <div style={{ marginBottom: '14px' }}>
-                <Avatar creator={c} size={80} square={true} />
+              <div style={{ marginBottom: isMobile ? '10px' : '14px' }}>
+                <Avatar creator={c} size={isMobile ? 60 : 80} square={true} />
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '5px' }}>{displayType(c)}</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-              <div style={{ fontSize: '11px', color: muted, marginBottom: '10px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
-              <div style={{ fontSize: '10px', color: subtle, marginBottom: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>
-              <div style={{ display: 'flex', paddingTop: '12px', borderTop: `0.5px solid ${border}` }}>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '13px' : '15px', color: text, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+              <div style={{ fontSize: '11px', color: muted, marginBottom: isMobile ? '6px' : '10px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
+              {!isMobile && <div style={{ fontSize: '10px', color: subtle, marginBottom: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>}
+              <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}` }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.ig_followers?.toLocaleString() || '—'}</div>
+                  <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{c.ig_followers?.toLocaleString() || '—'}</div>
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
-                  <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
-                </div>
+                {!isMobile && (
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
+                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
+                  </div>
+                )}
               </div>
-              {c.rates?.feed && (
-                <div style={{ fontSize: '10px', color: muted, marginTop: '10px' }}>From <span style={{ color: '#5b7c99', fontWeight: 500 }}>${c.rates.feed.toLocaleString()}</span></div>
-              )}
             </div>
           ))}
         </div>
       )}
 
-      {!loading && view === 'list' && filtered.length > 0 && (
+      {!loading && view === 'list' && !isMobile && filtered.length > 0 && (
         <div style={{ flex: 1, overflowY: 'auto', background: bg }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 80px 80px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg }}>
             {['Creator', 'Type', 'Followers', 'Eng Rate', 'Rate From', ''].map(h => (
@@ -276,9 +242,7 @@ export default function TalentView({ dark = true, orgId }) {
               <div style={{ fontSize: '13px', color: text }}>{c.ig_followers?.toLocaleString() || '—'}</div>
               <div style={{ fontSize: '13px', color: muted }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
               <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>
-              <button
-                onClick={e => { e.stopPropagation(); setArchiving(c) }}
-                style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
+              <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
                 {showArchived ? 'Restore' : 'Archive'}
               </button>
             </div>
