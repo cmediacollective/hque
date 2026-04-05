@@ -59,7 +59,7 @@ export default function BillingView({ dark = true, orgId, user }) {
   }
 
   return (
-    <div style={{ padding: '32px 40px', maxWidth: '800px' }}>
+    <div style={{ padding: '32px 40px', overflowY: 'auto', flex: 1 }}>
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Billing</div>
       <div style={{ fontSize: '12px', color: muted, marginBottom: '32px', lineHeight: 1.7 }}>
         Choose a plan to unlock full access. All plans include a 14-day free trial.
@@ -67,25 +67,27 @@ export default function BillingView({ dark = true, orgId, user }) {
 
       {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
         {PLANS.map(plan => (
           <div key={plan.key} style={{
-            background: card, border: `0.5px solid ${plan.recommended ? '#5b7c99' : border}`,
-            borderRadius: '2px', padding: '24px', display: 'flex', flexDirection: 'column', position: 'relative'
+            background: card,
+            border: `0.5px solid ${plan.recommended ? '#5b7c99' : border}`,
+            borderRadius: '2px', padding: '28px 24px',
+            display: 'flex', flexDirection: 'column', position: 'relative'
           }}>
             {plan.recommended && (
               <div style={{ position: 'absolute', top: '-1px', right: '16px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: '0 0 2px 2px' }}>
                 Most Popular
               </div>
             )}
-            <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>{plan.name}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', marginBottom: '20px' }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: text }}>{plan.price}</span>
+            <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>{plan.name}</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', marginBottom: '24px' }}>
+              <span style={{ fontFamily: 'Georgia, serif', fontSize: '32px', color: text }}>{plan.price}</span>
               <span style={{ fontSize: '11px', color: muted }}>{plan.period}</span>
             </div>
-            <div style={{ flex: 1, marginBottom: '20px' }}>
+            <div style={{ flex: 1, marginBottom: '24px', borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
               {plan.features.map(f => (
-                <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '10px' }}>
                   <span style={{ color: '#5b7c99', fontSize: '12px', marginTop: '1px', flexShrink: 0 }}>✓</span>
                   <span style={{ fontSize: '12px', color: muted, lineHeight: 1.5 }}>{f}</span>
                 </div>
@@ -95,21 +97,21 @@ export default function BillingView({ dark = true, orgId, user }) {
               onClick={() => checkout(plan)}
               disabled={loading === plan.key}
               style={{
-                width: '100%', padding: '10px', fontSize: '9px', letterSpacing: '0.18em',
-                textTransform: 'uppercase', background: plan.recommended ? '#5b7c99' : 'none',
+                width: '100%', padding: '11px', fontSize: '9px', letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                background: plan.recommended ? '#5b7c99' : 'none',
                 border: `0.5px solid ${plan.recommended ? '#5b7c99' : border2}`,
                 color: plan.recommended ? '#fff' : muted,
                 cursor: 'pointer', borderRadius: '1px', opacity: loading === plan.key ? 0.7 : 1
               }}>
-              {loading === plan.key ? 'Loading...' : plan.key === 'appsumo' ? 'Buy Lifetime' : 'Get Started'}
+              {loading === plan.key ? 'Loading...' : 'Get Started'}
             </button>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: '24px', fontSize: '11px', color: subtle, lineHeight: 1.7 }}>
-        Payments are processed securely by Stripe. You can cancel anytime from your billing portal.
-        Questions? <a href='mailto:support@hque.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@hque.com</a>
+      <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.7 }}>
+        Payments processed securely by Stripe. Cancel anytime. Questions? <a href='mailto:support@hque.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@hque.com</a>
       </div>
     </div>
   )
