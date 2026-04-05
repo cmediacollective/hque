@@ -168,6 +168,9 @@ function App() {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
                   <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
+              )}
+              {isMobile && (
+                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "☀" : "☾"}</button>
                 </div>
               </div>
             </div>
@@ -196,6 +199,9 @@ function App() {
               )}
               {isMobile && (
                 <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
+              )}
+              {isMobile && (
+                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "☀" : "☾"}</button>
               )}
             </div>
           </div>
