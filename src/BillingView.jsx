@@ -29,13 +29,13 @@ const PLANS = [
 ]
 
 export default function BillingView({ dark = true, orgId, user }) {
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
   const border2 = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
+  const isMobile = window.innerWidth < 768
 
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
@@ -59,7 +59,7 @@ export default function BillingView({ dark = true, orgId, user }) {
   }
 
   return (
-    <div style={{ padding: '32px 40px', overflowY: 'auto', flex: 1 }}>
+    <div style={{ padding: '32px', overflowY: 'auto', flex: 1 }}>
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Billing</div>
       <div style={{ fontSize: '12px', color: muted, marginBottom: '32px', lineHeight: 1.7 }}>
         Choose a plan to unlock full access. All plans include a 14-day free trial.
@@ -67,29 +67,29 @@ export default function BillingView({ dark = true, orgId, user }) {
 
       {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {PLANS.map(plan => (
           <div key={plan.key} style={{
             background: card,
             border: `0.5px solid ${plan.recommended ? '#5b7c99' : border}`,
-            borderRadius: '2px', padding: '28px 24px',
+            borderRadius: '2px', padding: '32px 28px',
             display: 'flex', flexDirection: 'column', position: 'relative'
           }}>
             {plan.recommended && (
-              <div style={{ position: 'absolute', top: '-1px', right: '16px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 8px', borderRadius: '0 0 2px 2px' }}>
+              <div style={{ position: 'absolute', top: '-1px', right: '20px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '0 0 2px 2px' }}>
                 Most Popular
               </div>
             )}
             <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>{plan.name}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px', marginBottom: '24px' }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: '32px', color: text }}>{plan.price}</span>
-              <span style={{ fontSize: '11px', color: muted }}>{plan.period}</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', marginBottom: '28px' }}>
+              <span style={{ fontFamily: 'Georgia, serif', fontSize: '36px', color: text }}>{plan.price}</span>
+              <span style={{ fontSize: '12px', color: muted }}>{plan.period}</span>
             </div>
-            <div style={{ flex: 1, marginBottom: '24px', borderTop: `0.5px solid ${border}`, paddingTop: '16px' }}>
+            <div style={{ flex: 1, marginBottom: '28px', borderTop: `0.5px solid ${border}`, paddingTop: '20px' }}>
               {plan.features.map(f => (
-                <div key={f} style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '10px' }}>
-                  <span style={{ color: '#5b7c99', fontSize: '12px', marginTop: '1px', flexShrink: 0 }}>✓</span>
-                  <span style={{ fontSize: '12px', color: muted, lineHeight: 1.5 }}>{f}</span>
+                <div key={f} style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '12px' }}>
+                  <span style={{ color: '#5b7c99', fontSize: '13px', marginTop: '1px', flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: '13px', color: muted, lineHeight: 1.5 }}>{f}</span>
                 </div>
               ))}
             </div>
@@ -97,7 +97,7 @@ export default function BillingView({ dark = true, orgId, user }) {
               onClick={() => checkout(plan)}
               disabled={loading === plan.key}
               style={{
-                width: '100%', padding: '11px', fontSize: '9px', letterSpacing: '0.18em',
+                width: '100%', padding: '13px', fontSize: '9px', letterSpacing: '0.18em',
                 textTransform: 'uppercase',
                 background: plan.recommended ? '#5b7c99' : 'none',
                 border: `0.5px solid ${plan.recommended ? '#5b7c99' : border2}`,
