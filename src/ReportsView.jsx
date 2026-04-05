@@ -85,7 +85,7 @@ export default function ReportsView({ dark = true, orgId }) {
             <div key={c.id}>
               <div
                 onClick={() => setSelectedCampaign(selectedCampaign === c.id ? null : c.id)}
-                style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', background: card, cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px 20px', background: card, cursor: 'pointer', flexWrap: 'wrap' }}
                 onMouseEnter={e => e.currentTarget.style.background = dark ? '#282828' : '#F5F2EC'}
                 onMouseLeave={e => e.currentTarget.style.background = card}>
 
@@ -99,7 +99,7 @@ export default function ReportsView({ dark = true, orgId }) {
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flexShrink: 0 }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {c.budget != null && (
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '14px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</div>
