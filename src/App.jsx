@@ -119,11 +119,11 @@ function App() {
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
 
   const navItems = [
-    { key: 'talent', label: 'Talent', icon: '👤' },
-    { key: 'campaigns', label: 'Campaigns', icon: '📋' },
-    { key: 'workspace', label: 'Work', icon: '⬜' },
-    { key: 'reports', label: 'Reports', icon: '📊' },
-    { key: 'settings', label: 'Settings', icon: '⚙️' },
+    { key: 'talent', label: 'Talent' },
+    { key: 'campaigns', label: 'Campaigns' },
+    { key: 'workspace', label: 'Work' },
+    { key: 'reports', label: 'Reports' },
+    { key: 'settings', label: 'Settings' },
   ]
 
   const viewLabel = navItems.find(n => n.key === view)?.label || 'HQue'
@@ -168,9 +168,6 @@ function App() {
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
                   <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
-              )}
-              {isMobile && (
-                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "Light" : "Dark"}</button>
                 </div>
               </div>
             </div>
@@ -184,11 +181,9 @@ function App() {
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {!isMobile && (
-                <button onClick={() => setDark(d => !d)} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-                  {dark ? 'Light' : 'Dark'}
-                </button>
-              )}
+              <button onClick={() => setDark(d => !d)} style={{ padding: isMobile ? '5px 10px' : '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                {dark ? 'Light' : 'Dark'}
+              </button>
               {view === 'talent' && talentTab === 'roster' && !isMobile && (
                 <button onClick={handleExport} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
                   {exporting ? 'Exporting...' : 'Export PDF'}
@@ -198,10 +193,7 @@ function App() {
                 <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
               )}
               {isMobile && (
-                <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
-              )}
-              {isMobile && (
-                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "Light" : "Dark"}</button>
+                <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Out</button>
               )}
             </div>
           </div>
@@ -239,7 +231,9 @@ function App() {
               flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'
             }}>
-              <span style={{ fontSize: '16px', lineHeight: 1, opacity: view === item.key ? 1 : 0.5 }}>{ item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'reports' ? '▮' : '◎' }</span>
+              <span style={{ fontSize: '16px', lineHeight: 1, opacity: view === item.key ? 1 : 0.5 }}>
+                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'reports' ? '▮' : '◎'}
+              </span>
               <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: view === item.key ? '#5b7c99' : muted }}>
                 {item.label}
               </span>
