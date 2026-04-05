@@ -121,7 +121,7 @@ function App() {
   const navItems = [
     { key: 'talent', label: 'Talent', icon: '👤' },
     { key: 'campaigns', label: 'Campaigns', icon: '📋' },
-    { key: 'workspace', label: 'Workspace', icon: '⬜' },
+    { key: 'workspace', label: 'Work', icon: '⬜' },
     { key: 'reports', label: 'Reports', icon: '📊' },
     { key: 'settings', label: 'Settings', icon: '⚙️' },
   ]
@@ -129,12 +129,11 @@ function App() {
   const viewLabel = navItems.find(n => n.key === view)?.label || 'HQue'
 
   return (
-    <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
 
-      <div style={{ display: 'flex', height: '100vh' }}>
+      <div style={{ display: 'flex', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100vh' : 'auto' }}>
 
-        {/* Desktop sidebar */}
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
@@ -175,18 +174,11 @@ function App() {
           </nav>
         )}
 
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bg }}>
-
-          {/* Header */}
-          <div style={{ padding: isMobile ? '12px 16px' : '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: isMobile ? 'center' : 'flex-end', justifyContent: 'space-between' }}>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isMobile ? 'auto' : 'hidden', background: bg, minWidth: 0 }}>
+          <div style={{ padding: isMobile ? '12px 16px' : '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              {isMobile
-                ? <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
-                : <>
-                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{agencyName}</div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
-                  </>
-              }
+              {!isMobile && <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{agencyName}</div>}
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {!isMobile && (
@@ -203,14 +195,7 @@ function App() {
                 <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
               )}
               {isMobile && (
-                <button onClick={() => setView('settings')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-                  {avatarUrl
-                    ? <img src={avatarUrl} alt='avatar' style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border}` }} />
-                    : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif' }}>
-                        {user?.email?.charAt(0).toUpperCase()}
-                      </div>
-                  }
-                </button>
+                <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
               )}
             </div>
           </div>
@@ -230,7 +215,7 @@ function App() {
 
           <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
 
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '60px' : '0' }}>
+          <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
             {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
@@ -241,7 +226,6 @@ function App() {
         </main>
       </div>
 
-      {/* Mobile bottom nav */}
       {isMobile && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
           {navItems.map(item => (
