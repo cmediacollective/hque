@@ -25,14 +25,6 @@ const PLANS = [
     period: '/month',
     priceId: import.meta.env.VITE_STRIPE_PRICE_AGENCY,
     features: ['Unlimited talent', 'Unlimited team members', 'Everything in Pro', 'Custom onboarding', 'Dedicated support']
-  },
-  {
-    key: 'appsumo',
-    name: 'AppSumo Lifetime',
-    price: '$159',
-    period: ' one-time',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_APPSUMO,
-    features: ['Pro-level access', 'Lifetime updates', 'No monthly fees', 'Limited availability']
   }
 ]
 
