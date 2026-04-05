@@ -96,7 +96,7 @@ export default function ReportsView({ dark = true, orgId }) {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '3px' }}>{c.brand || 'No brand'}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>{c.name}</div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
