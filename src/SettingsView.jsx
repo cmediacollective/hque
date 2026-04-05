@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import BillingView from './BillingView'
 import { supabase } from './supabase'
+import BillingView from './BillingView'
 
 export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -186,7 +186,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         ))}
       </div>
 
-      <div style={{ flex: 1, padding: '32px 40px', maxWidth: '600px' }}>
+      <div style={{ flex: 1, padding: '0', maxWidth: 'none', overflow: 'hidden' }}>
 
         {activeTab === 'profile' && (
           <div>
