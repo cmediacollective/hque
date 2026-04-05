@@ -6,6 +6,7 @@ import CampaignDetail from './CampaignDetail'
 const STATUSES = ['All', 'Pitch', 'Active', 'Completed']
 
 export default function CampaignView({ dark = true, orgId }) {
+  const isMobile = window.innerWidth < 768;
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#1A1A1A' : '#FFFFFF'
   const cardHover = dark ? '#222' : '#F0EDE8'
@@ -103,7 +104,7 @@ export default function CampaignView({ dark = true, orgId }) {
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
               {showArchived ? 'Restore campaign?' : 'Archive campaign?'}
             </div>
-            <div style={{ fontSize: '12px', color: muted, marginBottom: '24px' }}>
+            <div style={{ fontSize: '11px', color: muted, lineHeight: 1.4, marginBottom: '24px' }}>
               {showArchived
                 ? `"${archiving.name}" will be moved back to your active campaigns.`
                 : `"${archiving.name}" will be hidden but can be restored anytime.`}
@@ -159,7 +160,7 @@ export default function CampaignView({ dark = true, orgId }) {
         <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start' }}>
           {filtered.map(c => (
             <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: '24px', cursor: 'pointer', position: 'relative' }}
+              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '24px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
