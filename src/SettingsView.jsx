@@ -14,7 +14,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const subtle = dark ? '#777' : '#888'
 
   const [activeTab, setActiveTab] = useState('profile')
-  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_phone: '', agency_website: '', agency_logo_url: '' })
+  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
@@ -47,7 +47,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (data) {
-      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_phone: data.agency_phone || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '' })
+      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '' })
       setSenderAccounts(data.sender_accounts || [])
     }
   }
@@ -207,7 +207,6 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             {sectionTitle('Agency Info')}
             {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective' }))}
             {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email' }))}
-            {field('Phone', inp({ value: agencyForm.agency_phone, onChange: e => setAgencyForm(f => ({ ...f, agency_phone: e.target.value })), placeholder: '+1 (000) 000-0000' }))}
             {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://yoursite.com' }))}
             {field('Logo URL', inp({ value: agencyForm.agency_logo_url, onChange: e => setAgencyForm(f => ({ ...f, agency_logo_url: e.target.value })), placeholder: 'https://...' }))}
             {agencyForm.agency_logo_url && (
