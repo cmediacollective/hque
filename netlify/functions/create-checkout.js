@@ -7,9 +7,10 @@ exports.handler = async (event) => {
   const { priceId, orgId, email } = JSON.parse(event.body)
 
   try {
+    const isOneTime = priceId === process.env.VITE_STRIPE_PRICE_APPSUMO
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      mode: priceId === process.env.VITE_STRIPE_PRICE_APPSUMO ? 'payment' : 'subscription',
+      mode: isOneTime ? 'payment' : 'subscription',
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: email,
       allow_promotion_codes: true,
