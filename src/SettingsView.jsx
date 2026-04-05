@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import BillingView from './BillingView'
 import { supabase } from './supabase'
 
 export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange }) {
@@ -330,14 +331,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         )}
 
         {activeTab === 'billing' && (
-          <div>
-            {sectionTitle('Billing')}
-            <div style={{ padding: '32px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>💳</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Billing coming soon</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, maxWidth: '320px', margin: '0 auto' }}>Stripe integration is on the roadmap. Once connected, you'll be able to manage your subscription and payment method here.</div>
-            </div>
-          </div>
+          <BillingView dark={dark} orgId={orgId} user={user} />
         )}
 
       </div>
