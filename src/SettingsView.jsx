@@ -159,9 +159,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   ]
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: bg, display: 'flex' }}>
+    <div style={{ flex: 1, overflowY: 'auto', background: bg, display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
 
-      <div style={{ width: '180px', borderRight: `0.5px solid ${border}`, padding: '24px 0', flexShrink: 0 }}>
+      <div style={{ width: window.innerWidth < 768 ? '100%' : '180px', borderRight: window.innerWidth < 768 ? 'none' : `0.5px solid ${border}`, borderBottom: window.innerWidth < 768 ? `0.5px solid ${border}` : 'none', padding: '12px 0', flexShrink: 0, display: 'flex', flexDirection: window.innerWidth < 768 ? 'row' : 'column', overflowX: window.innerWidth < 768 ? 'auto' : 'visible' }}>
         {tabs.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
             width: '100%', textAlign: 'left', padding: '9px 20px',

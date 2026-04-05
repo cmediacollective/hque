@@ -60,9 +60,9 @@ export default function ReportsView({ dark = true, orgId }) {
   )
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', background: bg, padding: '28px' }}>
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: bg, padding: '28px' }}>
 
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         {stat('Total Budget', `$${totalBudget.toLocaleString()}`)}
         {stat('Campaigns', campaigns.length, `${activeCampaigns} active · ${completedCampaigns} completed · ${pitchCampaigns} pitch`)}
         {stat('Payments', `${totalPaid} paid`, `${totalPending} pending`)}
@@ -123,7 +123,7 @@ export default function ReportsView({ dark = true, orgId }) {
 
               {selectedCampaign === c.id && campLinks.length > 0 && (
                 <div style={{ background: dark ? '#1A1A1A' : '#F8F6F2', borderTop: `0.5px solid ${border}` }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', padding: '8px 20px', borderBottom: `0.5px solid ${border}` }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 2fr) repeat(5, minmax(80px, 1fr))', padding: '8px 20px', borderBottom: `0.5px solid ${border}` }}>
                     {['Creator', 'Role', 'Views', 'Likes', 'Reach', 'Payment'].map(h => (
                       <div key={h} style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>{h}</div>
                     ))}
@@ -132,7 +132,7 @@ export default function ReportsView({ dark = true, orgId }) {
                     const creator = getCreator(link.creator_id)
                     if (!creator) return null
                     return (
-                      <div key={link.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr', padding: '12px 20px', borderBottom: `0.5px solid ${border}`, alignItems: 'center' }}>
+                      <div key={link.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 2fr) repeat(5, minmax(80px, 1fr))', padding: '12px 20px', borderBottom: `0.5px solid ${border}`, alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           {creator.photo_url
                             ? <img src={creator.photo_url} alt={creator.name} style={{ width: '28px', height: '28px', borderRadius: '2px', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
