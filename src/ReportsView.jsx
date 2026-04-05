@@ -85,7 +85,7 @@ export default function ReportsView({ dark = true, orgId }) {
             <div key={c.id}>
               <div
                 onClick={() => setSelectedCampaign(selectedCampaign === c.id ? null : c.id)}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px 20px', background: card, cursor: 'pointer', flexWrap: 'wrap' }}
+                style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '16px 20px', background: card, cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = dark ? '#282828' : '#F5F2EC'}
                 onMouseLeave={e => e.currentTarget.style.background = card}>
 
@@ -96,10 +96,10 @@ export default function ReportsView({ dark = true, orgId }) {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '3px' }}>{c.brand || 'No brand'}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>{c.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', paddingLeft: '48px' }}>
                   {c.budget != null && (
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '14px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</div>
