@@ -170,7 +170,7 @@ function App() {
                   <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
               )}
               {isMobile && (
-                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "☀" : "☾"}</button>
+                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "Light" : "Dark"}</button>
                 </div>
               </div>
             </div>
@@ -201,7 +201,7 @@ function App() {
                 <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
               )}
               {isMobile && (
-                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "☀" : "☾"}</button>
+                <button onClick={() => setDark(d => !d)} style={{ background: "none", border: `0.5px solid ${border}`, color: muted, fontSize: "14px", padding: "5px 8px", cursor: "pointer", borderRadius: "1px" }}>{dark ? "Light" : "Dark"}</button>
               )}
             </div>
           </div>
