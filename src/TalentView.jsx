@@ -5,7 +5,7 @@ import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books']
+const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books', 'Specialty']
 
 export default function TalentView({ dark = true, orgId, isMobile = false }) {
   const [creators, setCreators] = useState([])
