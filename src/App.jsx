@@ -12,6 +12,8 @@ import SignUp from './SignUp'
 import TrialBanner from './TrialBanner'
 import TalentInquiry from './TalentInquiry'
 import InquiriesView from './InquiriesView'
+import UpgradeWall from './UpgradeWall'
+import LandingPage from './LandingPage'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -27,6 +29,7 @@ function App() {
   const [orgId, setOrgId] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -115,8 +118,10 @@ function App() {
   )
 
   if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
-  if (!user) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} />
+  if (!user && showLogin) return <Login onLogin={setUser} onShowSignUp={() => { setShowLogin(false); setShowSignUp(true) }} />
+  if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
+  if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
     { key: 'talent', label: 'Talent' },
@@ -193,7 +198,7 @@ function App() {
                 <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
               )}
               {isMobile && (
-                <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Out</button>
+                <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
               )}
             </div>
           </div>
