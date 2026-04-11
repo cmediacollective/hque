@@ -25,6 +25,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [dark, setDark] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const [agencyName, setAgencyName] = useState('HQue')
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
@@ -89,6 +90,44 @@ function App() {
     await supabase.auth.signOut()
     setUser(null)
     setOrgId(null)
+  }
+
+  async function handleCSVExport() {
+    if (!orgId) return
+    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
+    if (!creators || creators.length === 0) return
+    const headers = ['Name', 'Type', 'Niches', 'Instagram', 'TikTok', 'YouTube', 'IG Followers', 'TikTok Followers', 'YT Subscribers', 'Engagement Rate', 'Feed Rate', 'Reel Rate', 'Story Rate', 'TikTok Rate', 'YouTube Rate', 'Location', 'Tier', 'Contact Email', 'Manager', 'Manager Email']
+    const rows = creators.map(cr => [
+      cr.name || '',
+      (Array.isArray(cr.types) ? cr.types.join(', ') : cr.type) || '',
+      (Array.isArray(cr.niches) ? cr.niches.join(', ') : '') || '',
+      cr.handles?.instagram || '',
+      cr.handles?.tiktok || '',
+      cr.handles?.youtube || '',
+      cr.ig_followers || '',
+      cr.tiktok_followers || '',
+      cr.yt_subscribers || '',
+      cr.engagement_rate || '',
+      cr.rates?.feed || '',
+      cr.rates?.reel || '',
+      cr.rates?.story || '',
+      cr.rates?.tiktok || '',
+      cr.rates?.youtube || '',
+      cr.location || '',
+      cr.tier || '',
+      cr.contact_email || '',
+      cr.manager_name || '',
+      cr.manager_email || '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`))
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `talent-roster-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    setShowExportMenu(false)
   }
 
   async function handleExport() {
@@ -195,9 +234,17 @@ function App() {
                 {dark ? 'Light' : 'Dark'}
               </button>
               {view === 'talent' && talentTab === 'roster' && !isMobile && (
-                <button onClick={handleExport} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
-                  {exporting ? 'Exporting...' : 'Export PDF'}
-                </button>
+                <div style={{ position: 'relative' }}>
+                  <button onClick={() => setShowExportMenu(m => !m)} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
+                    {exporting ? 'Exporting...' : 'Export ▾'}
+                  </button>
+                  {showExportMenu && (
+                    <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', background: dark ? '#1E1E1E' : '#fff', border: `0.5px solid ${border}`, borderRadius: '2px', zIndex: 50, minWidth: '130px', overflow: 'hidden' }}>
+                      <button onClick={() => { handleExport(); setShowExportMenu(false) }} style={{ width: '100%', padding: '10px 16px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: 'none', color: muted, cursor: 'pointer', textAlign: 'left', borderBottom: `0.5px solid ${border}` }}>Export PDF</button>
+                      <button onClick={handleCSVExport} style={{ width: '100%', padding: '10px 16px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: 'none', color: muted, cursor: 'pointer', textAlign: 'left' }}>Export CSV</button>
+                    </div>
+                  )}
+                </div>
               )}
               {view === 'talent' && talentTab === 'roster' && (
                 <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
