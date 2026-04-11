@@ -101,13 +101,19 @@ function TalentEditor({ link, onSave, onCancel }) {
   )
 }
 
-export default function CampaignDetail({ campaign, onClose, onSaved, dark = true }) {
+export default function CampaignDetail({ campaign: initialCampaign, onClose, onSaved, dark = true }) {
+  const [campaign, setCampaign] = useState(initialCampaign)
   const [editing, setEditing] = useState(false)
   const [creatorLinks, setCreatorLinks] = useState([])
   const [preview, setPreview] = useState(null)
   const [editingLink, setEditingLink] = useState(null)
 
-  useEffect(() => { fetchCreators() }, [campaign.id])
+  useEffect(() => { fetchCampaign(); fetchCreators() }, [initialCampaign.id])
+
+  async function fetchCampaign() {
+    const { data } = await supabase.from('campaigns').select('*').eq('id', initialCampaign.id).single()
+    if (data) setCampaign(data)
+  }
 
   async function fetchCreators() {
     const { data: links } = await supabase
