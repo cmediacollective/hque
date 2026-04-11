@@ -210,21 +210,23 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: window.innerWidth < 768 ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: scrolled ? 'rgba(17,17,17,0.95)' : 'transparent',
         borderBottom: scrolled ? '0.5px solid #222' : 'none',
         transition: 'all 0.3s ease'
       }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '100px', height: 'auto' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <a href="#features" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Features</a>
-          <a href="#pricing" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Pricing</a>
-          <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
-          <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {window.innerWidth >= 768 && <>
+            <a href="#features" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Features</a>
+            <a href="#pricing" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Pricing</a>
+            <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
+          </>}
+          <button onClick={onGetStarted} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
         </div>
       </nav>
 
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '120px 48px 80px', textAlign: 'center', position: 'relative' }}>
+      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: window.innerWidth < 768 ? '100px 20px 60px' : '120px 48px 80px', textAlign: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, rgba(91,124,153,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.08, color: '#F0ECE6', margin: '0 0 28px', maxWidth: '900px' }}>
           Run your roster.<br />
@@ -242,7 +244,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ marginTop: '16px', fontSize: '10px', color: '#444', letterSpacing: '0.1em' }}>14-day free trial · No credit card required</div>
       </section>
 
-      <section style={{ padding: '0 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <section style={{ padding: window.innerWidth < 768 ? '0 16px 80px' : '0 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <div style={{ width: '100%', maxWidth: '1000px' }}>
           <div style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '8px 8px 0 0', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ display: 'flex', gap: '6px' }}>
@@ -273,9 +275,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </div>
       </section>
 
-      <section id="features" style={{ padding: '80px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
+      <section id="features" style={{ padding: window.innerWidth < 768 ? '60px 20px 80px' : '80px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '48px', textAlign: 'center' }}>What HQue does</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '48px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)', gap: window.innerWidth < 768 ? '40px' : '48px' }}>
           {FEATURES.map(f => (
             <div key={f.num}>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#444', marginBottom: '16px' }}>{f.num}</div>
@@ -288,10 +290,10 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       <div style={{ height: '0.5px', background: 'linear-gradient(to right, transparent, #2A2A2A, transparent)', maxWidth: '800px', margin: '0 auto' }} />
 
-      <section id="pricing" style={{ padding: '100px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
+      <section id="pricing" style={{ padding: window.innerWidth < 768 ? '60px 20px 80px' : '100px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px', textAlign: 'center' }}>Pricing</div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '36px', color: '#F0ECE6', marginBottom: '48px', textAlign: 'center', fontWeight: 'normal' }}>Simple, transparent pricing.</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)', gap: '16px' }}>
           {PLANS.map(plan => (
             <div key={plan.name} style={{ background: plan.highlight ? '#1E2428' : '#141414', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#222'}`, borderRadius: '2px', padding: '36px 28px', position: 'relative' }}>
               {plan.highlight && <div style={{ position: 'absolute', top: '-1px', right: '20px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '0 0 2px 2px' }}>Most Popular</div>}
@@ -315,7 +317,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#444' }}>14-day free trial on all plans · No credit card required</div>
       </section>
 
-      <section style={{ padding: '80px 48px 120px', textAlign: 'center', position: 'relative' }}>
+      <section style={{ padding: window.innerWidth < 768 ? '60px 20px 80px' : '80px 48px 120px', textAlign: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2 }}>
@@ -326,7 +328,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </button>
       </section>
 
-      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: window.innerWidth < 768 ? '24px 20px' : '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '80px', opacity: 0.25 }} />
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
           <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#666', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
