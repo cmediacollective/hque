@@ -68,10 +68,8 @@ const PLANS = [
 
 function BrandLogo({ brand, color, size = 44 }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: '2px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-      <div style={{ width: '100%', height: '100%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: size * 0.4, color: '#fff', fontWeight: 700 }}>{brand.charAt(0)}</span>
-      </div>
+    <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+      <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.4), color: '#fff', fontWeight: 700, lineHeight: 1 }}>{brand.charAt(0)}</span>
     </div>
   )
 }
@@ -211,8 +209,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '100px', height: 'auto' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <a href="#features" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#666', textDecoration: 'none' }}>Features</a>
-          <a href="#pricing" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#666', textDecoration: 'none' }}>Pricing</a>
+          <a href="#features" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Features</a>
+          <a href="#pricing" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Pricing</a>
           <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
           <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
         </div>
@@ -272,9 +270,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '48px' }}>
           {FEATURES.map(f => (
             <div key={f.num}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#333', marginBottom: '16px' }}>{f.num}</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#444', marginBottom: '16px' }}>{f.num}</div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{f.title}</div>
-              <div style={{ fontSize: '13px', color: '#555', lineHeight: 1.8 }}>{f.body}</div>
+              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{f.body}</div>
             </div>
           ))}
         </div>
@@ -323,9 +321,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '80px', opacity: 0.25 }} />
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#444', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
-          <span style={{ fontSize: '10px', color: '#333' }}>© 2026 HQue</span>
-          <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#444', display: 'flex', alignItems: 'center' }}>
+          <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#666', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
+          <span style={{ fontSize: '10px', color: '#555' }}>© 2026 HQue</span>
+          <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#666', display: 'flex', alignItems: 'center' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
             </svg>
