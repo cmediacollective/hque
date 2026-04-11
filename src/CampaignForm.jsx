@@ -33,6 +33,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
   })
 
   const [creators, setCreators] = useState([])
+  const [talentSearch, setTalentSearch] = useState("")
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -169,15 +170,22 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         )}
 
         {field('Talent',
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto' }}>
-            {creators.map(c => (
-              <div key={c.id} onClick={() => toggleTalent(c.id)} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', border: `0.5px solid ${form.talent_ids.includes(c.id) ? '#5b7c99' : border}`, borderRadius: '1px', cursor: 'pointer', background: form.talent_ids.includes(c.id) ? (dark ? '#1a2530' : '#EEF3F7') : 'none' }}>
-                {c.photo_url && <img src={c.photo_url} alt={c.name} style={{ width: '16px', height: '16px', borderRadius: '50%', objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />}
-                <span style={{ fontSize: '12px', color: text }}>{c.name}</span>
-                {c.handles?.instagram && <span style={{ fontSize: '10px', color: labelColor }}>@{c.handles.instagram}</span>}
-                {form.talent_ids.includes(c.id) && <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#5b7c99' }}>✓</span>}
+          <div>
+            <input value={talentSearch} onChange={e => setTalentSearch(e.target.value)} placeholder='Search by name or handle...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            {talentSearch.trim() && (
+              <div style={{ border: `0.5px solid ${border}`, borderRadius: '1px', maxHeight: '180px', overflowY: 'auto' }}>
+                {creators.filter(cr => cr.name?.toLowerCase().includes(talentSearch.toLowerCase()) || cr.handles?.instagram?.toLowerCase().includes(talentSearch.toLowerCase())).map(cr => (
+                  <div key={cr.id} onClick={() => { toggleTalent(cr.id); setTalentSearch('') }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', cursor: 'pointer', background: form.talent_ids.includes(cr.id) ? (dark ? '#1a2530' : '#EEF3F7') : inputBg, borderBottom: `0.5px solid ${border}` }}>
+                    {cr.photo_url ? <img src={cr.photo_url} alt={cr.name} style={{ width: '28px', height: '28px', borderRadius: '2px', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} /> : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>{cr.name?.charAt(0)}</div>}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '12px', color: text }}>{cr.name}</div>
+                      {cr.handles?.instagram && <div style={{ fontSize: '10px', color: labelColor }}>@{cr.handles.instagram}</div>}
+                    </div>
+                    {form.talent_ids.includes(cr.id) && <span style={{ fontSize: '10px', color: '#5b7c99' }}>✓ Added</span>}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         )}
 
