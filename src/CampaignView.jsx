@@ -183,7 +183,12 @@ export default function CampaignView({ dark = true, orgId }) {
                 </div>
               </div>
 
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px' }}>{c.brand || 'No brand'}</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {c.brand || 'No brand'}
+                {c.brand_website && (
+                  <a href={c.brand_website.startsWith('http') ? c.brand_website : 'https://' + c.brand_website} target="_blank" rel="noreferrer" style={{ fontSize: '8px', color: '#5b7c99', opacity: 0.6, textDecoration: 'none', letterSpacing: '0.1em' }} title={c.brand_website}>↗</a>
+                )}
+              </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '16px', lineHeight: 1.35 }}>{c.name}</div>
 
               <div style={{ display: 'flex', gap: '20px', paddingTop: '14px', borderTop: `0.5px solid ${border}` }}>
