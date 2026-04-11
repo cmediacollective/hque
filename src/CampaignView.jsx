@@ -40,6 +40,7 @@ export default function CampaignView({ dark = true, orgId }) {
       .order('created_at', { ascending: false })
     setCampaigns(data || [])
     if (data?.length) fetchCreatorCounts(data.map(c => c.id))
+    setSelected(sel => sel ? (data || []).find(d => d.id === sel.id) || sel : null)
     setLoading(false)
   }
 
