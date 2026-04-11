@@ -28,7 +28,7 @@ export default function CampaignView({ dark = true, orgId }) {
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(null)
 
-  useEffect(() => { fetchCampaigns() }, [showArchived])
+  useEffect(() => { fetchCampaigns() }, [showArchived, orgId])
 
   async function fetchCampaigns() {
     setLoading(true)
