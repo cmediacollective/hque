@@ -23,6 +23,9 @@ const FAKE_TASKS = [
   { title: 'Review UGC deliverables', col: 'IN PROGRESS', priority: 'MEDIUM', date: 'Apr 14' },
   { title: 'Q2 talent roster refresh', col: 'TO DO', priority: 'LOW', date: 'Apr 18' },
   { title: 'Nord Athletic brief review', col: 'TO DO', priority: 'HIGH', date: 'Apr 11' },
+  { title: 'Maven Foods final report', col: 'DONE', priority: 'LOW', date: 'Apr 3' },
+  { title: 'Onboard Raya Hassan', col: 'DONE', priority: 'MEDIUM', date: 'Apr 1' },
+  { title: 'Dusk Beauty pitch deck', col: 'DONE', priority: 'HIGH', date: 'Mar 28' },
 ]
 
 const FAKE_STATS = [
@@ -63,6 +66,23 @@ const PLANS = [
   { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support'] },
 ]
 
+function BrandLogo({ brand, color, size = 44 }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: '2px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontFamily: 'Georgia, serif', fontSize: size * 0.4, color: '#fff', fontWeight: 700 }}>{brand.charAt(0)}</span>
+      </div>
+    </div>
+  )
+}
+
+function StatusBadge({ status }) {
+  const color = status === 'ACTIVE' ? '#5b7c99' : status === 'COMPLETED' ? '#5C9E52' : '#666'
+  return (
+    <span style={{ fontSize: '7px', letterSpacing: '0.12em', border: `0.5px solid ${color}`, color, padding: '4px 10px', borderRadius: '1px', whiteSpace: 'nowrap', minWidth: '64px', textAlign: 'center', display: 'inline-block' }}>{status}</span>
+  )
+}
+
 function ScreenContent({ screen }) {
   if (screen === 'talent') return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#2A2A2A' }}>
@@ -86,16 +106,22 @@ function ScreenContent({ screen }) {
   if (screen === 'campaigns') return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: '#2A2A2A' }}>
       {FAKE_CAMPAIGNS.map((c, i) => (
-        <div key={i} style={{ background: '#1E1E1E', padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontWeight: 700 }}>{c.brand.charAt(0)}</div>
-            <span style={{ fontSize: '8px', letterSpacing: '0.12em', border: `0.5px solid ${c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555'}`, color: c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555', padding: '2px 8px', borderRadius: '1px' }}>{c.status}</span>
+        <div key={i} style={{ background: '#1E1E1E', padding: '20px', display: 'flex', flexDirection: 'column', minHeight: '160px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <BrandLogo brand={c.brand} color={c.color} size={44} />
+            <StatusBadge status={c.status} />
           </div>
-          <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '4px' }}>{c.brand}</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#F0ECE6', marginBottom: '12px' }}>{c.name}</div>
-          <div style={{ paddingTop: '10px', borderTop: '0.5px solid #2A2A2A', display: 'flex', gap: '16px' }}>
-            <div><div style={{ fontSize: '12px', color: '#F0ECE6', fontWeight: 500 }}>{c.budget}</div><div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Budget</div></div>
-            <div><div style={{ fontSize: '12px', color: '#777' }}>{c.talent}</div><div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Talent</div></div>
+          <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#F0ECE6', flex: 1, lineHeight: 1.4 }}>{c.name}</div>
+          <div style={{ paddingTop: '14px', marginTop: '14px', borderTop: '0.5px solid #2A2A2A', display: 'flex', gap: '20px' }}>
+            <div>
+              <div style={{ fontSize: '13px', color: '#F0ECE6', fontWeight: 500 }}>{c.budget}</div>
+              <div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Budget</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '13px', color: '#777' }}>{c.talent}</div>
+              <div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Talent</div>
+            </div>
           </div>
         </div>
       ))}
@@ -103,18 +129,18 @@ function ScreenContent({ screen }) {
   )
 
   if (screen === 'workspace') return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: '#2A2A2A', height: '360px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: '#2A2A2A', height: '360px', overflow: 'hidden' }}>
       {['TO DO', 'IN PROGRESS', 'DONE'].map(col => (
-        <div key={col} style={{ background: '#1A1A1A', padding: '14px' }}>
-          <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#444', marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
+        <div key={col} style={{ background: '#1A1A1A', padding: '14px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: col === 'DONE' ? '#5C9E52' : '#444', marginBottom: '12px', display: 'flex', justifyContent: 'space-between' }}>
             <span>{col}</span>
             <span>{FAKE_TASKS.filter(t => t.col === col).length}</span>
           </div>
           {FAKE_TASKS.filter(t => t.col === col).map((task, i) => (
-            <div key={i} style={{ background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '12px', marginBottom: '8px' }}>
-              <div style={{ fontSize: '11px', color: '#F0ECE6', marginBottom: '8px', lineHeight: 1.4 }}>{task.title}</div>
+            <div key={i} style={{ background: col === 'DONE' ? '#1C1C1C' : '#222', border: `0.5px solid ${col === 'DONE' ? '#1E1E1E' : '#2A2A2A'}`, borderRadius: '1px', padding: '12px', marginBottom: '8px', opacity: col === 'DONE' ? 0.6 : 1 }}>
+              <div style={{ fontSize: '11px', color: col === 'DONE' ? '#555' : '#F0ECE6', marginBottom: '8px', lineHeight: 1.4, textDecoration: col === 'DONE' ? 'line-through' : 'none' }}>{task.title}</div>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#444'}`, color: task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#555', padding: '1px 5px', borderRadius: '1px' }}>{task.priority}</span>
+                <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${col === 'DONE' ? '#333' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#444'}`, color: col === 'DONE' ? '#444' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#555', padding: '1px 5px', borderRadius: '1px' }}>{task.priority}</span>
                 <span style={{ fontSize: '9px', color: '#444' }}>{task.date}</span>
               </div>
             </div>
@@ -136,16 +162,16 @@ function ScreenContent({ screen }) {
         ))}
       </div>
       <div style={{ background: '#1A1A1A', padding: '14px 16px' }}>
-        <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#444', marginBottom: '12px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#444', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
         {FAKE_CAMPAIGNS.map((c, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid #1E1E1E' }}>
-            <div style={{ width: '28px', height: '28px', background: c.color, borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: '#fff', fontWeight: 700, flexShrink: 0 }}>{c.brand.charAt(0)}</div>
-            <div style={{ flex: 1 }}>
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: '0.5px solid #1E1E1E' }}>
+            <BrandLogo brand={c.brand} color={c.color} size={28} />
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
-              <div style={{ fontSize: '11px', color: '#F0ECE6' }}>{c.name}</div>
+              <div style={{ fontSize: '11px', color: '#F0ECE6', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
             </div>
-            <div style={{ fontSize: '12px', color: '#F0ECE6', fontWeight: 500 }}>{c.budget}</div>
-            <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555'}`, color: c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555', padding: '2px 6px', borderRadius: '1px' }}>{c.status}</span>
+            <div style={{ fontSize: '12px', color: '#F0ECE6', fontWeight: 500, minWidth: '64px', textAlign: 'right' }}>{c.budget}</div>
+            <StatusBadge status={c.status} />
           </div>
         ))}
       </div>
