@@ -12,10 +12,10 @@ const FAKE_TALENT = [
 ]
 
 const FAKE_CAMPAIGNS = [
-  { brand: 'LUMIÈRE', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#C9A96E' },
-  { brand: 'NORD ATHLETIC', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#4A7C59' },
-  { brand: 'DUSK BEAUTY', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#9B6B8A' },
-  { brand: 'MAVEN FOODS', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#C07A4F' },
+  { brand: 'Sephora', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', logo: 'https://logo.clearbit.com/sephora.com' },
+  { brand: 'Nike', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', logo: 'https://logo.clearbit.com/nike.com' },
+  { brand: 'Glossier', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', logo: 'https://logo.clearbit.com/glossier.com' },
+  { brand: 'Whole Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', logo: 'https://logo.clearbit.com/wholefoods.com' },
 ]
 
 const FAKE_TASKS = [
@@ -66,10 +66,10 @@ const PLANS = [
   { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support'] },
 ]
 
-function BrandLogo({ brand, color, size = 44 }) {
+function BrandLogo({ brand, logo, size = 44 }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-      <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.4), color: '#fff', fontWeight: 700, lineHeight: 1 }}>{brand.charAt(0)}</span>
+    <div style={{ width: size, height: size, borderRadius: '2px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', border: '0.5px solid #eee', padding: '4px' }}>
+      <img src={logo} alt={brand} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { e.target.style.display='none'; e.target.parentNode.style.background='#2A2A2A' }} />
     </div>
   )
 }
@@ -83,21 +83,29 @@ function StatusBadge({ status }) {
 
 function ScreenContent({ screen }) {
   if (screen === 'talent') return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#2A2A2A' }}>
-      {FAKE_TALENT.map((t, i) => (
-        <div key={i} style={{ background: '#1E1E1E', padding: '16px', opacity: 1 - (i * 0.04) }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '2px', background: '#2A2A2A', marginBottom: '10px', overflow: 'hidden' }}>
-            <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <div>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap' }}>
+        {['All Types', 'Influencer', 'UGC', 'Actor', 'Wellness', 'Beauty', 'Fashion', 'Fitness'].map((chip, i) => (
+          <span key={chip} style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${i === 0 ? '#5b7c99' : '#C4CFC8'}`, color: i === 0 ? '#5b7c99' : '#999', borderRadius: '1px', whiteSpace: 'nowrap' }}>{chip}</span>
+        ))}
+        <span style={{ marginLeft: 'auto', padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #C4CFC8', color: '#999', borderRadius: '1px' }}>Export PDF</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#D4CFC8' }}>
+        {FAKE_TALENT.map((t, i) => (
+          <div key={i} style={{ background: '#FFFFFF', padding: '14px', opacity: 1 - (i * 0.04) }}>
+            <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#E8E4DE', marginBottom: '8px', overflow: 'hidden' }}>
+              <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '3px' }}>{t.type}</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '11px', color: '#1A1A1A', marginBottom: '2px' }}>{t.name}</div>
+            <div style={{ fontSize: '9px', color: '#999', marginBottom: '6px' }}>{t.handle}</div>
+            <div style={{ paddingTop: '6px', borderTop: '0.5px solid #E0DCD6' }}>
+              <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
+              <div style={{ fontSize: '7px', color: '#aaa', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
+            </div>
           </div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '4px' }}>{t.type}</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '12px', color: '#F0ECE6', marginBottom: '2px' }}>{t.name}</div>
-          <div style={{ fontSize: '10px', color: '#555', marginBottom: '8px' }}>{t.handle}</div>
-          <div style={{ paddingTop: '8px', borderTop: '0.5px solid #2A2A2A' }}>
-            <div style={{ fontSize: '11px', color: '#F0ECE6', fontWeight: 500 }}>{t.followers}</div>
-            <div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 
@@ -106,7 +114,7 @@ function ScreenContent({ screen }) {
       {FAKE_CAMPAIGNS.map((c, i) => (
         <div key={i} style={{ background: '#1E1E1E', padding: '20px', display: 'flex', flexDirection: 'column', minHeight: '160px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-            <BrandLogo brand={c.brand} color={c.color} size={44} />
+            <BrandLogo brand={c.brand} logo={c.logo} size={44} />
             <StatusBadge status={c.status} />
           </div>
           <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
@@ -163,7 +171,7 @@ function ScreenContent({ screen }) {
         <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#444', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
         {FAKE_CAMPAIGNS.map((c, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: '0.5px solid #1E1E1E' }}>
-            <BrandLogo brand={c.brand} color={c.color} size={28} />
+            <BrandLogo brand={c.brand} logo={c.logo} size={28} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
               <div style={{ fontSize: '11px', color: '#F0ECE6', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
@@ -242,18 +250,18 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             </div>
             <div style={{ flex: 1, background: '#111', borderRadius: '4px', padding: '4px 12px', fontSize: '10px', color: '#444', textAlign: 'center' }}>h-que.com</div>
           </div>
-          <div style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderTop: 'none', borderRadius: '0 0 8px 8px', height: '520px', display: 'flex', overflow: 'hidden', position: 'relative' }}>
-            <div style={{ width: '180px', borderRight: '0.5px solid #2A2A2A', padding: '24px 0', flexShrink: 0 }}>
+          <div style={{ background: '#F5F3EF', border: '0.5px solid #D4CFC8', borderTop: 'none', borderRadius: '0 0 8px 8px', height: '520px', display: 'flex', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ width: '180px', borderRight: '0.5px solid #D4CFC8', padding: '24px 0', flexShrink: 0, background: '#ECEAE6' }}>
               <div style={{ padding: '0 16px 20px', borderBottom: '0.5px solid #2A2A2A', marginBottom: '16px' }}>
                 <img src="/logo.svg" alt="HQue" style={{ width: '80px' }} />
               </div>
               {SCREENS.map((s, i) => (
-                <div key={s.key} style={{ padding: '9px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: i === activeScreen ? '#F0ECE6' : '#444', borderLeft: i === activeScreen ? '1.5px solid #5b7c99' : '1.5px solid transparent' }}>{s.label.split(' ')[0]}</div>
+                <div key={s.key} style={{ padding: '9px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: i === activeScreen ? '#1A1A1A' : '#999', borderLeft: i === activeScreen ? '1.5px solid #5b7c99' : '1.5px solid transparent' }}>{s.label.split(' ')[0]}</div>
               ))}
             </div>
             <div style={{ flex: 1, padding: '24px', overflow: 'hidden' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#444', marginBottom: '6px' }}>Nova Talent Group</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '20px' }}>{SCREENS[activeScreen].label}</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#999', marginBottom: '6px' }}>Nova Talent Group</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1A1A1A', marginBottom: '20px' }}>{SCREENS[activeScreen].label}</div>
               <ScreenContent screen={SCREENS[activeScreen].key} />
             </div>
             <div style={{ position: 'absolute', bottom: '20px', right: '20px', display: 'flex', gap: '6px' }}>
