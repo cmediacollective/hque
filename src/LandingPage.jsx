@@ -1,21 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 
 const FAKE_TALENT = [
-  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', niche: 'BEAUTY' },
-  { name: 'Jordan Ellis', type: 'UGC · INFLUENCER', handle: '@jordanellis', followers: '124K', niche: 'FITNESS' },
-  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', niche: 'LIFESTYLE' },
-  { name: 'Caden Park', type: 'ATHLETE · INFLUENCER', handle: '@cadenpark', followers: '390K', niche: 'SPORTS' },
-  { name: 'Simone Veil', type: 'SPEAKER/HOST', handle: '@simoneveil', followers: '58K', niche: 'WELLNESS' },
-  { name: 'Raya Hassan', type: 'INFLUENCER', handle: '@rayahassan', followers: '1.4M', niche: 'FASHION' },
-  { name: 'Teo Briggs', type: 'PODCAST · UGC', handle: '@teobriggs', followers: '210K', niche: 'TECH' },
-  { name: 'Lena Voss', type: 'INFLUENCER', handle: '@lenavoss', followers: '76K', niche: 'FOOD' },
+  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', niche: 'BEAUTY', photo: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Jordan Ellis', type: 'UGC · INFLUENCER', handle: '@jordanellis', followers: '124K', niche: 'FITNESS', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', niche: 'LIFESTYLE', photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Caden Park', type: 'ATHLETE · INFLUENCER', handle: '@cadenpark', followers: '390K', niche: 'SPORTS', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Simone Veil', type: 'SPEAKER/HOST', handle: '@simoneveil', followers: '58K', niche: 'WELLNESS', photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Raya Hassan', type: 'INFLUENCER', handle: '@rayahassan', followers: '1.4M', niche: 'FASHION', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Teo Briggs', type: 'PODCAST · UGC', handle: '@teobriggs', followers: '210K', niche: 'TECH', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Lena Voss', type: 'INFLUENCER', handle: '@lenavoss', followers: '76K', niche: 'FOOD', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=face' },
 ]
 
 const FAKE_CAMPAIGNS = [
-  { brand: 'LUMIÈRE', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent' },
-  { brand: 'NORD ATHLETIC', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent' },
-  { brand: 'DUSK BEAUTY', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent' },
-  { brand: 'MAVEN FOODS', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent' },
+  { brand: 'LUMIÈRE', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#C9A96E' },
+  { brand: 'NORD ATHLETIC', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#4A7C59' },
+  { brand: 'DUSK BEAUTY', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#9B6B8A' },
+  { brand: 'MAVEN FOODS', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#C07A4F' },
 ]
 
 const FAKE_TASKS = [
@@ -68,15 +68,15 @@ function ScreenContent({ screen }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#2A2A2A' }}>
       {FAKE_TALENT.map((t, i) => (
         <div key={i} style={{ background: '#1E1E1E', padding: '16px', opacity: 1 - (i * 0.04) }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '2px', background: '#2A2A2A', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '16px', color: '#5b7c99' }}>{t.name.charAt(0)}</div>
+          <div style={{ width: '48px', height: '48px', borderRadius: '2px', background: '#2A2A2A', marginBottom: '10px', overflow: 'hidden' }}>
+            <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
           <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '4px' }}>{t.type}</div>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '12px', color: '#F0ECE6', marginBottom: '2px' }}>{t.name}</div>
           <div style={{ fontSize: '10px', color: '#555', marginBottom: '8px' }}>{t.handle}</div>
-          <div style={{ paddingTop: '8px', borderTop: '0.5px solid #2A2A2A', display: 'flex', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: '11px', color: '#F0ECE6', fontWeight: 500 }}>{t.followers}</div>
-              <div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
-            </div>
+          <div style={{ paddingTop: '8px', borderTop: '0.5px solid #2A2A2A' }}>
+            <div style={{ fontSize: '11px', color: '#F0ECE6', fontWeight: 500 }}>{t.followers}</div>
+            <div style={{ fontSize: '7px', color: '#444', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
           </div>
         </div>
       ))}
@@ -88,7 +88,7 @@ function ScreenContent({ screen }) {
       {FAKE_CAMPAIGNS.map((c, i) => (
         <div key={i} style={{ background: '#1E1E1E', padding: '20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: '#2A2A2A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#5b7c99', fontWeight: 600 }}>{c.brand.charAt(0)}</div>
+            <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontWeight: 700 }}>{c.brand.charAt(0)}</div>
             <span style={{ fontSize: '8px', letterSpacing: '0.12em', border: `0.5px solid ${c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555'}`, color: c.status === 'ACTIVE' ? '#5b7c99' : c.status === 'COMPLETED' ? '#5C9E52' : '#555', padding: '2px 8px', borderRadius: '1px' }}>{c.status}</span>
           </div>
           <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '4px' }}>{c.brand}</div>
@@ -139,7 +139,7 @@ function ScreenContent({ screen }) {
         <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#444', marginBottom: '12px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
         {FAKE_CAMPAIGNS.map((c, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid #1E1E1E' }}>
-            <div style={{ width: '28px', height: '28px', background: '#2A2A2A', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: '#5b7c99', flexShrink: 0 }}>{c.brand.charAt(0)}</div>
+            <div style={{ width: '28px', height: '28px', background: c.color, borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: '#fff', fontWeight: 700, flexShrink: 0 }}>{c.brand.charAt(0)}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
               <div style={{ fontSize: '11px', color: '#F0ECE6' }}>{c.name}</div>
@@ -287,18 +287,28 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2 }}>
-          Your agency deserves<br />better tools.
+          Your team deserves<br />a better tool.
         </div>
         <button onClick={onGetStarted} style={{ padding: '16px 48px', fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
           Start your free trial
         </button>
       </section>
 
-      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <img src="/logo.svg" alt="HQue" style={{ width: '80px', opacity: 0.4 }} />
-        <div style={{ display: 'flex', gap: '24px' }}>
-          <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#333', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
-          <span style={{ fontSize: '10px', color: '#222' }}>© 2026 HQue</span>
+      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <img src="/logo.svg" alt="HQue" style={{ width: '80px', opacity: 0.25 }} />
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#444', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
+          <span style={{ fontSize: '10px', color: '#333' }}>© 2026 HQue</span>
+          <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#444', display: 'flex', alignItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
+            </svg>
+          </a>
+          <a href="https://www.linkedin.com/company/h-que" target="_blank" rel="noreferrer" title="LinkedIn" style={{ color: '#444', display: 'flex', alignItems: 'center' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
         </div>
       </footer>
     </div>
