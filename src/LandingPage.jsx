@@ -12,10 +12,10 @@ const FAKE_TALENT = [
 ]
 
 const FAKE_CAMPAIGNS = [
-  { brand: 'Sephora', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', logo: 'https://logo.clearbit.com/sephora.com' },
-  { brand: 'Nike', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', logo: 'https://logo.clearbit.com/nike.com' },
-  { brand: 'Glossier', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', logo: 'https://logo.clearbit.com/glossier.com' },
-  { brand: 'Whole Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', logo: 'https://logo.clearbit.com/wholefoods.com' },
+  { brand: 'Sephora', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#D4A0A0', initial: 'S' },
+  { brand: 'Nike', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#1A1A1A', initial: 'N' },
+  { brand: 'Glossier', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#C8A2C8', initial: 'G' },
+  { brand: 'Whole Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF' },
 ]
 
 const FAKE_TASKS = [
@@ -66,10 +66,10 @@ const PLANS = [
   { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support'] },
 ]
 
-function BrandLogo({ brand, logo, size = 44 }) {
+function BrandLogo({ brand, color, initial, size = 44 }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: '2px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', border: '0.5px solid #eee', padding: '4px' }}>
-      <img src={logo} alt={brand} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={e => { e.target.style.display='none'; e.target.parentNode.style.background='#2A2A2A' }} />
+    <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.35), color: '#fff', fontWeight: 700, letterSpacing: '-0.02em' }}>{initial}</span>
     </div>
   )
 }
@@ -114,7 +114,7 @@ function ScreenContent({ screen }) {
       {FAKE_CAMPAIGNS.map((c, i) => (
         <div key={i} style={{ background: '#FFFFFF', padding: '20px', display: 'flex', flexDirection: 'column', minHeight: '160px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-            <BrandLogo brand={c.brand} logo={c.logo} size={44} />
+            <BrandLogo brand={c.brand} color={c.color} initial={c.initial} size={44} />
             <StatusBadge status={c.status} />
           </div>
           <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
@@ -171,7 +171,7 @@ function ScreenContent({ screen }) {
         <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#aaa', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
         {FAKE_CAMPAIGNS.map((c, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: '0.5px solid #E0DCD6' }}>
-            <BrandLogo brand={c.brand} logo={c.logo} size={28} />
+            <BrandLogo brand={c.brand} color={c.color} initial={c.initial} size={28} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
               <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
