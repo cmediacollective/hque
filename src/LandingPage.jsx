@@ -440,6 +440,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
           <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
           <span style={{ fontSize: '10px', color: '#444' }}>© 2026 HQue</span>
+          <a href="/privacy" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>Privacy</a>
+          <a href="/terms" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>Terms</a>
           <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#555', display: 'flex', alignItems: 'center' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
