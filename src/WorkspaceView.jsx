@@ -1,6 +1,21 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
+async function createNotification(orgId, memberName, type, message, profiles) {
+  const profile = profiles.find(p => (p.full_name || p.email) === memberName)
+  if (!profile) return
+  await supabase.from('notifications').insert([{ org_id: orgId, user_id: profile.id, type, message }])
+}
+
+async function parseMentions(description, orgId, message, profiles) {
+  if (!description) return
+  const mentions = description.match(/@([\w. ]+)/g) || []
+  for (const mention of mentions) {
+    const name = mention.slice(1).trim()
+    await createNotification(orgId, name, 'mention', message, profiles)
+  }
+}
+
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
@@ -154,12 +169,16 @@ export default function WorkspaceView({ orgId, dark = true }) {
     }])
     setShowNewTask(null)
     fetchTasks()
+    if (form.assigned_to) await createNotification(orgId, form.assigned_to, 'assignment', `You were assigned to: ${form.title}`, members)
+    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
   }
 
   async function updateTask(form) {
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
     setEditingTask(null)
     fetchTasks()
+    if (form.assigned_to) await createNotification(orgId, form.assigned_to, 'assignment', `You were assigned to: ${form.title}`, members)
+    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
   }
 
   async function moveTask(taskId, newColumnId) {
