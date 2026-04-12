@@ -15,6 +15,7 @@ import InquiriesView from './InquiriesView'
 import UpgradeWall from './UpgradeWall'
 import LandingPage from './LandingPage'
 import LegalPage from './LegalPage'
+import NotificationsPanel from './NotificationsPanel'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -32,6 +33,8 @@ function App() {
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -180,6 +183,7 @@ function App() {
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
+      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} />}
 
       <div style={{ display: 'flex', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100vh' : 'auto' }}>
 
@@ -233,6 +237,7 @@ function App() {
               <button onClick={() => setDark(d => !d)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
                 {dark ? 'Light' : 'Dark'}
               </button>
+              <button onClick={() => setShowNotifications(n => !n)} style={{ position: 'relative', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', padding: '5px 10px', fontSize: '14px', lineHeight: 1 }}>🔔{unreadCount > 0 && <span style={{ position: 'absolute', top: '-4px', right: '-4px', background: '#5b7c99', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unreadCount}</span>}</button>
               {view === 'talent' && talentTab === 'roster' && !isMobile && (
                 <div style={{ position: 'relative' }}>
                   <button onClick={() => setShowExportMenu(m => !m)} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
