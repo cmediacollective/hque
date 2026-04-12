@@ -20,6 +20,34 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', color: text, fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
       />
+      <textarea
+        value={form.description || ""}
+        onChange={e => {
+          const val = e.target.value
+          setForm(f => ({ ...f, description: val }))
+          const lastWord = val.split(/\s/).pop()
+          if (lastWord.startsWith("@")) { setShowMentions(true); setMentionQuery(lastWord.slice(1)) }
+          else { setShowMentions(false); setMentionQuery("") }
+        }}
+        placeholder="Description... (use @ to mention a team member)"
+        style={{ width: "100%", background: "none", border: , borderRadius: "1px", color: text, fontSize: "11px", outline: "none", resize: "vertical", height: "60px", fontFamily: "inherit", marginBottom: "6px", padding: "6px 8px", boxSizing: "border-box" }}
+      />
+      {showMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).length > 0 && (
+        <div style={{ background: dark ? "#1E1E1E" : "#fff", border: , borderRadius: "1px", marginBottom: "6px", overflow: "hidden" }}>
+          {members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).map(m => (
+            <div key={m.id} onClick={() => {
+              const name = m.full_name || m.email
+              const val = form.description.replace(/@[\w.]*$/, `@${name} `)
+              setForm(f => ({ ...f, description: val }))
+              setShowMentions(false)
+            }} style={{ padding: "7px 10px", fontSize: "11px", color: text, cursor: "pointer", borderBottom:  }}
+            onMouseEnter={e => e.currentTarget.style.background = dark ? "#2A2A2A" : "#f5f5f5"}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+              @{m.full_name || m.email}
+            </div>
+          ))}
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '8px' }}>
         <select value={form.priority || 'Medium'} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }}>
           {PRIORITIES.map(p => <option key={p}>{p}</option>)}
@@ -117,7 +145,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
   async function createTask(columnId, form) {
     if (!form.title?.trim()) return
     await supabase.from('tasks').insert([{
-      title: form.title, priority: form.priority || 'Medium',
+      title: form.title, description: form.description || null, priority: form.priority || 'Medium',
       due_date: form.due_date || null, assigned_to: form.assigned_to || null,
       column_id: columnId, board_id: activeBoard.id, org_id: orgId,
       position: tasks.filter(t => t.column_id === columnId).length
@@ -127,7 +155,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
   }
 
   async function updateTask(form) {
-    await supabase.from('tasks').update({ title: form.title, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
+    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
     setEditingTask(null)
     fetchTasks()
   }
@@ -254,6 +282,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
                       onClick={() => setEditingTask({ ...task })}
                       style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
                       <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                      {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
@@ -267,7 +296,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
                 ))}
 
                 {showNewTask === col.id ? (
-                  <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                  <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                 ) : (
                   <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
                 )}
