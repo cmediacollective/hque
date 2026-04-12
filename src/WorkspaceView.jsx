@@ -6,6 +6,8 @@ const PRIORITIES = ['Low', 'Medium', 'High']
 
 function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   const [form, setForm] = useState({ ...initial })
+  const [showMentions, setShowMentions] = useState(false)
+  const [mentionQuery, setMentionQuery] = useState("")
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
