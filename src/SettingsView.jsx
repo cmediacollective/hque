@@ -24,7 +24,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [uploadMsg, setUploadMsg] = useState('')
   const fileRef = useRef(null)
 
-  const [profileForm, setProfileForm] = useState({ full_name: '', title: '' })
+  const [profileForm, setProfileForm] = useState({ full_name: '', title: '', email_notifications: true })
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
@@ -42,10 +42,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
 
   async function fetchAvatar() {
-    const { data } = await supabase.from('profiles').select('avatar_url, role, full_name, title').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('avatar_url, role, full_name, title, email_notifications').eq('id', user.id).single()
     if (data?.avatar_url) { setAvatarUrl(data.avatar_url); onAvatarChange?.(data.avatar_url) }
     if (data?.role) setCurrentUserRole(data.role)
-    if (data) setProfileForm({ full_name: data.full_name || '', title: data.title || '' })
+    if (data) setProfileForm({ full_name: data.full_name || '', title: data.title || '', email_notifications: data.email_notifications !== false })
   }
 
   async function fetchAgency() {
@@ -83,7 +83,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   async function saveProfile() {
     setProfileSaving(true)
-    await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title }).eq('id', user.id)
+    await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, email_notifications: profileForm.email_notifications }).eq('id', user.id)
     setProfileSaving(false)
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 2000)
@@ -212,6 +212,18 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '24px' }}>JPG, PNG or GIF. Max 5MB. Your photo appears in the sidebar and team list.</div>
               {field('Full Name', inp({ value: profileForm.full_name, onChange: e => setProfileForm(f => ({ ...f, full_name: e.target.value })), placeholder: 'Your full name' }))}
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
+              <div style={{ marginBottom: '18px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '10px' }}>Email Notifications</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+                  <div>
+                    <div style={{ fontSize: '12px', color: text, marginBottom: '2px' }}>Task assignments and mentions</div>
+                    <div style={{ fontSize: '10px', color: labelColor }}>Get an email when assigned to a task or mentioned</div>
+                  </div>
+                  <div onClick={() => setProfileForm(f => ({ ...f, email_notifications: !f.email_notifications }))} style={{ width: '36px', height: '20px', borderRadius: '10px', background: profileForm.email_notifications ? '#5b7c99' : '#333', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+                    <div style={{ position: 'absolute', top: '2px', left: profileForm.email_notifications ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
+                  </div>
+                </div>
+              </div>
               <button onClick={saveProfile} disabled={profileSaving} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: profileSaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
                 {profileSaved ? 'Saved!' : profileSaving ? 'Saving...' : 'Save Profile'}
               </button>

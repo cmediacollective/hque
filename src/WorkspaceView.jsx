@@ -5,6 +5,7 @@ async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
   if (!profile) return
   await supabase.from('notifications').insert([{ org_id: orgId, user_id: profile.id, type, message }])
+  await fetch('/.netlify/functions/send-notification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: profile.id, type, message }) })
 }
 
 async function parseMentions(description, orgId, message, profiles) {
