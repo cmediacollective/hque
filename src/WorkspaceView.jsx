@@ -4,7 +4,7 @@ import { supabase } from './supabase'
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
-function TaskForm({ initial, onSave, onCancel, dark }) {
+function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   const [form, setForm] = useState({ ...initial })
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
@@ -26,12 +26,10 @@ function TaskForm({ initial, onSave, onCancel, dark }) {
         </select>
         <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
       </div>
-      <input
-        value={form.assigned_to || ''}
-        onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))}
-        placeholder='Assigned to...'
-        style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
-      />
+      <select value={form.assigned_to || ''} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
+        <option value=''>Unassigned</option>
+        {members.map(m => <option key={m.id} value={m.full_name || m.email}>{m.full_name || m.email}</option>)}
+      </select>
       <div style={{ display: 'flex', gap: '6px' }}>
         <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
         <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: `0.5px solid ${border}`, color: dark ? '#777' : '#888', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
@@ -41,6 +39,11 @@ function TaskForm({ initial, onSave, onCancel, dark }) {
 }
 
 export default function WorkspaceView({ orgId, dark = true }) {
+  const [members, setMembers] = useState([])
+
+  useEffect(() => {
+    supabase.from('profiles').select('id, email, full_name').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+  }, [orgId])
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -264,7 +267,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
                 ))}
 
                 {showNewTask === col.id ? (
-                  <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} />
+                  <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                 ) : (
                   <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
                 )}
