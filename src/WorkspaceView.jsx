@@ -30,17 +30,17 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
           else { setShowMentions(false); setMentionQuery("") }
         }}
         placeholder="Description... (use @ to mention a team member)"
-        style={{ width: "100%", background: "none", border: , borderRadius: "1px", color: text, fontSize: "11px", outline: "none", resize: "vertical", height: "60px", fontFamily: "inherit", marginBottom: "6px", padding: "6px 8px", boxSizing: "border-box" }}
+        style={{ width: "100%", background: "none", border: `0.5px solid ${border}`, borderRadius: "1px", color: text, fontSize: "11px", outline: "none", resize: "vertical", height: "60px", fontFamily: "inherit", marginBottom: "6px", padding: "6px 8px", boxSizing: "border-box" }}
       />
       {showMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).length > 0 && (
-        <div style={{ background: dark ? "#1E1E1E" : "#fff", border: , borderRadius: "1px", marginBottom: "6px", overflow: "hidden" }}>
+        <div style={{ background: dark ? "#1E1E1E" : "#fff", border: `0.5px solid ${border}`, borderRadius: "1px", marginBottom: "6px", overflow: "hidden" }}>
           {members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).map(m => (
             <div key={m.id} onClick={() => {
               const name = m.full_name || m.email
               const val = form.description.replace(/@[\w.]*$/, `@${name} `)
               setForm(f => ({ ...f, description: val }))
               setShowMentions(false)
-            }} style={{ padding: "7px 10px", fontSize: "11px", color: text, cursor: "pointer", borderBottom:  }}
+            }} style={{ padding: "7px 10px", fontSize: "11px", color: text, cursor: "pointer", borderBottom: `0.5px solid ${border}` }}
             onMouseEnter={e => e.currentTarget.style.background = dark ? "#2A2A2A" : "#f5f5f5"}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
               @{m.full_name || m.email}
