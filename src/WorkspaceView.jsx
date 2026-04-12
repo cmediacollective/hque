@@ -245,7 +245,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
               <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
                 {tasks.filter(t => t.column_id === col.id).map(task => (
                   editingTask?.id === task.id ? (
-                    <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} />
+                    <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
                   ) : (
                     <div key={task.id}
                       draggable
