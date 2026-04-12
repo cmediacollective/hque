@@ -69,6 +69,17 @@ function App() {
 
   useEffect(() => { if (user) fetchProfile() }, [user])
 
+  useEffect(() => {
+    if (!user) return
+    const fetchUnread = async () => {
+      const { data } = await supabase.from('notifications').select('id').eq('user_id', user.id).eq('read', false)
+      setUnreadCount((data || []).length)
+    }
+    fetchUnread()
+    const interval = setInterval(fetchUnread, 10000)
+    return () => clearInterval(interval)
+  }, [user])
+
   async function fetchProfile() {
     setProfileLoading(true)
     const { data } = await supabase.from('profiles').select('org_id, avatar_url').eq('id', user.id).single()
