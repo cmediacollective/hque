@@ -60,7 +60,7 @@ export default function NotificationsPanel({ user, dark, onClose }) {
             <div style={{ padding: '40px', textAlign: 'center', fontSize: '12px', color: subtle }}>Loading...</div>
           ) : notifications.length === 0 ? (
             <div style={{ padding: '60px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>🔔</div>
+              <svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' style={{ color: '#555', marginBottom: '12px' }}><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: muted, marginBottom: '6px' }}>All caught up</div>
               <div style={{ fontSize: '12px', color: subtle }}>Notifications will appear here when you are mentioned or assigned to a task.</div>
             </div>
