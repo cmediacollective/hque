@@ -213,11 +213,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               {field('Full Name', inp({ value: profileForm.full_name, onChange: e => setProfileForm(f => ({ ...f, full_name: e.target.value })), placeholder: 'Your full name' }))}
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
               <div style={{ marginBottom: '18px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '10px' }}>Email Notifications</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', marginBottom: '10px' }}>Email Notifications</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>
                   <div>
                     <div style={{ fontSize: '12px', color: text, marginBottom: '2px' }}>Task assignments and mentions</div>
-                    <div style={{ fontSize: '10px', color: labelColor }}>Get an email when assigned to a task or mentioned</div>
+                    <div style={{ fontSize: '10px', color: '#888' }}>Get an email when assigned to a task or mentioned</div>
                   </div>
                   <div onClick={() => setProfileForm(f => ({ ...f, email_notifications: !f.email_notifications }))} style={{ width: '36px', height: '20px', borderRadius: '10px', background: profileForm.email_notifications ? '#5b7c99' : '#333', cursor: 'pointer', position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
                     <div style={{ position: 'absolute', top: '2px', left: profileForm.email_notifications ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
