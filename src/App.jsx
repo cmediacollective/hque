@@ -16,6 +16,7 @@ import UpgradeWall from './UpgradeWall'
 import LandingPage from './LandingPage'
 import LegalPage from './LegalPage'
 import NotificationsPanel from './NotificationsPanel'
+import FAQPage from './FAQPage'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -48,6 +49,7 @@ function App() {
   const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
   const isPrivacyPage = window.location.pathname === '/privacy'
   const isTermsPage = window.location.pathname === '/terms'
+  const isFaqPage = window.location.pathname === '/faq'
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -168,6 +170,7 @@ function App() {
   if (isInquiryPage) return <TalentInquiry />
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
+  if (isFaqPage) return <FAQPage />
 
   if (authLoading || profileLoading) return (
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
