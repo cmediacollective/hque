@@ -21,6 +21,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [uploading, setUploading] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
   const [uploadMsg, setUploadMsg] = useState('')
   const fileRef = useRef(null)
 
@@ -59,6 +60,19 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchTeam() {
     const { data } = await supabase.from('profiles').select('*').eq('org_id', orgId).order('created_at', { ascending: true })
     setTeamMembers(data || [])
+  }
+
+  async function uploadAgencyLogo(file) {
+    if (!file) return
+    setUploadingLogo(true)
+    const ext = file.name.split('.').pop()
+    const path = `agency-logos/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('campaign-logos').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('campaign-logos').getPublicUrl(path)
+      setAgencyForm(f => ({ ...f, agency_logo_url: publicUrl }))
+    }
+    setUploadingLogo(false)
   }
 
   async function uploadAvatar(e) {
@@ -237,7 +251,20 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective' }))}
             {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email' }))}
             {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://youragency.com' }))}
-            {field('Logo URL', inp({ value: agencyForm.agency_logo_url, onChange: e => setAgencyForm(f => ({ ...f, agency_logo_url: e.target.value })), placeholder: 'https://...' }))}
+            {field('Agency Logo',
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                {agencyForm.agency_logo_url && (
+                  <img src={agencyForm.agency_logo_url} alt='logo' style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                )}
+                <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
+                  {uploadingLogo ? 'Uploading...' : agencyForm.agency_logo_url ? 'Change Logo' : 'Upload Logo'}
+                  <input type='file' accept='image/*' onChange={e => uploadAgencyLogo(e.target.files[0])} style={{ display: 'none' }} />
+                </label>
+                {agencyForm.agency_logo_url && (
+                  <button onClick={() => setAgencyForm(f => ({ ...f, agency_logo_url: '' }))} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+                )}
+              </div>
+            )}
 
             {sectionDivider('Sender Email Accounts')}
             <div style={{ fontSize: '11px', color: subtle, marginBottom: '14px', lineHeight: 1.6 }}>

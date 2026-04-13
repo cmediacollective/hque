@@ -31,6 +31,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '' }
   })
   const [saving, setSaving] = useState(false)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [error, setError] = useState('')
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
@@ -134,7 +135,20 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           </div>
 
           {field('Location', inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
-          {field('Photo URL', inp({ value: form.photo_url, onChange: e => set('photo_url', e.target.value), placeholder: 'https://...' }))}
+          {field('Photo',
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {form.photo_url && (
+              <img src={form.photo_url} alt='preview' style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '2px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+            )}
+            <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
+              {uploadingPhoto ? 'Uploading...' : form.photo_url ? 'Change Photo' : 'Upload Photo'}
+              <input type='file' accept='image/*' onChange={e => handlePhotoUpload(e.target.files[0])} style={{ display: 'none' }} />
+            </label>
+            {form.photo_url && (
+              <button onClick={() => set('photo_url', '')} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+            )}
+          </div>
+        )}
 
           {form.photo_url && (
             <div style={{ marginTop: '-8px', marginBottom: '16px' }}>
