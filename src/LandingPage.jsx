@@ -309,6 +309,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
   const [activeScreen, setActiveScreen] = useState(0)
   const [scrolled, setScrolled] = useState(false)
   const [mobile, setMobile] = useState(isMob())
+  const [openFaq, setOpenFaq] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const intervalRef = useRef(null)
 
@@ -422,6 +423,34 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#555' }}>14-day free trial on all plans · No credit card required</div>
       </section>
 
+
+      {/* FAQ */}
+      <section style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 100px', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px', textAlign: 'center' }}>FAQ</div>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '48px', textAlign: 'center', fontWeight: 'normal' }}>Common questions</div>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {[
+            { q: 'What is HQue?', a: 'HQue is an operating system for talent agencies and brands built on talent partnerships. It replaces spreadsheets, email threads, and disconnected tools with one place to manage your roster, campaigns, and team.' },
+            { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. Full access to all features during your trial.' },
+            { q: 'Can multiple team members use HQue?', a: 'Yes. Starter includes 2 seats, Pro includes 5, and Agency includes unlimited seats.' },
+            { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel anytime from your billing settings.' },
+            { q: 'How is HQue different from a spreadsheet or Monday.com?', a: 'Monday.com is generic. Spreadsheets break. HQue is purpose-built for agencies — roster management, campaign tracking, talent inquiries, and payment status all in one place.' },
+          ].map((faq, i) => (
+            <div key={i} style={{ borderTop: '0.5px solid #222' }}>
+              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
+                <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ color: '#5b7c99', fontSize: '20px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: openFaq === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
+              </button>
+              {openFaq === i && <div style={{ paddingBottom: '20px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
+            </div>
+          ))}
+          <div style={{ borderTop: '0.5px solid #222' }} />
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <a href="/faq" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>See all FAQs →</a>
+        </div>
+      </section>
+
       {/* CTA */}
       <section style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 120px', textAlign: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
@@ -435,23 +464,48 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: '0.5px solid #222', padding: mobile ? '24px 20px' : '32px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-        <img src="/logo.svg" alt="HQue" style={{ width: '80px', opacity: 0.35 }} />
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <a href="mailto:support@hque.com" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>support@hque.com</a>
-          <span style={{ fontSize: '10px', color: '#444' }}>© 2026 HQue</span>
-          <a href="/privacy" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>Privacy</a>
-          <a href="/terms" style={{ fontSize: '10px', color: '#555', textDecoration: 'none', letterSpacing: '0.1em' }}>Terms</a>
-          <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" title="Instagram" style={{ color: '#555', display: 'flex', alignItems: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/>
-            </svg>
-          </a>
-          <a href="https://www.linkedin.com/company/h-que" target="_blank" rel="noreferrer" title="LinkedIn" style={{ color: '#555', display: 'flex', alignItems: 'center' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>
-            </svg>
-          </a>
+      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: mobile ? '40px 24px' : '60px 48px 40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: mobile ? '32px' : '48px', marginBottom: '48px' }}>
+          <div>
+            <img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block' }} />
+            <div style={{ fontSize: '12px', color: '#444', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+              <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#444' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
+              </a>
+              <a href="https://www.linkedin.com/company/h-que" target="_blank" rel="noreferrer" style={{ color: '#444' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </a>
+            </div>
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Product</div>
+            {[['Features', '#features'], ['Pricing', '#pricing'], ['Changelog', null]].map(([label, href]) => (
+              <div key={label} style={{ marginBottom: '10px' }}>
+                {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Resources</div>
+            {[['FAQ', '/faq'], ['Blog', null], ['Help Center', null]].map(([label, href]) => (
+              <div key={label} style={{ marginBottom: '10px' }}>
+                {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Legal</div>
+            {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@hque.com', 'mailto:support@hque.com']].map(([label, href]) => (
+              <div key={label} style={{ marginBottom: '10px' }}>
+                <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '10px', color: '#333' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#2A2A2A' }}>Made for agencies that move fast.</span>
         </div>
       </footer>
     </div>
