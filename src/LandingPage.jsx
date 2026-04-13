@@ -425,29 +425,23 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
 
       {/* FAQ */}
-      <section style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 100px', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px', textAlign: 'center' }}>FAQ</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '48px', textAlign: 'center', fontWeight: 'normal' }}>Common questions</div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <section style={{ padding: mobile ? '40px 24px 60px' : '60px 48px 80px', maxWidth: '1000px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '32px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99' }}>Common questions</div>
+          <a href="/faq" style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#444', textDecoration: 'none' }}>See all →</a>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : '1fr 1fr', gap: '1px', background: '#1A1A1A' }}>
           {[
-            { q: 'What is HQue?', a: 'HQue is an operating system for talent agencies and brands built on talent partnerships. It replaces spreadsheets, email threads, and disconnected tools with one place to manage your roster, campaigns, and team.' },
-            { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. Full access to all features during your trial.' },
-            { q: 'Can multiple team members use HQue?', a: 'Yes. Starter includes 2 seats, Pro includes 5, and Agency includes unlimited seats.' },
-            { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel anytime from your billing settings.' },
-            { q: 'How is HQue different from a spreadsheet or Monday.com?', a: 'Monday.com is generic. Spreadsheets break. HQue is purpose-built for agencies — roster management, campaign tracking, talent inquiries, and payment status all in one place.' },
+            { q: 'Is there a free trial?', a: 'Yes — 14 days, no credit card required. Full access from day one.' },
+            { q: 'Who is HQue for?', a: 'Influencer agencies, talent managers, and brand partnerships teams.' },
+            { q: 'Can my whole team use it?', a: 'Yes. Starter has 2 seats, Pro has 5, Agency has unlimited.' },
+            { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel from billing settings, keep access until period ends.' },
           ].map((faq, i) => (
-            <div key={i} style={{ borderTop: '0.5px solid #222' }}>
-              <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ color: '#5b7c99', fontSize: '20px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: openFaq === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
-              </button>
-              {openFaq === i && <div style={{ paddingBottom: '20px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
+            <div key={i} style={{ background: '#111', padding: '24px' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#F0ECE6', marginBottom: '8px', lineHeight: 1.4 }}>{faq.q}</div>
+              <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.7 }}>{faq.a}</div>
             </div>
           ))}
-          <div style={{ borderTop: '0.5px solid #222' }} />
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <a href="/faq" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>See all FAQs →</a>
         </div>
       </section>
 
