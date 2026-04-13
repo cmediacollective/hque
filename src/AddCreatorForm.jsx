@@ -62,6 +62,19 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '20px 0 16px' }}>{t}</div>
   )
 
+  async function handlePhotoUpload(file) {
+    if (!file) return
+    setUploadingPhoto(true)
+    const ext = file.name.split('.').pop()
+    const path = 'talent/' + Date.now() + '.' + ext
+    const { error } = await supabase.storage.from('inquiry-photos').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('inquiry-photos').getPublicUrl(path)
+      set('photo_url', publicUrl)
+    }
+    setUploadingPhoto(false)
+  }
+
   async function save() {
     if (!form.name) return setError('Name is required')
     if (!form.types?.length) return setError('Select at least one type')
