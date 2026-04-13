@@ -36,6 +36,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
   const [talentSearch, setTalentSearch] = useState("")
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -51,6 +52,19 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     ...f,
     talent_ids: f.talent_ids.includes(id) ? f.talent_ids.filter(t => t !== id) : [...f.talent_ids, id]
   }))
+
+  async function handleLogoUpload(file) {
+    if (!file) return
+    setUploadingLogo(true)
+    const ext = file.name.split('.').pop()
+    const path = `${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('campaign-logos').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('campaign-logos').getPublicUrl(path)
+      set('brand_logo_url', publicUrl)
+    }
+    setUploadingLogo(false)
+  }
 
   async function handleSave() {
     if (!form.name.trim()) return setError('Campaign name is required')
@@ -112,14 +126,24 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
         {field('Campaign Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Summer Wellness Campaign' }))}
         {field('Brand', inp({ value: form.brand, onChange: e => set('brand', e.target.value), placeholder: 'e.g. Lululemon' }))}
-        {field('Brand Logo URL', inp({ value: form.brand_logo_url, onChange: e => set('brand_logo_url', e.target.value), placeholder: 'https://...' }))}
-        {field('Brand Website', inp({ value: form.brand_website, onChange: e => set('brand_website', e.target.value), placeholder: 'https://brand.com' }))}
-
-        {form.brand_logo_url && (
-          <div style={{ marginBottom: '18px' }}>
-            <img src={form.brand_logo_url} alt='brand logo preview' style={{ width: '56px', height: '56px', borderRadius: '2px', objectFit: 'contain', border: `0.5px solid ${border}`, background: '#fff', padding: '4px' }} onError={e => e.target.style.display = 'none'} />
+        {field('Brand Logo',
+          <div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {form.brand_logo_url && (
+                <img src={form.brand_logo_url} alt='logo' style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+              )}
+              <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', background: 'none', display: 'inline-block' }}>
+                {uploadingLogo ? 'Uploading...' : form.brand_logo_url ? 'Change Logo' : 'Upload Logo'}
+                <input type='file' accept='image/*' onChange={e => handleLogoUpload(e.target.files[0])} style={{ display: 'none' }} />
+              </label>
+              {form.brand_logo_url && (
+                <button onClick={() => set('brand_logo_url', '')} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+              )}
+            </div>
           </div>
         )}
+        {field('Brand Website', inp({ value: form.brand_website, onChange: e => set('brand_website', e.target.value), placeholder: 'https://brand.com' }))}
+
 
         {field('Campaign Type',
           <div style={{ display: 'flex', gap: '6px' }}>
