@@ -199,11 +199,11 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <Avatar creator={c} size={isMobile ? 88 : 96} square={true} />
-                <div style={{ flex: 1, minWidth: 0, paddingTop: '4px' }}>
+                <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                   <div style={{ fontSize: '11px', color: muted, marginBottom: '6px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
-                  <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>
+                  <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6, height: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{Array.isArray(c.niches) && c.niches.length > 0 ? c.niches.slice(0, 2).join(' · ') + (c.niches.length > 2 ? ' +' + (c.niches.length - 2) : '') : ''}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}` }}>
