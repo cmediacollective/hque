@@ -154,7 +154,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
             {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
             {!isMobile && (
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{filtered.length} creators</span>
+                
 
 
               </div>
@@ -163,7 +163,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         )}
         {showArchived && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em' }}>{filtered.length} archived</span>
+            
             <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>&lt;- Active Roster</button>
           </div>
         )}
