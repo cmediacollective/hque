@@ -216,10 +216,11 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     </div>
   ) : null
 
-  const stat = (label, value) => (
+  const stat = (line1, line2, value) => (
     <div style={{ flex: 1, padding: '14px', background: panelCard, borderRadius: '1px' }}>
       <div style={{ fontSize: '18px', color: panelText, fontWeight: 500, marginBottom: '4px' }}>{value || '—'}</div>
-      <div style={{ fontSize: '8px', color: panelMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontSize: '8px', color: panelMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{line1}</div>
+      <div style={{ fontSize: '8px', color: panelMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{line2}</div>
     </div>
   )
 
@@ -274,10 +275,10 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
           <div style={{ padding: '28px', flex: 1 }}>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '28px' }}>
-              {stat('IG Followers', creator.ig_followers?.toLocaleString())}
-              {stat('TikTok Followers', creator.tiktok_followers?.toLocaleString())}
-              {stat('YT Subscribers', creator.yt_subscribers?.toLocaleString())}
-              {stat('Eng Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
+              {stat('Instagram', 'Followers', creator.ig_followers?.toLocaleString())}
+              {stat('TikTok', 'Followers', creator.tiktok_followers?.toLocaleString())}
+              {stat('YouTube', 'Subscribers', creator.yt_subscribers?.toLocaleString())}
+              {stat('Engagement', 'Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
             </div>
 
             {Array.isArray(creator.niches) && creator.niches.length > 0 && (
