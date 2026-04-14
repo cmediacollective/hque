@@ -22,6 +22,7 @@ function App() {
   const [view, setView] = useState('talent')
   const [talentTab, setTalentTab] = useState('roster')
   const [showArchived, setShowArchived] = useState(false)
+  const [talentView, setTalentView] = useState('grid')
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -218,6 +219,13 @@ function App() {
               }}>{label}</button>
             ))}
             <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
+              {view === 'talent' && !isMobile && (
+                <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
+                  {['grid', 'list'].map(v => (
+                    <button key={v} onClick={() => setTalentView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: talentView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: talentView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                  ))}
+                </div>
+              )}
               <button onClick={() => setView('settings')} style={{
                 width: '100%', textAlign: 'left',
                 padding: view === 'settings' ? '9px 20px 9px 14.5px' : '9px 16px',
@@ -291,8 +299,8 @@ function App() {
           <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
 
           <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
-            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} />}
-            {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} />}
+            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
+            {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}

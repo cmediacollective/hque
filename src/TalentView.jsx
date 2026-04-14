@@ -18,9 +18,9 @@ function totalFollowers(creator) {
   if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
   return total.toLocaleString()
 }
-export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived }) {
+export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid' }) {
   const [creators, setCreators] = useState([])
-  const [view, setView] = useState('grid')
+  const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
   const [nicheFilter, setNicheFilter] = useState(null)
   const [loading, setLoading] = useState(true)
