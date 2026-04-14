@@ -135,7 +135,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
   )
 }
 
-export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId }) {
+export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = false }) {
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
   const [allCampaigns, setAllCampaigns] = useState([])
