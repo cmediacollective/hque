@@ -241,6 +241,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     <>
       {editing && (
         <AddCreatorForm
+          dark={dark}
           existing={creator}
           onClose={() => setEditing(false)}
           onSaved={() => { setEditing(false); onSaved() }}
