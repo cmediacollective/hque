@@ -136,6 +136,11 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
 }
 
 export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = false }) {
+  const panelBg = dark ? '#1A1A1A' : '#F5F3EF'
+  const panelBorder = dark ? '#2A2A2A' : '#D4CFC8'
+  const panelText = dark ? '#F2EEE8' : '#1A1A1A'
+  const panelMuted = dark ? '#888' : '#666'
+  const panelCard = dark ? '#222' : '#FFFFFF'
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
   const [allCampaigns, setAllCampaigns] = useState([])
@@ -243,9 +248,9 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
       )}
 
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
-        <div style={{ width: '560px', background: '#1A1A1A', height: '100vh', overflowY: 'auto', borderLeft: '0.5px solid #2A2A2A', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '560px', background: panelBg, height: '100vh', overflowY: 'auto', borderLeft: `0.5px solid ${panelBorder}`, display: 'flex', flexDirection: 'column' }}>
 
-          <div style={{ padding: '24px 28px', borderBottom: '0.5px solid #2A2A2A', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: '#1A1A1A', zIndex: 1 }}>
+          <div style={{ padding: '24px 28px', borderBottom: `0.5px solid ${panelBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: panelBg, zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {creator.photo_url
                 ? <img src={creator.photo_url} alt={creator.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #3A3A3A' }} onError={e => e.target.style.display = 'none'} />
