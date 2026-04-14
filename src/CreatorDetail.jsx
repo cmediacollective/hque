@@ -207,32 +207,32 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   }
 
   const row = (label, value, href) => value ? (
-    <div style={{ display: 'flex', padding: '12px 0', borderBottom: '0.5px solid #2A2A2A' }}>
-      <div style={{ width: '160px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#777', flexShrink: 0, paddingTop: '1px' }}>{label}</div>
+    <div style={{ display: 'flex', padding: '12px 0', borderBottom: `0.5px solid ${panelBorder}` }}>
+      <div style={{ width: '160px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: panelMuted, flexShrink: 0, paddingTop: '1px' }}>{label}</div>
       {href
         ? <a href={href} target='_blank' rel='noreferrer' style={{ fontSize: '13px', color: '#5b7c99', flex: 1, textDecoration: 'none', cursor: 'pointer' }} onMouseEnter={e => e.target.style.textDecoration = 'underline'} onMouseLeave={e => e.target.style.textDecoration = 'none'}>{value}</a>
-        : <div style={{ fontSize: '13px', color: '#CCC9C3', flex: 1 }}>{value}</div>
+        : <div style={{ fontSize: '13px', color: panelText, flex: 1 }}>{value}</div>
       }
     </div>
   ) : null
 
   const stat = (label, value) => (
-    <div style={{ flex: 1, padding: '14px', background: '#222', borderRadius: '1px' }}>
-      <div style={{ fontSize: '18px', color: '#F0ECE6', fontWeight: 500, marginBottom: '4px' }}>{value || '—'}</div>
-      <div style={{ fontSize: '8px', color: '#777', letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
+    <div style={{ flex: 1, padding: '14px', background: panelCard, borderRadius: '1px' }}>
+      <div style={{ fontSize: '18px', color: panelText, fontWeight: 500, marginBottom: '4px' }}>{value || '—'}</div>
+      <div style={{ fontSize: '8px', color: panelMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
     </div>
   )
 
   const rateRow = (label, value) => value ? (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '0.5px solid #2A2A2A' }}>
-      <div style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#777' }}>{label}</div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `0.5px solid ${panelBorder}` }}>
+      <div style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: panelMuted }}>{label}</div>
       <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>${value.toLocaleString()}</div>
     </div>
   ) : null
 
   const sectionHeader = (label, action) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666' }}>{label}</div>
+      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted }}>{label}</div>
       {action}
     </div>
   )
@@ -253,20 +253,20 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
           <div style={{ padding: '24px 28px', borderBottom: `0.5px solid ${panelBorder}`, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: panelBg, zIndex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {creator.photo_url
-                ? <img src={creator.photo_url} alt={creator.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: '0.5px solid #3A3A3A' }} onError={e => e.target.style.display = 'none'} />
-                : <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#2A2A2A', border: '0.5px solid #3A3A3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F2EEE8', flexShrink: 0 }}>
+                ? <img src={creator.photo_url} alt={creator.name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${panelBorder}` }} onError={e => e.target.style.display = 'none'} />
+                : <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: panelCard, border: `0.5px solid ${panelBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '20px', color: panelText, flexShrink: 0 }}>
                     {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
               }
               <div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(creator)}</div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '2px' }}>{creator.name}</div>
-                <div style={{ fontSize: '12px', color: '#777' }}>{creator.handles?.instagram ? `@${creator.handles.instagram}` : ''}</div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: panelText, marginBottom: '2px' }}>{creator.name}</div>
+                <div style={{ fontSize: '12px', color: panelMuted }}>{creator.handles?.instagram ? `@${creator.handles.instagram}` : ''}</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
-              <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 4px' }}>×</button>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: panelMuted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 4px' }}>×</button>
             </div>
           </div>
 
@@ -281,10 +281,10 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
 
             {Array.isArray(creator.niches) && creator.niches.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Niches</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Niches</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {creator.niches.map(n => (
-                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: '0.5px solid #3A3A3A', color: '#999', borderRadius: '1px' }}>{n}</span>
+                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${panelBorder}`, color: '#999', borderRadius: '1px' }}>{n}</span>
                   ))}
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
 
             {(creator.rates?.feed || creator.rates?.reel || creator.rates?.story || creator.rates?.tiktok || creator.rates?.youtube) && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Rates</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Rates</div>
                 {rateRow('IG Feed Post', creator.rates?.feed)}
                 {rateRow('IG Story', creator.rates?.story)}
                 {rateRow('IG Reel', creator.rates?.reel)}
@@ -302,7 +302,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             )}
 
             <div style={{ marginBottom: '28px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Details</div>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Details</div>
               {row('Tier', creator.tier)}
               {row('Primary Platform', creator.primary_platform)}
               {row('Location', creator.location)}
@@ -313,7 +313,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
 
             {(creator.contact_email || creator.manager_name || creator.manager_email) && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Contact</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Contact</div>
                 {row('Talent Email', creator.contact_email, `https://mail.google.com/mail/?view=cm&to=${creator.contact_email}`)}
                 {row('Manager', creator.manager_name)}
                 {row('Manager Email', creator.manager_email, `https://mail.google.com/mail/?view=cm&to=${creator.manager_email}`)}
@@ -322,8 +322,8 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
 
             {creator.notes && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Internal Notes</div>
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{creator.notes}</div>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Internal Notes</div>
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: panelCard, borderRadius: '1px' }}>{creator.notes}</div>
               </div>
             )}
 
@@ -347,7 +347,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               )}
 
               {outreachLogs.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: panelCard, borderRadius: '1px', overflow: 'hidden' }}>
                   {outreachLogs.map(log => (
                     <div key={log.id}
                       style={{ background: hoveredLog === log.id ? '#222' : '#1A1A1A', padding: '12px 14px', position: 'relative' }}
@@ -355,48 +355,48 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                       onMouseLeave={() => setHoveredLog(null)}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '11px', color: '#CCC9C3' }}>{formatDate(log.contacted_at)}</span>
-                          <span style={{ fontSize: '9px', color: '#666', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{log.method}</span>
+                          <span style={{ fontSize: '11px', color: panelText }}>{formatDate(log.contacted_at)}</span>
+                          <span style={{ fontSize: '9px', color: panelMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{log.method}</span>
                           {log.campaigns && <span style={{ fontSize: '9px', color: '#5b7c99' }}>{log.campaigns.name}</span>}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
                           <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${outreachStatusColor(log.status)}`, color: outreachStatusColor(log.status), borderRadius: '1px' }}>{log.status}</span>
                           {hoveredLog === log.id && (
-                            <button onClick={() => deleteOutreach(log.id)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px' }} title='Delete'>×</button>
+                            <button onClick={() => deleteOutreach(log.id)} style={{ background: 'none', border: 'none', color: panelMuted, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px' }} title='Delete'>×</button>
                           )}
                         </div>
                       </div>
-                      {log.notes && <div style={{ fontSize: '11px', color: '#777', lineHeight: 1.6 }}>{log.notes}</div>}
+                      {log.notes && <div style={{ fontSize: '11px', color: panelMuted, lineHeight: 1.6 }}>{log.notes}</div>}
                     </div>
                   ))}
                 </div>
               ) : (
-                !showOutreachForm && <div style={{ fontSize: '12px', color: '#555', fontStyle: 'italic' }}>No outreach logged yet.</div>
+                !showOutreachForm && <div style={{ fontSize: '12px', color: panelMuted, fontStyle: 'italic' }}>No outreach logged yet.</div>
               )}
             </div>
 
             {campaigns.length > 0 && (
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Campaigns</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Campaigns</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: panelCard, borderRadius: '1px', overflow: 'hidden' }}>
                   {campaigns.map(c => (
                     <div key={c.id}
                       onClick={() => { onClose(); onOpenCampaign(c) }}
-                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#1A1A1A', cursor: 'pointer' }}
+                      style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: panelBg, cursor: 'pointer' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#222'}
                       onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}>
                       <div>
-                        <div style={{ fontSize: '13px', color: '#CCC9C3' }}>{c.name}</div>
-                        {c.brand && <div style={{ fontSize: '10px', color: '#777', marginTop: '2px' }}>{c.brand}</div>}
+                        <div style={{ fontSize: '13px', color: panelText }}>{c.name}</div>
+                        {c.brand && <div style={{ fontSize: '10px', color: panelMuted, marginTop: '2px' }}>{c.brand}</div>}
                         <div style={{ display: 'flex', gap: '8px', marginTop: '5px', alignItems: 'center' }}>
                           <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(c.payment_status)}`, color: paymentColor(c.payment_status), borderRadius: '1px' }}>{c.payment_status || 'Pending'}</span>
-                          {c.payment_method && <span style={{ fontSize: '9px', color: '#666' }}>{c.payment_method}</span>}
-                          {c.payment_date && <span style={{ fontSize: '9px', color: '#666' }}>{formatPaymentDate(c.payment_date)}</span>}
+                          {c.payment_method && <span style={{ fontSize: '9px', color: panelMuted }}>{c.payment_method}</span>}
+                          {c.payment_date && <span style={{ fontSize: '9px', color: panelMuted }}>{formatPaymentDate(c.payment_date)}</span>}
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
-                        <span style={{ fontSize: '16px', color: '#444' }}>›</span>
+                        <span style={{ fontSize: '16px', color: panelMuted }}>›</span>
                       </div>
                     </div>
                   ))}
