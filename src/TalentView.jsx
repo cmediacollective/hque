@@ -251,7 +251,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
                   <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
                 </div>
               </div>
-              <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '3px 8px', display: 'inline-block' }}>{displayType(c)}</div>
+              <div style={{ fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5b7c99' }}>{displayType(c)}</div>
               <div style={{ fontSize: '13px', color: text }}>{totalFollowers(c)}</div>
               <div style={{ fontSize: '13px', color: muted }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
               <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>
