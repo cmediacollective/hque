@@ -275,8 +275,8 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '28px' }}>
               {stat('IG Followers', creator.ig_followers?.toLocaleString())}
-              {stat('TikTok', creator.tiktok_followers?.toLocaleString())}
-              {stat('YT Subs', creator.yt_subscribers?.toLocaleString())}
+              {stat('TikTok Followers', creator.tiktok_followers?.toLocaleString())}
+              {stat('YT Subscribers', creator.yt_subscribers?.toLocaleString())}
               {stat('Eng Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
             </div>
 
