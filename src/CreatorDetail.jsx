@@ -268,6 +268,9 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
+              {creator.media_kit_url && (
+                <a href={creator.media_kit_url} target='_blank' rel='noreferrer' style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', textDecoration: 'none', borderRadius: '1px' }}>Media Kit ↗</a>
+              )}
               <button onClick={onClose} style={{ background: 'none', border: 'none', color: panelMuted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 4px' }}>×</button>
             </div>
           </div>

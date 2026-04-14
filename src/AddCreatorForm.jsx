@@ -26,12 +26,13 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     name: '', types: [], tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
-    location: '', notes: '', photo_url: '',
+    location: '', notes: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
     rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '' }
   })
   const [saving, setSaving] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [uploadingKit, setUploadingKit] = useState(false)
   const [error, setError] = useState('')
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
@@ -61,6 +62,19 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const sectionLabel = (t) => (
     <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '20px 0 16px' }}>{t}</div>
   )
+
+  async function handleKitUpload(file) {
+    if (!file) return
+    setUploadingKit(true)
+    const ext = file.name.split('.').pop()
+    const path = 'kits/' + Date.now() + '.' + ext
+    const { error } = await supabase.storage.from('media-kits').upload(path, file, { upsert: true })
+    if (!error) {
+      const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
+      set('media_kit_url', publicUrl)
+    }
+    setUploadingKit(false)
+  }
 
   async function handlePhotoUpload(file) {
     if (!file) return
@@ -212,6 +226,21 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
             {field('Manager Name', inp({ value: form.manager_name, onChange: e => set('manager_name', e.target.value), placeholder: 'Manager name' }))}
           </div>
           {field('Manager Email', inp({ value: form.manager_email, onChange: e => set('manager_email', e.target.value), placeholder: 'manager@example.com' }))}
+
+          {field('Media Kit',
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {form.media_kit_url && (
+                <a href={form.media_kit_url} target='_blank' rel='noreferrer' style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.1em' }}>View PDF ↗</a>
+              )}
+              <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
+                {uploadingKit ? 'Uploading...' : form.media_kit_url ? 'Replace PDF' : 'Upload PDF'}
+                <input type='file' accept='application/pdf' onChange={e => handleKitUpload(e.target.files[0])} style={{ display: 'none' }} />
+              </label>
+              {form.media_kit_url && (
+                <button onClick={() => set('media_kit_url', '')} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+              )}
+            </div>
+          )}
 
           {field('Internal Notes',
             <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='Any notes...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '80px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
