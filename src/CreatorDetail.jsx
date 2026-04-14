@@ -142,7 +142,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   const [outreachLogs, setOutreachLogs] = useState([])
   const [showOutreachForm, setShowOutreachForm] = useState(false)
   const [hoveredLog, setHoveredLog] = useState(null)
-  const dark = true
+
 
   useEffect(() => { fetchCampaigns(); fetchAllCampaigns(); fetchOutreach() }, [creator.id])
 
