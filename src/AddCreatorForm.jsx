@@ -230,11 +230,11 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           {field('Media Kit',
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               {form.media_kit_url && (
-                <a href={form.media_kit_url} target='_blank' rel='noreferrer' style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.1em' }}>View PDF ↗</a>
+                <a href={form.media_kit_url} target='_blank' rel='noreferrer' style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.1em' }}>View File ↗</a>
               )}
               <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
-                {uploadingKit ? 'Uploading...' : form.media_kit_url ? 'Replace PDF' : 'Upload PDF'}
-                <input type='file' accept='application/pdf' onChange={e => handleKitUpload(e.target.files[0])} style={{ display: 'none' }} />
+                {uploadingKit ? 'Uploading...' : form.media_kit_url ? 'Replace File' : 'Upload Media Kit'}
+                <input type='file' accept='application/pdf,image/jpeg,image/png' onChange={e => { if (e.target.files[0]) handleKitUpload(e.target.files[0]); e.target.value = '' }} style={{ display: 'none' }} />
               </label>
               {form.media_kit_url && (
                 <button onClick={() => set('media_kit_url', '')} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
