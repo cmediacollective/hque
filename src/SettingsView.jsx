@@ -256,12 +256,12 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 {agencyForm.agency_logo_url && (
                   <img src={agencyForm.agency_logo_url} alt='logo' style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
                 )}
-                <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
+                <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
                   {uploadingLogo ? 'Uploading...' : agencyForm.agency_logo_url ? 'Change Logo' : 'Upload Logo'}
                   <input type='file' accept='image/*' onChange={e => uploadAgencyLogo(e.target.files[0])} style={{ display: 'none' }} />
                 </label>
                 {agencyForm.agency_logo_url && (
-                  <button onClick={() => setAgencyForm(f => ({ ...f, agency_logo_url: '' }))} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+                  <button onClick={() => setAgencyForm(f => ({ ...f, agency_logo_url: '' }))} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
                 )}
               </div>
             )}
