@@ -21,6 +21,7 @@ import FAQPage from './FAQPage'
 function App() {
   const [view, setView] = useState('talent')
   const [talentTab, setTalentTab] = useState('roster')
+  const [showArchived, setShowArchived] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -276,7 +277,7 @@ function App() {
 
           {view === 'talent' && (
             <div style={{ display: 'flex', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-              {[['roster', 'Roster'], ['inquiries', 'Inquiries']].map(([key, label]) => (
+              {[['roster', 'Roster'], ['inquiries', 'Inquiries'], ['archived', 'Archived']].map(([key, label]) => (
                 <button key={key} onClick={() => setTalentTab(key)} style={{
                   padding: isMobile ? '8px 16px' : '10px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
                   background: 'none', border: 'none',
@@ -290,7 +291,8 @@ function App() {
           <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
 
           <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
-            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} />}
+            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} />}
+            {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}

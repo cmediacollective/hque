@@ -18,12 +18,11 @@ function totalFollowers(creator) {
   if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
   return total.toLocaleString()
 }
-export default function TalentView({ dark = true, orgId, isMobile = false }) {
+export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived }) {
   const [creators, setCreators] = useState([])
   const [view, setView] = useState('grid')
   const [typeFilter, setTypeFilter] = useState('All Types')
   const [nicheFilter, setNicheFilter] = useState(null)
-  const [showArchived, setShowArchived] = useState(false)
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
   const [selectedCampaign, setSelectedCampaign] = useState(null)
@@ -147,18 +146,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
         </div>
       )}
 
-      {/* Roster / Archived tabs */}
-      <div style={{ display: 'flex', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-        {[['roster', 'Roster'], ['archived', 'Archived']].map(([key, label]) => (
-          <button key={key} onClick={() => { setShowArchived(key === 'archived'); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{
-            padding: '9px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
-            background: 'none', border: 'none',
-            borderBottom: (key === 'archived') === showArchived ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-            color: (key === 'archived') === showArchived ? text : muted, cursor: 'pointer'
-          }}>{label}</button>
-        ))}
-      </div>
-
       <div style={{ padding: isMobile ? '8px 12px' : '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
         {!showArchived && (
           <div style={{ display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
@@ -181,7 +168,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
         {showArchived && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em' }}>{filtered.length} archived</span>
-            <button onClick={() => { setShowArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>&lt;- Active Roster</button>
+            <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>&lt;- Active Roster</button>
           </div>
         )}
       </div>
