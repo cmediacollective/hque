@@ -84,9 +84,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     setUploadingPhoto(true)
     const ext = file.name.split('.').pop()
     const path = 'talent/' + Date.now() + '.' + ext
-    const { error } = await supabase.storage.from('inquiry-photos').upload(path, file, { upsert: true })
+    const { error } = await supabase.storage.from('media-kits').upload(path, file, { upsert: true })
     if (!error) {
-      const { data: { publicUrl } } = supabase.storage.from('inquiry-photos').getPublicUrl(path)
+      const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
       set('photo_url', publicUrl)
     }
     setUploadingPhoto(false)
