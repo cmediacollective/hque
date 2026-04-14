@@ -200,11 +200,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
 
-              {hovering === c.id && !isMobile && (
-                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: `0.5px solid ${border2}`, color: muted, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
-                  {showArchived ? 'Restore' : 'Archive'}
-                </button>
-              )}
+
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <Avatar creator={c} size={isMobile ? 88 : 96} square={true} />
@@ -224,6 +220,11 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
                     <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
                   </div>
+              {hovering === c.id && !isMobile && (
+                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ marginTop: '10px', width: '100%', background: 'none', border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px', cursor: 'pointer', borderRadius: '1px' }}>
+                  {showArchived ? 'Restore' : 'Archive'}
+                </button>
+              )}
               </div>
             </div>
           ))}
