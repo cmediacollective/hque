@@ -200,7 +200,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         ))}
       </div>
 
-      <div style={{ flex: 1, padding: '0', maxWidth: 'none', overflow: 'hidden' }}>
+      <div style={{ flex: 1, padding: activeTab === 'billing' ? '0' : '32px', maxWidth: 'none', overflowY: 'auto' }}>
 
         {activeTab === 'profile' && (
           <div>
