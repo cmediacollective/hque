@@ -102,7 +102,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
     return c.type || 'Influencer'
   }
 
-  const cols = isMobile ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))'
+  const cols = isMobile ? 'repeat(1, 1fr)' : 'repeat(4, minmax(0, 1fr))'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
@@ -195,7 +195,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
         <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '1px', background: gridBg, flex: 1, overflowY: 'auto' }}>
           {filtered.map(c => (
             <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '18px', cursor: 'pointer', position: 'relative' }}
+              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '16px' : '18px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
@@ -207,12 +207,12 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
               )}
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
-                <Avatar creator={c} size={isMobile ? 72 : 96} square={true} />
+                <Avatar creator={c} size={isMobile ? 88 : 96} square={true} />
                 <div style={{ flex: 1, minWidth: 0, paddingTop: '4px' }}>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '14px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                   <div style={{ fontSize: '11px', color: muted, marginBottom: '6px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
-                  {!isMobile && <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>}
+                  <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>
                 </div>
               </div>
               <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}` }}>
@@ -220,12 +220,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
                   <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{totalFollowers(c)}</div>
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
-                {!isMobile && (
-                  <div style={{ flex: 1 }}>
+                <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
                   </div>
-                )}
               </div>
             </div>
           ))}
