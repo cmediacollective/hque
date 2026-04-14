@@ -309,7 +309,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             {(creator.contact_email || creator.manager_name || creator.manager_email) && (
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px' }}>Contact</div>
-                {row('Creator Email', creator.contact_email, `https://mail.google.com/mail/?view=cm&to=${creator.contact_email}`)}
+                {row('Talent Email', creator.contact_email, `https://mail.google.com/mail/?view=cm&to=${creator.contact_email}`)}
                 {row('Manager', creator.manager_name)}
                 {row('Manager Email', creator.manager_email, `https://mail.google.com/mail/?view=cm&to=${creator.manager_email}`)}
               </div>
