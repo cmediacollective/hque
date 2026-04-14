@@ -76,14 +76,6 @@ export default function ReportsView({ dark = true, orgId }) {
   return (
     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: bg, padding: '28px' }}>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        {stat('Total Budget', `$${totalBudget.toLocaleString()}`)}
-        {stat('Campaigns', campaigns.length, `${activeCampaigns} active · ${completedCampaigns} completed · ${pitchCampaigns} pitch`)}
-        {stat('Payments', `${totalPaid} paid`, `${totalPending} pending`)}
-        {stat('Total Talent', creators.length)}
-      </div>
-
-
       {/* Monthly Budget Chart */}
       <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px', marginBottom: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px' }}>
@@ -105,6 +97,14 @@ export default function ReportsView({ dark = true, orgId }) {
           ))}
         </div>
       </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        {stat('Total Budget', `$${totalBudget.toLocaleString()}`)}
+        {stat('Campaigns', campaigns.length, `${activeCampaigns} active · ${completedCampaigns} completed · ${pitchCampaigns} pitch`)}
+        {stat('Payments', `${totalPaid} paid`, `${totalPending} pending`)}
+        {stat('Total Talent', creators.length)}
+      </div>
+
 
       {section('Campaign Breakdown')}
 
