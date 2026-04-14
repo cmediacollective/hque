@@ -52,18 +52,6 @@ export default function ReportsView({ dark = true, orgId }) {
   const maxBudget = Math.max(...monthlyBudget.map(m => m.total), 1)
   const currentMonth = new Date().getMonth()
 
-  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const monthlyBudget = MONTHS.map((month, i) => {
-    const total = campaigns.filter(camp => {
-      const date = camp.start_date || camp.created_at
-      if (!date) return false
-      const d = new Date(date)
-      return d.getFullYear() === 2026 && d.getMonth() === i
-    }).reduce((sum, camp) => sum + (Number(camp.budget) || 0), 0)
-    return { month, total }
-  })
-  const maxBudget = Math.max(...monthlyBudget.map(m => m.total), 1)
-  const currentMonth = new Date().getMonth()
   const campaignLinks = (campaignId) => links.filter(l => l.campaign_id === campaignId)
   const getCreator = (id) => creators.find(c => c.id === id)
 
