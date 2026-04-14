@@ -147,6 +147,18 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
         </div>
       )}
 
+      {/* Roster / Archived tabs */}
+      <div style={{ display: 'flex', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
+        {[['roster', 'Roster'], ['archived', 'Archived']].map(([key, label]) => (
+          <button key={key} onClick={() => { setShowArchived(key === 'archived'); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{
+            padding: '9px 20px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
+            background: 'none', border: 'none',
+            borderBottom: (key === 'archived') === showArchived ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+            color: (key === 'archived') === showArchived ? text : muted, cursor: 'pointer'
+          }}>{label}</button>
+        ))}
+      </div>
+
       <div style={{ padding: isMobile ? '8px 12px' : '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
         {!showArchived && (
           <div style={{ display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
