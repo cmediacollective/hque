@@ -83,6 +83,29 @@ export default function ReportsView({ dark = true, orgId }) {
         {stat('Total Talent', creators.length)}
       </div>
 
+
+      {/* Monthly Budget Chart */}
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px' }}>
+          <div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Budget by Month</div>
+            <div style={{ fontSize: '10px', color: muted }}>2026 — based on campaign start dates</div>
+          </div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>${totalBudget.toLocaleString()}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '140px' }}>
+          {monthlyBudget.map((m, i) => (
+            <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
+              {m.total > 0 && <div style={{ fontSize: '8px', color: '#5b7c99', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                {'$' + (m.total >= 1000 ? (m.total/1000).toFixed(0) + 'K' : m.total)}
+              </div>}
+              <div style={{ width: '100%', background: m.total > 0 ? (i === currentMonth ? '#5b7c99' : (dark ? '#2A3A4A' : '#C4D4E0')) : (dark ? '#1E1E1E' : '#E8E4DE'), borderRadius: '1px 1px 0 0', height: m.total > 0 ? Math.max((m.total / maxBudget) * 90, 6) + 'px' : '3px', transition: 'height 0.3s ease' }} />
+              <div style={{ fontSize: '8px', color: i === currentMonth ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: i === currentMonth ? 600 : 400 }}>{m.month}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {section('Campaign Breakdown')}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
