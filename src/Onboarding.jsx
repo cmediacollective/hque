@@ -57,7 +57,7 @@ export default function Onboarding({ user, onComplete }) {
         </div>
 
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>Agency Name</div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>Agency / Brand Name</div>
           <input
             value={agencyName}
             onChange={e => setAgencyName(e.target.value)}
