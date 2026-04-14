@@ -7,6 +7,17 @@ import CampaignDetail from './CampaignDetail'
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books', 'Specialty']
 
+
+function totalFollowers(creator) {
+  const ig = parseInt(creator.ig_followers) || 0
+  const tt = parseInt(creator.tiktok_followers) || 0
+  const yt = parseInt(creator.yt_subscribers) || 0
+  const total = ig + tt + yt
+  if (total === 0) return '—'
+  if (total >= 1000000) return (total / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+  if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
+  return total.toLocaleString()
+}
 export default function TalentView({ dark = true, orgId, isMobile = false }) {
   const [creators, setCreators] = useState([])
   const [view, setView] = useState('grid')
@@ -204,7 +215,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
               {!isMobile && <div style={{ fontSize: '10px', color: subtle, marginBottom: '14px', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6 }}>{Array.isArray(c.niches) ? c.niches.join(' · ') : ''}</div>}
               <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}` }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{c.ig_followers?.toLocaleString() || '—'}</div>
+                  <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{totalFollowers(c)}</div>
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
                 {!isMobile && (
@@ -240,7 +251,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
                 </div>
               </div>
               <div style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #1A2A38', color: '#5b7c99', padding: '3px 8px', display: 'inline-block' }}>{displayType(c)}</div>
-              <div style={{ fontSize: '13px', color: text }}>{c.ig_followers?.toLocaleString() || '—'}</div>
+              <div style={{ fontSize: '13px', color: text }}>{totalFollowers(c)}</div>
               <div style={{ fontSize: '13px', color: muted }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
               <div style={{ fontSize: '13px', color: '#5b7c99', fontWeight: 500 }}>{c.rates?.feed ? `$${c.rates.feed.toLocaleString()}` : '—'}</div>
               <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
