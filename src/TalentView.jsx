@@ -156,7 +156,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false }) {
             {!isMobile && (
               <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                 <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{filtered.length} creators</span>
-                <button onClick={() => { setShowArchived(a => !a); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border2}`, borderRadius: '1px', cursor: 'pointer', color: muted, background: 'none', whiteSpace: 'nowrap' }}>Archived</button>
+
                 <div style={{ display: 'flex', border: `0.5px solid ${border2}`, borderRadius: '2px', overflow: 'hidden' }}>
                   {['grid', 'list'].map(v => (
                     <button key={v} onClick={() => setView(v)} style={{ padding: '5px 12px', fontSize: '9px', background: view === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: 'none', color: view === v ? text : muted, cursor: 'pointer', borderRight: v === 'grid' ? `0.5px solid ${border2}` : 'none', letterSpacing: '0.1em' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
