@@ -68,12 +68,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     setUploadingKit(true)
     const ext = file.name.split('.').pop()
     const path = 'kits/' + Date.now() + '.' + ext
-    console.log('Uploading to media-kits:', path, file.type, file.size)
-    const { data, error } = await supabase.storage.from('media-kits').upload(path, file, { upsert: true })
-    console.log('Upload result:', data, error)
+    const { error } = await supabase.storage.from('media-kits').upload(path, file, { upsert: true })
     if (!error) {
       const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
-      console.log('Public URL:', publicUrl)
       set('media_kit_url', publicUrl)
     }
     setUploadingKit(false)
