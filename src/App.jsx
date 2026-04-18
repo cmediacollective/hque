@@ -17,6 +17,7 @@ import LandingPage from './LandingPage'
 import LegalPage from './LegalPage'
 import NotificationsPanel from './NotificationsPanel'
 import FAQPage from './FAQPage'
+import PricingPage from './PricingPage'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -52,6 +53,7 @@ function App() {
   const isPrivacyPage = window.location.pathname === '/privacy'
   const isTermsPage = window.location.pathname === '/terms'
   const isFaqPage = window.location.pathname === '/faq'
+  const isPricingPage = window.location.pathname === '/pricing'
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
@@ -173,6 +175,7 @@ function App() {
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
   if (isFaqPage) return <FAQPage />
+  if (isPricingPage) return <PricingPage onGetStarted={() => window.location.href = '/'} />
 
   if (authLoading || profileLoading) return (
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
