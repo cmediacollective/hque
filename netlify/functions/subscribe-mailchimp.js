@@ -1,7 +1,7 @@
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' }
 
-  const { email } = JSON.parse(event.body)
+  const { email, firstName, lastName } = JSON.parse(event.body)
   if (!email) return { statusCode: 400, body: JSON.stringify({ error: 'Email required' }) }
 
   const API_KEY = process.env.MAILCHIMP_API_KEY

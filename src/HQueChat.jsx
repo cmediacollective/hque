@@ -62,6 +62,8 @@ export default function HQueChat() {
   const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('hque_chat_email') : ''
   const savedMessages = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('hque_chat_messages') || 'null') : null
 
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(!!savedEmail)
   const [emailError, setEmailError] = useState('')
@@ -86,10 +88,11 @@ export default function HQueChat() {
       await fetch('/.netlify/functions/subscribe-mailchimp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
+        body: JSON.stringify({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim() })
       })
     } catch {}
     localStorage.setItem('hque_chat_email', email.trim())
+    localStorage.setItem('hque_chat_name', firstName.trim() + ' ' + lastName.trim())
     setEmailSubmitted(true)
     setSubmittingEmail(false)
   }
@@ -146,6 +149,20 @@ export default function HQueChat() {
               </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', marginBottom: '8px' }}>Chat with HQue</div>
               <div style={{ fontSize: '12px', color: '#666', lineHeight: 1.7, marginBottom: '24px' }}>Enter your email to get started. We will only reach out if you have questions.</div>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', width: '100%' }}>
+                <input
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  placeholder='First name'
+                  style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                />
+                <input
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  placeholder='Last name'
+                  style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                />
+              </div>
               <input
                 value={email}
                 onChange={e => setEmail(e.target.value)}
