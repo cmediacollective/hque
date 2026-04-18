@@ -18,6 +18,12 @@ import LegalPage from './LegalPage'
 import NotificationsPanel from './NotificationsPanel'
 import FAQPage from './FAQPage'
 import PricingPage from './PricingPage'
+import BlogPage from './BlogPage'
+import BlogPostPage from './BlogPostPage'
+import PricingPage from './PricingPage'
+import BlogPage from './BlogPage'
+import BlogPostPage from './BlogPostPage'
+import PricingPage from './PricingPage'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -53,6 +59,12 @@ function App() {
   const isPrivacyPage = window.location.pathname === '/privacy'
   const isTermsPage = window.location.pathname === '/terms'
   const isFaqPage = window.location.pathname === '/faq'
+  const isPricingPage = window.location.pathname === '/pricing'
+  const isBlogPage = window.location.pathname === '/blog'
+  const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
+  const isPricingPage = window.location.pathname === '/pricing'
+  const isBlogPage = window.location.pathname === '/blog'
+  const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
   const isPricingPage = window.location.pathname === '/pricing'
 
   useEffect(() => {
@@ -175,6 +187,12 @@ function App() {
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
   if (isFaqPage) return <FAQPage />
+  if (isPricingPage) return <PricingPage onGetStarted={() => setShowAuth(true)} />
+  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowAuth(true)} />
+  if (isBlogPage) return <BlogPage onGetStarted={() => setShowAuth(true)} />
+  if (isPricingPage) return <PricingPage onGetStarted={() => setShowAuth(true)} />
+  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowAuth(true)} />
+  if (isBlogPage) return <BlogPage onGetStarted={() => setShowAuth(true)} />
   if (isPricingPage) return <PricingPage onGetStarted={() => window.location.href = '/'} />
 
   if (authLoading || profileLoading) return (
