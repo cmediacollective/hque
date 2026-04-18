@@ -20,7 +20,7 @@ const VIDEOS_REVERSED = [...VIDEOS].reverse()
 const isMob = () => window.innerWidth < 768
 
 const FAKE_TALENT = [
-  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', photo: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', photo: 'https://images.unsplash.com/flagged/photo-1572129063552-570d721b9d5e?w=100&h=100&fit=crop&crop=face' },
   { name: 'Jordan Ellis', type: 'UGC', handle: '@jordanellis', followers: '124K', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face' },
   { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face' },
   { name: 'Caden Park', type: 'ATHLETE', handle: '@cadenpark', followers: '390K', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
