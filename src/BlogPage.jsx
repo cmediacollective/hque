@@ -113,7 +113,7 @@ function ThrowCard({ post, height = '220px', titleSize = '17px', showExcerpt = f
       onMouseUp={onMouseUp}
       onMouseLeave={e => { if (dragging) onMouseUp(e) }}
     >
-      
+      <a
         href={!dragging && distFromHome < 5 ? ('/blog/' + post.slug) : undefined}
         onClick={e => { if (distFromHome >= 5) { e.preventDefault() } }}
         style={{ textDecoration: 'none', display: 'block' }}
