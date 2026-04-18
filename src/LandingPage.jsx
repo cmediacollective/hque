@@ -442,7 +442,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       </section>
 
       {/* App Showcase */}
-      <section style={{ padding: mobile ? '0 20px 80px' : '0 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <section style={{ padding: mobile ? '0 20px 80px' : '80px 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {mobile
           ? <MobileAppPreview />
           : <DesktopAppPreview activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
