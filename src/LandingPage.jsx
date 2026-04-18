@@ -31,10 +31,10 @@ const FAKE_TALENT = [
 ]
 
 const FAKE_CAMPAIGNS = [
-  { brand: 'Sephora', name: 'Spring Glow Campaign', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#D4A0A0', initial: 'S' },
-  { brand: 'Nike', name: 'Q2 Brand Push', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#1A1A1A', initial: 'N' },
-  { brand: 'Glossier', name: 'Holiday Collection', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#C8A2C8', initial: 'G' },
-  { brand: 'Whole Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF' },
+  { brand: 'Mineral Beauty', name: 'Lotus Fall Collection', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#D4A0A0', initial: 'S' },
+  { brand: 'High Athletics', name: 'In-Store Activation', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#1A1A1A', initial: 'N' },
+  { brand: 'New Skin', name: 'Oceanside Launch', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#C8A2C8', initial: 'G' },
+  { brand: 'Earth Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF' },
 ]
 
 const FAKE_TASKS = [
