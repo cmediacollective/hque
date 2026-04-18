@@ -20,7 +20,7 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
 
   return (
     <>
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: isMobile ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled || menuOpen ? 'rgba(17,17,17,0.98)' : 'rgba(17,17,17,0.3)', borderBottom: scrolled || menuOpen ? '0.5px solid #222' : 'none', transition: 'all 0.3s ease' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: isMobile ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled || menuOpen ? 'rgba(17,17,17,0.98)' : 'rgba(17,17,17,0.85)', borderBottom: scrolled || menuOpen ? '0.5px solid #222' : 'none', transition: 'all 0.3s ease' }}>
         <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: isMobile ? '80px' : '100px', height: 'auto' }} /></a>
 
         {isMobile ? (

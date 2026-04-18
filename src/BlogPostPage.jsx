@@ -10,12 +10,14 @@ export default function BlogPostPage({ slug, onGetStarted }) {
     <div style={{ background: '#111', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '32px', color: '#F0ECE6', marginBottom: '16px' }}>Post not found</div>
-        <a href="/blog" style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Back to journal</a>
+        <a href="/blog" style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.14em', textTransform: 'uppercase' }}>The Pitch</a>
       </div>
     </div>
   )
 
-  const related = POSTS.filter(p => p.slug !== slug && p.category === post.category).slice(0, 3)
+  const sameCat = POSTS.filter(p => p.slug !== slug && p.category === post.category)
+  const others = POSTS.filter(p => p.slug !== slug && p.category !== post.category)
+  const related = [...sameCat, ...others].slice(0, 3)
   const paragraphs = post.body.split('\n\n').filter(p => p.trim())
 
   return (
@@ -36,7 +38,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
 
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: isMobile ? '40px 24px 60px' : '60px 48px 80px' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap' }}>
-          <a href="/blog" style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>← Journal</a>
+          <a href="/blog" style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>← The Pitch</a>
           <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#444', border: '0.5px solid #2A2A2A', padding: '3px 10px', borderRadius: '1px' }}>{post.category}</span>
           <span style={{ fontSize: '10px', color: '#444' }}>{post.readTime}</span>
           <span style={{ fontSize: '10px', color: '#333' }}>{post.date}</span>
@@ -69,7 +71,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
 
       {related.length > 0 && (
         <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px 60px' : '60px 48px 80px', maxWidth: '1100px', margin: '0 auto' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>More from the journal</div>
+          <div style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>More from The Pitch</div>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '2px' }}>
             {related.map(p => (
               <a key={p.slug} href={'/blog/' + p.slug} style={{ textDecoration: 'none' }}>
@@ -90,7 +92,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
 
       <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '20px 24px' : '20px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: '10px', color: '#2A2A2A' }}>© 2026 HQue. All rights reserved.</span>
-        <a href="/blog" style={{ fontSize: '10px', color: '#333', textDecoration: 'none', letterSpacing: '0.1em' }}>← Back to journal</a>
+        <a href="/blog" style={{ fontSize: '10px', color: '#333', textDecoration: 'none', letterSpacing: '0.1em' }}>← The Pitch</a>
       </div>
       <HQueChat />
     </div>

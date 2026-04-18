@@ -563,7 +563,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
           <div>
             <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Resources</div>
-            {[['FAQ', '/faq'], ['Blog', null], ['Help Center', null]].map(([label, href]) => (
+            {[['FAQ', '/faq'], ['The Pitch', '/blog'], ['Help Center', null]].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
                 {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
               </div>
