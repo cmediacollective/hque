@@ -31,10 +31,10 @@ const FAKE_TALENT = [
 ]
 
 const FAKE_CAMPAIGNS = [
-  { brand: 'Mineral Beauty', name: 'Lotus Fall Collection', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#D4A0A0', initial: 'S' },
-  { brand: 'High Athletics', name: 'In-Store Activation', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#1A1A1A', initial: 'N' },
-  { brand: 'New Skin', name: 'Oceanside Launch', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#C8A2C8', initial: 'G' },
-  { brand: 'Earth Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF' },
+  { brand: 'Mineral Beauty', name: 'Lotus Fall Collection', status: 'ACTIVE', budget: '$24,000', talent: '4 talent', color: '#D4A0A0', initial: 'S', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/MINERAL.svg' },
+  { brand: 'High Athletics', name: 'In-Store Activation', status: 'ACTIVE', budget: '$18,500', talent: '3 talent', color: '#1A1A1A', initial: 'N', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/High Athletics.svg' },
+  { brand: 'New Skin', name: 'Oceanside Launch', status: 'PITCH', budget: '$12,000', talent: '2 talent', color: '#C8A2C8', initial: 'G', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/NEW SKIN.svg' },
+  { brand: 'Earth Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/Earth Foods.svg' },
 ]
 
 const FAKE_TASKS = [
