@@ -408,6 +408,13 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
               </div>
             ))}
           </div>
+          <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 42s linear infinite', width: 'max-content' }}>
+            {[...VIDEOS, ...VIDEOS].map((v, i) => (
+              <div key={i} className="vtile" style={{ width: mobile ? '90px' : '130px', height: mobile ? '160px' : '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
           {!mobile && (
             <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 55s linear infinite', width: 'max-content' }}>
               {[...VIDEOS, ...VIDEOS].map((v, i) => (
