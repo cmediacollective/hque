@@ -31,7 +31,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
 
       <MarketingNav onGetStarted={onGetStarted} />
 
-      <div style={{ height: isMobile ? '260px' : '480px', position: 'relative', overflow: 'hidden', marginTop: '57px' }}>
+      <div style={{ height: isMobile ? '260px' : '480px', position: 'relative', overflow: 'hidden', marginTop: '80px' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(' + post.image + ')', backgroundSize: 'cover', backgroundPosition: 'center' }} />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.3) 0%, rgba(17,17,17,0.7) 100%)' }} />
       </div>
