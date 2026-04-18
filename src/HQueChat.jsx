@@ -60,7 +60,9 @@ function renderMessage(text) {
 export default function HQueChat() {
   const [open, setOpen] = useState(false)
   const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('hque_chat_email') : ''
+  const savedName = typeof window !== 'undefined' ? localStorage.getItem('hque_chat_firstname') : ''
   const savedMessages = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('hque_chat_messages') || 'null') : null
+  const greeting = savedName ? `Hi ${savedName}! Welcome back to HQue. What can I help you with?` : 'Hi! I am the HQue assistant. Ask me anything about how HQue works, pricing, or how to get started.'
 
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -68,7 +70,7 @@ export default function HQueChat() {
   const [emailSubmitted, setEmailSubmitted] = useState(!!savedEmail)
   const [emailError, setEmailError] = useState('')
   const [messages, setMessages] = useState(savedMessages || [
-    { role: 'assistant', content: 'Hi! I am the HQue assistant. Ask me anything about how HQue works, pricing, or how to get started.' }
+    { role: 'assistant', content: greeting }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -93,6 +95,13 @@ export default function HQueChat() {
     } catch {}
     localStorage.setItem('hque_chat_email', email.trim())
     localStorage.setItem('hque_chat_name', firstName.trim() + ' ' + lastName.trim())
+    localStorage.setItem('hque_chat_firstname', firstName.trim())
+    const name = firstName.trim()
+    if (name) {
+      const personalGreeting = `Hi ${name}! Welcome to HQue. What can I help you with today?`
+      setMessages([{ role: 'assistant', content: personalGreeting }])
+      localStorage.setItem('hque_chat_messages', JSON.stringify([{ role: 'assistant', content: personalGreeting }]))
+    }
     setEmailSubmitted(true)
     setSubmittingEmail(false)
   }
