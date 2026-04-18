@@ -23,16 +23,36 @@ Never mention that you are Claude or built by Anthropic. You are simply the HQue
 
 export default function HQueChat() {
   const [open, setOpen] = useState(false)
+  const [email, setEmail] = useState('')
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [emailError, setEmailError] = useState('')
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hi! I am the HQue assistant. Ask me anything about how HQue works, pricing, or how to get started.' }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [submittingEmail, setSubmittingEmail] = useState(false)
   const bottomRef = useRef(null)
 
   useEffect(() => {
     if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, open])
+
+  async function submitEmail() {
+    if (!email.trim() || submittingEmail) return
+    if (!email.includes('@')) return setEmailError('Please enter a valid email')
+    setSubmittingEmail(true)
+    setEmailError('')
+    try {
+      await fetch('/.netlify/functions/subscribe-mailchimp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      })
+    } catch {}
+    setEmailSubmitted(true)
+    setSubmittingEmail(false)
+  }
 
   async function sendMessage() {
     if (!input.trim() || loading) return
@@ -49,7 +69,7 @@ export default function HQueChat() {
           model: 'claude-sonnet-4-20250514',
           max_tokens: 1000,
           system: SYSTEM_PROMPT,
-          messages: [...messages, userMsg].filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }))
+          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content }))
         })
       })
       const data = await response.json()
@@ -65,6 +85,8 @@ export default function HQueChat() {
     <>
       {open && (
         <div style={{ position: 'fixed', bottom: '90px', right: '24px', width: '340px', height: '480px', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '8px', display: 'flex', flexDirection: 'column', zIndex: 1000, boxShadow: '0 8px 40px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
+
+          {/* Header */}
           <div style={{ padding: '16px 20px', background: '#111', borderBottom: '0.5px solid #2A2A2A', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -77,27 +99,55 @@ export default function HQueChat() {
             </div>
             <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
           </div>
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {messages.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px', background: m.role === 'user' ? '#5b7c99' : '#222', fontSize: '13px', color: '#F0ECE6', lineHeight: 1.6 }}>
-                  {m.content}
-                </div>
+
+          {/* Email capture or chat */}
+          {!emailSubmitted ? (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               </div>
-            ))}
-            {loading && (
-              <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <div style={{ padding: '10px 14px', borderRadius: '12px 12px 12px 2px', background: '#222', fontSize: '13px', color: '#666' }}>Typing...</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', marginBottom: '8px' }}>Chat with HQue</div>
+              <div style={{ fontSize: '12px', color: '#666', lineHeight: 1.7, marginBottom: '24px' }}>Enter your email to get started. We will only reach out if you have questions.</div>
+              <input
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && submitEmail()}
+                placeholder='your@email.com'
+                type='email'
+                style={{ width: '100%', background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+              />
+              {emailError && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '8px' }}>{emailError}</div>}
+              <button onClick={submitEmail} disabled={submittingEmail || !email.trim()} style={{ width: '100%', padding: '10px', background: '#5b7c99', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', opacity: submittingEmail || !email.trim() ? 0.5 : 1 }}>
+                {submittingEmail ? 'Starting...' : 'Start chatting'}
+              </button>
+              <button onClick={() => setEmailSubmitted(true)} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}>Skip</button>
+            </div>
+          ) : (
+            <>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {messages.map((m, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px', background: m.role === 'user' ? '#5b7c99' : '#222', fontSize: '13px', color: '#F0ECE6', lineHeight: 1.6 }}>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {loading && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                    <div style={{ padding: '10px 14px', borderRadius: '12px 12px 12px 2px', background: '#222', fontSize: '13px', color: '#666' }}>Typing...</div>
+                  </div>
+                )}
+                <div ref={bottomRef} />
               </div>
-            )}
-            <div ref={bottomRef} />
-          </div>
-          <div style={{ padding: '12px 16px', borderTop: '0.5px solid #2A2A2A', display: 'flex', gap: '8px' }}>
-            <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder='Ask anything...' style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '8px 12px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit' }} />
-            <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ padding: '8px 14px', background: '#5b7c99', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '13px', opacity: loading || !input.trim() ? 0.5 : 1 }}>→</button>
-          </div>
+              <div style={{ padding: '12px 16px', borderTop: '0.5px solid #2A2A2A', display: 'flex', gap: '8px' }}>
+                <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder='Ask anything...' style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '8px 12px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit' }} />
+                <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ padding: '8px 14px', background: '#5b7c99', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '13px', opacity: loading || !input.trim() ? 0.5 : 1 }}>→</button>
+              </div>
+            </>
+          )}
         </div>
       )}
+
       <button onClick={() => setOpen(o => !o)} style={{ position: 'fixed', bottom: '24px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: '#5b7c99', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(91,124,153,0.4)', zIndex: 1000 }}>
         {open ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
