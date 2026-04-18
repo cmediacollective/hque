@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import HQueChat from './HQueChat'
 
 const BASE = 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/talent-videos/'
 const VIDEOS = [
@@ -76,6 +77,7 @@ function BrandLogo({ color, initial, size = 44 }) {
   return (
     <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.35), color: '#fff', fontWeight: 700 }}>{initial}</span>
+    <HQueChat />
     </div>
   )
 }
@@ -190,6 +192,7 @@ function MobileAppPreview() {
           </div>
         </div>
       </div>
+    <HQueChat />
     </div>
   )
 }
@@ -317,6 +320,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
           ))}
         </div>
       </div>
+    <HQueChat />
     </div>
   )
 }
@@ -572,6 +576,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           <span style={{ fontSize: '10px', color: '#2A2A2A' }}>Made for agencies that move fast.</span>
         </div>
       </footer>
+    <HQueChat />
     </div>
   )
 }
