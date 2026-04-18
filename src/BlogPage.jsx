@@ -114,8 +114,8 @@ function ThrowCard({ post, height = '220px', titleSize = '17px', showExcerpt = f
       onMouseLeave={e => { if (dragging) onMouseUp(e) }}
     >
       
-        href={dragging || distFromHome > 5 ? undefined : '/blog/' + post.slug}
-        onClick={e => { if (distFromHome > 5) e.preventDefault() }}
+        href={!dragging && distFromHome < 5 ? ('/blog/' + post.slug) : undefined}
+        onClick={e => { if (distFromHome >= 5) { e.preventDefault() } }}
         style={{ textDecoration: 'none', display: 'block' }}
       >
         <div
