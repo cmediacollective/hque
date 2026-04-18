@@ -15,6 +15,7 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
     { label: 'Features', href: '/#features' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'FAQ', href: '/faq' },
+    { label: 'The Pitch', href: '/blog' },
   ]
 
   return (
