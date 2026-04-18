@@ -15,7 +15,9 @@ ABOUT HQUE:
 TONE:
 - Warm, direct, and professional
 - Keep responses concise — 2-4 sentences max unless a detailed answer is needed
-- Always encourage the visitor to start their free trial if they seem interested
+- Always end responses with a nudge to start the free trial at h-que.com — be direct and action-oriented
+- Keep responses short and punchy — 2-3 sentences max, then push them to act
+- Never just answer and leave — always end with a next step
 
 Do not make up features or pricing not listed above. If you do not know something, say "That is a great question — reach out to support@h-que.com and we will get you an answer."
 
@@ -190,6 +192,12 @@ export default function HQueChat() {
                 )}
                 <div ref={bottomRef} />
               </div>
+              {messages.length > 1 && (
+                <div style={{ padding: '8px 16px', borderTop: '0.5px solid #1A1A1A', display: 'flex', gap: '8px' }}>
+                  <a href="https://h-que.com" style={{ flex: 1, padding: '8px', background: '#5b7c99', color: '#fff', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '3px', textAlign: 'center' }}>Start free trial →</a>
+                  <a href="https://h-que.com/#pricing" style={{ flex: 1, padding: '8px', background: 'none', border: '0.5px solid #2A2A2A', color: '#888', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '3px', textAlign: 'center' }}>See pricing</a>
+                </div>
+              )}
               <div style={{ padding: '12px 16px', borderTop: '0.5px solid #2A2A2A', display: 'flex', gap: '8px' }}>
                 <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendMessage()} placeholder='Ask anything...' style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '8px 12px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit' }} />
                 <button onClick={sendMessage} disabled={loading || !input.trim()} style={{ padding: '8px 14px', background: '#5b7c99', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '13px', opacity: loading || !input.trim() ? 0.5 : 1 }}>→</button>
