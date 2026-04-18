@@ -85,7 +85,7 @@ export default function PricingPage({ onGetStarted }) {
       </div>
 
       {/* Plans */}
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1px', background: '#1A1A1A' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '24px', background: 'none' }}>
         {PLANS.map(plan => (
           <div key={plan.name} style={{ background: plan.highlight ? '#1E2428' : '#111', padding: '36px 28px', position: 'relative' }}>
             {plan.highlight && (
