@@ -158,20 +158,18 @@ export default function HQueChat() {
               </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', marginBottom: '8px' }}>Chat with HQue</div>
               <div style={{ fontSize: '12px', color: '#666', lineHeight: 1.7, marginBottom: '24px' }}>Enter your email to get started. We will only reach out if you have questions.</div>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', width: '100%' }}>
-                <input
-                  value={firstName}
-                  onChange={e => setFirstName(e.target.value)}
-                  placeholder='First name'
-                  style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                />
-                <input
-                  value={lastName}
-                  onChange={e => setLastName(e.target.value)}
-                  placeholder='Last name'
-                  style={{ flex: 1, background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                />
-              </div>
+              <input
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder='First name'
+                style={{ width: '100%', background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+              />
+              <input
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder='Last name'
+                style={{ width: '100%', background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '10px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+              />
               <input
                 value={email}
                 onChange={e => setEmail(e.target.value)}
