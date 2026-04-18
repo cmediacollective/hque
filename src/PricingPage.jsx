@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import MarketingNav from './MarketingNav'
 
 const PLANS = [
   {
@@ -63,18 +64,10 @@ export default function PricingPage({ onGetStarted }) {
   return (
     <div style={{ background: '#111', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#F0ECE6' }}>
 
-      {/* Nav */}
-      <nav style={{ padding: '20px 48px', borderBottom: '0.5px solid #1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '90px' }} /></a>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="/#features" style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#666', textDecoration: 'none' }}>Features</a>
-          <a href="/faq" style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#666', textDecoration: 'none' }}>FAQ</a>
-          <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free trial</button>
-        </div>
-      </nav>
+      <MarketingNav onGetStarted={onGetStarted} />
 
       {/* Header */}
-      <div style={{ padding: isMobile ? '60px 24px 40px' : '80px 48px 60px', textAlign: 'center', maxWidth: '700px', margin: '0 auto' }}>
+      <div style={{ padding: isMobile ? '100px 24px 40px' : '120px 48px 60px', textAlign: 'center', maxWidth: '700px', margin: '0 auto' }}>
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>Pricing</div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '36px' : '52px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px' }}>
           Simple, transparent pricing.

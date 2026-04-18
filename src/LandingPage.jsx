@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import MarketingNav from './MarketingNav'
 import HQueChat from './HQueChat'
 
 const BASE = 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/talent-videos/'
@@ -379,23 +380,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
   return (
     <div style={{ background: '#111', color: '#F0ECE6', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
 
-      {/* Nav */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: mobile ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled ? 'rgba(17,17,17,0.98)' : 'rgba(17,17,17,0.3)', borderBottom: scrolled ? '0.5px solid #222' : 'none', transition: 'all 0.3s ease' }}>
-        <img src="/logo.svg" alt="HQue" style={{ width: mobile ? '80px' : '100px', height: 'auto' }} />
-        {mobile ? (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={onSignIn} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#888', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
-            <button onClick={onGetStarted} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-            <a href="#features" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Features</a>
-            <a href="#pricing" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>Pricing</a>
-            <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#888', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
-            <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
-          </div>
-        )}
-      </nav>
+      <MarketingNav onSignIn={onSignIn} onGetStarted={onGetStarted} />
 
       {/* Hero */}
       <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>

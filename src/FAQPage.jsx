@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import MarketingNav from './MarketingNav'
 
 const FAQS = [
   { q: 'What is HQue?', a: 'HQue is an operating system for talent agencies and brands built on talent partnerships. It replaces spreadsheets, email threads, and disconnected tools with one platform for managing your roster, campaigns, payments, and team.' },
@@ -20,10 +21,7 @@ export default function FAQPage() {
   return (
     <div style={{ background: '#111', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
 
-      {/* Nav */}
-      <div style={{ padding: '20px 48px', borderBottom: '0.5px solid #1A1A1A' }}>
-        <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '90px' }} /></a>
-      </div>
+      <MarketingNav onGetStarted={() => window.location.href = '/'} />
 
       {/* Hero */}
       <div style={{ padding: isMobile ? '60px 24px 40px' : '80px 48px 60px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: '24px' }}>
