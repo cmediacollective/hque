@@ -1,5 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 
+const BASE = 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/talent-videos/'
+const VIDEOS = [
+  BASE + 'Annie.mp4',
+  BASE + 'Brittk.mp4',
+  BASE + 'Delayna.mp4',
+  BASE + 'JackLeius.mp4',
+  BASE + 'Mariah.mp4',
+  BASE + 'Michelle.mp4',
+  BASE + 'Needed.mp4',
+  BASE + 'Olivia.mp4',
+  BASE + 'Sparks.mp4',
+  BASE + 'Traci.mp4',
+]
+const VIDEOS_REVERSED = [...VIDEOS].reverse()
+
+
 const isMob = () => window.innerWidth < 768
 
 const FAKE_TALENT = [
@@ -356,19 +372,52 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       </nav>
 
       {/* Hero */}
-      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: mobile ? '100px 24px 60px' : '120px 48px 80px', textAlign: 'center', position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, rgba(91,124,153,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.08, color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px' }}>
-          Run your roster.<br /><span style={{ color: '#5b7c99' }}>Not your inbox.</span>
-        </h1>
-        <p style={{ fontSize: mobile ? '14px' : '15px', color: '#777', lineHeight: 1.8, maxWidth: '480px', margin: '0 0 40px' }}>
-          HQue is the operating system for agencies and brands built on talent partnerships.
-        </p>
-        <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center' }}>
-          <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
-          <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#777', textDecoration: 'none' }}>See how it works →</a>
+      <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <style>{`
+          @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+          @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+          .vtile { filter: grayscale(100%); transition: filter 0.4s ease; }
+          .vtile:hover { filter: grayscale(0%); }
+        `}</style>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '6px', opacity: 0.55 }}>
+          <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 40s linear infinite', width: 'max-content' }}>
+            {[...VIDEOS, ...VIDEOS].map((v, i) => (
+              <div key={i} className="vtile" style={{ width: mobile ? '90px' : '130px', height: mobile ? '160px' : '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '6px', animation: 'scrollRight 35s linear infinite', width: 'max-content' }}>
+            {[...VIDEOS_REVERSED, ...VIDEOS_REVERSED].map((v, i) => (
+              <div key={i} className="vtile" style={{ width: mobile ? '90px' : '130px', height: mobile ? '160px' : '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
+          {!mobile && (
+            <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 50s linear infinite', width: 'max-content' }}>
+              {[...VIDEOS, ...VIDEOS].map((v, i) => (
+                <div key={i} className="vtile" style={{ width: '130px', height: '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                  <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ marginTop: '16px', fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>14-day free trial · No credit card required</div>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.75) 0%, rgba(17,17,17,0.45) 50%, rgba(17,17,17,0.75) 100%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 2, padding: mobile ? '0 24px' : '0 48px' }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.08, color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
+            Run your roster.<br /><span style={{ color: '#5b7c99' }}>Not your inbox.</span>
+          </h1>
+          <p style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '480px', margin: '0 auto 40px' }}>
+            HQue is the operating system for agencies and brands built on talent partnerships.
+          </p>
+          <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
+            <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
+          </div>
+          <div style={{ marginTop: '16px', fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>14-day free trial · No credit card required</div>
+        </div>
       </section>
 
       {/* App Showcase */}
