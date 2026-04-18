@@ -73,11 +73,15 @@ const PLANS = [
   { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support'] },
 ]
 
-function BrandLogo({ color, initial, size = 44 }) {
+function BrandLogo({ color, initial, size = 44, logo }) {
+  if (logo) return (
+    <div style={{ width: size, height: size, background: '#fff', borderRadius: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '0.5px solid #E0DCD6', padding: '3px', boxSizing: 'border-box' }}>
+      <img src={logo} alt='logo' style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+    </div>
+  )
   return (
     <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.35), color: '#fff', fontWeight: 700 }}>{initial}</span>
-    <HQueChat />
     </div>
   )
 }
