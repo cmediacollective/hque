@@ -25,25 +25,33 @@ Never mention that you are Claude or built by Anthropic. You are simply the HQue
 
 
 function renderMessage(text) {
-  // Split on emails first
-  const emailRegex = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/g
+  // Strip markdown bold/italic asterisks
+  let clean = text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1')
+
+  // Combined regex for emails and URLs
+  const tokenRegex = /([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})|(https?:\/\/[^\s]+|h-que\.com[^\s]*)/g
   const parts = []
   let last = 0
   let match
   let key = 0
 
-  while ((match = emailRegex.exec(text)) !== null) {
+  while ((match = tokenRegex.exec(clean)) !== null) {
     if (match.index > last) {
-      parts.push(<span key={key++}>{text.slice(last, match.index)}</span>)
+      parts.push(<span key={key++}>{clean.slice(last, match.index)}</span>)
     }
-    parts.push(
-      <a key={key++} href={`mailto:${match[1]}`} style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{match[1]}</a>
-    )
-    last = match.index + match[1].length
+    if (match[1]) {
+      // Email
+      parts.push(<a key={key++} href={`mailto:${match[1]}`} style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{match[1]}</a>)
+    } else if (match[2]) {
+      // URL
+      const href = match[2].startsWith('http') ? match[2] : `https://${match[2]}`
+      parts.push(<a key={key++} href={href} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{match[2]}</a>)
+    }
+    last = match.index + match[0].length
   }
 
-  if (last < text.length) {
-    parts.push(<span key={key++}>{text.slice(last)}</span>)
+  if (last < clean.length) {
+    parts.push(<span key={key++}>{clean.slice(last)}</span>)
   }
 
   return <>{parts}</>
