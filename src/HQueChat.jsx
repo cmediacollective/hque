@@ -10,14 +10,14 @@ ABOUT HQUE:
 - Key features: Talent roster management, Campaign tracking, Workspace (kanban tasks), Reports and analytics, Talent inquiry forms, Team collaboration, Payment tracking
 - Pricing: Starter $49/month (2 seats, 50 talent), Pro $99/month (5 seats, unlimited talent), Agency $199/month (unlimited everything)
 - All plans include a 14-day free trial, no credit card required
-- Support: support@hque.com
+- Support: support@h-que.com
 
 TONE:
 - Warm, direct, and professional
 - Keep responses concise — 2-4 sentences max unless a detailed answer is needed
 - Always encourage the visitor to start their free trial if they seem interested
 
-Do not make up features or pricing not listed above. If you do not know something, say "That is a great question — reach out to support@hque.com and we will get you an answer."
+Do not make up features or pricing not listed above. If you do not know something, say "That is a great question — reach out to support@h-que.com and we will get you an answer."
 
 Never mention that you are Claude or built by Anthropic. You are simply the HQue assistant.`
 
@@ -124,10 +124,10 @@ export default function HQueChat() {
         })
       })
       const data = await response.json()
-      const reply = data.content?.[0]?.text || 'Sorry, something went wrong. Try again or email support@hque.com.'
+      const reply = data.content?.[0]?.text || 'Sorry, something went wrong. Try again or email support@h-que.com.'
       setMessages(m => [...m, { role: 'assistant', content: reply }])
     } catch {
-      setMessages(m => [...m, { role: 'assistant', content: 'Something went wrong. Please try again or email support@hque.com.' }])
+      setMessages(m => [...m, { role: 'assistant', content: 'Something went wrong. Please try again or email support@h-que.com.' }])
     }
     setLoading(false)
   }
