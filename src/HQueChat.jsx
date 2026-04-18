@@ -59,10 +59,13 @@ function renderMessage(text) {
 
 export default function HQueChat() {
   const [open, setOpen] = useState(false)
+  const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('hque_chat_email') : ''
+  const savedMessages = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('hque_chat_messages') || 'null') : null
+
   const [email, setEmail] = useState('')
-  const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [emailSubmitted, setEmailSubmitted] = useState(!!savedEmail)
   const [emailError, setEmailError] = useState('')
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState(savedMessages || [
     { role: 'assistant', content: 'Hi! I am the HQue assistant. Ask me anything about how HQue works, pricing, or how to get started.' }
   ])
   const [input, setInput] = useState('')
@@ -86,6 +89,7 @@ export default function HQueChat() {
         body: JSON.stringify({ email: email.trim() })
       })
     } catch {}
+    localStorage.setItem('hque_chat_email', email.trim())
     setEmailSubmitted(true)
     setSubmittingEmail(false)
   }
@@ -93,7 +97,7 @@ export default function HQueChat() {
   async function sendMessage() {
     if (!input.trim() || loading) return
     const userMsg = { role: 'user', content: input.trim() }
-    setMessages(m => [...m, userMsg])
+    setMessages(m => { const updated = [...m, userMsg]; localStorage.setItem('hque_chat_messages', JSON.stringify(updated)); return updated })
     setInput('')
     setLoading(true)
 
@@ -108,7 +112,7 @@ export default function HQueChat() {
       })
       const data = await response.json()
       const reply = data.content?.[0]?.text || 'Sorry, something went wrong. Try again or email support@h-que.com.'
-      setMessages(m => [...m, { role: 'assistant', content: reply }])
+      setMessages(m => { const updated = [...m, { role: 'assistant', content: reply }]; localStorage.setItem('hque_chat_messages', JSON.stringify(updated)); return updated })
     } catch {
       setMessages(m => [...m, { role: 'assistant', content: 'Something went wrong. Please try again or email support@h-que.com.' }])
     }
@@ -154,7 +158,7 @@ export default function HQueChat() {
               <button onClick={submitEmail} disabled={submittingEmail || !email.trim()} style={{ width: '100%', padding: '10px', background: '#5b7c99', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '11px', letterSpacing: '0.16em', textTransform: 'uppercase', opacity: submittingEmail || !email.trim() ? 0.5 : 1 }}>
                 {submittingEmail ? 'Starting...' : 'Start chatting'}
               </button>
-              <button onClick={() => setEmailSubmitted(true)} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}>Skip</button>
+              <button onClick={() => { localStorage.setItem('hque_chat_email', 'skipped'); setEmailSubmitted(true) }} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#444', fontSize: '11px', cursor: 'pointer', textDecoration: 'underline' }}>Skip</button>
             </div>
           ) : (
             <>
