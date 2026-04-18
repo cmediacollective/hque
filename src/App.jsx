@@ -58,7 +58,6 @@ function App() {
   const isPricingPage = window.location.pathname === '/pricing'
   const isBlogPage = window.location.pathname === '/blog'
   const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
-        const isPricingPage = window.location.pathname === '/pricing'
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
