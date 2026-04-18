@@ -354,7 +354,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
     <div style={{ background: '#111', color: '#F0ECE6', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
 
       {/* Nav */}
-      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: mobile ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled ? 'rgba(17,17,17,0.95)' : 'transparent', borderBottom: scrolled ? '0.5px solid #222' : 'none', transition: 'all 0.3s ease' }}>
+      <nav style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, padding: mobile ? '16px 20px' : '20px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: scrolled ? 'rgba(17,17,17,0.98)' : 'rgba(17,17,17,0.3)', borderBottom: scrolled ? '0.5px solid #222' : 'none', transition: 'all 0.3s ease' }}>
         <img src="/logo.svg" alt="HQue" style={{ width: mobile ? '80px' : '100px', height: 'auto' }} />
         {mobile ? (
           <div style={{ display: 'flex', gap: '8px' }}>
@@ -394,8 +394,22 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
               </div>
             ))}
           </div>
+          <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 50s linear infinite', width: 'max-content' }}>
+            {[...VIDEOS, ...VIDEOS].map((v, i) => (
+              <div key={i} className="vtile" style={{ width: mobile ? '90px' : '130px', height: mobile ? '160px' : '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '6px', animation: 'scrollRight 45s linear infinite', width: 'max-content' }}>
+            {[...VIDEOS_REVERSED, ...VIDEOS_REVERSED].map((v, i) => (
+              <div key={i} className="vtile" style={{ width: mobile ? '90px' : '130px', height: mobile ? '160px' : '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+          </div>
           {!mobile && (
-            <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 50s linear infinite', width: 'max-content' }}>
+            <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 55s linear infinite', width: 'max-content' }}>
               {[...VIDEOS, ...VIDEOS].map((v, i) => (
                 <div key={i} className="vtile" style={{ width: '130px', height: '231px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
                   <video src={v} autoPlay muted loop playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -404,7 +418,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             </div>
           )}
         </div>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.75) 0%, rgba(17,17,17,0.45) 50%, rgba(17,17,17,0.75) 100%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.85) 0%, rgba(17,17,17,0.65) 50%, rgba(17,17,17,0.85) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 2, padding: mobile ? '0 24px' : '0 48px' }}>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.08, color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
             Run your roster.<br /><span style={{ color: '#5b7c99' }}>Not your inbox.</span>
