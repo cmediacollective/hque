@@ -21,10 +21,10 @@ const isMob = () => window.innerWidth < 768
 
 const FAKE_TALENT = [
   { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', photo: 'https://images.unsplash.com/flagged/photo-1572129063552-570d721b9d5e?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Jordan Ellis', type: 'UGC', handle: '@jordanellis', followers: '124K', photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', photo: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Caden Park', type: 'ATHLETE', handle: '@cadenpark', followers: '390K', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Simone Veil', type: 'HOST', handle: '@simoneveil', followers: '58K', photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Jordan Ellis', type: 'UGC', handle: '@jordanellis', followers: '124K', photo: 'https://images.unsplash.com/photo-1588000232223-352854a3fe35?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', photo: 'https://images.unsplash.com/photo-1659479018069-90af149049c8?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Caden Park', type: 'ATHLETE', handle: '@cadenpark', followers: '390K', photo: 'https://images.unsplash.com/photo-1735854395786-d44c4b4b0508?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Simone Veil', type: 'HOST', handle: '@simoneveil', followers: '58K', photo: 'https://images.unsplash.com/photo-1521577352947-9bb58764b69a?w=100&h=100&fit=crop&crop=face' },
   { name: 'Raya Hassan', type: 'INFLUENCER', handle: '@rayahassan', followers: '1.4M', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face' },
   { name: 'Teo Briggs', type: 'PODCAST', handle: '@teobriggs', followers: '210K', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
   { name: 'Lena Voss', type: 'INFLUENCER', handle: '@lenavoss', followers: '76K', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=face' },
