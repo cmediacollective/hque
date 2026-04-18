@@ -20,10 +20,6 @@ import FAQPage from './FAQPage'
 import PricingPage from './PricingPage'
 import BlogPage from './BlogPage'
 import BlogPostPage from './BlogPostPage'
-import PricingPage from './PricingPage'
-import BlogPage from './BlogPage'
-import BlogPostPage from './BlogPostPage'
-import PricingPage from './PricingPage'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -62,11 +58,7 @@ function App() {
   const isPricingPage = window.location.pathname === '/pricing'
   const isBlogPage = window.location.pathname === '/blog'
   const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
-  const isPricingPage = window.location.pathname === '/pricing'
-  const isBlogPage = window.location.pathname === '/blog'
-  const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
-  const isPricingPage = window.location.pathname === '/pricing'
-
+        const isPricingPage = window.location.pathname === '/pricing'
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
