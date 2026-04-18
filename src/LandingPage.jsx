@@ -20,14 +20,14 @@ const VIDEOS_REVERSED = [...VIDEOS].reverse()
 const isMob = () => window.innerWidth < 768
 
 const FAKE_TALENT = [
-  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', photo: 'https://images.unsplash.com/flagged/photo-1572129063552-570d721b9d5e?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Jordan Ellis', type: 'UGC', handle: '@jordanellis', followers: '124K', photo: 'https://images.unsplash.com/photo-1588000232223-352854a3fe35?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', photo: 'https://images.unsplash.com/photo-1659479018069-90af149049c8?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Caden Park', type: 'ATHLETE', handle: '@cadenpark', followers: '390K', photo: 'https://images.unsplash.com/photo-1735854395786-d44c4b4b0508?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Simone Veil', type: 'HOST', handle: '@simoneveil', followers: '58K', photo: 'https://images.unsplash.com/photo-1521577352947-9bb58764b69a?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Raya Hassan', type: 'INFLUENCER', handle: '@rayahassan', followers: '1.4M', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Teo Briggs', type: 'PODCAST', handle: '@teobriggs', followers: '210K', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
-  { name: 'Lena Voss', type: 'INFLUENCER', handle: '@lenavoss', followers: '76K', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Ava Monroe', type: 'INFLUENCER', handle: '@avamonroe', followers: '847K', engRate: '4.2%', photo: 'https://images.unsplash.com/flagged/photo-1572129063552-570d721b9d5e?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Jordan Ellis', type: 'UGC', handle: '@jordanellis', followers: '124K', engRate: '6.8%', photo: 'https://images.unsplash.com/photo-1588000232223-352854a3fe35?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Mila Torres', type: 'INFLUENCER', handle: '@milatorresx', followers: '2.1M', engRate: '2.1%', photo: 'https://images.unsplash.com/photo-1659479018069-90af149049c8?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Caden Park', type: 'ATHLETE', handle: '@cadenpark', followers: '390K', engRate: '5.4%', photo: 'https://images.unsplash.com/photo-1735854395786-d44c4b4b0508?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Simone Veil', type: 'HOST', handle: '@simoneveil', followers: '58K', engRate: '7.1%', photo: 'https://images.unsplash.com/photo-1521577352947-9bb58764b69a?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Raya Hassan', type: 'INFLUENCER', handle: '@rayahassan', followers: '1.4M', engRate: '3.8%', photo: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Teo Briggs', type: 'PODCAST', handle: '@teobriggs', followers: '210K', engRate: '4.5%', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
+  { name: 'Lena Voss', type: 'INFLUENCER', handle: '@lenavoss', followers: '76K', engRate: '8.3%', photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=100&h=100&fit=crop&crop=face' },
 ]
 
 const FAKE_CAMPAIGNS = [
@@ -115,13 +115,21 @@ function MobileAppPreview() {
             {SCREENS[activeScreen].key === 'talent' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {FAKE_TALENT.slice(0, 4).map((t, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '12px', border: '0.5px solid #E0DCD6' }}>
-                    <div style={{ width: '36px', height: '36px', borderRadius: '2px', overflow: 'hidden', marginBottom: '8px' }}>
-                      <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '10px', border: '0.5px solid #E0DCD6' }}>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
+                        <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '6px', color: '#5b7c99', letterSpacing: '0.1em', marginBottom: '2px' }}>{t.type}</div>
+                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                        <div style={{ fontSize: '8px', color: '#aaa', marginTop: '1px' }}>{t.handle}</div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '7px', color: '#5b7c99', letterSpacing: '0.1em', marginBottom: '2px' }}>{t.type}</div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '11px', color: '#1A1A1A', marginBottom: '1px' }}>{t.name}</div>
-                    <div style={{ fontSize: '9px', color: '#aaa' }}>{t.followers}</div>
+                    <div style={{ paddingTop: '6px', borderTop: '0.5px solid #E0DCD6' }}>
+                      <div style={{ fontSize: '10px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
+                      <div style={{ fontSize: '6px', color: '#bbb', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Followers</div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -230,15 +238,25 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#D4CFC8' }}>
                 {FAKE_TALENT.map((t, i) => (
                   <div key={i} style={{ background: '#FFFFFF', padding: '14px', opacity: 1 - (i * 0.04) }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: '#E8E4DE', marginBottom: '8px', overflow: 'hidden' }}>
-                      <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
+                      <div style={{ width: '52px', height: '52px', borderRadius: '2px', background: '#E8E4DE', flexShrink: 0, overflow: 'hidden' }}>
+                        <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0, paddingTop: '2px' }}>
+                        <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '3px' }}>{t.type}</div>
+                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '11px', color: '#1A1A1A', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                        <div style={{ fontSize: '9px', color: '#aaa' }}>{t.handle}</div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '3px' }}>{t.type}</div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '11px', color: '#1A1A1A', marginBottom: '2px' }}>{t.name}</div>
-                    <div style={{ fontSize: '9px', color: '#aaa', marginBottom: '6px' }}>{t.handle}</div>
-                    <div style={{ paddingTop: '6px', borderTop: '0.5px solid #E0DCD6' }}>
-                      <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
-                      <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
+                    <div style={{ paddingTop: '8px', borderTop: '0.5px solid #E0DCD6', display: 'flex', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
+                        <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{t.engRate || '3.2%'}</div>
+                        <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Eng Rate</div>
+                      </div>
                     </div>
                   </div>
                 ))}
