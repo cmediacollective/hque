@@ -21,6 +21,59 @@ Do not make up features or pricing not listed above. If you do not know somethin
 
 Never mention that you are Claude or built by Anthropic. You are simply the HQue assistant.`
 
+
+function renderMessage(text) {
+  const parts = []
+  let remaining = text
+
+  while (remaining.length > 0) {
+    // Check for email
+    const emailMatch = remaining.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
+    // Check for trial phrases
+    const trialMatch = remaining.match(/(start (your |a )?(free )?14-day trial|start (your |a )?free trial|try (it )?free|sign up( for free)?)/i)
+    // Check for pricing phrases
+    const pricingMatch = remaining.match(/(view pricing|see pricing|check (out )?pricing|our pricing)/i)
+
+    const emailIdx = emailMatch ? remaining.indexOf(emailMatch[0]) : Infinity
+    const trialIdx = trialMatch ? remaining.indexOf(trialMatch[0]) : Infinity
+    const pricingIdx = pricingMatch ? remaining.indexOf(pricingMatch[0]) : Infinity
+
+    const minIdx = Math.min(emailIdx, trialIdx, pricingIdx)
+
+    if (minIdx === Infinity) {
+      parts.push(<span key={parts.length}>{remaining}</span>)
+      break
+    }
+
+    if (minIdx > 0) {
+      parts.push(<span key={parts.length}>{remaining.slice(0, minIdx)}</span>)
+      remaining = remaining.slice(minIdx)
+    }
+
+    if (emailIdx === 0 && emailMatch) {
+      parts.push(<a key={parts.length} href={`mailto:${emailMatch[0]}`} style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{emailMatch[0]}</a>)
+      remaining = remaining.slice(emailMatch[0].length)
+    } else if (trialIdx === 0 && trialMatch) {
+      parts.push(
+        <span key={parts.length}>
+          {trialMatch[0]}
+          <a href="https://h-que.com" onClick={e => { e.preventDefault(); window.location.href = '/?signup=true' }} style={{ display: 'inline-block', marginLeft: '6px', padding: '2px 10px', background: '#5b7c99', color: '#fff', fontSize: '10px', borderRadius: '3px', textDecoration: 'none', verticalAlign: 'middle', letterSpacing: '0.08em' }}>Start free →</a>
+        </span>
+      )
+      remaining = remaining.slice(trialMatch[0].length)
+    } else if (pricingIdx === 0 && pricingMatch) {
+      parts.push(
+        <a key={parts.length} href="https://h-que.com/#pricing" style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{pricingMatch[0]}</a>
+      )
+      remaining = remaining.slice(pricingMatch[0].length)
+    } else {
+      parts.push(<span key={parts.length}>{remaining[0]}</span>)
+      remaining = remaining.slice(1)
+    }
+  }
+  return <>{parts}</>
+}
+
 export default function HQueChat() {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
@@ -126,7 +179,7 @@ export default function HQueChat() {
                 {messages.map((m, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
                     <div style={{ maxWidth: '80%', padding: '10px 14px', borderRadius: m.role === 'user' ? '12px 12px 2px 12px' : '12px 12px 12px 2px', background: m.role === 'user' ? '#5b7c99' : '#222', fontSize: '13px', color: '#F0ECE6', lineHeight: 1.6 }}>
-                      {m.content}
+                      {m.role === 'assistant' ? renderMessage(m.content) : m.content}
                     </div>
                   </div>
                 ))}
