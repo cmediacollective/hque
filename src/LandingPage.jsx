@@ -138,7 +138,7 @@ function MobileAppPreview() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {FAKE_CAMPAIGNS.slice(0, 3).map((c, i) => (
                   <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '12px', border: '0.5px solid #E0DCD6', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={32} />
+                    <BrandLogo color={c.color} initial={c.initial} size={32} logo={c.logo} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.1em' }}>{c.brand}</div>
                       <div style={{ fontFamily: 'Georgia, serif', fontSize: '12px', color: '#1A1A1A' }}>{c.name}</div>
@@ -177,7 +177,7 @@ function MobileAppPreview() {
                 </div>
                 {FAKE_CAMPAIGNS.slice(0, 2).map((c, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '0.5px solid #E0DCD6' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={24} />
+                    <BrandLogo color={c.color} initial={c.initial} size={24} logo={c.logo} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '11px', color: '#1A1A1A' }}>{c.name}</div>
                     </div>
@@ -269,7 +269,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
               {FAKE_CAMPAIGNS.map((c, i) => (
                 <div key={i} style={{ background: '#FFFFFF', padding: '20px', display: 'flex', flexDirection: 'column', minHeight: '160px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={44} />
+                    <BrandLogo color={c.color} initial={c.initial} size={44} logo={c.logo} />
                     <StatusBadge status={c.status} />
                   </div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
@@ -319,7 +319,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                 <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#bbb', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
                 {FAKE_CAMPAIGNS.map((c, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: '0.5px solid #E0DCD6' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={28} />
+                    <BrandLogo color={c.color} initial={c.initial} size={28} logo={c.logo} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
                       <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
