@@ -560,26 +560,26 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', marginBottom: '16px' }}>Product</div>
             {[['Features', '#features'], ['Pricing', '#pricing']].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
-                {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
+                {href ? <a href={href} style={{ fontSize: '12px', color: '#CCCCCC', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
               </div>
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Resources</div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', marginBottom: '16px' }}>Resources</div>
             {[['FAQ', '/faq'], ['The Pitch', '/blog']].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
-                {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
+                {href ? <a href={href} style={{ fontSize: '12px', color: '#CCCCCC', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
               </div>
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#ffffff', fontWeight: '700', marginBottom: '16px' }}>Legal</div>
             {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@h-que.com', 'mailto:support@h-que.com']].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
-                <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a>
+                <a href={href} style={{ fontSize: '12px', color: '#CCCCCC', textDecoration: 'none' }}>{label}</a>
               </div>
             ))}
           </div>

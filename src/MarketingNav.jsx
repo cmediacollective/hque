@@ -33,9 +33,9 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
             {links.map(l => (
-              <a key={l.label} href={l.href} style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>{l.label}</a>
+              <a key={l.label} href={l.href} style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#fff', textDecoration: 'none' }}>{l.label}</a>
             ))}
-            {onSignIn && <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#888', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>}
+            {onSignIn && <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #555', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>}
             <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
           </div>
         )}
@@ -45,10 +45,10 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
       {isMobile && menuOpen && (
         <div style={{ position: 'fixed', top: '57px', left: 0, right: 0, zIndex: 99, background: 'rgba(17,17,17,0.98)', borderBottom: '0.5px solid #222', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {links.map(l => (
-            <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)} style={{ padding: '12px 0', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', textDecoration: 'none', borderBottom: '0.5px solid #1A1A1A' }}>{l.label}</a>
+            <a key={l.label} href={l.href} onClick={() => setMenuOpen(false)} style={{ padding: '12px 0', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#fff', textDecoration: 'none', borderBottom: '0.5px solid #1A1A1A' }}>{l.label}</a>
           ))}
           {onSignIn && (
-            <button onClick={() => { setMenuOpen(false); onSignIn() }} style={{ marginTop: '8px', padding: '12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #333', color: '#888', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
+            <button onClick={() => { setMenuOpen(false); onSignIn() }} style={{ marginTop: '8px', padding: '12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #555', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>
           )}
         </div>
       )}
