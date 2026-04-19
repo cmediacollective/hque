@@ -118,32 +118,32 @@ export default function BlogPostPage({ slug, onGetStarted }) {
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? '32px' : '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
           <div>
             <img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block' }} />
-            <div style={{ fontSize: '12px', color: '#444', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
+            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Product</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
             {[['Features', '/#features'], ['Pricing', '/pricing'], ['FAQ', '/faq']].map(([l, h]) => (
-              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{l}</a></div>
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Resources</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Resources</div>
             {[['The Pitch', '/blog'], ['Help Center', null]].map(([l, h]) => (
               <div key={l} style={{ marginBottom: '10px' }}>
-                {h ? <a href={h} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{l}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{l}</span>}
+                {h ? <a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a> : <span style={{ fontSize: '12px', color: '#555' }}>{l}</span>}
               </div>
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Legal</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
             {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@h-que.com', 'mailto:support@h-que.com']].map(([l, h]) => (
-              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{l}</a></div>
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
             ))}
           </div>
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#333' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#2A2A2A' }}>Made for agencies that move fast.</span>
+          <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#555' }}>Made for agencies that move fast.</span>
         </div>
       </footer>
       <HQueChat />

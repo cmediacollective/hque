@@ -543,7 +543,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: mobile ? '32px' : '48px', marginBottom: '48px' }}>
           <div>
             <img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block' }} />
-            <div style={{ fontSize: '12px', color: '#444', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
+            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#444' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
@@ -554,7 +554,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Product</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
             {[['Features', '#features'], ['Pricing', '#pricing'], ['Changelog', null]].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
                 {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
@@ -562,7 +562,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Resources</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Resources</div>
             {[['FAQ', '/faq'], ['The Pitch', '/blog'], ['Help Center', null]].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
                 {href ? <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a> : <span style={{ fontSize: '12px', color: '#2A2A2A' }}>{label}</span>}
@@ -570,7 +570,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             ))}
           </div>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#444', marginBottom: '16px' }}>Legal</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
             {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@hque.com', 'mailto:support@hque.com']].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
                 <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a>
@@ -579,8 +579,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#333' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#2A2A2A' }}>Made for agencies that move fast.</span>
+          <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#555' }}>Made for agencies that move fast.</span>
         </div>
       </footer>
     <HQueChat />
