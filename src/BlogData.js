@@ -79,7 +79,7 @@ The agencies that consistently win repeat business aren't always the ones with t
     readTime: '5 min read',
     date: 'April 2, 2026',
     excerpt: "The lines are blurring. Here's how to think about the distinction — and why it matters for how you position your agency.",
-    image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1752650734166-8bc6cbf96192?q=80&w=2531&auto=format&fit=crop',
     body: `The creator economy didn't come with a glossary. So the same person might call themselves a talent manager, an influencer marketing agency, a creator rep, or a brand partnerships director — and mean something completely different in each case.
 
 The distinction matters, especially if you're building a business in this space.
