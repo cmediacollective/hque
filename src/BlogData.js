@@ -132,7 +132,7 @@ The roster you build in year one sets the trajectory. Take it seriously from the
     readTime: '5 min read',
     date: 'March 27, 2026',
     excerpt: "Not all tools are built for the way talent agencies actually work. Here's how to evaluate what's worth your time.",
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1732210038531-9cefab37885a?q=80&w=987&auto=format&fit=crop',
     body: `The market for agency software has never been bigger — which means the noise has never been louder. Every tool promises to streamline your workflow, centralize your data, and save you hours a week. Most of them were built for a different kind of agency entirely.
 
 **Does it understand talent?**
