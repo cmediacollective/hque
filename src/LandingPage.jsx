@@ -551,10 +551,10 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             <img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block' }} />
             <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-              <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#444' }}>
+              <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#BBB' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
               </a>
-              <a href="https://www.linkedin.com/company/h-que" target="_blank" rel="noreferrer" style={{ color: '#444' }}>
+              <a href="https://www.linkedin.com/company/h-que" target="_blank" rel="noreferrer" style={{ color: '#BBB' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
               </a>
             </div>
