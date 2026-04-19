@@ -200,7 +200,7 @@ export default function BlogPage({ onGetStarted }) {
           <div style={{ fontSize: '9px', letterSpacing: '0.36em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>The Pitch</div>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '44px' : '72px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 0.95 }}>Every deal<br />starts somewhere.</div>
         </div>
-        <div style={{ fontSize: '13px', color: '#3A3A3A', maxWidth: '200px', lineHeight: 1.9, paddingBottom: '10px' }}>Strategy and operations for agencies building what's next.</div>
+        <div style={{ fontSize: '13px', color: '#888', maxWidth: '220px', lineHeight: 1.9, paddingBottom: '10px' }}>Strategy and operations for agencies and brands building what's next.</div>
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '0 24px 80px' : '0 48px 100px' }}>
