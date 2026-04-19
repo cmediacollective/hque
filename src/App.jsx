@@ -46,13 +46,16 @@ function App() {
 
 
   useEffect(() => {
+    if (!user) return
     window.$crisp = []
     window.CRISP_WEBSITE_ID = '0144cb69-1552-4c18-a032-153183d9030f'
     const s = document.createElement('script')
     s.src = 'https://client.crisp.chat/l.js'
     s.async = true
     document.head.appendChild(s)
-  }, [])
+    // Identify the user in Crisp
+    window.$crisp.push(['set', 'user:email', [user.email]])
+  }, [user])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
