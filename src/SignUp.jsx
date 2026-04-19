@@ -51,7 +51,7 @@ export default function SignUp({ onSignUp }) {
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ width: '380px', padding: '0 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <img src="/logo.svg" alt="HQue" style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
+          <img src="/logo.svg" alt="HQue" onClick={() => window.location.href='/'} style={{ cursor: 'pointer' }} style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
         </div>
 
         <div style={{ background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '2px', padding: '32px' }}>
