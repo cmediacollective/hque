@@ -53,10 +53,34 @@ export default function BlogPostPage({ slug, onGetStarted }) {
             if (para.startsWith('**') && para.endsWith('**')) {
               return <h3 key={i} style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', fontWeight: 'normal', margin: '36px 0 16px' }}>{para.replace(/\*\*/g, '')}</h3>
             }
-            const parts = para.split(/(\*\*[^*]+\*\*)/)
+            function renderPara(text) {
+              const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
+              const boldRegex = /\*\*([^*]+)\*\*/g
+              const tokens = []
+              let last = 0
+              let m
+              const combined = []
+              // Find all bold and link tokens
+              const allMatches = []
+              let bm
+              boldRegex.lastIndex = 0
+              while ((bm = boldRegex.exec(text)) !== null) allMatches.push({ idx: bm.index, end: bm.index + bm[0].length, type: 'bold', text: bm[1] })
+              linkRegex.lastIndex = 0
+              while ((bm = linkRegex.exec(text)) !== null) allMatches.push({ idx: bm.index, end: bm.index + bm[0].length, type: 'link', text: bm[1], href: bm[2] })
+              allMatches.sort((a, b) => a.idx - b.idx)
+              let pos = 0
+              allMatches.forEach((m, j) => {
+                if (m.idx > pos) combined.push(<span key={pos}>{text.slice(pos, m.idx)}</span>)
+                if (m.type === 'bold') combined.push(<strong key={m.idx} style={{ color: '#F0ECE6', fontWeight: 500 }}>{m.text}</strong>)
+                if (m.type === 'link') combined.push(<a key={m.idx} href={m.href} target={m.href.startsWith('http') ? '_blank' : '_self'} rel="noreferrer" style={{ color: '#5b7c99', textDecoration: 'none', borderBottom: '0.5px solid #5b7c99' }}>{m.text}</a>)
+                pos = m.end
+              })
+              if (pos < text.length) combined.push(<span key={pos}>{text.slice(pos)}</span>)
+              return combined
+            }
             return (
               <p key={i} style={{ marginBottom: '24px' }}>
-                {parts.map((part, j) => part.startsWith('**') ? <strong key={j} style={{ color: '#F0ECE6', fontWeight: 500 }}>{part.replace(/\*\*/g, '')}</strong> : <span key={j}>{part}</span>)}
+                {renderPara(para)}
               </p>
             )
           })}
