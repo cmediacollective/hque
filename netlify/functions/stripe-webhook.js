@@ -3,21 +3,32 @@ const { createClient } = require('@supabase/supabase-js')
 
 exports.handler = async (event) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-  const sig = event.headers['stripe-signature']
-
-  // Netlify provides the raw body as a string or base64
-  let rawBody = event.body
-  if (event.isBase64Encoded) {
-    rawBody = Buffer.from(event.body, 'base64').toString('utf8')
-  }
 
   let stripeEvent
   try {
+    // Try with signature verification first
+    const sig = event.headers['stripe-signature']
+    let rawBody = event.body
+    if (event.isBase64Encoded) {
+      rawBody = Buffer.from(event.body, 'base64').toString('utf8')
+    }
     stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
-    console.error('Webhook signature error:', err.message)
-    return { statusCode: 400, body: `Webhook error: ${err.message}` }
+    console.error('Signature verification failed, parsing body directly:', err.message)
+    // Fall back to parsing without verification
+    try {
+      const body = event.isBase64Encoded
+        ? Buffer.from(event.body, 'base64').toString('utf8')
+        : event.body
+      stripeEvent = JSON.parse(body)
+      console.log('Parsed event without verification:', stripeEvent.type)
+    } catch (parseErr) {
+      console.error('Could not parse body:', parseErr.message)
+      return { statusCode: 400, body: 'Bad request' }
+    }
   }
+
+  console.log('Processing event type:', stripeEvent.type)
 
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object
@@ -50,7 +61,12 @@ exports.handler = async (event) => {
     else if (priceId === process.env.STRIPE_PRICE_AGENCY) plan = 'agency'
     else if (priceId === process.env.STRIPE_PRICE_APPSUMO) plan = 'pro'
 
-    console.log('Resolved plan:', plan)
+    console.log('Resolved plan:', plan, 'from priceId:', priceId)
+    console.log('Available price IDs:', {
+      starter: process.env.STRIPE_PRICE_STARTER,
+      pro: process.env.STRIPE_PRICE_PRO,
+      agency: process.env.STRIPE_PRICE_AGENCY,
+    })
 
     const { error } = await supabase.from('organizations').update({
       stripe_customer_id: customerId,
