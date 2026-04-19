@@ -459,7 +459,7 @@ The creator economy has room for matchmakers. But the ceiling is real. The media
     readTime: '6 min read',
     date: 'March 14, 2026',
     excerpt: "Brands have been burned enough times to know exactly what they're looking for. Here's how to be the agency that delivers it.",
-    image: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1509983165097-0c31a863e3f3?q=80&w=1170&auto=format&fit=crop',
     body: `Brands talk. Marketing teams share vendor experiences. The agencies that keep getting briefed aren't necessarily the ones with the biggest rosters or the most impressive deck — they're the ones that made the last campaign easy.
 
 That's not a small thing. In a market where most agencies overpromise and under-deliver, being the agency that runs a clean process is a genuine competitive advantage. Here's what brands are actually looking for — based on the consistent feedback that shapes repeat business decisions.
