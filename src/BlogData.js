@@ -127,7 +127,7 @@ The roster you build in year one sets the trajectory. Take it seriously from the
   },
   {
     slug: 'what-to-look-for-talent-management-software',
-    imagePosition: 'top',
+    imagePosition: '25%',
     title: 'What to Look for in Talent Management Software',
     category: 'Agency Operations',
     readTime: '5 min read',
