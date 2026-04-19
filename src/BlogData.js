@@ -103,7 +103,7 @@ Knowing which business you're building, or which blend, is the first step. Build
     readTime: '6 min read',
     date: 'March 30, 2026',
     excerpt: "The roster is the product. Here's how smart agencies build one that actually converts.",
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1624290002702-85f5db31e580?q=80&w=2070&auto=format&fit=crop',
     body: `The roster is the product. Everything else — the pitches, the campaigns, the brand relationships — runs downstream from who you represent.
 
 Building one from scratch is one of the most important things a new agency does, and one of the most misunderstood.
