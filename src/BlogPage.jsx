@@ -181,7 +181,7 @@ function HeroSpotlight({ post }) {
 export default function BlogPage({ onGetStarted }) {
   useSEO({
     title: 'The Pitch — Strategy & Operations for Talent Agencies',
-    description: 'Insights on talent management, brand partnerships, and agency operations for the agencies building what's next in the creator economy.',
+    description: "Insights on talent management, brand partnerships, and agency operations for the agencies building what's next in the creator economy.",
     canonical: 'https://h-que.com/blog',
   })
   const isMobile = window.innerWidth < 768
