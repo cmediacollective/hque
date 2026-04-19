@@ -265,7 +265,7 @@ Brands have been burned enough times to know exactly what they're looking for. T
     readTime: '6 min read',
     date: 'March 10, 2026',
     excerpt: "The creator economy is still young. But the shape of what talent representation looks like in its next chapter is already coming into focus.",
-    image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1684306484436-cdc302e2dc75?q=80&w=2066&auto=format&fit=crop',
     body: `Traditional talent representation took decades to professionalize. The creator economy is doing that same work in real time, at internet speed.
 
 **The creator as a multi-platform business**
