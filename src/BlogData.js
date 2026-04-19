@@ -127,13 +127,13 @@ The roster you build in year one sets the trajectory. Take it seriously from the
   },
   {
     slug: 'what-to-look-for-talent-management-software',
-    imagePosition: '25%',
+    imagePosition: 'center',
     title: 'What to Look for in Talent Management Software',
     category: 'Agency Operations',
     readTime: '5 min read',
     date: 'March 27, 2026',
     excerpt: "Not all tools are built for the way talent agencies actually work. Here's how to evaluate what's worth your time.",
-    image: 'https://images.unsplash.com/photo-1732210038531-9cefab37885a?q=80&w=987&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1678436748957-396fb013a4d4?q=80&w=2669&auto=format&fit=crop',
     body: `The market for agency software has never been bigger — which means the noise has never been louder. Every tool promises to streamline your workflow, centralize your data, and save you hours a week. Most of them were built for a different kind of agency entirely.
 
 **Does it understand talent?**
