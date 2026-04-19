@@ -84,7 +84,7 @@ export default function InquiriesView({ orgId, dark = true }) {
                 We'll be in touch when there's a campaign opportunity that fits your profile.
               </div>
               <div style="font-size:12px;color:#555;line-height:1.7;margin-top:32px;">
-                If you have any questions, reply to this email or contact us at <a href="mailto:support@hque.com" style="color:#5b7c99;">support@hque.com</a>
+                If you have any questions, reply to this email or contact us at <a href="mailto:support@h-que.com" style="color:#5b7c99;">support@h-que.com</a>
               </div>
             </div>
           `

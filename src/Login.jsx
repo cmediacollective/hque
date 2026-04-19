@@ -101,7 +101,7 @@ export default function Login({ onLogin, onShowSignUp }) {
           Don't have an account? <button onClick={onShowSignUp} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '11px', padding: 0 }}>Start free trial</button>
         </div>
         <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: '#333' }}>
-          Questions? <a href='mailto:support@hque.com' style={{ color: '#444', textDecoration: 'none' }}>support@hque.com</a>
+          Questions? <a href='mailto:support@h-que.com' style={{ color: '#444', textDecoration: 'none' }}>support@h-que.com</a>
         </div>
       </div>
     </div>

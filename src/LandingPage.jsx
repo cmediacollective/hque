@@ -577,7 +577,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
           <div>
             <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
-            {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@hque.com', 'mailto:support@hque.com']].map(([label, href]) => (
+            {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@h-que.com', 'mailto:support@h-que.com']].map(([label, href]) => (
               <div key={label} style={{ marginBottom: '10px' }}>
                 <a href={href} style={{ fontSize: '12px', color: '#555', textDecoration: 'none' }}>{label}</a>
               </div>
@@ -586,7 +586,6 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#555' }}>Made for agencies that move fast.</span>
         </div>
       </footer>
     <HQueChat />

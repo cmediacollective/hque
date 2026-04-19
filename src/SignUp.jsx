@@ -128,7 +128,7 @@ export default function SignUp({ onSignUp }) {
           Already have an account? <a href='/' style={{ color: '#5b7c99', textDecoration: 'none' }}>Sign in</a>
         </div>
         <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: '#333' }}>
-          Questions? <a href='mailto:support@hque.com' style={{ color: '#444', textDecoration: 'none' }}>support@hque.com</a>
+          Questions? <a href='mailto:support@h-que.com' style={{ color: '#444', textDecoration: 'none' }}>support@h-que.com</a>
         </div>
       </div>
     </div>

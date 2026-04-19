@@ -140,7 +140,7 @@ export default function TalentInquiry() {
         <img src="/logo.svg" alt="HQue" style={{ width: '140px', marginBottom: '32px', display: 'block', margin: '0 auto 32px', filter: 'invert(1)' }} />
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1A1A1A', marginBottom: '10px' }}>Agency not found</div>
         <div style={{ fontSize: '13px', color: '#888' }}>This inquiry link may be invalid or expired.</div>
-        <div style={{ marginTop: '20px', fontSize: '11px', color: '#999' }}>Questions? <a href='mailto:support@hque.com' style={{ color: '#5b7c99' }}>support@hque.com</a></div>
+        <div style={{ marginTop: '20px', fontSize: '11px', color: '#999' }}>Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99' }}>support@h-que.com</a></div>
       </div>
     </div>
   )
@@ -245,7 +245,7 @@ export default function TalentInquiry() {
           </button>
 
           <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#aaa' }}>
-            Questions? <a href='mailto:support@hque.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@hque.com</a>
+            Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com</a>
           </div>
         </div>
 

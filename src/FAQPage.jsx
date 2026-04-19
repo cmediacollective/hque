@@ -8,9 +8,9 @@ const FAQS = [
   { q: 'How is HQue different from Monday.com or a spreadsheet?', a: 'Spreadsheets break quickly. Monday.com is generic — it has no concept of talent, campaigns, or brand partnerships. HQue is purpose-built for the way agencies actually work.' },
   { q: 'Can multiple team members use HQue?', a: 'Yes. All plans include multiple team members. Starter includes 2 seats, Pro includes 5, and Agency includes unlimited seats.' },
   { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. You\'ll have full access to all features during your trial.' },
-  { q: 'What happens after my trial ends?', a: 'You\'ll be prompted to choose a plan to continue. Your data is never deleted — if you need more time, reach out to us at support@hque.com.' },
+  { q: 'What happens after my trial ends?', a: 'You\'ll be prompted to choose a plan to continue. Your data is never deleted — if you need more time, reach out to us at support@h-que.com.' },
   { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel anytime from your billing settings and you\'ll retain access until the end of your billing period.' },
-  { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams. If you\'re a solo operator just getting started, reach out to support@hque.com.' },
+  { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams. If you\'re a solo operator just getting started, reach out to support@h-que.com.' },
 ]
 
 export default function FAQPage() {
@@ -39,7 +39,7 @@ export default function FAQPage() {
         </div>
         <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
           <div style={{ fontSize: '12px', color: '#555', marginBottom: '8px' }}>Still have questions?</div>
-          <a href="mailto:support@hque.com" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>support@hque.com →</a>
+          <a href="mailto:support@h-que.com" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com →</a>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function FAQPage() {
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '6px' }}>Still have questions?</div>
           <div style={{ fontSize: '13px', color: '#555' }}>Our team is happy to help. We usually respond within a few hours.</div>
         </div>
-        <a href="mailto:support@hque.com" style={{ display: 'inline-block', padding: '12px 28px', background: '#5b7c99', color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '1px', whiteSpace: 'nowrap' }}>Contact support</a>
+        <a href="mailto:support@h-que.com" style={{ display: 'inline-block', padding: '12px 28px', background: '#5b7c99', color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '1px', whiteSpace: 'nowrap' }}>Contact support</a>
       </div>
 
       {/* Footer */}
