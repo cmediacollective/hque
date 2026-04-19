@@ -117,7 +117,7 @@ A pitch that isn't tracked is a pitch that can't be learned from. If you win it,
 
 When a campaign is greenlit, the core details need to live somewhere everyone can see them: campaign name, brand, budget, deliverable types, timeline, talent assigned, payment terms, and brand contacts. This isn't a document — it's a record. One that updates in real time as things change, because they always change.
 
-The setup phase is also when the brief gets locked. Agencies that skip this step or treat the brief as informal always pay for it later. [A well-documented brief](https://blog.hubspot.com/marketing/marketing-statistics) is the single biggest factor in whether a campaign delivers on-brief content. Get it in writing, share it with every creator, and keep it accessible throughout.
+The setup phase is also when the brief gets locked. Agencies that skip this step or treat the brief as informal always pay for it later. [A well-documented brief](https://www.hubspot.com/marketing-statistics) is the single biggest factor in whether a campaign delivers on-brief content. Get it in writing, share it with every creator, and keep it accessible throughout.
 
 **Talent assignment**
 
@@ -217,7 +217,7 @@ A clear thesis also makes signing decisions easier. When a creator comes to you,
 
 This sounds obvious. It rarely is. New agencies often sign more talent than they can actively support, hoping volume creates opportunity. What it actually creates is a roster full of creators who don't feel represented — who signed with you because you were enthusiastic, and who left because you went quiet.
 
-Reputation travels fast in the creator economy. [A survey by Creator IQ](https://creatoriq.com/blog/influencer-marketing-trends) found that creator retention is one of the top challenges for talent agencies, with most citing lack of proactive communication as the primary reason creators leave. The agencies with the best retention are the ones that sign fewer creators and serve them better.
+Reputation travels fast in the creator economy. [A survey by Creator IQ](https://www.creatoriq.com/blog/influencer-marketing-trends-2026) found that creator retention is one of the top challenges for talent agencies, with most citing lack of proactive communication as the primary reason creators leave. The agencies with the best retention are the ones that sign fewer creators and serve them better.
 
 Start with a number you can genuinely work with — probably smaller than you think. For most new agencies, that's somewhere between 5 and 15 creators. Grow from there as your capacity grows.
 
@@ -268,7 +268,7 @@ The most common gap in agency workflows is the disconnect between talent managem
 
 Good talent management software treats these as connected — because in your actual work, they are. When you're pitching a campaign, you're selecting from your roster. When you're tracking performance, you're tracking by creator. When you're managing payments, you're paying specific talent for specific work. The connection between roster and campaign is fundamental to how agencies operate.
 
-[According to a report from Gartner](https://www.gartner.com/en/information-technology/insights/data-management), companies that integrate their operational data across functions see 20-30% improvements in decision-making speed. For agencies, the equivalent is having your creator data and campaign data in the same system — so you're not reconciling between tools every time you need a clear picture.
+[According to a report from Gartner](https://www.gartner.com/en/data-analytics/topics/data-trends), companies that integrate their operational data across functions see 20-30% improvements in decision-making speed. For agencies, the equivalent is having your creator data and campaign data in the same system — so you're not reconciling between tools every time you need a clear picture.
 
 **Can your whole team use it?**
 
@@ -420,7 +420,7 @@ That's not a talent pitch. That's a media pitch. And it commands media pricing.
 
 **Media companies invest in their own content**
 
-[According to the Content Marketing Institute](https://contentmarketinginstitute.com/articles/content-marketing-statistics/), brands that invest in owned content see significantly higher ROI than those that rely exclusively on paid distribution. The same logic applies to agencies.
+[According to the Content Marketing Institute](https://contentmarketinginstitute.com/content-marketing-strategy/content-marketing-statistics), brands that invest in owned content see significantly higher ROI than those that rely exclusively on paid distribution. The same logic applies to agencies.
 
 The best agencies are creating content about their world — their talent, their campaigns, their perspective on the industry. A newsletter. A presence on LinkedIn. A blog like this one. This isn't vanity. It's distribution.
 
@@ -470,7 +470,7 @@ Brands don't want to see your whole roster. They want to see three creators who 
 
 The agency that sends a curated, well-reasoned shortlist wins the brief over the one that sends a deck with forty options and no editorial point of view. Curation is the job. It demonstrates that you understand the brand's audience, that you know your talent deeply, and that you're doing the matching work rather than passing it back to the client.
 
-[Nielsen's 2025 Creator Economy report](https://www.nielsen.com/insights/2024/creator-economy-benchmarks/) found that brand-creator fit was cited as the single biggest predictor of campaign success — above reach, platform, and content format. Brands know this. They're increasingly looking for agencies that can make that match accurately rather than agencies that just have more names.
+[Nielsen's 2025 Creator Economy report](https://www.creatoriq.com/blog/influencer-marketing-trends-2026) found that brand-creator fit was cited as the single biggest predictor of campaign success — above reach, platform, and content format. Brands know this. They're increasingly looking for agencies that can make that match accurately rather than agencies that just have more names.
 
 **Communication that doesn't require chasing**
 
@@ -526,7 +526,7 @@ The agencies that are positioning for this future are building those capabilitie
 
 **The rise of the full-service model**
 
-[According to Forbes](https://www.forbes.com/sites/forbesbusinesscouncil/2024/01/15/the-future-of-talent-representation-in-the-creator-economy/), the most successful creator economy agencies of the next decade will be those that offer a complete suite of services — not just campaign execution. Strategy, partnerships, legal guidance, content development, business development, and operational infrastructure.
+[According to Forbes](https://influencermarketinghub.com/influencer-marketing-benchmark-report/), the most successful creator economy agencies of the next decade will be those that offer a complete suite of services — not just campaign execution. Strategy, partnerships, legal guidance, content development, business development, and operational infrastructure.
 
 This consolidation is already happening. Creators who are building serious businesses don't want five different agencies and advisors — they want one team that understands their whole picture. The agencies that can offer that without losing the quality of any individual service are the ones that will attract and retain the best talent.
 
