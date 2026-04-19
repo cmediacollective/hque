@@ -1,3 +1,4 @@
+import useSEO from './useSEO'
 import { useState, useRef, useEffect } from 'react'
 import { POSTS } from './BlogData'
 import MarketingNav from './MarketingNav'
@@ -178,6 +179,11 @@ function HeroSpotlight({ post }) {
 }
 
 export default function BlogPage({ onGetStarted }) {
+  useSEO({
+    title: 'The Pitch — Strategy & Operations for Talent Agencies',
+    description: 'Insights on talent management, brand partnerships, and agency operations for the agencies building what's next in the creator economy.',
+    canonical: 'https://h-que.com/blog',
+  })
   const isMobile = window.innerWidth < 768
   const hero = POSTS[0]
   const col1 = POSTS.slice(1, 4)

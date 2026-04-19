@@ -1,3 +1,4 @@
+import useSEO from './useSEO'
 import { POSTS } from './BlogData'
 import MarketingNav from './MarketingNav'
 import HQueChat from './HQueChat'
@@ -5,6 +6,14 @@ import HQueChat from './HQueChat'
 export default function BlogPostPage({ slug, onGetStarted }) {
   const post = POSTS.find(p => p.slug === slug)
   const isMobile = window.innerWidth < 768
+
+  useSEO({
+    title: post ? post.title : 'Article Not Found',
+    description: post ? post.excerpt : '',
+    image: post ? post.image : undefined,
+    canonical: post ? 'https://h-que.com/blog/' + post.slug : undefined,
+    type: 'article',
+  })
 
   if (!post) return (
     <div style={{ background: '#111', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>

@@ -1,3 +1,4 @@
+import useSEO from './useSEO'
 import { useState, useEffect, useRef } from 'react'
 import MarketingNav from './MarketingNav'
 import HQueChat from './HQueChat'
@@ -349,6 +350,11 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
 }
 
 export default function LandingPage({ onGetStarted, onSignIn }) {
+  useSEO({
+    title: 'HQue — Agency OS for Talent & Influencer Agencies',
+    description: 'HQue is the operating system for talent and influencer agencies. Manage your roster, campaigns, payments, and team — all in one place.',
+    canonical: 'https://h-que.com',
+  })
   const [activeScreen, setActiveScreen] = useState(0)
   const [scrolled, setScrolled] = useState(false)
   const [mobile, setMobile] = useState(isMob())

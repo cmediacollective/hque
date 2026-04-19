@@ -1,3 +1,4 @@
+import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
 
@@ -13,6 +14,11 @@ const FAQS = [
 ]
 
 export default function FAQPage() {
+  useSEO({
+    title: 'FAQ — HQue',
+    description: 'Answers to the most common questions about HQue, the agency OS built for talent and influencer agencies.',
+    canonical: 'https://h-que.com/faq',
+  })
   const [open, setOpen] = useState(null)
   const isMobile = window.innerWidth < 768
   const left = FAQS.filter((_, i) => i % 2 === 0)

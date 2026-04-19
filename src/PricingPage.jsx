@@ -1,3 +1,4 @@
+import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
 
@@ -58,6 +59,11 @@ const FAQS = [
 ]
 
 export default function PricingPage({ onGetStarted }) {
+  useSEO({
+    title: 'Pricing — HQue',
+    description: 'Simple, transparent pricing for talent and influencer agencies of every size. Start free, upgrade as you grow.',
+    canonical: 'https://h-que.com/pricing',
+  })
   const [openFaq, setOpenFaq] = useState(null)
   const isMobile = window.innerWidth < 768
 
