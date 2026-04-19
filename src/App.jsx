@@ -202,13 +202,9 @@ function App() {
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
   if (isFaqPage) return <FAQPage />
-  if (isPricingPage) return <PricingPage onGetStarted={() => setShowAuth(true)} />
-  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowAuth(true)} />
-  if (isBlogPage) return <BlogPage onGetStarted={() => setShowAuth(true)} />
-  if (isPricingPage) return <PricingPage onGetStarted={() => setShowAuth(true)} />
-  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowAuth(true)} />
-  if (isBlogPage) return <BlogPage onGetStarted={() => setShowAuth(true)} />
-  if (isPricingPage) return <PricingPage onGetStarted={() => window.location.href = '/'} />
+  if (isPricingPage) return <PricingPage onGetStarted={() => setShowSignUp(true)} />
+  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowSignUp(true)} />
+  if (isBlogPage) return <BlogPage onGetStarted={() => setShowSignUp(true)} />
 
   if (authLoading || profileLoading) return (
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
