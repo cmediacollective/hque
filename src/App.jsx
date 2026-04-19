@@ -44,6 +44,16 @@ function App() {
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
+
+  useEffect(() => {
+    window.$crisp = []
+    window.CRISP_WEBSITE_ID = '0144cb69-1552-4c18-a032-153183d9030f'
+    const s = document.createElement('script')
+    s.src = 'https://client.crisp.chat/l.js'
+    s.async = true
+    document.head.appendChild(s)
+  }, [])
+
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const nav = dark ? '#111111' : '#E8E4DE'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
