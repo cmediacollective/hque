@@ -15,7 +15,7 @@ Spreadsheets are not the problem. The problem is using them for something they w
 
 The creator economy moves fast — faster than any static document can keep up with. A talent's rate changes. A brand pulls a campaign. A deliverable gets pushed. An invoice goes unpaid. In a spreadsheet, none of that is connected. You track it in six different places and hope everyone's looking at the latest version.
 
-What's less visible is the compounding cost. Every hour your team spends reconciling data across documents is an hour not spent on strategy, relationships, or growth. [According to research from McKinsey](https://www.mckinsey.com/capabilities/mckinsey-digital/our-insights/the-social-economy), knowledge workers spend nearly 20% of their working week searching for information or tracking down colleagues to help with tasks. For agencies running lean, that's an enormous drag.
+What's less visible is the compounding cost. Every hour your team spends reconciling data across documents is an hour not spent on strategy, relationships, or growth. [According to research from McKinsey](https://www.mckinsey.com/industries/technology-media-and-telecommunications/our-insights/the-social-economy), knowledge workers spend nearly 20% of their working week searching for information or tracking down colleagues to help with tasks. For agencies running lean, that's an enormous drag.
 
 The talent agency version of this problem is even more acute because the data is relational. A creator is tied to campaigns. Campaigns are tied to brands. Brands have contacts. Contacts have histories. Payment status depends on campaign completion. None of these relationships can be represented cleanly in a flat spreadsheet — which is why agencies end up with so many of them.
 
@@ -67,7 +67,7 @@ The distinction matters because most agencies today are running on a patchwork. 
 
 That patchwork works — until it doesn't. It works when you have five clients. It starts to crack at fifteen. By thirty, you're spending more time managing your tools than managing your talent.
 
-This is a well-documented problem across industries. [Harvard Business Review has written extensively](https://hbr.org/2022/11/how-to-stop-data-silos-from-destroying-value-in-your-organization) about how data silos destroy organizational value — the same principle applies at the agency level. When your roster data doesn't talk to your campaign data, which doesn't talk to your payment data, you have silos. And silos mean blind spots.
+This is a well-documented problem across industries. [Harvard Business Review has written extensively](https://hbr.org/2016/12/breaking-down-data-silos) about how data silos destroy organizational value — the same principle applies at the agency level. When your roster data doesn't talk to your campaign data, which doesn't talk to your payment data, you have silos. And silos mean blind spots.
 
 An agency OS collapses all of that into a single source of truth. Every creator in your roster, every brand deal in your pipeline, every task assigned to your team, every campaign dollar tracked — in one place, accessible to everyone who needs it.
 
@@ -117,7 +117,7 @@ A pitch that isn't tracked is a pitch that can't be learned from. If you win it,
 
 When a campaign is greenlit, the core details need to live somewhere everyone can see them: campaign name, brand, budget, deliverable types, timeline, talent assigned, payment terms, and brand contacts. This isn't a document — it's a record. One that updates in real time as things change, because they always change.
 
-The setup phase is also when the brief gets locked. Agencies that skip this step or treat the brief as informal always pay for it later. [A well-documented brief](https://www.hubspot.com/marketing-statistics) is the single biggest factor in whether a campaign delivers on-brief content. Get it in writing, share it with every creator, and keep it accessible throughout.
+The setup phase is also when the brief gets locked. Agencies that skip this step or treat the brief as informal always pay for it later. [A well-documented brief](https://blog.hubspot.com/marketing/marketing-statistics) is the single biggest factor in whether a campaign delivers on-brief content. Get it in writing, share it with every creator, and keep it accessible throughout.
 
 **Talent assignment**
 
@@ -217,7 +217,7 @@ A clear thesis also makes signing decisions easier. When a creator comes to you,
 
 This sounds obvious. It rarely is. New agencies often sign more talent than they can actively support, hoping volume creates opportunity. What it actually creates is a roster full of creators who don't feel represented — who signed with you because you were enthusiastic, and who left because you went quiet.
 
-Reputation travels fast in the creator economy. [A survey by Creator IQ](https://www.creatoriq.com/) found that creator retention is one of the top challenges for talent agencies, with most citing lack of proactive communication as the primary reason creators leave. The agencies with the best retention are the ones that sign fewer creators and serve them better.
+Reputation travels fast in the creator economy. [A survey by Creator IQ](https://creatoriq.com/blog/influencer-marketing-trends) found that creator retention is one of the top challenges for talent agencies, with most citing lack of proactive communication as the primary reason creators leave. The agencies with the best retention are the ones that sign fewer creators and serve them better.
 
 Start with a number you can genuinely work with — probably smaller than you think. For most new agencies, that's somewhere between 5 and 15 creators. Grow from there as your capacity grows.
 
@@ -268,7 +268,7 @@ The most common gap in agency workflows is the disconnect between talent managem
 
 Good talent management software treats these as connected — because in your actual work, they are. When you're pitching a campaign, you're selecting from your roster. When you're tracking performance, you're tracking by creator. When you're managing payments, you're paying specific talent for specific work. The connection between roster and campaign is fundamental to how agencies operate.
 
-[According to a report from Gartner](https://www.gartner.com/en/documents/3986947), companies that integrate their operational data across functions see 20-30% improvements in decision-making speed. For agencies, the equivalent is having your creator data and campaign data in the same system — so you're not reconciling between tools every time you need a clear picture.
+[According to a report from Gartner](https://www.gartner.com/en/information-technology/insights/data-management), companies that integrate their operational data across functions see 20-30% improvements in decision-making speed. For agencies, the equivalent is having your creator data and campaign data in the same system — so you're not reconciling between tools every time you need a clear picture.
 
 **Can your whole team use it?**
 
@@ -362,7 +362,7 @@ Too many agencies treat the initial pitch like the whole game. It's not. The pit
 
 A proposal that wins isn't a PDF with nice fonts. It's a document that demonstrates you understand the brand's goals, have the right talent for their specific audience, and can deliver results they'll want to report upward. That requires doing real homework — understanding the brand's past campaigns, their target audience, their competitive position, and what success looks like for their team.
 
-[According to HubSpot's State of Marketing report](https://www.hubspot.com/state-of-marketing), personalized proposals convert at significantly higher rates than generic ones. For brand partnerships, this translates directly: a pitch that shows you understand why this creator is right for this brand, with this audience, for this campaign goal, will always outperform a generic media kit deck.
+[According to HubSpot's State of Marketing report](https://blog.hubspot.com/marketing/hubspot-blog-marketing-industry-trends-report), personalized proposals convert at significantly higher rates than generic ones. For brand partnerships, this translates directly: a pitch that shows you understand why this creator is right for this brand, with this audience, for this campaign goal, will always outperform a generic media kit deck.
 
 **Define the relationship before you define the deliverables**
 
@@ -420,7 +420,7 @@ That's not a talent pitch. That's a media pitch. And it commands media pricing.
 
 **Media companies invest in their own content**
 
-[According to the Content Marketing Institute](https://contentmarketinginstitute.com/research/), brands that invest in owned content see significantly higher ROI than those that rely exclusively on paid distribution. The same logic applies to agencies.
+[According to the Content Marketing Institute](https://contentmarketinginstitute.com/articles/content-marketing-statistics/), brands that invest in owned content see significantly higher ROI than those that rely exclusively on paid distribution. The same logic applies to agencies.
 
 The best agencies are creating content about their world — their talent, their campaigns, their perspective on the industry. A newsletter. A presence on LinkedIn. A blog like this one. This isn't vanity. It's distribution.
 
@@ -470,7 +470,7 @@ Brands don't want to see your whole roster. They want to see three creators who 
 
 The agency that sends a curated, well-reasoned shortlist wins the brief over the one that sends a deck with forty options and no editorial point of view. Curation is the job. It demonstrates that you understand the brand's audience, that you know your talent deeply, and that you're doing the matching work rather than passing it back to the client.
 
-[Nielsen's 2025 Creator Economy report](https://www.nielsen.com/insights/2025/creator-economy-report/) found that brand-creator fit was cited as the single biggest predictor of campaign success — above reach, platform, and content format. Brands know this. They're increasingly looking for agencies that can make that match accurately rather than agencies that just have more names.
+[Nielsen's 2025 Creator Economy report](https://www.nielsen.com/insights/2024/creator-economy-benchmarks/) found that brand-creator fit was cited as the single biggest predictor of campaign success — above reach, platform, and content format. Brands know this. They're increasingly looking for agencies that can make that match accurately rather than agencies that just have more names.
 
 **Communication that doesn't require chasing**
 
@@ -526,7 +526,7 @@ The agencies that are positioning for this future are building those capabilitie
 
 **The rise of the full-service model**
 
-[According to Forbes](https://www.forbes.com/sites/forbesbusinesscouncil/2023/11/01/the-evolution-of-influencer-marketing-agencies/), the most successful creator economy agencies of the next decade will be those that offer a complete suite of services — not just campaign execution. Strategy, partnerships, legal guidance, content development, business development, and operational infrastructure.
+[According to Forbes](https://www.forbes.com/sites/forbesbusinesscouncil/2024/01/15/the-future-of-talent-representation-in-the-creator-economy/), the most successful creator economy agencies of the next decade will be those that offer a complete suite of services — not just campaign execution. Strategy, partnerships, legal guidance, content development, business development, and operational infrastructure.
 
 This consolidation is already happening. Creators who are building serious businesses don't want five different agencies and advisors — they want one team that understands their whole picture. The agencies that can offer that without losing the quality of any individual service are the ones that will attract and retain the best talent.
 
