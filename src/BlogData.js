@@ -159,7 +159,7 @@ The best talent management software feels like it was built by someone who ran a
     readTime: '8 min read',
     date: 'March 24, 2026',
     excerpt: "The creator economy is maturing. The agencies that understand what's shifting will be the ones that lead.",
-    image: 'https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=2532&auto=format&fit=crop',
     body: `The creator economy isn't new anymore. That's the most important thing to understand about where we are in 2026.
 
 The early days were defined by novelty — brands were excited about influencers, creators were excited about brand money, and nobody was being particularly rigorous about any of it. That window is closed. What's replaced it is something that looks a lot more like a mature media industry — with all the professionalism, competition, and operational complexity that implies.
@@ -188,7 +188,7 @@ The creator economy matured. The question is whether your agency did too.`,
     readTime: '6 min read',
     date: 'March 20, 2026',
     excerpt: "The difference between a transactional campaign and a real brand partnership comes down to how you structure it from the start.",
-    image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1582005450386-52b25f82d9bb?q=80&w=2070&auto=format&fit=crop',
     body: `Every great brand partnership started somewhere informal. A DM. A warm intro. A brand that slid into a creator's comments. The magic isn't in how it starts — it's in what you build from there.
 
 **The pitch is not the proposal**
@@ -212,7 +212,7 @@ The path from DMs to deals isn't about being more aggressive with outreach. It's
     readTime: '5 min read',
     date: 'March 17, 2026',
     excerpt: "The most successful agencies in the creator economy stopped thinking like talent shops and started thinking like publishers.",
-    image: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&auto=format&fit=crop&q=60',
+    image: 'https://images.unsplash.com/photo-1592861394767-6484f6a8e5c0?q=80&w=2071&auto=format&fit=crop',
     body: `There's a version of a talent agency that functions as a matchmaker. Brand needs creator. Agency has creator. Deal gets done. Repeat.
 
 That model works. But it has a ceiling.
