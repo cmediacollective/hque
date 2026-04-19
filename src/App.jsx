@@ -201,6 +201,11 @@ function App() {
   if (isInquiryPage) return <TalentInquiry />
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
+
+  // Signup/login must be checked BEFORE marketing pages so CTAs work from /pricing, /blog, /faq, etc.
+  if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
+  if (!user && showLogin) return <Login onLogin={setUser} onShowSignUp={() => { setShowLogin(false); setShowSignUp(true) }} />
+
   if (isFaqPage) return <FAQPage />
   if (isPricingPage) return <PricingPage onGetStarted={() => setShowSignUp(true)} />
   if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowSignUp(true)} />
@@ -211,9 +216,6 @@ function App() {
       <div style={{ fontSize: '9px', color: '#555', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
     </div>
   )
-
-  if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
-  if (!user && showLogin) return <Login onLogin={setUser} onShowSignUp={() => { setShowLogin(false); setShowSignUp(true) }} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
   if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
