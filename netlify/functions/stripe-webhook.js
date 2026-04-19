@@ -9,6 +9,7 @@ exports.handler = async (event) => {
   try {
     stripeEvent = stripe.webhooks.constructEvent(event.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
+    console.error('Webhook signature error:', err.message)
     return { statusCode: 400, body: `Webhook error: ${err.message}` }
   }
 
@@ -16,9 +17,21 @@ exports.handler = async (event) => {
     const session = stripeEvent.data.object
     const orgId = session.metadata?.orgId
     const customerId = session.customer
-    const priceId = session.line_items?.data?.[0]?.price?.id
 
-    if (!orgId) return { statusCode: 200, body: 'No orgId' }
+    console.log('Checkout completed. orgId:', orgId, 'customerId:', customerId)
+
+    if (!orgId) {
+      console.error('No orgId in session metadata')
+      return { statusCode: 200, body: 'No orgId' }
+    }
+
+    // Fetch the session with line_items expanded
+    const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ['line_items']
+    })
+
+    const priceId = fullSession.line_items?.data?.[0]?.price?.id
+    console.log('PriceId from line items:', priceId)
 
     const supabase = createClient(
       process.env.SUPABASE_URL,
@@ -27,16 +40,30 @@ exports.handler = async (event) => {
 
     // Determine plan from priceId
     let plan = null
-    if (priceId === process.env.VITE_STRIPE_PRICE_STARTER) plan = 'starter'
-    else if (priceId === process.env.VITE_STRIPE_PRICE_PRO) plan = 'pro'
-    else if (priceId === process.env.VITE_STRIPE_PRICE_AGENCY) plan = 'agency'
-    else if (priceId === process.env.VITE_STRIPE_PRICE_APPSUMO) plan = 'pro'
+    if (priceId === process.env.STRIPE_PRICE_STARTER) plan = 'starter'
+    else if (priceId === process.env.STRIPE_PRICE_PRO) plan = 'pro'
+    else if (priceId === process.env.STRIPE_PRICE_AGENCY) plan = 'agency'
+    else if (priceId === process.env.STRIPE_PRICE_APPSUMO) plan = 'pro'
 
-    await supabase.from('organizations').update({
+    console.log('Resolved plan:', plan, 'from priceId:', priceId)
+
+    if (!plan) {
+      console.error('Could not resolve plan from priceId:', priceId)
+      console.error('Available price IDs:', {
+        starter: process.env.STRIPE_PRICE_STARTER,
+        pro: process.env.STRIPE_PRICE_PRO,
+        agency: process.env.STRIPE_PRICE_AGENCY,
+      })
+    }
+
+    const { error } = await supabase.from('organizations').update({
       stripe_customer_id: customerId,
       stripe_plan: plan,
       trial_ends_at: null
     }).eq('id', orgId)
+
+    if (error) console.error('Supabase update error:', error)
+    else console.log('Organization updated successfully with plan:', plan)
   }
 
   return { statusCode: 200, body: 'OK' }
