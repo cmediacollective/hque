@@ -123,6 +123,17 @@ function App() {
   }
 
   async function handleLogout() {
+    try {
+      if (window.$crisp) window.$crisp.push(['do', 'session:reset'])
+      const crispScript = document.querySelector('script[src="https://client.crisp.chat/l.js"]')
+      if (crispScript) crispScript.remove()
+      const crispBox = document.getElementById('crisp-chatbox')
+      if (crispBox) crispBox.remove()
+      const crispClient = document.getElementById('crisp-client')
+      if (crispClient) crispClient.remove()
+      window.$crisp = undefined
+      window.CRISP_WEBSITE_ID = undefined
+    } catch(e) {}
     await supabase.auth.signOut()
     setUser(null)
     setOrgId(null)
