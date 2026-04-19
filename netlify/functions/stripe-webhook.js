@@ -5,9 +5,15 @@ exports.handler = async (event) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
   const sig = event.headers['stripe-signature']
 
+  // Netlify provides the raw body as a string or base64
+  let rawBody = event.body
+  if (event.isBase64Encoded) {
+    rawBody = Buffer.from(event.body, 'base64').toString('utf8')
+  }
+
   let stripeEvent
   try {
-    stripeEvent = stripe.webhooks.constructEvent(event.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
     console.error('Webhook signature error:', err.message)
     return { statusCode: 400, body: `Webhook error: ${err.message}` }
@@ -38,23 +44,13 @@ exports.handler = async (event) => {
       process.env.SUPABASE_SERVICE_KEY
     )
 
-    // Determine plan from priceId
     let plan = null
     if (priceId === process.env.STRIPE_PRICE_STARTER) plan = 'starter'
     else if (priceId === process.env.STRIPE_PRICE_PRO) plan = 'pro'
     else if (priceId === process.env.STRIPE_PRICE_AGENCY) plan = 'agency'
     else if (priceId === process.env.STRIPE_PRICE_APPSUMO) plan = 'pro'
 
-    console.log('Resolved plan:', plan, 'from priceId:', priceId)
-
-    if (!plan) {
-      console.error('Could not resolve plan from priceId:', priceId)
-      console.error('Available price IDs:', {
-        starter: process.env.STRIPE_PRICE_STARTER,
-        pro: process.env.STRIPE_PRICE_PRO,
-        agency: process.env.STRIPE_PRICE_AGENCY,
-      })
-    }
+    console.log('Resolved plan:', plan)
 
     const { error } = await supabase.from('organizations').update({
       stripe_customer_id: customerId,
