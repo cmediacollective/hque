@@ -29,9 +29,14 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
 
   async function fetchBrands() {
-    const { data } = await supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true })
-    const active = (data || []).filter(b => b.status !== 'archived')
-    const archived = (data || []).filter(b => b.status === 'archived')
+    const { data: brandsData } = await supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true })
+    const { data: pinsData } = await supabase.from('user_brand_pins').select('brand_id, pinned_at')
+    const pinMap = {}
+    ;(pinsData || []).forEach(p => { pinMap[p.brand_id] = p.pinned_at })
+
+    const enriched = (brandsData || []).map(b => ({ ...b, pinned_at: pinMap[b.id] || null }))
+    const active = enriched.filter(b => b.status !== 'archived')
+    const archived = enriched.filter(b => b.status === 'archived')
     active.sort((a, b) => {
       if (a.pinned_at && !b.pinned_at) return -1
       if (!a.pinned_at && b.pinned_at) return 1
@@ -43,8 +48,13 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   }
 
   async function togglePin(brand) {
-    const pinned_at = brand.pinned_at ? null : new Date().toISOString()
-    await supabase.from('brands').update({ pinned_at }).eq('id', brand.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    if (brand.pinned_at) {
+      await supabase.from('user_brand_pins').delete().eq('user_id', user.id).eq('brand_id', brand.id)
+    } else {
+      await supabase.from('user_brand_pins').insert([{ user_id: user.id, brand_id: brand.id }])
+    }
     fetchBrands()
   }
 
