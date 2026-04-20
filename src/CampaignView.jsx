@@ -92,6 +92,14 @@ export default function CampaignView({ dark = true, orgId }) {
       const q = search.toLowerCase()
       return c.name?.toLowerCase().includes(q) || c.brand?.toLowerCase().includes(q)
     })
+    .sort((a, b) => {
+      const aBrand = (a.brand || '').trim().toLowerCase()
+      const bBrand = (b.brand || '').trim().toLowerCase()
+      if (!aBrand && bBrand) return 1
+      if (aBrand && !bBrand) return -1
+      if (aBrand !== bBrand) return aBrand.localeCompare(bBrand)
+      return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
+    })
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
