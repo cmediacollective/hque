@@ -43,6 +43,17 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  // Detect successful checkout return from Stripe and show welcome modal
+  useEffect(() => {
+    if (window.location.search.includes('checkout=success')) {
+      setShowWelcome(true)
+      // Clean the URL so refresh doesn't re-trigger the modal
+      const cleanUrl = window.location.pathname
+      window.history.replaceState({}, '', cleanUrl)
+    }
+  }, [])
 
 
   useEffect(() => {
@@ -234,6 +245,19 @@ function App() {
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
       {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} />}
+      {showWelcome && (
+        <div onClick={() => setShowWelcome(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '2px', maxWidth: '440px', width: '100%', padding: isMobile ? '40px 28px' : '48px 40px', textAlign: 'center', color: '#F0ECE6' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#5b7c99', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='#fff' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='20 6 9 17 4 12'/></svg>
+            </div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>Payment Confirmed</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '28px' : '34px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.2, marginBottom: '16px' }}>Welcome to HQue.</div>
+            <div style={{ fontSize: '13px', color: '#888', lineHeight: 1.7, marginBottom: '32px' }}>Your subscription is active. A receipt has been sent to your email. You can manage your plan any time from Settings → Billing.</div>
+            <button onClick={() => setShowWelcome(false)} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Let's get started</button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'flex', height: isMobile ? 'auto' : '100vh', minHeight: isMobile ? '100vh' : 'auto' }}>
 
