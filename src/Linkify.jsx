@@ -1,16 +1,13 @@
 import React from 'react'
 
-// Matches http(s)://, www., bare domains, and email addresses
 const URL_REGEX = /((https?:\/\/|www\.)[^\s<>"]+|[\w.-]+@[\w-]+\.[\w.-]+)/gi
 
 export default function Linkify({ text, linkColor = '#5b7c99' }) {
   if (!text) return null
 
-  const parts = []
+  const segments = []
   let lastIndex = 0
   let match
-  let keyCounter = 0
-
   URL_REGEX.lastIndex = 0
 
   while ((match = URL_REGEX.exec(text)) !== null) {
@@ -18,7 +15,7 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
     const index = match.index
 
     if (index > lastIndex) {
-      parts.push(text.slice(lastIndex, index))
+      segments.push({ type: 'text', value: text.slice(lastIndex, index) })
     }
 
     const isEmail = matched.includes('@') && !matched.startsWith('http')
@@ -29,24 +26,30 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
       href = 'https://' + matched
     }
 
-    parts.push(
-      
-        key={'link-' + keyCounter++}
-        href={href}
-        target={isEmail ? undefined : '_blank'}
-        rel={isEmail ? undefined : 'noopener noreferrer'}
-        onClick={e => e.stopPropagation()}
-        style={{ color: linkColor, textDecoration: 'underline', wordBreak: 'break-word' }}>
-        {matched}
-      </a>
-    )
-
+    segments.push({ type: 'link', value: matched, href, isEmail })
     lastIndex = index + matched.length
   }
 
   if (lastIndex < text.length) {
-    parts.push(text.slice(lastIndex))
+    segments.push({ type: 'text', value: text.slice(lastIndex) })
   }
 
-  return <>{parts}</>
+  return (
+    <>
+      {segments.map((seg, i) => {
+        if (seg.type === 'text') return <React.Fragment key={i}>{seg.value}</React.Fragment>
+        return (
+          
+            key={i}
+            href={seg.href}
+            target={seg.isEmail ? undefined : '_blank'}
+            rel={seg.isEmail ? undefined : 'noopener noreferrer'}
+            onClick={e => e.stopPropagation()}
+            style={{ color: linkColor, textDecoration: 'underline', wordBreak: 'break-word' }}>
+            {seg.value}
+          </a>
+        )
+      })}
+    </>
+  )
 }
