@@ -185,7 +185,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
         {!showArchived && filtered.length === 0 && !search && (
           <div style={{ padding: '20px 16px', fontSize: '11px', color: subtle, lineHeight: 1.6 }}>
-            No brands or clients yet. Click "+ New Brand/Client/Client/Client" below to add one.
+            No brands or clients yet. Click "+ New Brand/Client" below to add one.
           </div>
         )}
 
@@ -318,7 +318,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           </div>
         ) : (
           <button onClick={() => setShowNewBrand(true)} style={{ width: '100%', padding: '8px 0', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-            + New Brand/Client/Client
+            + New Brand/Client
           </button>
         )}
       </div>
