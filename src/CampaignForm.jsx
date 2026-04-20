@@ -26,7 +26,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     brief_url: existing.brief_url || '',
     contract_url: existing.contract_url || '',
     notes: existing.notes || '',
-    talent_ids: existing.campaign_talent?.map(ct => ct.creator_id) || [],
+    talent_ids: existing.campaign_creators?.map(ct => ct.creator_id) || [],
   } : {
     name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
@@ -165,9 +165,11 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       campaignId = data?.id
     }
     if (campaignId) {
-      await supabase.from('campaign_talent').delete().eq('campaign_id', campaignId)
+      const { error: delErr } = await supabase.from('campaign_creators').delete().eq('campaign_id', campaignId)
+      if (delErr) { setSaving(false); alert(`Error clearing talent: ${delErr.message}`); return }
       if (form.talent_ids.length > 0) {
-        await supabase.from('campaign_talent').insert(form.talent_ids.map(tid => ({ campaign_id: campaignId, creator_id: tid })))
+        const { error: insErr } = await supabase.from('campaign_creators').insert(form.talent_ids.map(tid => ({ campaign_id: campaignId, creator_id: tid })))
+        if (insErr) { setSaving(false); alert(`Error saving talent: ${insErr.message}`); return }
       }
     }
     setSaving(false)
