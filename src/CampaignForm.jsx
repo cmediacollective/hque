@@ -247,7 +247,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
         {field('Campaign Type',
           <div style={{ display: 'flex', gap: '6px' }}>
-            {['Paid', 'Gifting', 'Seeding'].map(t => (
+            {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => (
               <button key={t} onClick={() => set('campaign_type', t)} style={{
                 padding: '6px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
                 border: `0.5px solid ${form.campaign_type === t ? '#5b7c99' : border}`,
