@@ -9,6 +9,7 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
   const parts = []
   let lastIndex = 0
   let match
+  let keyCounter = 0
 
   URL_REGEX.lastIndex = 0
 
@@ -23,14 +24,14 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
     const isEmail = matched.includes('@') && !matched.startsWith('http')
     let href = matched
     if (isEmail) {
-      href = `mailto:${matched}`
+      href = 'mailto:' + matched
     } else if (matched.startsWith('www.')) {
-      href = `https://${matched}`
+      href = 'https://' + matched
     }
 
     parts.push(
       
-        key={`${index}-${matched}`}
+        key={'link-' + keyCounter++}
         href={href}
         target={isEmail ? undefined : '_blank'}
         rel={isEmail ? undefined : 'noopener noreferrer'}
