@@ -212,8 +212,8 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
                 <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>{c.engagement_rate ? `${c.engagement_rate}%` : '—'}</div>
-                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
+                    <div style={{ fontSize: '13px', color: text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.location || '—'}</div>
+                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Location</div>
                   </div>
               {hovering === c.id && !isMobile && (
                 <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '10px', right: '10px', background: card, border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
