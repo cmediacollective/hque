@@ -34,6 +34,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
   const [mentionQuery, setMentionQuery] = useState("")
   const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
   const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
@@ -60,7 +61,14 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
       <textarea
         value={form.title}
         onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-        placeholder='Task title...'
+        onKeyDown={e => {
+          if (e.key === 'Enter' && !e.shiftKey && !saving && form.title?.trim()) {
+            e.preventDefault()
+            setSaving(true)
+            Promise.resolve(onSave(form)).finally(() => setSaving(false))
+          }
+        }}
+        placeholder='Task title... (Enter to save)'
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', color: text, fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
       />
@@ -204,7 +212,16 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
       )}
 
       <div style={{ display: 'flex', gap: '6px' }}>
-        <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
+        <button
+          onClick={async () => {
+            if (saving) return
+            setSaving(true)
+            try { await onSave(form) } finally { setSaving(false) }
+          }}
+          disabled={saving}
+          style={{ padding: '5px 12px', fontSize: '9px', background: saving ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving ? 'default' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving ? 0.7 : 1 }}>
+          {saving ? 'Saving...' : 'Save'}
+        </button>
         <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: `0.5px solid ${border}`, color: dark ? '#777' : '#888', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
       </div>
     </div>
