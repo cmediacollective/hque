@@ -212,6 +212,15 @@ export default function WorkspaceView({ orgId, dark = true }) {
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
 
+  const tasksInColumn = (colId) => {
+    return tasks.filter(t => t.column_id === colId).sort((a, b) => {
+      if (!a.due_date && !b.due_date) return 0
+      if (!a.due_date) return 1
+      if (!b.due_date) return -1
+      return new Date(a.due_date) - new Date(b.due_date)
+    })
+  }
+
   const colorFromName = (name) => {
     if (!name) return '#5b7c99'
     const colors = ['#5B7C99', '#B784A7', '#7A9B8E', '#A87575', '#8C6BAA', '#D4A574', '#6B8E7F']
@@ -237,7 +246,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
             <div style={{ textAlign: 'center', maxWidth: '360px' }}>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand</div>
               <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>
-                Choose a brand from the sidebar to see its Kanban board. Use Agency Ops for internal tasks not tied to a client.
+                Choose a brand from the sidebar to see its Kanban board.
               </div>
             </div>
           </div>
@@ -278,21 +287,21 @@ export default function WorkspaceView({ orgId, dark = true }) {
             )}
 
             {!loading && activeBoard && viewMode === 'kanban' && (
-              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflow: 'hidden' }}>
+              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
                 {columns.map(col => (
                   <div key={col.id}
-                    style={{ flex: 1, minWidth: '200px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    style={{ flex: '0 0 260px', minWidth: '260px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
                     onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
 
                     <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                       <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
-                      <div style={{ fontSize: '10px', color: subtle }}>{tasks.filter(t => t.column_id === col.id).length}</div>
+                      <div style={{ fontSize: '10px', color: subtle }}>{tasksInColumn(col.id).length}</div>
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
-                      {tasks.filter(t => t.column_id === col.id).map(task => (
+                      {tasksInColumn(col.id).map(task => (
                         editingTask?.id === task.id ? (
                           <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
                         ) : (
@@ -345,7 +354,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
                       ))}
                     </div>
                     {columns.flatMap(col =>
-                      tasks.filter(t => t.column_id === col.id).map(task => (
+                      tasksInColumn(col.id).map(task => (
                         <div key={task.id}
                           onClick={() => setEditingTask({ ...task })}
                           style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center' }}

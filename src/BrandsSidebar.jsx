@@ -31,8 +31,20 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     const { data } = await supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true })
     const active = (data || []).filter(b => b.status !== 'archived')
     const archived = (data || []).filter(b => b.status === 'archived')
+    active.sort((a, b) => {
+      if (a.pinned_at && !b.pinned_at) return -1
+      if (!a.pinned_at && b.pinned_at) return 1
+      if (a.pinned_at && b.pinned_at) return new Date(b.pinned_at) - new Date(a.pinned_at)
+      return a.name.localeCompare(b.name)
+    })
     setBrands(active)
     setArchivedBrands(archived)
+  }
+
+  async function togglePin(brand) {
+    const pinned_at = brand.pinned_at ? null : new Date().toISOString()
+    await supabase.from('brands').update({ pinned_at }).eq('id', brand.id)
+    fetchBrands()
   }
 
   async function fetchBoardCounts() {
@@ -179,7 +191,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             onMouseEnter={() => setHovering(b.id)}
             onMouseLeave={() => setHovering(null)}
             style={{
-              padding: '10px 14px',
+              padding: '11px 14px',
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
@@ -189,31 +201,42 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               position: 'relative'
             }}>
             {b.logo_url ? (
-              <img src={b.logo_url} alt={b.name} style={{ width: '22px', height: '22px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
+              <img src={b.logo_url} alt={b.name} style={{ width: '28px', height: '28px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
             ) : (
-              <div style={{ width: '22px', height: '22px', borderRadius: '3px', background: colorFromName(b.name), color: '#fff', fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: colorFromName(b.name), color: '#fff', fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {initial(b.name)}
               </div>
             )}
             <span style={{ fontSize: '13px', color: selectedBrandId === b.id ? text : muted, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
+
             {hovering === b.id ? (
-              <button
-                onClick={e => { e.stopPropagation(); setArchiving({ brand: b, restore: false }) }}
-                title='Archive'
-                style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', padding: 0, lineHeight: 1 }}>×</button>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                <button
+                  onClick={e => { e.stopPropagation(); togglePin(b) }}
+                  title={b.pinned_at ? 'Unpin' : 'Pin to top'}
+                  style={{ background: 'none', border: 'none', color: b.pinned_at ? '#5b7c99' : subtle, cursor: 'pointer', fontSize: '13px', padding: 0, lineHeight: 1 }}>
+                  {b.pinned_at ? '★' : '☆'}
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); setArchiving({ brand: b, restore: false }) }}
+                  title='Archive'
+                  style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', padding: 0, lineHeight: 1 }}>×</button>
+              </div>
+            ) : b.pinned_at ? (
+              <span style={{ fontSize: '11px', color: '#5b7c99', flexShrink: 0 }}>★</span>
             ) : (
               <span style={{ fontSize: '10px', color: subtle, flexShrink: 0 }}>{boardCounts[b.id] || 0}</span>
             )}
           </div>
         ))}
 
-        {!showArchived && (
+        {!showArchived && boardCounts.__internal > 0 && (
           <>
-            <div style={{ padding: '16px 14px 4px', fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle }}>Internal</div>
+            <div style={{ padding: '16px 14px 4px', fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle }}>Unassigned</div>
             <div
-              onClick={() => onSelectBrand?.({ id: '__internal', name: 'Internal' })}
+              onClick={() => onSelectBrand?.({ id: '__internal', name: 'Unassigned' })}
               style={{
-                padding: '10px 14px',
+                padding: '11px 14px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '10px',
@@ -221,16 +244,16 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                 background: selectedBrandId === '__internal' ? selectedBg : 'transparent',
                 borderLeft: selectedBrandId === '__internal' ? '2px solid #5b7c99' : '2px solid transparent'
               }}>
-              <div style={{ width: '22px', height: '22px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
-              <span style={{ fontSize: '13px', color: selectedBrandId === '__internal' ? text : muted, flex: 1 }}>Agency Ops</span>
+              <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
+              <span style={{ fontSize: '13px', color: selectedBrandId === '__internal' ? text : muted, flex: 1 }}>Unassigned</span>
               <span style={{ fontSize: '10px', color: subtle }}>{boardCounts.__internal || 0}</span>
             </div>
           </>
         )}
 
         {showArchived && archivedBrands.map(b => (
-          <div key={b.id} style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '22px', height: '22px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: subtle, fontSize: '11px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div key={b.id} style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: subtle, fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {initial(b.name)}
             </div>
             <span style={{ fontSize: '13px', color: subtle, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
