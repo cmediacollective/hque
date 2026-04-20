@@ -30,10 +30,15 @@ export default function TalentInquiry() {
   }, [])
 
   async function fetchOrg(slug) {
-    const { data: org } = await supabase.from('organizations').select('id, name').eq('slug', slug).single()
+    const { data: org } = await supabase.from('organizations').select('id, name, stripe_plan').eq('slug', slug).single()
     if (org) {
-      const { data: settings } = await supabase.from('org_settings').select('agency_name').eq('org_id', org.id).single()
-      setOrg({ ...org, displayName: settings?.agency_name || org.name })
+      const { data: settings } = await supabase.from('org_settings').select('agency_name, agency_logo_url').eq('org_id', org.id).single()
+      setOrg({
+        ...org,
+        displayName: settings?.agency_name || org.name,
+        logoUrl: settings?.agency_logo_url,
+        isAgencyTier: org.stripe_plan === 'agency'
+      })
     } else {
       setOrg(null)
     }
@@ -148,13 +153,19 @@ export default function TalentInquiry() {
   if (submitted) return (
     <div style={{ background: '#F5F3EF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '0 20px' }}>
-        <img src="/logo.svg" alt="HQue" style={{ width: '140px', marginBottom: '40px', display: 'block', margin: '0 auto 40px', filter: 'invert(1)' }} />
+        {org?.isAgencyTier && org.logoUrl ? (
+          <img src={org.logoUrl} alt={org.displayName} style={{ maxWidth: '140px', maxHeight: '60px', objectFit: 'contain', marginBottom: '40px', display: 'block', margin: '0 auto 40px' }} onError={e => { e.target.style.display = 'none' }} />
+        ) : (
+          <img src="/logo.svg" alt="HQue" style={{ width: '140px', marginBottom: '40px', display: 'block', margin: '0 auto 40px', filter: 'invert(1)' }} />
+        )}
         <div style={{ fontSize: '40px', marginBottom: '20px' }}>✓</div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: '#1A1A1A', marginBottom: '12px' }}>Application received</div>
         <div style={{ fontSize: '14px', color: '#777', lineHeight: 1.8 }}>
           Thanks for applying to <span style={{ color: '#1A1A1A', fontWeight: 500 }}>{org.displayName}</span>. We'll review your profile and be in touch if there's a fit.
         </div>
-        <div style={{ marginTop: '32px', fontSize: '11px', color: '#bbb' }}>Powered by <a href='https://h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>HQue</a></div>
+        {!org?.isAgencyTier && (
+          <div style={{ marginTop: '32px', fontSize: '11px', color: '#bbb' }}>Powered by <a href='https://h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>HQue</a></div>
+        )}
       </div>
     </div>
   )
@@ -164,7 +175,11 @@ export default function TalentInquiry() {
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px' }}>
 
         <div style={{ marginBottom: '40px' }}>
-          <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '32px', display: 'block', filter: 'invert(1)' }} />
+          {org.isAgencyTier && org.logoUrl ? (
+            <img src={org.logoUrl} alt={org.displayName} style={{ maxWidth: '140px', maxHeight: '60px', objectFit: 'contain', marginBottom: '32px', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
+          ) : (
+            <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '32px', display: 'block', filter: 'invert(1)' }} />
+          )}
           <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>{org.displayName}</div>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', marginBottom: '10px', color: '#1A1A1A' }}>Talent Application</div>
           <div style={{ fontSize: '13px', color: '#888', lineHeight: 1.7 }}>Fill out the form below to apply to join {org.displayName}'s talent roster. Fields marked with * are required.</div>
@@ -249,9 +264,11 @@ export default function TalentInquiry() {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#bbb' }}>
-          Powered by <a href='https://h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>HQue</a>
-        </div>
+        {!org.isAgencyTier && (
+          <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#bbb' }}>
+            Powered by <a href='https://h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>HQue</a>
+          </div>
+        )}
       </div>
     </div>
   )
