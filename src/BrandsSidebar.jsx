@@ -27,6 +27,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [openMenuId, setOpenMenuId] = useState(null)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
+  useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
 
   async function fetchBrands() {
     const { data: brandsData } = await supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true })
@@ -59,12 +60,21 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   }
 
   async function fetchBoardCounts() {
-    const { data } = await supabase.from('boards').select('brand_id').eq('org_id', orgId).neq('status', 'archived')
+    // Fetch boards (to map brand_id ↔ board_id) and all non-archived tasks
+    const { data: boards } = await supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived')
+    const { data: tasks } = await supabase.from('tasks').select('board_id').eq('org_id', orgId)
+
+    // Build a map of board_id → brand_id (null brand_id = unassigned board)
+    const boardToBrand = {}
+    ;(boards || []).forEach(b => { boardToBrand[b.id] = b.brand_id })
+
+    // Count tasks per brand
     const counts = {}
     let internal = 0
-    ;(data || []).forEach(b => {
-      if (b.brand_id) counts[b.brand_id] = (counts[b.brand_id] || 0) + 1
-      else internal += 1
+    ;(tasks || []).forEach(t => {
+      const brandId = boardToBrand[t.board_id]
+      if (brandId) counts[brandId] = (counts[brandId] || 0) + 1
+      else if (t.board_id && boardToBrand[t.board_id] === null) internal += 1
     })
     counts.__internal = internal
     setBoardCounts(counts)
