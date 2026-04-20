@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
+import Linkify from './Linkify'
 
 const PAYMENT_METHODS = ['PayPal', 'Venmo', 'Wire Transfer', 'Check', 'ACH', 'Other']
 
@@ -272,7 +273,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
             {campaign.notes && (
               <>
                 {section('Notes')}
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{campaign.notes}</div>
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={campaign.notes} /></div>
               </>
             )}
 
@@ -301,7 +302,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                             </div>
                           )}
                           {link.performance_notes && (
-                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic' }}>{link.performance_notes}</div>
+                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}><Linkify text={link.performance_notes} /></div>
                           )}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>

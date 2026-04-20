@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
+import Linkify from './Linkify'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -549,7 +550,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
                           onClick={() => setEditingTask({ ...task })}
                           style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer', opacity: col.name?.toLowerCase() === 'done' ? 0.55 : 1 }}>
                           <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: col.name?.toLowerCase() === 'done' ? 'line-through' : 'none' }}>{task.title}</div>
-                          {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
+                          {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}><Linkify text={task.description} /></div>}
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
                             {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}

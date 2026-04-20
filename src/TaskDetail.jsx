@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
+import Linkify from './Linkify'
 
 export default function TaskDetail({ task, dark, members = [], brands = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
@@ -365,7 +366,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
                           </div>
                         </div>
                       ) : (
-                        <div style={{ fontSize: '12px', color: text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{c.body}</div>
+                        <div style={{ fontSize: '12px', color: text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} /></div>
                       )}
                     </div>
                   </div>
