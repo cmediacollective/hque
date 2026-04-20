@@ -11,6 +11,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
   const [form, setForm] = useState(existing ? {
     name: existing.name || '',
+    brand_id: existing.brand_id || '',
     brand: existing.brand || '',
     brand_logo_url: existing.brand_logo_url || '',
     brand_website: existing.brand_website || '',
@@ -27,12 +28,17 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     notes: existing.notes || '',
     talent_ids: existing.campaign_talent?.map(ct => ct.creator_id) || [],
   } : {
-    name: '', brand: '', brand_logo_url: '', brand_website: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
+    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
     timeline: '', brief_url: '', contract_url: '', notes: '', talent_ids: []
   })
 
   const [creators, setCreators] = useState([])
+  const [brands, setBrands] = useState([])
+  const [showNewBrand, setShowNewBrand] = useState(false)
+  const [newBrandName, setNewBrandName] = useState('')
+  const [newBrandLogoFile, setNewBrandLogoFile] = useState(null)
+  const [creatingBrand, setCreatingBrand] = useState(false)
   const [talentSearch, setTalentSearch] = useState("")
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -43,10 +49,72 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       const { data } = await supabase.from('creators').select('id, name, photo_url, handles').eq('status', 'active').order('name')
       if (data) setCreators(data)
     }
+    const fetchBrands = async () => {
+      const { data } = await supabase.from('brands').select('*').eq('org_id', orgId).neq('status', 'archived').order('name', { ascending: true })
+      setBrands(data || [])
+    }
     fetchCreators()
-  }, [])
+    fetchBrands()
+  }, [orgId])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  const selectBrand = (brandId) => {
+    if (!brandId) {
+      setForm(f => ({ ...f, brand_id: '', brand: '', brand_logo_url: '', brand_website: '' }))
+      return
+    }
+    const b = brands.find(x => x.id === brandId)
+    if (!b) return
+    setForm(f => ({
+      ...f,
+      brand_id: b.id,
+      brand: b.name,
+      brand_logo_url: b.logo_url || '',
+      brand_website: b.website || ''
+    }))
+  }
+
+  async function createBrandInline() {
+    if (!newBrandName.trim()) return
+    setCreatingBrand(true)
+    let logo_url = null
+    if (newBrandLogoFile) {
+      const ext = newBrandLogoFile.name.split('.').pop()
+      const path = 'brand-logos/' + Date.now() + '.' + ext
+      const { error: uploadErr } = await supabase.storage.from('media-kits').upload(path, newBrandLogoFile, { upsert: true })
+      if (!uploadErr) {
+        const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
+        logo_url = publicUrl
+      }
+    }
+    const { data, error: insertErr } = await supabase.from('brands').insert([{
+      org_id: orgId,
+      name: newBrandName.trim(),
+      logo_url,
+      status: 'active'
+    }]).select().single()
+    setCreatingBrand(false)
+    if (insertErr) {
+      setError(insertErr.message?.includes('unique') || insertErr.code === '23505' ? 'A brand with this name already exists' : (insertErr.message || 'Failed to create brand'))
+      return
+    }
+    if (data) {
+      const updated = [...brands, data].sort((a, b) => a.name.localeCompare(b.name))
+      setBrands(updated)
+      setForm(f => ({
+        ...f,
+        brand_id: data.id,
+        brand: data.name,
+        brand_logo_url: data.logo_url || '',
+        brand_website: data.website || ''
+      }))
+      setNewBrandName('')
+      setNewBrandLogoFile(null)
+      setShowNewBrand(false)
+      setError('')
+    }
+  }
 
   const toggleTalent = (id) => setForm(f => ({
     ...f,
@@ -73,6 +141,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     const payload = {
       org_id: orgId,
       name: form.name,
+      brand_id: form.brand_id || null,
       brand: form.brand || null,
       brand_logo_url: form.brand_logo_url || null,
       brand_website: form.brand_website || null,
@@ -125,24 +194,55 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         </div>
 
         {field('Campaign Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Summer Wellness Campaign' }))}
-        {field('Brand', inp({ value: form.brand, onChange: e => set('brand', e.target.value), placeholder: 'e.g. Lululemon' }))}
-        {field('Brand Logo',
+        {field('Brand',
           <div>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {form.brand_logo_url && (
-                <img src={form.brand_logo_url} alt='logo' style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-              )}
-              <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', background: 'none', display: 'inline-block' }}>
-                {uploadingLogo ? 'Uploading...' : form.brand_logo_url ? 'Change Logo' : 'Upload Logo'}
-                <input type='file' accept='image/*' onChange={e => handleLogoUpload(e.target.files[0])} style={{ display: 'none' }} />
-              </label>
-              {form.brand_logo_url && (
-                <button onClick={() => set('brand_logo_url', '')} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
-              )}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <select
+                value={form.brand_id || ''}
+                onChange={e => selectBrand(e.target.value)}
+                style={{ flex: 1, background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                <option value=''>No brand (internal)</option>
+                {brands.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+              <button
+                type='button'
+                onClick={() => setShowNewBrand(s => !s)}
+                style={{ padding: '9px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', whiteSpace: 'nowrap' }}>
+                {showNewBrand ? 'Cancel' : '+ New'}
+              </button>
             </div>
+            {form.brand_id && form.brand_logo_url && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', padding: '8px 12px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+                <img src={form.brand_logo_url} alt={form.brand} style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '2px', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
+                <span style={{ fontSize: '12px', color: text, flex: 1 }}>{form.brand}</span>
+                {form.brand_website && <a href={form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 30)} ↗</a>}
+              </div>
+            )}
+            {showNewBrand && (
+              <div style={{ marginTop: '10px', padding: '12px', border: `0.5px dashed ${border}`, borderRadius: '1px' }}>
+                <input
+                  value={newBrandName}
+                  onChange={e => setNewBrandName(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') createBrandInline() }}
+                  placeholder='New brand name'
+                  autoFocus
+                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
+                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <label style={{ padding: '6px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', flex: 1 }}>
+                    {newBrandLogoFile ? newBrandLogoFile.name.slice(0, 20) : 'Upload logo (optional)'}
+                    <input type='file' accept='image/*' onChange={e => setNewBrandLogoFile(e.target.files?.[0] || null)} style={{ display: 'none' }} />
+                  </label>
+                  <button onClick={createBrandInline} disabled={creatingBrand || !newBrandName.trim()} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: creatingBrand || !newBrandName.trim() ? 0.5 : 1 }}>
+                    {creatingBrand ? 'Adding...' : 'Add brand'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
-        {field('Brand Website', inp({ value: form.brand_website, onChange: e => set('brand_website', e.target.value), placeholder: 'https://brand.com' }))}
 
 
         {field('Campaign Type',
