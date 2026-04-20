@@ -448,13 +448,13 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             Run your roster.<br /><span style={{ color: '#5b7c99' }}>Not your inbox.</span>
           </h1>
           <p style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '480px', margin: '0 auto 40px' }}>
-            HQue is the operating system for agencies and brands built on talent partnerships.
+            HQue is the operating system for agencies and brands<br/>built on talent partnerships.
           </p>
           <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
             <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
             <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
           </div>
-          <div style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.18em' }}>14-day free trial · No credit card required</div>
+          <div style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.12em' }}>14-day free trial · No credit card required</div>
         </div>
       </section>
 
