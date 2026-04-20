@@ -454,7 +454,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
             <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
           </div>
-          <div style={{ marginTop: '16px', fontSize: '10px', color: '#666', letterSpacing: '0.1em' }}>14-day free trial · No credit card required</div>
+          <div style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.18em' }}>14-day free trial · No credit card required</div>
         </div>
       </section>
 
