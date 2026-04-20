@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
-export default function TaskDetail({ task, dark, members = [], brands = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
+export default function TaskDetail({ task, dark, members = [], brands = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const panelBg = dark ? '#141414' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -198,6 +198,18 @@ export default function TaskDetail({ task, dark, members = [], brands = [], curr
           )}
 
           <div style={{ height: '24px' }} />
+
+          {columns.length > 0 && (
+            <>
+              {sectionLabel('Status')}
+              <select
+                value={form.column_id || ''}
+                onChange={e => setForm(f => ({ ...f, column_id: e.target.value }))}
+                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '20px', boxSizing: 'border-box' }}>
+                {columns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div>

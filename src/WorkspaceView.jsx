@@ -461,6 +461,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
           dark={dark}
           members={members}
           brands={brandsForMove}
+          columns={columns}
           currentBrandId={selectedBrand?.id}
           orgId={orgId}
           onSave={updateTask}
@@ -546,8 +547,8 @@ export default function WorkspaceView({ orgId, dark = true }) {
                           onDragStart={() => setDragging(task.id)}
                           onDragEnd={() => setDragging(null)}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer', opacity: col.name?.toLowerCase() === 'done' ? 0.55 : 1 }}>
+                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: col.name?.toLowerCase() === 'done' ? 'line-through' : 'none' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
@@ -595,10 +596,10 @@ export default function WorkspaceView({ orgId, dark = true }) {
                       tasksInColumn(col.id).map(task => (
                         <div key={task.id}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center' }}
+                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center', opacity: col.name?.toLowerCase() === 'done' ? 0.55 : 1 }}
                           onMouseEnter={e => e.currentTarget.style.background = dark ? '#222' : '#EDEAE5'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.title}</div>
+                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px', textDecoration: col.name?.toLowerCase() === 'done' ? 'line-through' : 'none' }}>{task.title}</div>
                           <div style={{ fontSize: '9px', color: muted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{col.name}</div>
                           <div><span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span></div>
                           <div style={{ overflow: 'hidden', paddingRight: '10px' }}>
