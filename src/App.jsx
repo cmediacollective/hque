@@ -97,7 +97,12 @@ function App() {
       setAuthLoading(false)
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const newUser = session?.user ?? null
+      // Only update if user actually changed — prevents re-render on token refresh when tab regains focus
+      setUser(prev => {
+        if (prev?.id === newUser?.id) return prev
+        return newUser
+      })
     })
     return () => subscription.unsubscribe()
   }, [])
