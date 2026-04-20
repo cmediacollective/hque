@@ -42,7 +42,7 @@ export default function CampaignView({ dark = true, orgId }) {
     setLoading(true)
     const { data } = await supabase
       .from('campaigns')
-      .select('*, campaign_creators(creator_id)')
+      .select('*')
       .eq('org_id', orgId)
       .eq('archived', showArchived)
       .order('created_at', { ascending: false })

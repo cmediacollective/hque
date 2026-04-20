@@ -57,6 +57,16 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     fetchBrands()
   }, [orgId])
 
+  // When editing an existing campaign, fetch its linked talent
+  useEffect(() => {
+    if (!existing?.id) return
+    const fetchLinkedTalent = async () => {
+      const { data } = await supabase.from('campaign_creators').select('creator_id').eq('campaign_id', existing.id)
+      if (data) setForm(f => ({ ...f, talent_ids: data.map(d => d.creator_id) }))
+    }
+    fetchLinkedTalent()
+  }, [existing?.id])
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const selectBrand = (brandId) => {
