@@ -34,22 +34,17 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
     segments.push({ type: 'text', value: text.slice(lastIndex) })
   }
 
-  return (
-    <>
-      {segments.map((seg, i) => {
-        if (seg.type === 'text') return <React.Fragment key={i}>{seg.value}</React.Fragment>
-        return (
-          
-            key={i}
-            href={seg.href}
-            target={seg.isEmail ? undefined : '_blank'}
-            rel={seg.isEmail ? undefined : 'noopener noreferrer'}
-            onClick={e => e.stopPropagation()}
-            style={{ color: linkColor, textDecoration: 'underline', wordBreak: 'break-word' }}>
-            {seg.value}
-          </a>
-        )
-      })}
-    </>
+  return React.createElement(React.Fragment, null,
+    segments.map((seg, i) => {
+      if (seg.type === 'text') return React.createElement(React.Fragment, { key: i }, seg.value)
+      return React.createElement('a', {
+        key: i,
+        href: seg.href,
+        target: seg.isEmail ? undefined : '_blank',
+        rel: seg.isEmail ? undefined : 'noopener noreferrer',
+        onClick: (e) => e.stopPropagation(),
+        style: { color: linkColor, textDecoration: 'underline', wordBreak: 'break-word' }
+      }, seg.value)
+    })
   )
 }
