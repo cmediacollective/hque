@@ -24,6 +24,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [search, setSearch] = useState('')
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
+  const [openMenuId, setOpenMenuId] = useState(null)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
 
@@ -209,8 +210,8 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             )}
             <span style={{ fontSize: '13px', color: selectedBrandId === b.id ? text : muted, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
 
-            {hovering === b.id ? (
-              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+            {hovering === b.id || openMenuId === b.id ? (
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', position: 'relative' }}>
                 <button
                   onClick={e => { e.stopPropagation(); togglePin(b) }}
                   title={b.pinned_at ? 'Unpin' : 'Pin to top'}
@@ -218,9 +219,21 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                   {b.pinned_at ? '★' : '☆'}
                 </button>
                 <button
-                  onClick={e => { e.stopPropagation(); setArchiving({ brand: b, restore: false }) }}
-                  title='Archive'
-                  style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', padding: 0, lineHeight: 1 }}>×</button>
+                  onClick={e => { e.stopPropagation(); setOpenMenuId(openMenuId === b.id ? null : b.id) }}
+                  title='More'
+                  style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', padding: '0 3px', lineHeight: 1, letterSpacing: '1px' }}>⋯</button>
+                {openMenuId === b.id && (
+                  <>
+                    <div onClick={e => { e.stopPropagation(); setOpenMenuId(null) }} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
+                    <div style={{ position: 'absolute', top: '22px', right: 0, background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border2}`, borderRadius: '2px', zIndex: 20, minWidth: '120px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); setOpenMenuId(null); setArchiving({ brand: b, restore: false }) }}
+                        style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer' }}
+                        onMouseEnter={e => e.currentTarget.style.background = cardHover}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Archive brand</button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : b.pinned_at ? (
               <span style={{ fontSize: '11px', color: '#5b7c99', flexShrink: 0 }}>★</span>
