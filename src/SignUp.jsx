@@ -124,7 +124,7 @@ export default function SignUp({ onSignUp }) {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#444' }}>
+        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#888' }}>
           Already have an account? <a href='/' style={{ color: '#5b7c99', textDecoration: 'none' }}>Sign in</a>
         </div>
         <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: '#333' }}>
