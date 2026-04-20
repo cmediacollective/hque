@@ -189,6 +189,20 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     fetchTeam()
   }
 
+  async function removeUser(member) {
+    const displayName = member.full_name || member.email
+    if (!confirm(`Remove ${displayName} from the team? They will lose access immediately.`)) return
+    const { error } = await supabase.from('profiles').update({ org_id: null, role: 'member' }).eq('id', member.id)
+    if (error) {
+      alert(`Could not remove user: ${error.message}`)
+      return
+    }
+    if (member.email) {
+      await supabase.from('invitations').delete().ilike('email', member.email).eq('org_id', orgId)
+    }
+    fetchTeam()
+  }
+
   const roleColor = (r) => r === 'owner' ? '#5b7c99' : r === 'admin' ? '#888' : '#666'
 
   const field = (label, children) => (
@@ -343,17 +357,19 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         {activeTab === 'team' && (
           <div>
             {sectionTitle('Team')}
-            <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
-                <button onClick={inviteUser} disabled={inviting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: inviting ? 0.7 : 1, whiteSpace: 'nowrap' }}>
-                  {inviting ? 'Sending...' : 'Send Invite'}
-                </button>
+            {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
+              <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
+                  <button onClick={inviteUser} disabled={inviting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: inviting ? 0.7 : 1, whiteSpace: 'nowrap' }}>
+                    {inviting ? 'Sending...' : 'Send Invite'}
+                  </button>
+                </div>
+                {inviteMsg && <div style={{ fontSize: '11px', color: inviteMsg.startsWith('Error') ? '#e74c3c' : '#5C9E52', marginTop: '10px' }}>{inviteMsg}</div>}
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in. No password needed on their end.</div>
               </div>
-              {inviteMsg && <div style={{ fontSize: '11px', color: inviteMsg.startsWith('Error') ? '#e74c3c' : '#5C9E52', marginTop: '10px' }}>{inviteMsg}</div>}
-              <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in. No password needed on their end.</div>
-            </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
               {teamMembers.map(member => (
@@ -372,14 +388,24 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   {member.role === 'owner' ? (
                     <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', border: '0.5px solid #5b7c99', padding: '3px 8px', borderRadius: '1px' }}>Owner</span>
                   ) : (
-                    <select
-                      value={member.role || 'member'}
-                      onChange={e => updateRole(member.id, e.target.value)}
-                      disabled={currentUserRole !== 'owner' && currentUserRole !== 'admin'}
-                      style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
-                      <option value='admin'>Admin</option>
-                      <option value='member'>Member</option>
-                    </select>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <select
+                        value={member.role || 'member'}
+                        onChange={e => updateRole(member.id, e.target.value)}
+                        disabled={currentUserRole !== 'owner' && currentUserRole !== 'admin'}
+                        style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
+                        <option value='admin'>Admin</option>
+                        <option value='member'>Member</option>
+                      </select>
+                      {(currentUserRole === 'owner' || currentUserRole === 'admin') && member.id !== user?.id && (
+                        <button
+                          onClick={() => removeUser(member)}
+                          title='Remove from team'
+                          style={{ background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '1px' }}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
