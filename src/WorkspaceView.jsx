@@ -25,11 +25,13 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
   const [form, setForm] = useState({
     ...initial,
     target_brand_id: initial.target_brand_id ?? (currentBrandId === '__internal' ? '' : currentBrandId ?? ''),
-    assignee_ids: initial.assignee_ids ?? []
+    assignee_ids: initial.assignee_ids ?? [],
+    watcher_ids: initial.watcher_ids ?? []
   })
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState("")
   const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
+  const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
@@ -42,7 +44,13 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
     assignee_ids: f.assignee_ids.includes(id) ? f.assignee_ids.filter(x => x !== id) : [...f.assignee_ids, id]
   }))
 
+  const toggleWatcher = (id) => setForm(f => ({
+    ...f,
+    watcher_ids: f.watcher_ids.includes(id) ? f.watcher_ids.filter(x => x !== id) : [...f.watcher_ids, id]
+  }))
+
   const selectedMembers = members.filter(m => form.assignee_ids.includes(m.id))
+  const selectedWatchers = members.filter(m => form.watcher_ids.includes(m.id))
   const initialFromName = (n) => (n || '?').trim().charAt(0).toUpperCase()
 
   return (
@@ -123,6 +131,55 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
                       <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
                       <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
+                    )}
+                    <span style={{ fontSize: '12px', color: text, flex: 1 }}>{m.full_name || m.email}</span>
+                    {isSelected && <span style={{ fontSize: '11px', color: '#5b7c99' }}>✓</span>}
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
+
+      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
+        Watchers
+      </div>
+      <div style={{ marginBottom: '8px', position: 'relative' }}>
+        <div
+          onClick={() => setWatcherMenuOpen(o => !o)}
+          style={{ minHeight: '30px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 8px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+          {selectedWatchers.length === 0 && <span style={{ fontSize: '11px', color: labelColor }}>Add watchers (copied, not responsible)</span>}
+          {selectedWatchers.map(m => (
+            <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px 2px 2px', borderRadius: '10px', fontSize: '11px', color: text }}>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
+              )}
+              <span>{(m.full_name || m.email).split(' ')[0]}</span>
+              <button onClick={e => { e.stopPropagation(); toggleWatcher(m.id) }} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: '0 2px', lineHeight: 1 }}>×</button>
+            </span>
+          ))}
+        </div>
+        {watcherMenuOpen && (
+          <>
+            <div onClick={() => setWatcherMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
+            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 20, maxHeight: '180px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+              {members.length === 0 && <div style={{ padding: '10px', fontSize: '11px', color: labelColor }}>No team members found</div>}
+              {members.map(m => {
+                const isSelected = form.watcher_ids.includes(m.id)
+                return (
+                  <div key={m.id}
+                    onClick={e => { e.stopPropagation(); toggleWatcher(m.id) }}
+                    style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF' }}
+                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+                    {m.avatar_url ? (
+                      <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
                     )}
                     <span style={{ fontSize: '12px', color: text, flex: 1 }}>{m.full_name || m.email}</span>
                     {isSelected && <span style={{ fontSize: '11px', color: '#5b7c99' }}>✓</span>}
@@ -248,10 +305,11 @@ export default function WorkspaceView({ orgId, dark = true }) {
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id)').eq('board_id', activeBoard.id).order('position')
+    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').eq('board_id', activeBoard.id).order('position')
     const enriched = (data || []).map(t => ({
       ...t,
-      assignee_ids: (t.task_assignees || []).map(a => a.user_id)
+      assignee_ids: (t.task_assignees || []).map(a => a.user_id),
+      watcher_ids: (t.task_watchers || []).map(w => w.user_id)
     }))
     setTasks(enriched)
   }
@@ -272,6 +330,16 @@ export default function WorkspaceView({ orgId, dark = true }) {
         const member = members.find(m => m.id === uid)
         if (member) {
           await createNotification(orgId, member.full_name || member.email, 'assignment', `You were assigned to: ${form.title}`, members)
+        }
+      }
+    }
+
+    if (inserted && form.watcher_ids?.length > 0) {
+      await supabase.from('task_watchers').insert(form.watcher_ids.map(uid => ({ task_id: inserted.id, user_id: uid })))
+      for (const uid of form.watcher_ids) {
+        const member = members.find(m => m.id === uid)
+        if (member) {
+          await createNotification(orgId, member.full_name || member.email, 'watching', `You're watching: ${form.title}`, members)
         }
       }
     }
@@ -472,6 +540,12 @@ export default function WorkspaceView({ orgId, dark = true }) {
                                 <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
                                 {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                                 <AvatarStack assignees={getAssignees(task)} size={20} />
+                                {(task.watcher_ids || []).length > 0 && (
+                                  <span title={`${task.watcher_ids.length} watcher${task.watcher_ids.length !== 1 ? 's' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: muted }}>
+                                    <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
+                                    {task.watcher_ids.length}
+                                  </span>
+                                )}
                               </div>
                               <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
                             </div>
