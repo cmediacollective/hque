@@ -3,6 +3,14 @@ import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 
 const PAYMENT_METHODS = ['PayPal', 'Venmo', 'Wire Transfer', 'Check', 'ACH', 'Other']
+
+const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
+const brandColor = (name) => {
+  let hash = 0
+  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0
+  return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
+}
+const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 const ROLES = ['Post', 'Content Only', 'Host', 'Event', 'Gifting', 'UGC', 'Other']
 
 function DocPreview({ url, label, onClose }) {
@@ -182,7 +190,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 {campaign.brand_logo_url
                   ? <img src={campaign.brand_logo_url} alt={campaign.brand} style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '2px', border: '0.5px solid #3A3A3A', background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: '#2A2A2A', border: '0.5px solid #3A3A3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>🏷</div>
+                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                 }
                 <div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{campaign.brand || 'Campaign'}{campaign.brand_website && (<a href={campaign.brand_website.startsWith('http') ? campaign.brand_website : 'https://' + campaign.brand_website} target='_blank' rel='noreferrer' style={{ marginLeft: '8px', fontSize: '8px', letterSpacing: '0.14em', color: '#fff', background: '#5b7c99', padding: '3px 8px', borderRadius: '1px', textDecoration: 'none', textTransform: 'uppercase' }}>↗ Website</a>)}</div>

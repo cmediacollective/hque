@@ -5,6 +5,14 @@ import CampaignDetail from './CampaignDetail'
 
 const STATUSES = ['All', 'Pitch', 'Active', 'Completed']
 
+const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
+const brandColor = (name) => {
+  let hash = 0
+  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0
+  return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
+}
+const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
+
 export default function CampaignView({ dark = true, orgId }) {
   const isMobile = window.innerWidth < 768;
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -169,7 +177,7 @@ export default function CampaignView({ dark = true, orgId }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 {c.brand_logo_url
                   ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '88px', height: '88px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '6px' }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '88px', height: '88px', borderRadius: '2px', background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: subtle }}>🏷</div>
+                  : <div style={{ width: '88px', height: '88px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '36px', fontWeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                 }
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                   <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px' }}>{c.status}</span>

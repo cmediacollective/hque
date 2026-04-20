@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
+const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
+const brandColor = (name) => {
+  let hash = 0
+  for (let i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0
+  return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
+}
+const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
+
 export default function ReportsView({ dark = true, orgId }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
@@ -128,7 +136,7 @@ export default function ReportsView({ dark = true, orgId }) {
 
                 {c.brand_logo_url
                   ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border2}`, background: '#fff', padding: '3px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', flexShrink: 0 }}>🏷</div>
+                  : <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                 }
 
                 <div style={{ flex: 1, minWidth: 0 }}>
