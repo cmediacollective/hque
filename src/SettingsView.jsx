@@ -157,10 +157,25 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     if (!inviteEmail.trim()) return
     setInviting(true)
     setInviteMsg('')
-    const { error } = await supabase.auth.signInWithOtp({ email: inviteEmail, options: { shouldCreateUser: true } })
+
+    const email = inviteEmail.trim().toLowerCase()
+
+    // Store the invitation so when they log in we can auto-attach them to the org
+    const { error: inviteErr } = await supabase.from('invitations').upsert(
+      [{ email, org_id: orgId, role: 'member' }],
+      { onConflict: 'email,org_id' }
+    )
+
+    if (inviteErr) {
+      setInviting(false)
+      return setInviteMsg(`Error: ${inviteErr.message}`)
+    }
+
+    // Now send the magic link
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
     setInviting(false)
     if (error) return setInviteMsg(`Error: ${error.message}`)
-    setInviteMsg(`Invite sent to ${inviteEmail}`)
+    setInviteMsg(`Invite sent to ${email}`)
     setInviteEmail('')
     setTimeout(() => setInviteMsg(''), 4000)
   }

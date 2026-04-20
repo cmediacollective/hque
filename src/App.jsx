@@ -118,7 +118,33 @@ function App() {
   async function fetchProfile() {
     setProfileLoading(true)
     const { data } = await supabase.from('profiles').select('org_id, avatar_url').eq('id', user.id).single()
-    if (data?.org_id) { setOrgId(data.org_id); fetchAgencyName(data.org_id) }
+
+    if (data?.org_id) {
+      setOrgId(data.org_id)
+      fetchAgencyName(data.org_id)
+    } else {
+      // No org — check if there's a pending invitation for this email
+      const email = (user.email || '').toLowerCase()
+      if (email) {
+        const { data: invite } = await supabase
+          .from('invitations')
+          .select('org_id, role')
+          .ilike('email', email)
+          .is('accepted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (invite?.org_id) {
+          // Attach user to the inviting org
+          await supabase.from('profiles').upsert([{ id: user.id, org_id: invite.org_id, role: invite.role || 'member' }], { onConflict: 'id' })
+          await supabase.from('invitations').update({ accepted_at: new Date().toISOString() }).ilike('email', email).eq('org_id', invite.org_id)
+          setOrgId(invite.org_id)
+          fetchAgencyName(invite.org_id)
+        }
+      }
+    }
+
     if (data?.avatar_url) setAvatarUrl(data.avatar_url)
     setProfileLoading(false)
   }
