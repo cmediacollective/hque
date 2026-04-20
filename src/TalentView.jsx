@@ -229,7 +229,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       {!loading && view === 'list' && !isMobile && filtered.length > 0 && (
         <div style={{ flex: 1, overflowY: 'auto', background: bg }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 80px 80px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg }}>
-            {['Creator', 'Type', 'Followers', 'Eng Rate', 'Rate From', ''].map(h => (
+            {['Talent', 'Type', 'Followers', 'Eng Rate', 'Rate From', ''].map(h => (
               <div key={h} style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>{h}</div>
             ))}
           </div>

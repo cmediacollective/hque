@@ -161,7 +161,7 @@ export default function ReportsView({ dark = true, orgId }) {
               {selectedCampaign === c.id && campLinks.length > 0 && (
                 <div style={{ background: dark ? '#1A1A1A' : '#F8F6F2', borderTop: `0.5px solid ${border}` }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 2fr) repeat(5, minmax(80px, 1fr))', padding: '8px 20px', borderBottom: `0.5px solid ${border}` }}>
-                    {['Creator', 'Role', 'Views', 'Likes', 'Reach', 'Payment'].map(h => (
+                    {['Talent', 'Role', 'Views', 'Likes', 'Reach', 'Payment'].map(h => (
                       <div key={h} style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>{h}</div>
                     ))}
                   </div>

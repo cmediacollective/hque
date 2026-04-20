@@ -19,7 +19,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const [form, setForm] = useState(existing ? {
     ...existing,
     types: existing.types || (existing.type ? [existing.type] : []),
-    rates: existing.rates || { feed: '', story: '', reel: '', tiktok: '', youtube: '' },
+    rates: existing.rates || { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' },
     handles: existing.handles || { instagram: '', tiktok: '', youtube: '' },
     niches: existing.niches || []
   } : {
@@ -28,7 +28,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
     location: '', notes: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
-    rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '' }
+    rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' }
   })
   const [saving, setSaving] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
@@ -108,6 +108,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
         reel: form.rates.reel ? parseInt(form.rates.reel) : null,
         tiktok: form.rates.tiktok ? parseInt(form.rates.tiktok) : null,
         youtube: form.rates.youtube ? parseInt(form.rates.youtube) : null,
+        misc: form.rates.misc ? parseInt(form.rates.misc) : null,
       },
       handles: {
         instagram: form.handles.instagram?.replace('@', ''),
@@ -212,12 +213,13 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           </div>
 
           {sectionLabel('Rates (USD)')}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             {field('IG Feed', inp({ value: form.rates.feed, onChange: e => setRate('feed', e.target.value), placeholder: '0', type: 'number' }))}
             {field('IG Story', inp({ value: form.rates.story, onChange: e => setRate('story', e.target.value), placeholder: '0', type: 'number' }))}
             {field('IG Reel', inp({ value: form.rates.reel, onChange: e => setRate('reel', e.target.value), placeholder: '0', type: 'number' }))}
             {field('TikTok', inp({ value: form.rates.tiktok, onChange: e => setRate('tiktok', e.target.value), placeholder: '0', type: 'number' }))}
             {field('YouTube', inp({ value: form.rates.youtube, onChange: e => setRate('youtube', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('Other', inp({ value: form.rates.misc, onChange: e => setRate('misc', e.target.value), placeholder: '0', type: 'number' }))}
           </div>
 
           {sectionLabel('Contact')}
@@ -251,7 +253,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '8px' }}>
             <button onClick={onClose} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: label, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
             <button onClick={save} disabled={saving} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Saving...' : existing ? 'Save Changes' : 'Save Creator'}
+              {saving ? 'Saving...' : existing ? 'Save Changes' : 'Save Talent'}
             </button>
           </div>
         </div>
