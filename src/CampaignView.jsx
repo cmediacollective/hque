@@ -52,11 +52,31 @@ export default function CampaignView({ dark = true, orgId }) {
     setLoading(false)
   }
 
+  const [campaignTalent, setCampaignTalent] = useState({})
+
   async function fetchCreatorCounts(ids) {
-    const { data } = await supabase.from('campaign_creators').select('campaign_id').in('campaign_id', ids)
+    const { data } = await supabase.from('campaign_creators').select('campaign_id, creator_id').in('campaign_id', ids)
     const counts = {}
-    ;(data || []).forEach(r => { counts[r.campaign_id] = (counts[r.campaign_id] || 0) + 1 })
+    const byCampaign = {}
+    const creatorIds = new Set()
+    ;(data || []).forEach(r => {
+      counts[r.campaign_id] = (counts[r.campaign_id] || 0) + 1
+      if (!byCampaign[r.campaign_id]) byCampaign[r.campaign_id] = []
+      byCampaign[r.campaign_id].push(r.creator_id)
+      creatorIds.add(r.creator_id)
+    })
     setCreatorCounts(counts)
+
+    if (creatorIds.size > 0) {
+      const { data: creators } = await supabase.from('creators').select('id, name, photo_url').in('id', Array.from(creatorIds))
+      const creatorMap = {}
+      ;(creators || []).forEach(c => { creatorMap[c.id] = c })
+      const perCampaign = {}
+      Object.entries(byCampaign).forEach(([cid, cids]) => {
+        perCampaign[cid] = cids.map(id => creatorMap[id]).filter(Boolean)
+      })
+      setCampaignTalent(perCampaign)
+    }
   }
 
   async function archiveCampaign(campaign, restore = false) {
@@ -181,7 +201,6 @@ export default function CampaignView({ dark = true, orgId }) {
                 }
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                   <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px' }}>{c.status}</span>
-                  {creatorCounts[c.id] > 0 && <span style={{ fontSize: '9px', color: subtle }}>{creatorCounts[c.id]} talent</span>}
                   {hovering === c.id && (
                     <button
                       onClick={e => { e.stopPropagation(); setArchiving(c) }}
@@ -200,17 +219,45 @@ export default function CampaignView({ dark = true, orgId }) {
               </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '16px', lineHeight: 1.35 }}>{c.name}</div>
 
-              <div style={{ display: 'flex', gap: '20px', paddingTop: '14px', borderTop: `0.5px solid ${border}` }}>
-                {c.budget != null && (
-                  <div>
-                    <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</div>
-                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Budget</div>
-                  </div>
-                )}
-                {(c.start_date || c.end_date) && (
-                  <div>
-                    <div style={{ fontSize: '12px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</div>
-                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Dates</div>
+              <div style={{ display: 'flex', gap: '20px', paddingTop: '14px', borderTop: `0.5px solid ${border}`, alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                  {c.budget != null && (
+                    <div>
+                      <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</div>
+                      <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Budget</div>
+                    </div>
+                  )}
+                  {(c.start_date || c.end_date) && (
+                    <div>
+                      <div style={{ fontSize: '12px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</div>
+                      <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Dates</div>
+                    </div>
+                  )}
+                </div>
+
+                {(campaignTalent[c.id] || []).length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      {(campaignTalent[c.id] || []).slice(0, 4).map((t, i) => (
+                        <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: 4 - i }}>
+                          {t.photo_url ? (
+                            <img src={t.photo_url} alt={t.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${card}`, display: 'block' }} />
+                          ) : (
+                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>
+                              {(t.name || '?').charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {campaignTalent[c.id].length > 4 && (
+                        <div style={{ marginLeft: -8, width: '28px', height: '28px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>
+                          +{campaignTalent[c.id].length - 4}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                      {campaignTalent[c.id].length} Talent
+                    </div>
                   </div>
                 )}
               </div>
