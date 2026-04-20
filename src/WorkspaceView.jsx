@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
+import TaskDetail from './TaskDetail'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -454,6 +455,22 @@ export default function WorkspaceView({ orgId, dark = true }) {
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
 
+      {editingTask && (
+        <TaskDetail
+          task={editingTask}
+          dark={dark}
+          members={members}
+          brands={brandsForMove}
+          currentBrandId={selectedBrand?.id}
+          orgId={orgId}
+          onSave={updateTask}
+          onClose={() => setEditingTask(null)}
+          onDelete={deleteTask}
+          createNotification={createNotification}
+          parseMentions={parseMentions}
+        />
+      )}
+
       <BrandsSidebar
         dark={dark}
         orgId={orgId}
@@ -524,33 +541,26 @@ export default function WorkspaceView({ orgId, dark = true }) {
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
                       {tasksInColumn(col.id).map(task => (
-                        editingTask?.id === task.id ? (
-                          <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} brands={brandsForMove} currentBrandId={selectedBrand?.id} />
-                        ) : (
-                          <div key={task.id}
-                            draggable
-                            onDragStart={() => setDragging(task.id)}
-                            onDragEnd={() => setDragging(null)}
-                            onClick={() => setEditingTask({ ...task })}
-                            style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                            <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
-                            {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                                {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
-                                <AvatarStack assignees={getAssignees(task)} size={20} />
-                                {(task.watcher_ids || []).length > 0 && (
-                                  <span title={`${task.watcher_ids.length} watcher${task.watcher_ids.length !== 1 ? 's' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: muted }}>
-                                    <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
-                                    {task.watcher_ids.length}
-                                  </span>
-                                )}
-                              </div>
-                              <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
-                            </div>
+                        <div key={task.id}
+                          draggable
+                          onDragStart={() => setDragging(task.id)}
+                          onDragEnd={() => setDragging(null)}
+                          onClick={() => setEditingTask({ ...task })}
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
+                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                          {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
+                            {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                            <AvatarStack assignees={getAssignees(task)} size={20} />
+                            {(task.watcher_ids || []).length > 0 && (
+                              <span title={`${task.watcher_ids.length} watcher${task.watcher_ids.length !== 1 ? 's' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: muted }}>
+                                <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
+                                {task.watcher_ids.length}
+                              </span>
+                            )}
                           </div>
-                        )
+                        </div>
                       ))}
 
                       {showNewTask === col.id ? (
