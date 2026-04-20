@@ -45,6 +45,7 @@ const PLANS = [
       'Everything in Pro',
       'Custom onboarding',
       'Dedicated account support',
+      'Remove HQue branding',
       'Early access to new features',
     ]
   },
