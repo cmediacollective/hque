@@ -236,14 +236,14 @@ function App() {
   if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
-    { key: 'talent', label: 'Talent' },
-    { key: 'campaigns', label: 'Campaigns' },
-    { key: 'workspace', label: 'Work' },
-    { key: 'reports', label: 'Reports' },
-    { key: 'settings', label: 'Settings' },
+    { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
+    { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
+    { key: 'workspace', label: 'Work', pageLabel: 'Brands & Clients' },
+    { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
+    { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
 
-  const viewLabel = navItems.find(n => n.key === view)?.label || 'HQue'
+  const viewLabel = navItems.find(n => n.key === view)?.pageLabel || navItems.find(n => n.key === view)?.label || 'HQue'
 
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
