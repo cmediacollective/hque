@@ -4,31 +4,32 @@ const { createClient } = require('@supabase/supabase-js')
 exports.handler = async (event) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-  let stripeEvent
-  try {
-    // Try with signature verification first
-    const sig = event.headers['stripe-signature']
-    let rawBody = event.body
-    if (event.isBase64Encoded) {
-      rawBody = Buffer.from(event.body, 'base64').toString('utf8')
-    }
-    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET)
-  } catch (err) {
-    console.error('Signature verification failed, parsing body directly:', err.message)
-    // Fall back to parsing without verification
-    try {
-      const body = event.isBase64Encoded
-        ? Buffer.from(event.body, 'base64').toString('utf8')
-        : event.body
-      stripeEvent = JSON.parse(body)
-      console.log('Parsed event without verification:', stripeEvent.type)
-    } catch (parseErr) {
-      console.error('Could not parse body:', parseErr.message)
-      return { statusCode: 400, body: 'Bad request' }
-    }
+  const sig = event.headers['stripe-signature']
+  if (!sig) {
+    console.error('No stripe-signature header on request')
+    return { statusCode: 400, body: 'Missing signature' }
   }
 
-  console.log('Processing event type:', stripeEvent.type)
+  // Stripe signature verification requires the EXACT raw body bytes.
+  // Netlify gives us event.body as either a base64 string (when isBase64Encoded)
+  // or a plain string. Convert to Buffer either way so we pass raw bytes.
+  const rawBody = event.isBase64Encoded
+    ? Buffer.from(event.body, 'base64')
+    : Buffer.from(event.body, 'utf8')
+
+  let stripeEvent
+  try {
+    stripeEvent = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err.message)
+    return { statusCode: 400, body: `Webhook Error: ${err.message}` }
+  }
+
+  console.log('Verified event:', stripeEvent.type)
 
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object
@@ -42,7 +43,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: 'No orgId' }
     }
 
-    // Fetch the session with line_items expanded
+    // Fetch the session with line_items expanded so we can read the price
     const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
       expand: ['line_items']
     })
@@ -62,11 +63,6 @@ exports.handler = async (event) => {
     else if (priceId === process.env.STRIPE_PRICE_APPSUMO) plan = 'pro'
 
     console.log('Resolved plan:', plan, 'from priceId:', priceId)
-    console.log('Available price IDs:', {
-      starter: process.env.STRIPE_PRICE_STARTER,
-      pro: process.env.STRIPE_PRICE_PRO,
-      agency: process.env.STRIPE_PRICE_AGENCY,
-    })
 
     const { error } = await supabase.from('organizations').update({
       stripe_customer_id: customerId,
