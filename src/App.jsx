@@ -268,11 +268,7 @@ function App() {
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-              {stripePlan === 'agency' && agencyLogoUrl ? (
-                <img src={agencyLogoUrl} alt={agencyName || 'Agency'} style={{ maxWidth: '140px', maxHeight: '48px', objectFit: 'contain', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
-              ) : (
-                <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
-              )}
+              <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
             </div>
             {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
