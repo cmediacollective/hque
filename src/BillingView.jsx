@@ -164,7 +164,7 @@ export default function BillingView({ dark = true, orgId, user }) {
       </div>
 
       <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.7 }}>
-        Payments processed securely by Stripe. Cancel anytime from billing portal. Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com</a>
+        Payments processed securely by Stripe. Click Manage Plan above to cancel or update your subscription through Stripe's billing portal. Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com</a>
       </div>
     </div>
   )
