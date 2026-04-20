@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
 
-const STATUSES = ['All', 'Pitch', 'Active', 'Completed']
+const STATUSES = ['All', 'Pitch', 'Active', 'Pending Payment', 'Completed']
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -85,6 +85,15 @@ export default function CampaignView({ dark = true, orgId }) {
     fetchCampaigns()
   }
 
+  async function updateCampaignField(id, field, value) {
+    setCampaigns(cs => cs.map(c => c.id === id ? { ...c, [field]: value } : c))
+    const { error } = await supabase.from('campaigns').update({ [field]: value }).eq('id', id)
+    if (error) {
+      alert(`Could not update: ${error.message}`)
+      fetchCampaigns()
+    }
+  }
+
   const filtered = campaigns
     .filter(c => statusFilter === 'All' || c.status === statusFilter)
     .filter(c => {
@@ -101,7 +110,7 @@ export default function CampaignView({ dark = true, orgId }) {
       return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
     })
 
-  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
+  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : '#888'
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
 
   const chip = (label, active, onClick) => (
@@ -209,8 +218,22 @@ export default function CampaignView({ dark = true, orgId }) {
                 }
                 <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                    <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.campaign_type || 'Paid'}</div>
-                    <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
+                    <select
+                      value={c.campaign_type || 'Paid'}
+                      onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'campaign_type', e.target.value) }}
+                      onClick={e => e.stopPropagation()}
+                      title='Campaign type'
+                      style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', flex: 1, minWidth: 0, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}>
+                      {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <select
+                      value={c.status || 'Pitch'}
+                      onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
+                      onClick={e => e.stopPropagation()}
+                      title='Status'
+                      style={{ padding: '2px 18px 2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0, background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
+                      {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
                   </div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                   <div style={{ fontSize: '11px', color: muted, marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>

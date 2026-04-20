@@ -272,7 +272,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
         {field('Status',
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {['Pitch', 'Active', 'Completed', 'Cancelled'].map(s => (
+            {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => (
               <button key={s} onClick={() => set('status', s)} style={{
                 padding: '6px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
                 border: `0.5px solid ${form.status === s ? '#5b7c99' : border}`,
