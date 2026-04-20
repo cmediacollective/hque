@@ -158,7 +158,7 @@ export default function CampaignView({ dark = true, orgId }) {
       )}
 
       {!loading && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
           {filtered.map(c => (
             <div key={c.id}
               style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '24px', cursor: 'pointer', position: 'relative' }}

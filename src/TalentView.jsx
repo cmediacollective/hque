@@ -187,7 +187,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       )}
 
       {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '1px', background: gridBg, flex: 1, overflowY: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
           {filtered.map(c => (
             <div key={c.id}
               style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '16px' : '18px', cursor: 'pointer', position: 'relative' }}
@@ -216,7 +216,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Eng Rate</div>
                   </div>
               {hovering === c.id && !isMobile && (
-                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', bottom: '10px', right: '10px', background: 'none', border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
+                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '10px', right: '10px', background: card, border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
                   {showArchived ? 'Restore' : 'Archive'}
                 </button>
               )}
