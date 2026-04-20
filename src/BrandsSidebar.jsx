@@ -165,7 +165,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder='Search brands & clients...'
+          placeholder='Search brands/clients...'
           style={{ width: '100%', padding: '7px 10px', fontSize: '12px', background: dark ? '#141414' : '#F5F3EF', border: `0.5px solid ${border}`, borderRadius: '1px', color: text, outline: 'none', boxSizing: 'border-box' }}
         />
       </div>
@@ -185,7 +185,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
         {!showArchived && filtered.length === 0 && !search && (
           <div style={{ padding: '20px 16px', fontSize: '11px', color: subtle, lineHeight: 1.6 }}>
-            No brands or clients yet. Click "+ New Brand/Client/Client" below to add one.
+            No brands or clients yet. Click "+ New Brand/Client/Client/Client" below to add one.
           </div>
         )}
 
@@ -318,7 +318,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           </div>
         ) : (
           <button onClick={() => setShowNewBrand(true)} style={{ width: '100%', padding: '8px 0', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-            + New Brand/Client
+            + New Brand/Client/Client
           </button>
         )}
       </div>

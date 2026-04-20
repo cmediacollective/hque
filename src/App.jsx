@@ -238,7 +238,7 @@ function App() {
   const navItems = [
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
-    { key: 'workspace', label: 'Work', pageLabel: 'Brands & Clients' },
+    { key: 'workspace', label: 'Work', pageLabel: 'Brands/Clients' },
     { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
