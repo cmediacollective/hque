@@ -181,7 +181,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   async function updateRole(id, role) {
-    await supabase.from('profiles').update({ role }).eq('id', id)
+    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
+    if (error) {
+      alert(`Could not update role: ${error.message}`)
+      return
+    }
     fetchTeam()
   }
 
@@ -211,7 +215,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
-    { key: 'billing', label: 'Billing' }
+    ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : [])
   ]
 
   return (
@@ -399,7 +403,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           </div>
         )}
 
-        {activeTab === 'billing' && (
+        {activeTab === 'billing' && currentUserRole === 'owner' && (
           <BillingView dark={dark} orgId={orgId} user={user} />
         )}
 
