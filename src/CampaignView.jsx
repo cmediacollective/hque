@@ -168,8 +168,8 @@ export default function CampaignView({ dark = true, orgId }) {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 {c.brand_logo_url
-                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px' }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '48px', height: '48px', borderRadius: '2px', background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', color: subtle }}>🏷</div>
+                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '88px', height: '88px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '6px' }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '88px', height: '88px', borderRadius: '2px', background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', color: subtle }}>🏷</div>
                 }
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
                   <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px' }}>{c.status}</span>
