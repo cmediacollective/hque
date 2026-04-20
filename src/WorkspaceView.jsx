@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import BrandsSidebar from './BrandsSidebar'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -17,7 +18,7 @@ async function parseMentions(description, orgId, message, profiles) {
   }
 }
 
-const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Done']
+const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
 function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
@@ -90,6 +91,7 @@ export default function WorkspaceView({ orgId, dark = true }) {
   useEffect(() => {
     supabase.from('profiles').select('id, email, full_name').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
+
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -101,63 +103,80 @@ export default function WorkspaceView({ orgId, dark = true }) {
   const colBg = dark ? '#1A1A1A' : '#F5F3EF'
   const colHover = dark ? '#222' : '#EDEAE5'
 
-  const [boards, setBoards] = useState([])
-  const [archivedBoards, setArchivedBoards] = useState([])
+  const [selectedBrand, setSelectedBrand] = useState(null)
   const [activeBoard, setActiveBoard] = useState(null)
   const [columns, setColumns] = useState([])
   const [tasks, setTasks] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [showNewBoard, setShowNewBoard] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [viewMode, setViewMode] = useState('kanban')
   const [showNewTask, setShowNewTask] = useState(null)
   const [editingTask, setEditingTask] = useState(null)
-  const [newBoardName, setNewBoardName] = useState('')
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
-  const [showArchived, setShowArchived] = useState(false)
-  const [archiving, setArchiving] = useState(null)
 
-  useEffect(() => { fetchBoards() }, [])
-  useEffect(() => { if (activeBoard) { fetchColumns(); fetchTasks() } }, [activeBoard])
+  useEffect(() => {
+    if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); return }
+    findOrCreateBoardForBrand(selectedBrand)
+  }, [selectedBrand?.id])
 
-  async function fetchBoards() {
-    const { data } = await supabase.from('boards').select('*').eq('org_id', orgId)
-    const active = (data || []).filter(b => b.status !== 'archived')
-    const archived = (data || []).filter(b => b.status === 'archived')
-    setBoards(active)
-    setArchivedBoards(archived)
-    if (active?.length) setActiveBoard(active[0])
-    else setLoading(false)
+  useEffect(() => {
+    if (activeBoard) { fetchColumns(); fetchTasks() }
+  }, [activeBoard?.id])
+
+  async function findOrCreateBoardForBrand(brand) {
+    setLoading(true)
+    const isInternal = brand.id === '__internal'
+
+    let query = supabase.from('boards').select('*').eq('org_id', orgId).neq('status', 'archived').order('created_at', { ascending: true })
+    query = isInternal ? query.is('brand_id', null) : query.eq('brand_id', brand.id)
+
+    const { data: existing } = await query.limit(1).maybeSingle()
+
+    if (existing) {
+      setActiveBoard(existing)
+      setLoading(false)
+      return
+    }
+
+    const { data: newBoard } = await supabase.from('boards').insert([{
+      name: brand.name,
+      org_id: orgId,
+      brand_id: isInternal ? null : brand.id,
+      status: 'active'
+    }]).select().single()
+
+    if (newBoard) {
+      await supabase.from('board_columns').insert(DEFAULT_COLUMNS.map((name, i) => ({ board_id: newBoard.id, name, position: i })))
+      setActiveBoard(newBoard)
+    }
+    setLoading(false)
   }
 
   async function fetchColumns() {
     const { data } = await supabase.from('board_columns').select('*').eq('board_id', activeBoard.id).order('position')
+
+    if (data && data.length > 0 && !data.some(c => c.name?.toLowerCase() === 'hold')) {
+      const reviewIndex = data.findIndex(c => c.name?.toLowerCase() === 'review')
+      const insertPos = reviewIndex >= 0 ? reviewIndex + 1 : data.length
+      const { data: holdCol } = await supabase.from('board_columns').insert([{
+        board_id: activeBoard.id,
+        name: 'Hold',
+        position: insertPos
+      }]).select().single()
+      if (holdCol) {
+        const updated = [...data]
+        updated.splice(insertPos, 0, holdCol)
+        setColumns(updated)
+        return
+      }
+    }
+
     setColumns(data || [])
   }
 
   async function fetchTasks() {
-    setLoading(true)
-    const { data } = await supabase.from('tasks').select('*').eq('org_id', orgId).order('position')
+    const { data } = await supabase.from('tasks').select('*').eq('board_id', activeBoard.id).order('position')
     setTasks(data || [])
-    setLoading(false)
-  }
-
-  async function createBoard() {
-    if (!newBoardName.trim()) return
-    const { data } = await supabase.from('boards').insert([{ name: newBoardName, org_id: orgId, status: 'active' }]).select().single()
-    if (data) {
-      await supabase.from('board_columns').insert(DEFAULT_COLUMNS.map((name, i) => ({ board_id: data.id, name, position: i })))
-      setNewBoardName('')
-      setShowNewBoard(false)
-      setBoards(b => [...b, data])
-      setActiveBoard(data)
-    }
-  }
-
-  async function archiveBoard(board, restore = false) {
-    await supabase.from('boards').update({ status: restore ? 'active' : 'archived' }).eq('id', board.id)
-    setArchiving(null)
-    if (!restore && activeBoard?.id === board.id) setActiveBoard(null)
-    fetchBoards()
   }
 
   async function createTask(columnId, form) {
@@ -178,7 +197,6 @@ export default function WorkspaceView({ orgId, dark = true }) {
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
     setEditingTask(null)
     fetchTasks()
-    if (form.assigned_to) await createNotification(orgId, form.assigned_to, 'assignment', `You were assigned to: ${form.title}`, members)
     await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
   }
 
@@ -194,139 +212,164 @@ export default function WorkspaceView({ orgId, dark = true }) {
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
 
+  const colorFromName = (name) => {
+    if (!name) return '#5b7c99'
+    const colors = ['#5B7C99', '#B784A7', '#7A9B8E', '#A87575', '#8C6BAA', '#D4A574', '#6B8E7F']
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
+    return colors[Math.abs(hash) % colors.length]
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', background: bg }}>
+    <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
 
-      {archiving && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: card, border: `0.5px solid ${border}`, padding: '32px', width: '380px', borderRadius: '2px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
-              {archiving.restore ? 'Restore board?' : 'Archive board?'}
+      <BrandsSidebar
+        dark={dark}
+        orgId={orgId}
+        selectedBrandId={selectedBrand?.id}
+        onSelectBrand={(b) => setSelectedBrand(b)}
+      />
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {!selectedBrand && (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>
+                Choose a brand from the sidebar to see its Kanban board. Use Agency Ops for internal tasks not tied to a client.
+              </div>
             </div>
-            <div style={{ fontSize: '12px', color: muted, marginBottom: '24px' }}>
-              {archiving.restore
-                ? `"${archiving.board.name}" will be moved back to your active boards.`
-                : `"${archiving.board.name}" will be hidden but can be restored anytime.`}
-            </div>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
-              <button onClick={() => archiveBoard(archiving.board, archiving.restore)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
-                {archiving.restore ? 'Restore' : 'Archive'}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-
-      <div style={{ padding: '0 28px', display: 'flex', alignItems: 'center', borderBottom: `0.5px solid ${border}`, overflowX: 'auto', flexShrink: 0, background: bg }}>
-        {!showArchived && boards.map(b => (
-          <div key={b.id} style={{ display: 'flex', alignItems: 'center', borderBottom: activeBoard?.id === b.id ? '1.5px solid #5b7c99' : '1.5px solid transparent' }}>
-            <button onClick={() => setActiveBoard(b)} style={{
-              padding: '12px 12px 12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
-              background: 'none', border: 'none',
-              color: activeBoard?.id === b.id ? text : muted, cursor: 'pointer', whiteSpace: 'nowrap'
-            }}>{b.name}</button>
-            {activeBoard?.id === b.id && (
-              <button onClick={() => setArchiving({ board: b, restore: false })} style={{ padding: '2px 6px', marginRight: '8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: subtle, cursor: 'pointer', borderRadius: '1px' }}>Archive</button>
-            )}
-          </div>
-        ))}
-
-        {showArchived && archivedBoards.map(b => (
-          <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px' }}>
-            <span style={{ fontSize: '10px', color: muted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{b.name}</span>
-            <button onClick={() => setArchiving({ board: b, restore: true })} style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Restore</button>
-          </div>
-        ))}
-
-        {showNewBoard && !showArchived ? (
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', padding: '8px 0 8px 12px' }}>
-            <input
-              value={newBoardName}
-              onChange={e => setNewBoardName(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') createBoard(); if (e.key === 'Escape') setShowNewBoard(false) }}
-              placeholder='Board name...'
-              autoFocus
-              style={{ background: card, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '5px 10px', fontSize: '11px', color: text, outline: 'none', width: '160px' }}
-            />
-            <button onClick={createBoard} style={{ padding: '5px 10px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Add</button>
-            <button onClick={() => setShowNewBoard(false)} style={{ padding: '5px 10px', fontSize: '9px', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
-          </div>
-        ) : !showArchived && (
-          <button onClick={() => setShowNewBoard(true)} style={{ padding: '12px 16px', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: muted, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Board</button>
         )}
 
-        <div style={{ marginLeft: 'auto', flexShrink: 0, padding: '8px 0' }}>
-          <button
-            onClick={() => { setShowArchived(a => !a); if (!showArchived) setActiveBoard(null) }}
-            style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, color: showArchived ? '#5b7c99' : muted, cursor: 'pointer', borderRadius: '1px' }}>
-            {showArchived ? '<- Active' : `Archived${archivedBoards.length ? ` (${archivedBoards.length})` : ''}`}
-          </button>
-        </div>
-      </div>
-
-      {!activeBoard && !showArchived && (
-        <div style={{ padding: '80px 28px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No boards yet</div>
-          <div style={{ fontSize: '12px', color: muted }}>Click + Board to create your first board</div>
-        </div>
-      )}
-
-      {showArchived && archivedBoards.length === 0 && (
-        <div style={{ padding: '80px 28px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No archived boards</div>
-        </div>
-      )}
-
-      {activeBoard && !showArchived && (
-        <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflow: 'hidden' }}>
-          {columns.map(col => (
-            <div key={col.id}
-              style={{ flex: 1, minWidth: '220px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
-              onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
-              onDragLeave={() => setDragOver(null)}
-              onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
-
-              <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
-                <div style={{ fontSize: '10px', color: subtle }}>{tasks.filter(t => t.column_id === col.id).length}</div>
+        {selectedBrand && (
+          <>
+            <div style={{ padding: '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
+              {selectedBrand.id === '__internal' ? (
+                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
+              ) : selectedBrand.logo_url ? (
+                <img src={selectedBrand.logo_url} alt={selectedBrand.name} style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '4px', background: '#fff', padding: '3px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => { e.target.style.display = 'none' }} />
+              ) : (
+                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: colorFromName(selectedBrand.name), color: '#fff', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {(selectedBrand.name || '?').charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, lineHeight: 1.2 }}>{selectedBrand.name}</div>
+                <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.14em', marginTop: '3px' }}>
+                  {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                  {selectedBrand.website && (
+                    <> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>
+                  )}
+                </div>
               </div>
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
-                {tasks.filter(t => t.column_id === col.id).map(task => (
-                  editingTask?.id === task.id ? (
-                    <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
-                  ) : (
-                    <div key={task.id}
-                      draggable
-                      onDragStart={() => setDragging(task.id)}
-                      onDragEnd={() => setDragging(null)}
-                      onClick={() => setEditingTask({ ...task })}
-                      style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                      <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
-                      {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                          {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
-                          {task.assigned_to && <span style={{ fontSize: '9px', color: muted, background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px', borderRadius: '1px' }}>{task.assigned_to}</span>}
-                        </div>
-                        <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
-                      </div>
-                    </div>
-                  )
-                ))}
-
-                {showNewTask === col.id ? (
-                  <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
-                ) : (
-                  <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
-                )}
+              <div style={{ display: 'flex', gap: '0', border: `0.5px solid ${border2}`, borderRadius: '1px', flexShrink: 0 }}>
+                <button onClick={() => setViewMode('kanban')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer' }}>Kanban</button>
+                <button onClick={() => setViewMode('list')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}` }}>List</button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+
+            {loading && (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Loading...</div>
+              </div>
+            )}
+
+            {!loading && activeBoard && viewMode === 'kanban' && (
+              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflow: 'hidden' }}>
+                {columns.map(col => (
+                  <div key={col.id}
+                    style={{ flex: 1, minWidth: '200px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
+                    onDragLeave={() => setDragOver(null)}
+                    onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
+
+                    <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                      <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
+                      <div style={{ fontSize: '10px', color: subtle }}>{tasks.filter(t => t.column_id === col.id).length}</div>
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
+                      {tasks.filter(t => t.column_id === col.id).map(task => (
+                        editingTask?.id === task.id ? (
+                          <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
+                        ) : (
+                          <div key={task.id}
+                            draggable
+                            onDragStart={() => setDragging(task.id)}
+                            onDragEnd={() => setDragging(null)}
+                            onClick={() => setEditingTask({ ...task })}
+                            style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
+                            <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                            {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
+                                {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                                {task.assigned_to && <span style={{ fontSize: '9px', color: muted, background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px', borderRadius: '1px' }}>{task.assigned_to}</span>}
+                              </div>
+                              <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
+                            </div>
+                          </div>
+                        )
+                      ))}
+
+                      {showNewTask === col.id ? (
+                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                      ) : (
+                        <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!loading && activeBoard && viewMode === 'list' && (
+              <div style={{ flex: 1, overflowY: 'auto' }}>
+
+                {tasks.length === 0 && (
+                  <div style={{ padding: '60px 28px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: muted, marginBottom: '14px' }}>No tasks yet for {selectedBrand.name}</div>
+                    <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '8px 18px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
+                  </div>
+                )}
+
+                {tasks.length > 0 && (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
+                      {['Task', 'Status', 'Priority', 'Assigned', 'Due', ''].map(h => (
+                        <div key={h} style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>{h}</div>
+                      ))}
+                    </div>
+                    {columns.flatMap(col =>
+                      tasks.filter(t => t.column_id === col.id).map(task => (
+                        <div key={task.id}
+                          onClick={() => setEditingTask({ ...task })}
+                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center' }}
+                          onMouseEnter={e => e.currentTarget.style.background = dark ? '#222' : '#EDEAE5'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.title}</div>
+                          <div style={{ fontSize: '9px', color: muted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{col.name}</div>
+                          <div><span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span></div>
+                          <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.assigned_to || '—'}</div>
+                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                          <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
+                        </div>
+                      ))
+                    )}
+                    <div style={{ padding: '16px 28px' }}>
+                      <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
