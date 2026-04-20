@@ -62,7 +62,7 @@ export default function Onboarding({ user, onComplete }) {
             value={agencyName}
             onChange={e => setAgencyName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && createOrg()}
-            placeholder='e.g. cMedia Collective'
+            placeholder='e.g. Nova Talent Group'
             autoFocus
             style={{ width: '100%', background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '12px 14px', fontSize: '14px', color: '#F0ECE6', outline: 'none', boxSizing: 'border-box' }}
           />
