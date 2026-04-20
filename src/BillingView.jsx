@@ -25,7 +25,7 @@ const PLANS = [
     price: '$199',
     period: '/month',
     priceId: import.meta.env.VITE_STRIPE_PRICE_AGENCY,
-    features: ['Unlimited talent', 'Unlimited team members', 'Everything in Pro', 'Custom onboarding', 'Dedicated support', 'Remove HQue branding']
+    features: ['Unlimited talent', 'Unlimited team members', 'Everything in Pro', 'Custom onboarding', 'Dedicated support', 'Custom branding on PDFs & talent inquiries']
   }
 ]
 

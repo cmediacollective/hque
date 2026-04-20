@@ -72,7 +72,7 @@ const FEATURES = [
 const PLANS = [
   { name: 'Starter', price: '$49', features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form'] },
   { name: 'Pro', price: '$99', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'], highlight: true },
-  { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support', 'Remove HQue branding'] },
+  { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support', 'Custom branding on PDFs & talent inquiries'] },
 ]
 
 function BrandLogo({ color, initial, size = 44, logo }) {
