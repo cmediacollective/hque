@@ -194,30 +194,32 @@ export default function CampaignView({ dark = true, orgId }) {
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
                 {c.brand_logo_url
-                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '88px', height: '88px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '6px' }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '88px', height: '88px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '36px', fontWeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
+                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '96px', height: '96px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '6px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '96px', height: '96px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '36px', fontWeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                 }
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-                  <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px' }}>{c.status}</span>
+                <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.campaign_type || 'Paid'}</div>
+                    <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
+                  </div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                  <div style={{ fontSize: '11px', color: muted, marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {c.brand || 'No brand'}
+                    {c.brand_website && (
+                      <a href={c.brand_website.startsWith('http') ? c.brand_website : 'https://' + c.brand_website} target="_blank" rel="noreferrer" style={{ fontSize: '9px', color: '#5b7c99', opacity: 0.7, textDecoration: 'none' }} title={c.brand_website} onClick={e => e.stopPropagation()}>↗</a>
+                    )}
+                  </div>
                   {hovering === c.id && (
                     <button
                       onClick={e => { e.stopPropagation(); setArchiving(c) }}
-                      style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                      style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', alignSelf: 'flex-start', marginTop: 'auto' }}>
                       {showArchived ? 'Restore' : 'Archive'}
                     </button>
                   )}
                 </div>
               </div>
-
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                {c.brand || 'No brand'}
-                {c.brand_website && (
-                  <a href={c.brand_website.startsWith('http') ? c.brand_website : 'https://' + c.brand_website} target="_blank" rel="noreferrer" style={{ fontSize: '8px', color: '#5b7c99', opacity: 0.6, textDecoration: 'none', letterSpacing: '0.1em' }} title={c.brand_website}>↗</a>
-                )}
-              </div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '16px', lineHeight: 1.35 }}>{c.name}</div>
 
               <div style={{ display: 'flex', gap: '20px', paddingTop: '14px', borderTop: `0.5px solid ${border}`, alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
