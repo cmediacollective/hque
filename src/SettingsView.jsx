@@ -28,6 +28,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [profileForm, setProfileForm] = useState({ full_name: '', title: '', email_notifications: true })
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
+  const [profileLoaded, setProfileLoaded] = useState(false)
 
   const [pwForm, setPwForm] = useState({ newPw: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
@@ -42,11 +43,25 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
 
+  // Auto-save profile form with 800ms debounce
+  useEffect(() => {
+    if (!profileLoaded || !user) return
+    const timer = setTimeout(async () => {
+      setProfileSaving(true)
+      await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, email_notifications: profileForm.email_notifications }).eq('id', user.id)
+      setProfileSaving(false)
+      setProfileSaved(true)
+      setTimeout(() => setProfileSaved(false), 2000)
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [profileForm.full_name, profileForm.title, profileForm.email_notifications, profileLoaded, user])
+
   async function fetchAvatar() {
     const { data } = await supabase.from('profiles').select('avatar_url, role, full_name, title, email_notifications').eq('id', user.id).single()
     if (data?.avatar_url) { setAvatarUrl(data.avatar_url); onAvatarChange?.(data.avatar_url) }
     if (data?.role) setCurrentUserRole(data.role)
     if (data) setProfileForm({ full_name: data.full_name || '', title: data.title || '', email_notifications: data.email_notifications !== false })
+    setProfileLoaded(true)
   }
 
   async function fetchAgency() {
@@ -238,9 +253,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   </div>
                 </div>
               </div>
-              <button onClick={saveProfile} disabled={profileSaving} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: profileSaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
-                {profileSaved ? 'Saved!' : profileSaving ? 'Saving...' : 'Save Profile'}
-              </button>
+              <div style={{ fontSize: '11px', color: profileSaved ? '#5C9E52' : profileSaving ? '#888' : subtle, letterSpacing: '0.12em', textTransform: 'uppercase', minHeight: '16px' }}>
+                {profileSaved ? '✓ Saved' : profileSaving ? 'Saving...' : 'Changes save automatically'}
+              </div>
             </div>
           </div>
         )}
