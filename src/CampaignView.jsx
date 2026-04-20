@@ -3,8 +3,6 @@ import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
 
-const STATUSES = ['All', 'Pitch', 'Active', 'Pending Payment', 'Completed']
-
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
   let hash = 0
@@ -13,8 +11,9 @@ const brandColor = (name) => {
 }
 const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
-export default function CampaignView({ dark = true, orgId }) {
+export default function CampaignView({ dark = true, orgId, campaignView = 'grid' }) {
   const isMobile = window.innerWidth < 768;
+  const view = campaignView
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const card = dark ? '#1A1A1A' : '#FFFFFF'
   const cardHover = dark ? '#222' : '#F0EDE8'
@@ -27,7 +26,6 @@ export default function CampaignView({ dark = true, orgId }) {
 
   const [campaigns, setCampaigns] = useState([])
   const [loading, setLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState('All')
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [hovering, setHovering] = useState(null)
@@ -40,8 +38,7 @@ export default function CampaignView({ dark = true, orgId }) {
 
   async function fetchCampaigns() {
     setLoading(true)
-    const { data } = await supabase
-      .from('campaigns')
+    const { data } = await supabase.from('campaigns')
       .select('*')
       .eq('org_id', orgId)
       .eq('archived', showArchived)
@@ -95,7 +92,6 @@ export default function CampaignView({ dark = true, orgId }) {
   }
 
   const filtered = campaigns
-    .filter(c => statusFilter === 'All' || c.status === statusFilter)
     .filter(c => {
       if (!search.trim()) return true
       const q = search.toLowerCase()
@@ -113,22 +109,14 @@ export default function CampaignView({ dark = true, orgId }) {
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : '#888'
   const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
 
-  const chip = (label, active, onClick) => (
-    <button onClick={onClick} style={{
-      padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-      border: `0.5px solid ${active ? '#5b7c99' : border2}`,
-      borderRadius: '1px', cursor: 'pointer', color: active ? '#5b7c99' : muted,
-      background: 'none', whiteSpace: 'nowrap', fontWeight: active ? '500' : '400'
-    }}>{label}</button>
-  )
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
 
       {showForm && (
         <CampaignForm
-          dark={!dark}
           orgId={orgId}
+          dark={dark}
+          existing={null}
           onClose={() => setShowForm(false)}
           onSaved={() => { setShowForm(false); fetchCampaigns() }}
         />
@@ -136,44 +124,42 @@ export default function CampaignView({ dark = true, orgId }) {
 
       {selected && (
         <CampaignDetail
-          campaign={selected}
-          dark={!dark}
+          initialCampaign={selected}
           orgId={orgId}
           onClose={() => setSelected(null)}
-          onSaved={() => { setSelected(null); fetchCampaigns() }}
+          onUpdated={fetchCampaigns}
         />
       )}
 
       {archiving && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, padding: '32px', width: '380px', borderRadius: '2px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
+        <div onClick={() => setArchiving(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border}`, padding: '32px', maxWidth: '400px', width: '100%', borderRadius: '2px' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text, marginBottom: '12px' }}>
               {showArchived ? 'Restore campaign?' : 'Archive campaign?'}
             </div>
-            <div style={{ fontSize: '11px', color: muted, lineHeight: 1.4, marginBottom: '24px' }}>
+            <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6, marginBottom: '24px' }}>
               {showArchived
                 ? `"${archiving.name}" will be moved back to your active campaigns.`
-                : `"${archiving.name}" will be hidden but can be restored anytime.`}
+                : `"${archiving.name}" will be hidden from your active campaigns. You can restore it anytime.`}
             </div>
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-              <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => archiveCampaign(archiving, showArchived)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
                 {showArchived ? 'Restore' : 'Archive'}
               </button>
+              <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
             </div>
           </div>
         </div>
       )}
 
       <div style={{ padding: '12px 28px', display: 'flex', gap: '6px', alignItems: 'center', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-        {!showArchived && STATUSES.map(s => chip(s, statusFilter === s, () => setStatusFilter(s)))}
-        <span style={{ marginLeft: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
-          {filtered.length} campaigns
+        <span style={{ marginRight: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
+          {filtered.length} {filtered.length === 1 ? 'campaign' : 'campaigns'}
         </span>
         <button
-          onClick={() => { setShowArchived(a => !a); setStatusFilter('All'); setSearch('') }}
+          onClick={() => { setShowArchived(a => !a); setSearch('') }}
           style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, borderRadius: '1px', cursor: 'pointer', color: showArchived ? '#5b7c99' : muted, background: 'none', whiteSpace: 'nowrap' }}>
-          {showArchived ? '<- Active' : 'Archived'}
+          {showArchived ? '← Active' : 'Archived'}
         </button>
         {!showArchived && <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>}
       </div>
@@ -202,7 +188,7 @@ export default function CampaignView({ dark = true, orgId }) {
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
+      {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
           {filtered.map(c => (
             <div key={c.id}
@@ -302,6 +288,74 @@ export default function CampaignView({ dark = true, orgId }) {
                 </div>
               )}
 
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && view === 'list' && !isMobile && filtered.length > 0 && (
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '48px 2fr 1fr 120px 120px 140px 120px 80px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg, zIndex: 1, gap: '10px' }}>
+            {['', 'Campaign', 'Brand', 'Type', 'Status', 'Dates', 'Talent', 'Budget'].map((h, i) => (
+              <div key={i} style={{ fontSize: '8px', color: subtle, letterSpacing: '0.22em', textTransform: 'uppercase' }}>{h}</div>
+            ))}
+          </div>
+          {filtered.map(c => (
+            <div key={c.id}
+              onClick={() => setSelected(c)}
+              onMouseEnter={() => setHovering(c.id)}
+              onMouseLeave={() => setHovering(null)}
+              style={{ display: 'grid', gridTemplateColumns: '48px 2fr 1fr 120px 120px 140px 120px 80px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center', background: hovering === c.id ? cardHover : 'transparent', gap: '10px' }}>
+
+              {c.brand_logo_url
+                ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '3px' }} onError={e => e.target.style.display = 'none'} />
+                : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brandInitial(c.brand || c.name || '?')}</div>
+              }
+
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+              <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || '—'}</div>
+
+              <select
+                value={c.campaign_type || 'Paid'}
+                onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'campaign_type', e.target.value) }}
+                onClick={e => e.stopPropagation()}
+                style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center', width: 'fit-content' }}>
+                {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+
+              <select
+                value={c.status || 'Pitch'}
+                onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
+                onClick={e => e.stopPropagation()}
+                style={{ padding: '3px 16px 3px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center', width: 'fit-content' }}>
+                {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {(c.start_date || c.end_date) ? [formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ') : '—'}
+              </div>
+
+              <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                {(campaignTalent[c.id] || []).slice(0, 3).map((t, i) => (
+                  <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -6, zIndex: 3 - i }}>
+                    {t.photo_url ? (
+                      <img src={t.photo_url} alt={t.name} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${bg}` }} />
+                    ) : (
+                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${bg}` }}>
+                        {(t.name || '?').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {(campaignTalent[c.id] || []).length > 3 && (
+                  <div style={{ marginLeft: -6, width: '22px', height: '22px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${bg}` }}>
+                    +{campaignTalent[c.id].length - 3}
+                  </div>
+                )}
+                {(campaignTalent[c.id] || []).length === 0 && <span style={{ fontSize: '11px', color: subtle }}>—</span>}
+              </div>
+
+              <div style={{ fontSize: '12px', color: text, fontWeight: 500 }}>{c.budget != null ? `$${Number(c.budget).toLocaleString()}` : '—'}</div>
             </div>
           ))}
         </div>

@@ -26,6 +26,7 @@ function App() {
   const [talentTab, setTalentTab] = useState('roster')
   const [showArchived, setShowArchived] = useState(false)
   const [talentView, setTalentView] = useState('grid')
+  const [campaignView, setCampaignView] = useState('grid')
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -319,6 +320,13 @@ function App() {
                   ))}
                 </div>
               )}
+              {view === 'campaigns' && !isMobile && (
+                <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
+                  {['grid', 'list'].map(v => (
+                    <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: campaignView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                  ))}
+                </div>
+              )}
               <button onClick={() => setView('settings')} style={{
                 width: '100%', textAlign: 'left',
                 padding: view === 'settings' ? '9px 20px 9px 14.5px' : '9px 16px',
@@ -396,7 +404,7 @@ function App() {
             {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} />}
-            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} />}
+            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
           </div>
