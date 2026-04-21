@@ -52,7 +52,8 @@ export default function ReportsView({ dark = true, orgId }) {
     const total = campaigns.filter(camp => {
       const date = camp.start_date || camp.created_at
       if (!date) return false
-      const d = new Date(date)
+      const hasT = String(date).includes('T')
+      const d = hasT ? new Date(date) : new Date(date + 'T00:00:00')
       return d.getFullYear() === 2026 && d.getMonth() === i
     }).reduce((sum, camp) => sum + (Number(camp.budget) || 0), 0)
     return { month, total }

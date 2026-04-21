@@ -459,7 +459,7 @@ export default function WorkspaceView({ orgId, userId, dark = true }) {
       if (!a.due_date && !b.due_date) return 0
       if (!a.due_date) return 1
       if (!b.due_date) return -1
-      return new Date(a.due_date) - new Date(b.due_date)
+      return a.due_date.localeCompare(b.due_date)
     })
   }
 
@@ -570,7 +570,7 @@ export default function WorkspaceView({ orgId, userId, dark = true }) {
                           {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}><Linkify text={task.description} /></div>}
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                            {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                            {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                             <AvatarStack assignees={getAssignees(task)} size={20} />
                             {(task.watcher_ids || []).length > 0 && (
                               <span title={`${task.watcher_ids.length} watcher${task.watcher_ids.length !== 1 ? 's' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: muted }}>
@@ -623,7 +623,7 @@ export default function WorkspaceView({ orgId, userId, dark = true }) {
                           <div style={{ overflow: 'hidden', paddingRight: '10px' }}>
                             {(task.assignee_ids || []).length > 0 ? <AvatarStack assignees={getAssignees(task)} size={20} /> : <span style={{ fontSize: '11px', color: muted }}>—</span>}
                           </div>
-                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
                           <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
                         </div>
                       ))
