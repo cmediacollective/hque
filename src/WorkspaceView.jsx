@@ -501,14 +501,13 @@ export default function WorkspaceView({ orgId, userId, dark = true }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {!selectedBrand && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand/client</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>
-                Choose a brand or client from the sidebar to see its Kanban board.
-              </div>
-            </div>
-          </div>
+          <MyTasksDashboard
+            userId={userId}
+            orgId={orgId}
+            dark={dark}
+            brands={brandsForMove}
+            onSelectBrand={setSelectedBrand}
+          />
         )}
 
         {selectedBrand && (
