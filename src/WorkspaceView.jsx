@@ -229,7 +229,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
   )
 }
 
-export default function WorkspaceView({ orgId, userId, dark = true }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true }) {
   const [members, setMembers] = useState([])
 
   useEffect(() => {
@@ -506,6 +506,7 @@ export default function WorkspaceView({ orgId, userId, dark = true }) {
             orgId={orgId}
             dark={dark}
             brands={brandsForMove}
+            agencyTz={agencyTz}
             onSelectBrand={setSelectedBrand}
           />
         )}

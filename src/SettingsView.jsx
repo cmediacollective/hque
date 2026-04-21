@@ -13,7 +13,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const subtle = dark ? '#777' : '#888'
 
   const [activeTab, setActiveTab] = useState('profile')
-  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '' })
+  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', timezone: 'America/Los_Angeles' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
@@ -67,7 +67,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (data) {
-      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '' })
+      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', timezone: data.timezone || 'America/Los_Angeles' })
       setSenderAccounts(data.sender_accounts || [])
     }
   }
@@ -299,6 +299,36 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective' }))}
             {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email' }))}
             {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://youragency.com' }))}
+            {field('Timezone',
+              <select
+                value={agencyForm.timezone}
+                onChange={e => setAgencyForm(f => ({ ...f, timezone: e.target.value }))}
+                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                <optgroup label='Americas'>
+                  <option value='America/Los_Angeles'>Los Angeles (Pacific)</option>
+                  <option value='America/Denver'>Denver (Mountain)</option>
+                  <option value='America/Chicago'>Chicago (Central)</option>
+                  <option value='America/New_York'>New York (Eastern)</option>
+                  <option value='America/Toronto'>Toronto</option>
+                  <option value='America/Mexico_City'>Mexico City</option>
+                </optgroup>
+                <optgroup label='Europe'>
+                  <option value='Europe/London'>London</option>
+                  <option value='Europe/Paris'>Paris</option>
+                  <option value='Europe/Berlin'>Berlin</option>
+                  <option value='Europe/Madrid'>Madrid</option>
+                  <option value='Europe/Amsterdam'>Amsterdam</option>
+                </optgroup>
+                <optgroup label='Asia / Pacific'>
+                  <option value='Asia/Tokyo'>Tokyo</option>
+                  <option value='Asia/Hong_Kong'>Hong Kong</option>
+                  <option value='Asia/Singapore'>Singapore</option>
+                  <option value='Asia/Dubai'>Dubai</option>
+                  <option value='Australia/Sydney'>Sydney</option>
+                </optgroup>
+                <option value='UTC'>UTC</option>
+              </select>
+            )}
             {field('Agency Logo',
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 {agencyForm.agency_logo_url && (

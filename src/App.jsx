@@ -35,6 +35,7 @@ function App() {
   const [exporting, setExporting] = useState(false)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [agencyName, setAgencyName] = useState('HQue')
+  const [agencyTz, setAgencyTz] = useState('America/Los_Angeles')
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
@@ -156,9 +157,10 @@ function App() {
   }
 
   async function fetchAgencyName(oid) {
-    const { data } = await supabase.from('org_settings').select('agency_name, agency_logo_url').eq('org_id', oid).single()
+    const { data } = await supabase.from('org_settings').select('agency_name, agency_logo_url, timezone').eq('org_id', oid).single()
     if (data?.agency_name) setAgencyName(data.agency_name)
     if (data?.agency_logo_url) setAgencyLogoUrl(data.agency_logo_url)
+    if (data?.timezone) setAgencyTz(data.timezone)
     const { data: org } = await supabase.from('organizations').select('trial_ends_at, stripe_plan').eq('id', oid).single()
     if (org?.trial_ends_at) setTrialEndsAt(org.trial_ends_at)
     if (org?.stripe_plan) setStripePlan(org.stripe_plan)
@@ -403,7 +405,7 @@ function App() {
             {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
-            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} />}
+            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}

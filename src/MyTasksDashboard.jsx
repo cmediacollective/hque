@@ -17,7 +17,7 @@ const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 }
 const MAX_PER_BUCKET = 5
 
-export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand }) {
+export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand, agencyTz = 'America/Los_Angeles' }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
@@ -110,12 +110,22 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     setLoading(false)
   }
 
-  const today = new Date()
-  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  function todayInTz(tz) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date())
+      const get = (type) => parts.find(p => p.type === type)?.value
+      return get('year') + '-' + get('month') + '-' + get('day')
+    } catch {
+      const d = new Date()
+      const pad = n => String(n).padStart(2, '0')
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
+    }
+  }
+  const todayStr = todayInTz(agencyTz)
+  const todayMidnight = new Date(todayStr + 'T00:00:00')
   const isOverdue = (dueDate) => {
     if (!dueDate) return false
-    const due = new Date(dueDate + 'T00:00:00')
-    return due < todayMidnight
+    return dueDate < todayStr
   }
 
   function sortTasks(tasks) {
@@ -153,7 +163,13 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     if (h < 18) return 'Good afternoon'
     return 'Good evening'
   }
-  const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const dateLabel = (() => {
+    try {
+      return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: agencyTz })
+    } catch {
+      return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    }
+  })()
 
   const BUCKETS = ['Today', 'This Week', 'Next Week']
 
