@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import Linkify from './Linkify'
+import MyTasksDashboard from './MyTasksDashboard'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -228,7 +229,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
   )
 }
 
-export default function WorkspaceView({ orgId, dark = true }) {
+export default function WorkspaceView({ orgId, userId, dark = true }) {
   const [members, setMembers] = useState([])
 
   useEffect(() => {
