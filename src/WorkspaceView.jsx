@@ -255,6 +255,28 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [viewMode, setViewMode] = useState('kanban')
   const [showNewTask, setShowNewTask] = useState(null)
   const [editingTask, setEditingTask] = useState(null)
+  const [showArchive, setShowArchive] = useState(false)
+  const [archiveTasks, setArchiveTasks] = useState([])
+
+  const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
+  const doneColumnIds = (() => {
+    if (!columns.length) return new Set()
+    const ids = new Set()
+    columns.forEach(c => {
+      const n = (c.name || '').trim().toLowerCase()
+      if (DONE_COLUMN_NAMES.includes(n)) ids.add(c.id)
+    })
+    const last = [...columns].sort((a, b) => b.position - a.position)[0]
+    if (last) ids.add(last.id)
+    return ids
+  })()
+  const isDoneColumn = (colId) => doneColumnIds.has(colId)
+
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+  const isRecentlyCompleted = (task) => {
+    if (!task.completed_at) return true
+    return (Date.now() - new Date(task.completed_at).getTime()) < SEVEN_DAYS_MS
+  }
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
   const [brandsForMove, setBrandsForMove] = useState([])
@@ -415,8 +437,14 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function moveTask(taskId, newColumnId) {
-    await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
-    setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
+    const task = tasks.find(t => t.id === taskId)
+    const wasDone = task && isDoneColumn(task.column_id)
+    const nowDone = isDoneColumn(newColumnId)
+    const payload = { column_id: newColumnId }
+    if (!wasDone && nowDone) payload.completed_at = new Date().toISOString()
+    if (wasDone && !nowDone) payload.completed_at = null
+    await supabase.from('tasks').update(payload).eq('id', taskId)
+    setTasks(ts => ts.map(t => t.id === taskId ? { ...t, ...payload } : t))
   }
 
   async function deleteTask(taskId) {
@@ -455,12 +483,27 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   const tasksInColumn = (colId) => {
-    return tasks.filter(t => t.column_id === colId).sort((a, b) => {
+    let filtered = tasks.filter(t => t.column_id === colId)
+    if (isDoneColumn(colId)) {
+      filtered = filtered.filter(isRecentlyCompleted)
+    }
+    return filtered.sort((a, b) => {
       if (!a.due_date && !b.due_date) return 0
       if (!a.due_date) return 1
       if (!b.due_date) return -1
       return a.due_date.localeCompare(b.due_date)
     })
+  }
+
+  async function openArchive(colId) {
+    const { data } = await supabase.from('tasks')
+      .select('*, task_assignees(user_id)')
+      .eq('column_id', colId)
+      .not('completed_at', 'is', null)
+      .lt('completed_at', new Date(Date.now() - SEVEN_DAYS_MS).toISOString())
+      .order('completed_at', { ascending: false })
+    setArchiveTasks(data || [])
+    setShowArchive(true)
   }
 
   const colorFromName = (name) => {
@@ -473,6 +516,34 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
+
+      {showArchive && (
+        <div onClick={() => setShowArchive(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border}`, padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflowY: 'auto', borderRadius: '2px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle, marginBottom: '4px' }}>Archived · older than 7 days</div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>Completed tasks</div>
+              </div>
+              <button onClick={() => setShowArchive(false)} style={{ background: 'none', border: 'none', color: subtle, fontSize: '18px', cursor: 'pointer', padding: 0, lineHeight: 1 }}>×</button>
+            </div>
+            {archiveTasks.length === 0 ? (
+              <div style={{ padding: '40px 0', textAlign: 'center', color: subtle, fontSize: '12px' }}>No archived tasks yet. Tasks auto-archive 7 days after completion.</div>
+            ) : (
+              <div>
+                {archiveTasks.map(t => (
+                  <div key={t.id} style={{ padding: '10px 0', borderBottom: `0.5px solid ${border}` }}>
+                    <div style={{ fontSize: '13px', color: text, marginBottom: '4px', textDecoration: 'line-through', opacity: 0.75 }}>{t.title}</div>
+                    <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.1em' }}>
+                      Completed {new Date(t.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {editingTask && (
         <TaskDetail
@@ -556,7 +627,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
                     <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                       <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
-                      <div style={{ fontSize: '10px', color: subtle }}>{tasksInColumn(col.id).length}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {isDoneColumn(col.id) && (
+                          <button onClick={e => { e.stopPropagation(); openArchive(col.id) }} title='View archived tasks' style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: subtle, padding: '2px 6px', cursor: 'pointer', borderRadius: '1px' }}>Archive</button>
+                        )}
+                        <div style={{ fontSize: '10px', color: subtle }}>{tasksInColumn(col.id).length}</div>
+                      </div>
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
