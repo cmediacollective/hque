@@ -119,8 +119,11 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   }
 
   function bucketize(tasks) {
-    const buckets = { Today: [], Tomorrow: [], 'This Week': [], Later: [] }
-    tasks.forEach(t => buckets[bucketFor(t.due_date, todayMidnight)].push(t))
+    const buckets = { Today: [], 'This Week': [], 'Next Week': [] }
+    tasks.forEach(t => {
+      const b = bucketFor(t.due_date, todayMidnight)
+      if (b && buckets[b]) buckets[b].push(t)
+    })
     Object.keys(buckets).forEach(k => buckets[k] = sortTasks(buckets[k]))
     return buckets
   }
@@ -137,7 +140,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   }
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
-  const BUCKETS = ['Today', 'Tomorrow', 'This Week', 'Later']
+  const BUCKETS = ['Today', 'This Week', 'Next Week']
 
   const TaskCard = ({ t, filled = true }) => {
     const overdue = isOverdue(t.due_date) && filled
@@ -218,7 +221,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
         {hasAnything && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr 1fr 1fr', gap: 0, marginBottom: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, marginBottom: '8px' }}>
               <div></div>
               {BUCKETS.map(b => {
                 const isToday = b === 'Today'
@@ -228,7 +231,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
               })}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, alignItems: 'start', marginBottom: '20px' }}>
               <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Assigned</div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>To me</div>
@@ -239,7 +242,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             </div>
 
             {totalWatching > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, alignItems: 'start' }}>
                 <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Watching</div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>Keep tabs</div>
