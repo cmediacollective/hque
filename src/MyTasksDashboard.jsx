@@ -2,17 +2,18 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
 function bucketFor(dueDate, todayMidnight) {
-  if (!dueDate) return 'Later'
+  if (!dueDate) return null
   const due = new Date(dueDate + 'T00:00:00')
   const msInDay = 24 * 60 * 60 * 1000
   const days = Math.round((due - todayMidnight) / msInDay)
   if (days < 0) return 'Today'
   if (days === 0) return 'Today'
-  if (days === 1) return 'Tomorrow'
-  if (days <= 6) return 'This Week'
-  return 'Later'
+  if (days <= 7) return 'This Week'
+  if (days <= 14) return 'Next Week'
+  return null
 }
 
+const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 }
 const MAX_PER_BUCKET = 5
 
@@ -61,6 +62,18 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     const boardBrandMap = {}
     ;(boards || []).forEach(b => { boardBrandMap[b.id] = b.brand_id })
 
+    const { data: cols } = await supabase.from('board_columns').select('id, name, board_id, position').in('board_id', boardIds)
+    const doneColumnIds = new Set()
+    const lastColumnPerBoard = {}
+    ;(cols || []).forEach(c => {
+      const nameLower = (c.name || '').trim().toLowerCase()
+      if (DONE_COLUMN_NAMES.includes(nameLower)) doneColumnIds.add(c.id)
+      if (!lastColumnPerBoard[c.board_id] || c.position > lastColumnPerBoard[c.board_id].position) {
+        lastColumnPerBoard[c.board_id] = { id: c.id, position: c.position }
+      }
+    })
+    Object.values(lastColumnPerBoard).forEach(c => doneColumnIds.add(c.id))
+
     const { data: assignedLinks } = await supabase.from('task_assignees').select('task_id').eq('user_id', userId)
     const assignedIds = [...new Set((assignedLinks || []).map(r => r.task_id))]
 
@@ -76,7 +89,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
       .in('id', allIds)
       .in('board_id', boardIds)
 
-    const brandIds = [...new Set((tasks || []).map(t => boardBrandMap[t.board_id]).filter(Boolean))]
+    const openTasks = (tasks || []).filter(t => !doneColumnIds.has(t.column_id))
+
+    const brandIds = [...new Set(openTasks.map(t => boardBrandMap[t.board_id]).filter(Boolean))]
     let brandMap = {}
     if (brandIds.length > 0) {
       const { data: bs } = await supabase.from('brands').select('id, name, logo_url').in('id', brandIds)
@@ -90,8 +105,8 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     }
 
     const assignedSet = new Set(assignedIds)
-    setAssignedTasks((tasks || []).filter(t => assignedSet.has(t.id)).map(enrich))
-    setWatchedTasks((tasks || []).filter(t => !assignedSet.has(t.id)).map(enrich))
+    setAssignedTasks(openTasks.filter(t => assignedSet.has(t.id)).map(enrich))
+    setWatchedTasks(openTasks.filter(t => !assignedSet.has(t.id)).map(enrich))
     setLoading(false)
   }
 
