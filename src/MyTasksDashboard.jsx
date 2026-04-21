@@ -75,7 +75,6 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
       .select('*, task_assignees(user_id), task_watchers(user_id)')
       .in('id', allIds)
       .in('board_id', boardIds)
-      .neq('status', 'archived')
 
     const brandIds = [...new Set((tasks || []).map(t => boardBrandMap[t.board_id]).filter(Boolean))]
     let brandMap = {}
