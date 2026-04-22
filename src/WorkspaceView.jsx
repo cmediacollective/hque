@@ -135,7 +135,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, isMobile = false }) {
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
 
@@ -329,8 +329,16 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {!selectedBrand && (
+        {!selectedBrand && !isMobile && (
           <MyTasksDashboard userId={userId} orgId={orgId} dark={dark} brands={brands} onSelectBrand={setSelectedBrand} agencyTz={agencyTz} />
+        )}
+        {!selectedBrand && isMobile && (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand/client</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>Choose a brand or client from the sidebar to see its Kanban board.</div>
+            </div>
+          </div>
         )}
 
         {selectedBrand && (
