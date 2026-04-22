@@ -1,6 +1,6 @@
 import React from 'react'
 
-const URL_REGEX = /((https?:\/\/|www\.)[^\s<>"]+|[\w.-]+@[\w-]+\.[\w.-]+)/gi
+const TOKEN_REGEX = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+|[\w.-]+@[\w-]+\.[\w.-]+|@[\w.]+)/gi
 
 export default function Linkify({ text, linkColor = '#5b7c99' }) {
   if (!text) return null
@@ -8,9 +8,9 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
   const segments = []
   let lastIndex = 0
   let match
-  URL_REGEX.lastIndex = 0
+  TOKEN_REGEX.lastIndex = 0
 
-  while ((match = URL_REGEX.exec(text)) !== null) {
+  while ((match = TOKEN_REGEX.exec(text)) !== null) {
     const matched = match[0]
     const index = match.index
 
@@ -18,15 +18,16 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
       segments.push({ type: 'text', value: text.slice(lastIndex, index) })
     }
 
-    const isEmail = matched.includes('@') && !matched.startsWith('http')
-    let href = matched
-    if (isEmail) {
-      href = 'mailto:' + matched
-    } else if (matched.startsWith('www.')) {
-      href = 'https://' + matched
+    if (matched.startsWith('@')) {
+      segments.push({ type: 'mention', value: matched })
+    } else {
+      const isEmail = matched.includes('@') && !matched.startsWith('http') && !matched.startsWith('www.')
+      let href = matched
+      if (isEmail) href = 'mailto:' + matched
+      else if (matched.startsWith('www.')) href = 'https://' + matched
+      segments.push({ type: 'link', value: matched, href, isEmail })
     }
 
-    segments.push({ type: 'link', value: matched, href, isEmail })
     lastIndex = index + matched.length
   }
 
@@ -37,6 +38,20 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
   return React.createElement(React.Fragment, null,
     segments.map((seg, i) => {
       if (seg.type === 'text') return React.createElement(React.Fragment, { key: i }, seg.value)
+      if (seg.type === 'mention') {
+        return React.createElement('span', {
+          key: i,
+          title: seg.value,
+          style: {
+            color: linkColor,
+            background: 'rgba(91, 124, 153, 0.15)',
+            padding: '1px 6px',
+            borderRadius: '3px',
+            fontWeight: 500,
+            whiteSpace: 'nowrap'
+          }
+        }, seg.value)
+      }
       return React.createElement('a', {
         key: i,
         href: seg.href,

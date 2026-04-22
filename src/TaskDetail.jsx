@@ -35,6 +35,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
   const [currentUserId, setCurrentUserId] = useState(null)
   const [editingCommentId, setEditingCommentId] = useState(null)
   const [editingBody, setEditingBody] = useState('')
+  const [recentlySaved, setRecentlySaved] = useState(false)
 
   useEffect(() => { fetchComments(); fetchCurrentUser() }, [task.id])
 
@@ -57,6 +58,13 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
   async function postComment() {
     if (!newComment.trim()) return
     setPostingComment(true)
+    if (onSave) {
+      try {
+        await onSave(form)
+        setRecentlySaved(true)
+        setTimeout(() => setRecentlySaved(false), 2500)
+      } catch (_) { /* non-blocking */ }
+    }
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setPostingComment(false); return }
     const { error } = await supabase.from('task_comments').insert([{
@@ -414,9 +422,14 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
                   ))}
                 </div>
               )}
-              <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : `0.5px solid ${border2}`, color: newComment.trim() ? '#fff' : subtle, cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
-                {postingComment ? 'Posting...' : 'Comment'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : `0.5px solid ${border2}`, color: newComment.trim() ? '#fff' : subtle, cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
+                  {postingComment ? 'Posting...' : 'Comment'}
+                </button>
+                {recentlySaved && (
+                  <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5C9E52' }}>✓ Saved</span>
+                )}
+              </div>
             </div>
           </div>
 
