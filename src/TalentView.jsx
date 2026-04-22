@@ -206,7 +206,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                   <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6, height: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{Array.isArray(c.niches) && c.niches.length > 0 ? c.niches.slice(0, 2).join(' · ') + (c.niches.length > 2 ? ' +' + (c.niches.length - 2) : '') : ''}</div>
                 </div>
               </div>
-              <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}` }}>
+              <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}`, alignItems: 'center', gap: '8px' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{totalFollowers(c)}</div>
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
@@ -216,7 +216,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Location</div>
                   </div>
               {hovering === c.id && !isMobile && (
-                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '10px', right: '10px', background: card, border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '3px 8px', cursor: 'pointer', borderRadius: '1px' }}>
+                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ background: 'none', border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
                   {showArchived ? 'Restore' : 'Archive'}
                 </button>
               )}
