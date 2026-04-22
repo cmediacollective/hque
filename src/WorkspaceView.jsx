@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
+import TaskDetail from './TaskDetail'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -25,17 +26,25 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   const [form, setForm] = useState({ ...initial })
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState("")
+  const [saving, setSaving] = useState(false)
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const cardBg = dark ? '#222' : '#FFFFFF'
+
+  const doSave = async () => {
+    if (saving || !form.title?.trim()) return
+    setSaving(true)
+    try { await onSave(form) } finally { setSaving(false) }
+  }
 
   return (
     <div style={{ background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px' }}>
       <textarea
         value={form.title}
         onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-        placeholder='Task title...'
+        onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSave() } }}
+        placeholder='Task title... (Enter to save)'
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', color: text, fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
       />
@@ -59,33 +68,27 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
               const val = form.description.replace(/@[\w.]*$/, `@${name} `)
               setForm(f => ({ ...f, description: val }))
               setShowMentions(false)
-            }} style={{ padding: "7px 10px", fontSize: "11px", color: text, cursor: "pointer", borderBottom: `0.5px solid ${border}` }}
-            onMouseEnter={e => e.currentTarget.style.background = dark ? "#2A2A2A" : "#f5f5f5"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            }} style={{ padding: "6px 10px", cursor: "pointer", fontSize: "11px", color: text }}>
               @{m.full_name || m.email}
             </div>
           ))}
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginBottom: '8px' }}>
-        <select value={form.priority || 'Medium'} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }}>
-          {PRIORITIES.map(p => <option key={p}>{p}</option>)}
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+        <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }}>
+          {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
       </div>
-      <select value={form.assigned_to || ''} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
-        <option value=''>Unassigned</option>
-        {members.map(m => <option key={m.id} value={m.full_name || m.email}>{m.full_name || m.email}</option>)}
-      </select>
       <div style={{ display: 'flex', gap: '6px' }}>
-        <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
+        <button onClick={doSave} disabled={saving} style={{ padding: '5px 12px', fontSize: '9px', background: saving ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving ? 'default' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
         <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: `0.5px solid ${border}`, color: dark ? '#777' : '#888', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
       </div>
     </div>
   )
 }
 
-export default function WorkspaceView({ orgId, dark = true }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true }) {
   const [members, setMembers] = useState([])
 
   useEffect(() => {
@@ -126,25 +129,11 @@ export default function WorkspaceView({ orgId, dark = true }) {
   async function findOrCreateBoardForBrand(brand) {
     setLoading(true)
     const isInternal = brand.id === '__internal'
-
     let query = supabase.from('boards').select('*').eq('org_id', orgId).neq('status', 'archived').order('created_at', { ascending: true })
     query = isInternal ? query.is('brand_id', null) : query.eq('brand_id', brand.id)
-
-    const { data: existing } = await query.limit(1).maybeSingle()
-
-    if (existing) {
-      setActiveBoard(existing)
-      setLoading(false)
-      return
-    }
-
-    const { data: newBoard } = await supabase.from('boards').insert([{
-      name: brand.name,
-      org_id: orgId,
-      brand_id: isInternal ? null : brand.id,
-      status: 'active'
-    }]).select().single()
-
+    const { data } = await query.limit(1).maybeSingle()
+    if (data) { setActiveBoard(data); setLoading(false); return }
+    const { data: newBoard } = await supabase.from('boards').insert([{ name: brand.name, org_id: orgId, brand_id: isInternal ? null : brand.id, status: 'active' }]).select().single()
     if (newBoard) {
       await supabase.from('board_columns').insert(DEFAULT_COLUMNS.map((name, i) => ({ board_id: newBoard.id, name, position: i })))
       setActiveBoard(newBoard)
@@ -154,48 +143,68 @@ export default function WorkspaceView({ orgId, dark = true }) {
 
   async function fetchColumns() {
     const { data } = await supabase.from('board_columns').select('*').eq('board_id', activeBoard.id).order('position')
-
-    if (data && data.length > 0 && !data.some(c => c.name?.toLowerCase() === 'hold')) {
-      const reviewIndex = data.findIndex(c => c.name?.toLowerCase() === 'review')
-      const insertPos = reviewIndex >= 0 ? reviewIndex + 1 : data.length
-      const { data: holdCol } = await supabase.from('board_columns').insert([{
-        board_id: activeBoard.id,
-        name: 'Hold',
-        position: insertPos
-      }]).select().single()
-      if (holdCol) {
-        const updated = [...data]
-        updated.splice(insertPos, 0, holdCol)
-        setColumns(updated)
-        return
-      }
-    }
-
     setColumns(data || [])
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('tasks').select('*').eq('board_id', activeBoard.id).order('position')
-    setTasks(data || [])
+    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').eq('board_id', activeBoard.id).order('position')
+    const enriched = (data || []).map(t => ({
+      ...t,
+      assignee_ids: (t.task_assignees || []).map(r => r.user_id),
+      watcher_ids: (t.task_watchers || []).map(r => r.user_id)
+    }))
+    setTasks(enriched)
+  }
+
+  async function syncAssignees(taskId, newIds, taskTitle) {
+    const { data: existing } = await supabase.from('task_assignees').select('user_id').eq('task_id', taskId)
+    const existingIds = (existing || []).map(r => r.user_id)
+    const toRemove = existingIds.filter(id => !newIds.includes(id))
+    const toAdd = newIds.filter(id => !existingIds.includes(id))
+    if (toRemove.length) await supabase.from('task_assignees').delete().eq('task_id', taskId).in('user_id', toRemove)
+    if (toAdd.length) {
+      await supabase.from('task_assignees').insert(toAdd.map(uid => ({ task_id: taskId, user_id: uid })))
+      for (const uid of toAdd) {
+        const m = members.find(p => p.id === uid)
+        if (m) await createNotification(orgId, m.full_name || m.email, 'assignment', `You were assigned to: ${taskTitle}`, members)
+      }
+    }
+  }
+
+  async function syncWatchers(taskId, newIds, taskTitle) {
+    const { data: existing } = await supabase.from('task_watchers').select('user_id').eq('task_id', taskId)
+    const existingIds = (existing || []).map(r => r.user_id)
+    const toRemove = existingIds.filter(id => !newIds.includes(id))
+    const toAdd = newIds.filter(id => !existingIds.includes(id))
+    if (toRemove.length) await supabase.from('task_watchers').delete().eq('task_id', taskId).in('user_id', toRemove)
+    if (toAdd.length) {
+      await supabase.from('task_watchers').insert(toAdd.map(uid => ({ task_id: taskId, user_id: uid })))
+      for (const uid of toAdd) {
+        const m = members.find(p => p.id === uid)
+        if (m) await createNotification(orgId, m.full_name || m.email, 'watching', `You're watching: ${taskTitle}`, members)
+      }
+    }
   }
 
   async function createTask(columnId, form) {
     if (!form.title?.trim()) return
-    await supabase.from('tasks').insert([{
+    const { data: inserted } = await supabase.from('tasks').insert([{
       title: form.title, description: form.description || null, priority: form.priority || 'Medium',
-      due_date: form.due_date || null, assigned_to: form.assigned_to || null,
+      due_date: form.due_date || null,
       column_id: columnId, board_id: activeBoard.id, org_id: orgId,
       position: tasks.filter(t => t.column_id === columnId).length
-    }])
+    }]).select().single()
     setShowNewTask(null)
     fetchTasks()
-    if (form.assigned_to) await createNotification(orgId, form.assigned_to, 'assignment', `You were assigned to: ${form.title}`, members)
-    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
+    if (inserted) {
+      await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
+    }
   }
 
   async function updateTask(form) {
-    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
-    setEditingTask(null)
+    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null }).eq('id', form.id)
+    if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
+    if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     fetchTasks()
     await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
   }
@@ -220,25 +229,36 @@ export default function WorkspaceView({ orgId, dark = true }) {
     return colors[Math.abs(hash) % colors.length]
   }
 
+  const renderAvatars = (task) => {
+    const ids = task.assignee_ids || []
+    if (ids.length === 0) return null
+    return (
+      <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+        {ids.slice(0, 3).map((uid, i) => {
+          const m = members.find(mem => mem.id === uid)
+          if (!m) return null
+          const initials = (m.full_name || m.email).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+          return (
+            <div key={uid} title={m.full_name || m.email} style={{ marginLeft: i === 0 ? 0 : -4, width: '20px', height: '20px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${card}`, zIndex: 3 - i }}>{initials}</div>
+          )
+        })}
+        {ids.length > 3 && (
+          <div style={{ marginLeft: -4, width: '20px', height: '20px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${card}` }}>+{ids.length - 3}</div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
-
-      <BrandsSidebar
-        dark={dark}
-        orgId={orgId}
-        selectedBrandId={selectedBrand?.id}
-        onSelectBrand={(b) => setSelectedBrand(b)}
-      />
+      <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} />
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
         {!selectedBrand && (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
             <div style={{ textAlign: 'center', maxWidth: '360px' }}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>
-                Choose a brand from the sidebar to see its Kanban board. Use Agency Ops for internal tasks not tied to a client.
-              </div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand/client</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>Choose a brand or client from the sidebar to see its Kanban board.</div>
             </div>
           </div>
         )}
@@ -251,37 +271,28 @@ export default function WorkspaceView({ orgId, dark = true }) {
               ) : selectedBrand.logo_url ? (
                 <img src={selectedBrand.logo_url} alt={selectedBrand.name} style={{ width: '36px', height: '36px', objectFit: 'contain', borderRadius: '4px', background: '#fff', padding: '3px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => { e.target.style.display = 'none' }} />
               ) : (
-                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: colorFromName(selectedBrand.name), color: '#fff', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {(selectedBrand.name || '?').charAt(0).toUpperCase()}
-                </div>
+                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: colorFromName(selectedBrand.name), color: '#fff', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{(selectedBrand.name || '?').charAt(0).toUpperCase()}</div>
               )}
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, lineHeight: 1.2 }}>{selectedBrand.name}</div>
                 <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.14em', marginTop: '3px' }}>
                   {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
-                  {selectedBrand.website && (
-                    <> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>
-                  )}
+                  {selectedBrand.website && (<> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>)}
                 </div>
               </div>
-
               <div style={{ display: 'flex', gap: '0', border: `0.5px solid ${border2}`, borderRadius: '1px', flexShrink: 0 }}>
                 <button onClick={() => setViewMode('kanban')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer' }}>Kanban</button>
                 <button onClick={() => setViewMode('list')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}` }}>List</button>
               </div>
             </div>
 
-            {loading && (
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.18em', textTransform: 'uppercase' }}>Loading...</div>
-              </div>
-            )}
+            {loading && (<div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>)}
 
-            {!loading && activeBoard && viewMode === 'kanban' && (
-              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflow: 'hidden' }}>
+            {!loading && viewMode === 'kanban' && (
+              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
                 {columns.map(col => (
                   <div key={col.id}
-                    style={{ flex: 1, minWidth: '200px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    style={{ flex: '0 0 260px', minWidth: '260px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
                     onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
@@ -293,31 +304,27 @@ export default function WorkspaceView({ orgId, dark = true }) {
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
                       {tasks.filter(t => t.column_id === col.id).map(task => (
-                        editingTask?.id === task.id ? (
-                          <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
-                        ) : (
-                          <div key={task.id}
-                            draggable
-                            onDragStart={() => setDragging(task.id)}
-                            onDragEnd={() => setDragging(null)}
-                            onClick={() => setEditingTask({ ...task })}
-                            style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                            <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
-                            {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                                {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
-                                {task.assigned_to && <span style={{ fontSize: '9px', color: muted, background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px', borderRadius: '1px' }}>{task.assigned_to}</span>}
-                              </div>
-                              <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
+                        <div key={task.id}
+                          draggable
+                          onDragStart={() => setDragging(task.id)}
+                          onDragEnd={() => setDragging(null)}
+                          onClick={() => setEditingTask({ ...task })}
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
+                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                          {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
+                              {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                              {renderAvatars(task)}
                             </div>
+                            <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
                           </div>
-                        )
+                        </div>
                       ))}
 
                       {showNewTask === col.id ? (
-                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', assigned_to: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                       ) : (
                         <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
                       )}
@@ -327,49 +334,55 @@ export default function WorkspaceView({ orgId, dark = true }) {
               </div>
             )}
 
-            {!loading && activeBoard && viewMode === 'list' && (
-              <div style={{ flex: 1, overflowY: 'auto' }}>
-
-                {tasks.length === 0 && (
-                  <div style={{ padding: '60px 28px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '13px', color: muted, marginBottom: '14px' }}>No tasks yet for {selectedBrand.name}</div>
-                    <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '8px 18px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
-                  </div>
-                )}
-
-                {tasks.length > 0 && (
-                  <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
-                      {['Task', 'Status', 'Priority', 'Assigned', 'Due', ''].map(h => (
-                        <div key={h} style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>{h}</div>
-                      ))}
-                    </div>
-                    {columns.flatMap(col =>
-                      tasks.filter(t => t.column_id === col.id).map(task => (
-                        <div key={task.id}
-                          onClick={() => setEditingTask({ ...task })}
-                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center' }}
-                          onMouseEnter={e => e.currentTarget.style.background = dark ? '#222' : '#EDEAE5'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.title}</div>
-                          <div style={{ fontSize: '9px', color: muted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{col.name}</div>
-                          <div><span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span></div>
-                          <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.assigned_to || '—'}</div>
-                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
-                          <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
+            {!loading && viewMode === 'list' && (
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px' }}>
+                {columns.map(col => (
+                  <div key={col.id} style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '9px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted, marginBottom: '8px', paddingBottom: '6px', borderBottom: `0.5px solid ${border}` }}>{col.name} ({tasks.filter(t => t.column_id === col.id).length})</div>
+                    {tasks.filter(t => t.column_id === col.id).map(task => (
+                      <div key={task.id}
+                        onClick={() => setEditingTask({ ...task })}
+                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px 14px', marginBottom: '6px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '12px', color: text, marginBottom: '3px' }}>{task.title}</div>
+                          {task.description && <div style={{ fontSize: '10px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
                         </div>
-                      ))
+                        <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px', textAlign: 'center', borderRadius: '1px' }}>{task.priority}</span>
+                        <div style={{ fontSize: '10px', color: muted }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                        <div>{renderAvatars(task)}</div>
+                        <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
+                      </div>
+                    ))}
+                    {tasks.filter(t => t.column_id === col.id).length === 0 && (
+                      <div style={{ fontSize: '11px', color: subtle, padding: '6px 14px', fontStyle: 'italic' }}>No tasks in this column.</div>
                     )}
-                    <div style={{ padding: '16px 28px' }}>
-                      <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
-                    </div>
-                  </>
-                )}
+                  </div>
+                ))}
+                <div style={{ marginTop: '12px' }}>
+                  <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
+                </div>
               </div>
             )}
           </>
         )}
       </div>
+
+      {editingTask && (
+        <TaskDetail
+          task={editingTask}
+          dark={dark}
+          members={members}
+          brands={[]}
+          columns={columns}
+          currentBrandId={selectedBrand?.id}
+          orgId={orgId}
+          onSave={updateTask}
+          onClose={() => setEditingTask(null)}
+          onDelete={deleteTask}
+          createNotification={createNotification}
+          parseMentions={parseMentions}
+        />
+      )}
     </div>
   )
 }
