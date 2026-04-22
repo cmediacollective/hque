@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
-import TaskDetail from './TaskDetail'
-import Linkify from './Linkify'
-import MyTasksDashboard from './MyTasksDashboard'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -24,52 +21,21 @@ async function parseMentions(description, orgId, message, profiles) {
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
-function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], currentBrandId = null }) {
-  const [form, setForm] = useState({
-    ...initial,
-    target_brand_id: initial.target_brand_id ?? (currentBrandId === '__internal' ? '' : currentBrandId ?? ''),
-    assignee_ids: initial.assignee_ids ?? [],
-    watcher_ids: initial.watcher_ids ?? []
-  })
+function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
+  const [form, setForm] = useState({ ...initial })
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState("")
-  const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
-  const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const cardBg = dark ? '#222' : '#FFFFFF'
-  const labelColor = dark ? '#666' : '#888'
-  const isEditing = !!initial.id
-
-  const toggleAssignee = (id) => setForm(f => ({
-    ...f,
-    assignee_ids: f.assignee_ids.includes(id) ? f.assignee_ids.filter(x => x !== id) : [...f.assignee_ids, id]
-  }))
-
-  const toggleWatcher = (id) => setForm(f => ({
-    ...f,
-    watcher_ids: f.watcher_ids.includes(id) ? f.watcher_ids.filter(x => x !== id) : [...f.watcher_ids, id]
-  }))
-
-  const selectedMembers = members.filter(m => form.assignee_ids.includes(m.id))
-  const selectedWatchers = members.filter(m => form.watcher_ids.includes(m.id))
-  const initialFromName = (n) => (n || '?').trim().charAt(0).toUpperCase()
 
   return (
     <div style={{ background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px' }}>
       <textarea
         value={form.title}
         onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-        onKeyDown={e => {
-          if (e.key === 'Enter' && !e.shiftKey && !saving && form.title?.trim()) {
-            e.preventDefault()
-            setSaving(true)
-            Promise.resolve(onSave(form)).finally(() => setSaving(false))
-          }
-        }}
-        placeholder='Task title... (Enter to save)'
+        placeholder='Task title...'
         autoFocus
         style={{ width: '100%', background: 'none', border: 'none', color: text, fontSize: '12px', outline: 'none', resize: 'none', height: '60px', fontFamily: 'inherit', marginBottom: '8px', boxSizing: 'border-box' }}
       />
@@ -107,133 +73,23 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [], brands = [], 
         </select>
         <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
       </div>
-      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '4px' }}>Assigned to</div>
-      <div style={{ marginBottom: '8px', position: 'relative' }}>
-        <div
-          onClick={() => setAssigneeMenuOpen(o => !o)}
-          style={{ minHeight: '30px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 8px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-          {selectedMembers.length === 0 && <span style={{ fontSize: '11px', color: labelColor }}>Click to assign...</span>}
-          {selectedMembers.map(m => (
-            <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px 2px 2px', borderRadius: '10px', fontSize: '11px', color: text }}>
-              {m.avatar_url ? (
-                <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
-              )}
-              <span>{(m.full_name || m.email).split(' ')[0]}</span>
-              <button onClick={e => { e.stopPropagation(); toggleAssignee(m.id) }} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: '0 2px', lineHeight: 1 }}>×</button>
-            </span>
-          ))}
-        </div>
-        {assigneeMenuOpen && (
-          <>
-            <div onClick={() => setAssigneeMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 20, maxHeight: '180px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
-              {members.length === 0 && <div style={{ padding: '10px', fontSize: '11px', color: labelColor }}>No team members found</div>}
-              {members.map(m => {
-                const isSelected = form.assignee_ids.includes(m.id)
-                return (
-                  <div key={m.id}
-                    onClick={e => { e.stopPropagation(); toggleAssignee(m.id) }}
-                    style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF' }}
-                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
-                    {m.avatar_url ? (
-                      <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
-                    )}
-                    <span style={{ fontSize: '12px', color: text, flex: 1 }}>{m.full_name || m.email}</span>
-                    {isSelected && <span style={{ fontSize: '11px', color: '#5b7c99' }}>✓</span>}
-                  </div>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
-      <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
-        Watchers
-      </div>
-      <div style={{ marginBottom: '8px', position: 'relative' }}>
-        <div
-          onClick={() => setWatcherMenuOpen(o => !o)}
-          style={{ minHeight: '30px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 8px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-          {selectedWatchers.length === 0 && <span style={{ fontSize: '11px', color: labelColor }}>Add watchers (copied, not responsible)</span>}
-          {selectedWatchers.map(m => (
-            <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px 2px 2px', borderRadius: '10px', fontSize: '11px', color: text }}>
-              {m.avatar_url ? (
-                <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
-              )}
-              <span>{(m.full_name || m.email).split(' ')[0]}</span>
-              <button onClick={e => { e.stopPropagation(); toggleWatcher(m.id) }} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '12px', padding: '0 2px', lineHeight: 1 }}>×</button>
-            </span>
-          ))}
-        </div>
-        {watcherMenuOpen && (
-          <>
-            <div onClick={() => setWatcherMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
-            <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 20, maxHeight: '180px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
-              {members.length === 0 && <div style={{ padding: '10px', fontSize: '11px', color: labelColor }}>No team members found</div>}
-              {members.map(m => {
-                const isSelected = form.watcher_ids.includes(m.id)
-                return (
-                  <div key={m.id}
-                    onClick={e => { e.stopPropagation(); toggleWatcher(m.id) }}
-                    style={{ padding: '8px 10px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF' }}
-                    onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
-                    {m.avatar_url ? (
-                      <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
-                    )}
-                    <span style={{ fontSize: '12px', color: text, flex: 1 }}>{m.full_name || m.email}</span>
-                    {isSelected && <span style={{ fontSize: '11px', color: '#5b7c99' }}>✓</span>}
-                  </div>
-                )
-              })}
-            </div>
-          </>
-        )}
-      </div>
-
-      {isEditing && brands.length > 0 && (
-        <>
-          <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '4px' }}>Brand</div>
-          <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
-            <option value=''>Unassigned</option>
-            {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-          </select>
-        </>
-      )}
-
+      <select value={form.assigned_to || ''} onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
+        <option value=''>Unassigned</option>
+        {members.map(m => <option key={m.id} value={m.full_name || m.email}>{m.full_name || m.email}</option>)}
+      </select>
       <div style={{ display: 'flex', gap: '6px' }}>
-        <button
-          onClick={async () => {
-            if (saving) return
-            setSaving(true)
-            try { await onSave(form) } finally { setSaving(false) }
-          }}
-          disabled={saving}
-          style={{ padding: '5px 12px', fontSize: '9px', background: saving ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving ? 'default' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving ? 0.7 : 1 }}>
-          {saving ? 'Saving...' : 'Save'}
-        </button>
+        <button onClick={() => onSave(form)} style={{ padding: '5px 12px', fontSize: '9px', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Save</button>
         <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: `0.5px solid ${border}`, color: dark ? '#777' : '#888', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
       </div>
     </div>
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true }) {
+export default function WorkspaceView({ orgId, dark = true }) {
   const [members, setMembers] = useState([])
 
   useEffect(() => {
-    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    supabase.from('profiles').select('id, email, full_name').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -255,36 +111,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [viewMode, setViewMode] = useState('kanban')
   const [showNewTask, setShowNewTask] = useState(null)
   const [editingTask, setEditingTask] = useState(null)
-  const [showArchive, setShowArchive] = useState(false)
-  const [archiveTasks, setArchiveTasks] = useState([])
-
-  const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
-  const doneColumnIds = (() => {
-    if (!columns.length) return new Set()
-    const ids = new Set()
-    columns.forEach(c => {
-      const n = (c.name || '').trim().toLowerCase()
-      if (DONE_COLUMN_NAMES.includes(n)) ids.add(c.id)
-    })
-    const last = [...columns].sort((a, b) => b.position - a.position)[0]
-    if (last) ids.add(last.id)
-    return ids
-  })()
-  const isDoneColumn = (colId) => doneColumnIds.has(colId)
-
-  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
-  const isRecentlyCompleted = (task) => {
-    if (!task.completed_at) return true
-    return (Date.now() - new Date(task.completed_at).getTime()) < SEVEN_DAYS_MS
-  }
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
-  const [brandsForMove, setBrandsForMove] = useState([])
-
-  useEffect(() => {
-    if (!orgId) return
-    supabase.from('brands').select('id, name').eq('org_id', orgId).neq('status', 'archived').order('name', { ascending: true }).then(({ data }) => setBrandsForMove(data || []))
-  }, [orgId, selectedBrand?.id])
 
   useEffect(() => {
     if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); return }
@@ -347,89 +175,25 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').eq('board_id', activeBoard.id).order('position')
-    const enriched = (data || []).map(t => ({
-      ...t,
-      assignee_ids: (t.task_assignees || []).map(a => a.user_id),
-      watcher_ids: (t.task_watchers || []).map(w => w.user_id)
-    }))
-    setTasks(enriched)
+    const { data } = await supabase.from('tasks').select('*').eq('board_id', activeBoard.id).order('position')
+    setTasks(data || [])
   }
 
   async function createTask(columnId, form) {
     if (!form.title?.trim()) return
-    const { data: inserted } = await supabase.from('tasks').insert([{
+    await supabase.from('tasks').insert([{
       title: form.title, description: form.description || null, priority: form.priority || 'Medium',
-      due_date: form.due_date || null,
-      assigned_to: null,
+      due_date: form.due_date || null, assigned_to: form.assigned_to || null,
       column_id: columnId, board_id: activeBoard.id, org_id: orgId,
       position: tasks.filter(t => t.column_id === columnId).length
-    }]).select().single()
-
-    if (inserted && form.assignee_ids?.length > 0) {
-      await supabase.from('task_assignees').insert(form.assignee_ids.map(uid => ({ task_id: inserted.id, user_id: uid })))
-      for (const uid of form.assignee_ids) {
-        const member = members.find(m => m.id === uid)
-        if (member) {
-          await createNotification(orgId, member.full_name || member.email, 'assignment', `You were assigned to: ${form.title}`, members)
-        }
-      }
-    }
-
-    if (inserted && form.watcher_ids?.length > 0) {
-      await supabase.from('task_watchers').insert(form.watcher_ids.map(uid => ({ task_id: inserted.id, user_id: uid })))
-      for (const uid of form.watcher_ids) {
-        const member = members.find(m => m.id === uid)
-        if (member) {
-          await createNotification(orgId, member.full_name || member.email, 'watching', `You're watching: ${form.title}`, members)
-        }
-      }
-    }
-
+    }])
     setShowNewTask(null)
     fetchTasks()
+    if (form.assigned_to) await createNotification(orgId, form.assigned_to, 'assignment', `You were assigned to: ${form.title}`, members)
     await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
   }
 
   async function updateTask(form) {
-    const currentBrandKey = selectedBrand?.id === '__internal' ? '' : (selectedBrand?.id || '')
-    const targetBrandKey = form.target_brand_id || ''
-    const movingToDifferentBrand = targetBrandKey !== currentBrandKey
-
-    if (movingToDifferentBrand) {
-      const targetIsInternal = !targetBrandKey
-      let q = supabase.from('boards').select('*').eq('org_id', orgId).neq('status', 'archived').order('created_at', { ascending: true })
-      q = targetIsInternal ? q.is('brand_id', null) : q.eq('brand_id', targetBrandKey)
-      let { data: targetBoard } = await q.limit(1).maybeSingle()
-
-      if (!targetBoard) {
-        const targetBrandName = targetIsInternal ? 'Unassigned' : (brandsForMove.find(b => b.id === targetBrandKey)?.name || 'Brand')
-        const { data: newBoard } = await supabase.from('boards').insert([{
-          name: targetBrandName, org_id: orgId, brand_id: targetIsInternal ? null : targetBrandKey, status: 'active'
-        }]).select().single()
-        if (newBoard) {
-          await supabase.from('board_columns').insert(DEFAULT_COLUMNS.map((n, i) => ({ board_id: newBoard.id, name: n, position: i })))
-          targetBoard = newBoard
-        }
-      }
-
-      if (targetBoard) {
-        const { data: targetCols } = await supabase.from('board_columns').select('*').eq('board_id', targetBoard.id).order('position')
-        const targetCol = targetCols?.find(c => c.name?.toLowerCase() === 'to do') || targetCols?.[0]
-        if (targetCol) {
-          await supabase.from('tasks').update({
-            title: form.title, description: form.description || null, priority: form.priority,
-            due_date: form.due_date || null, assigned_to: form.assigned_to || null,
-            board_id: targetBoard.id, column_id: targetCol.id
-          }).eq('id', form.id)
-          setEditingTask(null)
-          fetchTasks()
-          await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
-          return
-        }
-      }
-    }
-
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, assigned_to: form.assigned_to || null }).eq('id', form.id)
     setEditingTask(null)
     fetchTasks()
@@ -437,14 +201,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function moveTask(taskId, newColumnId) {
-    const task = tasks.find(t => t.id === taskId)
-    const wasDone = task && isDoneColumn(task.column_id)
-    const nowDone = isDoneColumn(newColumnId)
-    const payload = { column_id: newColumnId }
-    if (!wasDone && nowDone) payload.completed_at = new Date().toISOString()
-    if (wasDone && !nowDone) payload.completed_at = null
-    await supabase.from('tasks').update(payload).eq('id', taskId)
-    setTasks(ts => ts.map(t => t.id === taskId ? { ...t, ...payload } : t))
+    await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
+    setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
   }
 
   async function deleteTask(taskId) {
@@ -453,58 +211,6 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
-
-  const getAssignees = (task) => {
-    return (task.assignee_ids || []).map(id => members.find(m => m.id === id)).filter(Boolean)
-  }
-
-  const initialChar = (name) => (name || '?').trim().charAt(0).toUpperCase()
-
-  const AvatarStack = ({ assignees, size = 22 }) => {
-    if (!assignees || assignees.length === 0) return null
-    const shown = assignees.slice(0, 3)
-    const overflow = assignees.length - shown.length
-    return (
-      <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-        {shown.map((m, i) => (
-          <div key={m.id} title={m.full_name || m.email} style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown.length - i }}>
-            {m.avatar_url ? (
-              <img src={m.avatar_url} alt={m.full_name || m.email} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${card}`, display: 'block' }} />
-            ) : (
-              <div style={{ width: size, height: size, borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: Math.round(size * 0.42), display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${card}` }}>{initialChar(m.full_name || m.email)}</div>
-            )}
-          </div>
-        ))}
-        {overflow > 0 && (
-          <div style={{ marginLeft: -6, width: size, height: size, borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: Math.round(size * 0.38), display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${card}` }}>+{overflow}</div>
-        )}
-      </div>
-    )
-  }
-
-  const tasksInColumn = (colId) => {
-    let filtered = tasks.filter(t => t.column_id === colId)
-    if (isDoneColumn(colId)) {
-      filtered = filtered.filter(isRecentlyCompleted)
-    }
-    return filtered.sort((a, b) => {
-      if (!a.due_date && !b.due_date) return 0
-      if (!a.due_date) return 1
-      if (!b.due_date) return -1
-      return a.due_date.localeCompare(b.due_date)
-    })
-  }
-
-  async function openArchive(colId) {
-    const { data } = await supabase.from('tasks')
-      .select('*, task_assignees(user_id)')
-      .eq('column_id', colId)
-      .not('completed_at', 'is', null)
-      .lt('completed_at', new Date(Date.now() - SEVEN_DAYS_MS).toISOString())
-      .order('completed_at', { ascending: false })
-    setArchiveTasks(data || [])
-    setShowArchive(true)
-  }
 
   const colorFromName = (name) => {
     if (!name) return '#5b7c99'
@@ -517,51 +223,6 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
 
-      {showArchive && (
-        <div onClick={() => setShowArchive(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border}`, padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '80vh', overflowY: 'auto', borderRadius: '2px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-              <div>
-                <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle, marginBottom: '4px' }}>Archived · older than 7 days</div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>Completed tasks</div>
-              </div>
-              <button onClick={() => setShowArchive(false)} style={{ background: 'none', border: 'none', color: subtle, fontSize: '18px', cursor: 'pointer', padding: 0, lineHeight: 1 }}>×</button>
-            </div>
-            {archiveTasks.length === 0 ? (
-              <div style={{ padding: '40px 0', textAlign: 'center', color: subtle, fontSize: '12px' }}>No archived tasks yet. Tasks auto-archive 7 days after completion.</div>
-            ) : (
-              <div>
-                {archiveTasks.map(t => (
-                  <div key={t.id} style={{ padding: '10px 0', borderBottom: `0.5px solid ${border}` }}>
-                    <div style={{ fontSize: '13px', color: text, marginBottom: '4px', textDecoration: 'line-through', opacity: 0.75 }}>{t.title}</div>
-                    <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.1em' }}>
-                      Completed {new Date(t.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {editingTask && (
-        <TaskDetail
-          task={editingTask}
-          dark={dark}
-          members={members}
-          brands={brandsForMove}
-          columns={columns}
-          currentBrandId={selectedBrand?.id}
-          orgId={orgId}
-          onSave={updateTask}
-          onClose={() => setEditingTask(null)}
-          onDelete={deleteTask}
-          createNotification={createNotification}
-          parseMentions={parseMentions}
-        />
-      )}
-
       <BrandsSidebar
         dark={dark}
         orgId={orgId}
@@ -572,14 +233,14 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {!selectedBrand && (
-          <MyTasksDashboard
-            userId={userId}
-            orgId={orgId}
-            dark={dark}
-            brands={brandsForMove}
-            agencyTz={agencyTz}
-            onSelectBrand={setSelectedBrand}
-          />
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>
+                Choose a brand from the sidebar to see its Kanban board. Use Agency Ops for internal tasks not tied to a client.
+              </div>
+            </div>
+          </div>
         )}
 
         {selectedBrand && (
@@ -617,46 +278,42 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
             )}
 
             {!loading && activeBoard && viewMode === 'kanban' && (
-              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
+              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflow: 'hidden' }}>
                 {columns.map(col => (
                   <div key={col.id}
-                    style={{ flex: '0 0 260px', minWidth: '260px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    style={{ flex: 1, minWidth: '200px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
                     onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
 
                     <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
                       <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {isDoneColumn(col.id) && (
-                          <button onClick={e => { e.stopPropagation(); openArchive(col.id) }} title='View archived tasks' style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: subtle, padding: '2px 6px', cursor: 'pointer', borderRadius: '1px' }}>Archive</button>
-                        )}
-                        <div style={{ fontSize: '10px', color: subtle }}>{tasksInColumn(col.id).length}</div>
-                      </div>
+                      <div style={{ fontSize: '10px', color: subtle }}>{tasks.filter(t => t.column_id === col.id).length}</div>
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
-                      {tasksInColumn(col.id).map(task => (
-                        <div key={task.id}
-                          draggable
-                          onDragStart={() => setDragging(task.id)}
-                          onDragEnd={() => setDragging(null)}
-                          onClick={() => setEditingTask({ ...task })}
-                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer', opacity: col.name?.toLowerCase() === 'done' ? 0.55 : 1 }}>
-                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: col.name?.toLowerCase() === 'done' ? 'line-through' : 'none' }}>{task.title}</div>
-                          {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}><Linkify text={task.description} /></div>}
-                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                            {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
-                            <AvatarStack assignees={getAssignees(task)} size={20} />
-                            {(task.watcher_ids || []).length > 0 && (
-                              <span title={`${task.watcher_ids.length} watcher${task.watcher_ids.length !== 1 ? 's' : ''}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', color: muted }}>
-                                <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>
-                                {task.watcher_ids.length}
-                              </span>
-                            )}
+                      {tasks.filter(t => t.column_id === col.id).map(task => (
+                        editingTask?.id === task.id ? (
+                          <TaskForm key={task.id} initial={editingTask} onSave={updateTask} onCancel={() => setEditingTask(null)} dark={dark} members={members} />
+                        ) : (
+                          <div key={task.id}
+                            draggable
+                            onDragStart={() => setDragging(task.id)}
+                            onDragEnd={() => setDragging(null)}
+                            onClick={() => setEditingTask({ ...task })}
+                            style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
+                            <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                            {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap" }}>{task.description}</div>}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
+                                {task.due_date && <span style={{ fontSize: '9px', color: muted }}>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                                {task.assigned_to && <span style={{ fontSize: '9px', color: muted, background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px', borderRadius: '1px' }}>{task.assigned_to}</span>}
+                              </div>
+                              <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
+                            </div>
                           </div>
-                        </div>
+                        )
                       ))}
 
                       {showNewTask === col.id ? (
@@ -688,19 +345,17 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                       ))}
                     </div>
                     {columns.flatMap(col =>
-                      tasksInColumn(col.id).map(task => (
+                      tasks.filter(t => t.column_id === col.id).map(task => (
                         <div key={task.id}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center', opacity: col.name?.toLowerCase() === 'done' ? 0.55 : 1 }}
+                          style={{ display: 'grid', gridTemplateColumns: '2fr 110px 110px 130px 110px 40px', padding: '12px 28px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', alignItems: 'center' }}
                           onMouseEnter={e => e.currentTarget.style.background = dark ? '#222' : '#EDEAE5'}
                           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px', textDecoration: col.name?.toLowerCase() === 'done' ? 'line-through' : 'none' }}>{task.title}</div>
+                          <div style={{ fontSize: '12px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.title}</div>
                           <div style={{ fontSize: '9px', color: muted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{col.name}</div>
                           <div><span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span></div>
-                          <div style={{ overflow: 'hidden', paddingRight: '10px' }}>
-                            {(task.assignee_ids || []).length > 0 ? <AvatarStack assignees={getAssignees(task)} size={20} /> : <span style={{ fontSize: '11px', color: muted }}>—</span>}
-                          </div>
-                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                          <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '10px' }}>{task.assigned_to || '—'}</div>
+                          <div style={{ fontSize: '11px', color: muted }}>{task.due_date ? new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
                           <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
                         </div>
                       ))
