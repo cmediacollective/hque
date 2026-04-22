@@ -169,9 +169,12 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     }
     let campaignId = existing?.id
     if (existing) {
-      await supabase.from('campaigns').update(payload).eq('id', existing.id)
+      const { error: updErr, data: updData } = await supabase.from('campaigns').update(payload).eq('id', existing.id).select()
+      if (updErr) { setSaving(false); setError(`Could not save: ${updErr.message}`); return }
+      if (!updData || updData.length === 0) { setSaving(false); setError('Save returned no rows — likely a Supabase row-level-security policy on the campaigns table is blocking the update. Let Claude know.'); return }
     } else {
-      const { data } = await supabase.from('campaigns').insert(payload).select().single()
+      const { data, error: insErr } = await supabase.from('campaigns').insert(payload).select().single()
+      if (insErr) { setSaving(false); setError(`Could not create: ${insErr.message}`); return }
       campaignId = data?.id
     }
     if (campaignId) {
