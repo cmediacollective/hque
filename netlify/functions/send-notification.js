@@ -13,7 +13,7 @@ exports.handler = async (event) => {
     body: JSON.stringify({
       from: 'HQue <support@hque.com>',
       to: profile.email,
-      subject: type === 'assignment' ? "You've been assigned a task" : 'You were mentioned in a task',
+      subject: type === 'assignment' ? "You've been assigned a task" : type === 'comment' ? 'New comment on a task you follow' : type === 'watching' ? "You're now watching a task" : 'You were mentioned in a task',
       html: `<div style="font-family:Helvetica Neue,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;color:#1A1A1A;"><p style="font-size:16px;">Hi ${name},</p><p style="font-size:14px;color:#555;line-height:1.7;">${message}</p><a href="https://h-que.com" style="display:inline-block;margin-top:24px;padding:10px 24px;background:#5b7c99;color:#fff;text-decoration:none;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;">Open HQue</a><p style="margin-top:32px;font-size:11px;color:#aaa;">You can turn off email notifications in your HQue profile settings.</p></div>`
     })
   })

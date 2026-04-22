@@ -78,7 +78,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
       setNewComment('')
       fetchComments()
 
-      const toNotify = new Set([...(task.watcher_ids || []), ...(task.assignee_ids || [])])
+      const toNotify = new Set([...(form.watcher_ids || []), ...(form.assignee_ids || [])])
       toNotify.delete(user.id)
       const commenterName = members.find(m => m.id === user.id)?.full_name || members.find(m => m.id === user.id)?.email || 'Someone'
       for (const uid of toNotify) {
