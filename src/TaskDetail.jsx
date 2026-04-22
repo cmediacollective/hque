@@ -38,7 +38,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
   const [editingBody, setEditingBody] = useState('')
   const [recentlySaved, setRecentlySaved] = useState(false)
 
-  useEffect(() => { fetchComments(); fetchCurrentUser() }, [task.id])
+  const [attachments, setAttachments] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+
+  useEffect(() => { fetchComments(); fetchCurrentUser(); fetchAttachments() }, [task.id])
 
   async function fetchCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser()
@@ -105,6 +109,56 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
     if (!confirm('Delete this comment?')) return
     await supabase.from('task_comments').delete().eq('id', id)
     fetchComments()
+  }
+
+  async function fetchAttachments() {
+    const { data } = await supabase.from('task_attachments').select('*').eq('task_id', task.id).order('created_at', { ascending: true })
+    setAttachments(data || [])
+  }
+
+  async function handleFiles(fileList) {
+    const files = Array.from(fileList || [])
+    if (files.length === 0) return
+    setUploading(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setUploading(false); return }
+    for (const file of files) {
+      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const path = `${task.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`
+      const { error: upErr } = await supabase.storage.from('task-attachments').upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+      if (upErr) { console.error('upload failed', upErr); alert(`Upload failed for ${file.name}: ${upErr.message}`); continue }
+      await supabase.from('task_attachments').insert([{
+        task_id: task.id,
+        org_id: orgId,
+        user_id: user.id,
+        filename: file.name,
+        storage_path: path,
+        size_bytes: file.size,
+        mime_type: file.type || null
+      }])
+    }
+    setUploading(false)
+    fetchAttachments()
+  }
+
+  async function openAttachment(a) {
+    const { data, error } = await supabase.storage.from('task-attachments').createSignedUrl(a.storage_path, 60)
+    if (error) { alert('Could not open file: ' + error.message); return }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  async function deleteAttachment(a) {
+    if (!confirm(`Delete ${a.filename}?`)) return
+    await supabase.storage.from('task-attachments').remove([a.storage_path])
+    await supabase.from('task_attachments').delete().eq('id', a.id)
+    fetchAttachments()
+  }
+
+  function humanSize(bytes) {
+    if (!bytes || bytes < 1024) return (bytes || 0) + ' B'
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB'
   }
 
   const toggleAssignee = (id) => setForm(f => ({
@@ -352,6 +406,39 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
               </select>
             </>
           )}
+
+          <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '24px', marginTop: '8px', marginBottom: '8px' }}>
+            {sectionLabel(`Files${attachments.length > 0 ? ` (${attachments.length})` : ''}`)}
+
+            {attachments.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                {attachments.map(a => (
+                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+                    <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round' strokeLinejoin='round' style={{ color: muted, flexShrink: 0 }}><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>
+                    <button onClick={() => openAttachment(a)} title='Open in a new tab' style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '12px', textAlign: 'left', padding: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.filename}</button>
+                    <span style={{ fontSize: '10px', color: subtle, flexShrink: 0 }}>{humanSize(a.size_bytes)}</span>
+                    {a.user_id === currentUserId && (
+                      <button onClick={() => deleteAttachment(a)} title='Delete' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <label
+              onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files) }}
+              style={{ display: 'block', padding: '18px', border: `1px dashed ${dragOver ? '#5b7c99' : border2}`, background: dragOver ? (dark ? 'rgba(91,124,153,0.08)' : 'rgba(91,124,153,0.04)') : 'transparent', borderRadius: '2px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s' }}>
+              <input type='file' multiple onChange={e => { handleFiles(e.target.files); e.target.value = '' }} style={{ display: 'none' }} disabled={uploading} />
+              <div style={{ fontSize: '11px', color: uploading ? '#5b7c99' : muted, lineHeight: 1.6 }}>
+                {uploading ? 'Uploading…' : 'Drop files here, or click to choose'}
+              </div>
+              {!uploading && (
+                <div style={{ fontSize: '9px', color: subtle, marginTop: '4px', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Any file type</div>
+              )}
+            </label>
+          </div>
 
           <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '24px', marginTop: '8px' }}>
             {sectionLabel(`Comments${comments.length > 0 ? ` (${comments.length})` : ''}`)}
