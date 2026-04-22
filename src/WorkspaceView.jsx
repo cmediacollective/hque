@@ -315,6 +315,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
         {selectedBrand && (
           <>
             <div style={{ padding: '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
+              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+                <span style={{ fontSize: '12px', lineHeight: 1 }}>←</span>
+                <span>My Tasks</span>
+              </button>
               {selectedBrand.id === '__internal' ? (
                 <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
               ) : selectedBrand.logo_url ? (
