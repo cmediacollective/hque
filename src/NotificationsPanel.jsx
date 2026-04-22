@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
-export default function NotificationsPanel({ user, dark, onClose }) {
+export default function NotificationsPanel({ user, dark, onClose, onOpenTask }) {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -65,13 +65,16 @@ export default function NotificationsPanel({ user, dark, onClose }) {
               <div style={{ fontSize: '12px', color: subtle }}>Notifications will appear here when you are mentioned or assigned to a task.</div>
             </div>
           ) : notifications.map(n => (
-            <div key={n.id} onClick={() => markRead(n.id)} style={{ padding: '14px 20px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', background: n.read ? 'transparent' : (dark ? 'rgba(91,124,153,0.06)' : 'rgba(91,124,153,0.04)'), display: 'flex', gap: '12px', alignItems: 'flex-start' }}
+            <div key={n.id} onClick={() => { markRead(n.id); if (n.task_id && onOpenTask) { onOpenTask(n.task_id); onClose && onClose() } }} style={{ padding: '14px 20px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', background: n.read ? 'transparent' : (dark ? 'rgba(91,124,153,0.06)' : 'rgba(91,124,153,0.04)'), display: 'flex', gap: '12px', alignItems: 'flex-start' }}
               onMouseEnter={e => e.currentTarget.style.background = dark ? '#1E1E1E' : '#F0ECE8'}
               onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : (dark ? 'rgba(91,124,153,0.06)' : 'rgba(91,124,153,0.04)')}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: n.read ? 'transparent' : '#5b7c99', flexShrink: 0, marginTop: '5px' }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '12px', color: text, lineHeight: 1.5, marginBottom: '4px' }}>{n.message}</div>
-                <div style={{ fontSize: '10px', color: subtle }}>{timeAgo(n.created_at)}</div>
+                <div style={{ fontSize: '10px', color: subtle, display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span>{timeAgo(n.created_at)}</span>
+                  {n.task_id && <span style={{ color: '#5b7c99', letterSpacing: '0.14em', textTransform: 'uppercase', fontSize: '9px' }}>Open task →</span>}
+                </div>
               </div>
             </div>
           ))}

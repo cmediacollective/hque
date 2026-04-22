@@ -43,6 +43,7 @@ function App() {
   const [showLogin, setShowLogin] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [pendingTaskId, setPendingTaskId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showWelcome, setShowWelcome] = useState(false)
@@ -282,7 +283,7 @@ function App() {
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
-      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} />}
+      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} />}
       {showWelcome && (
         <div onClick={() => setShowWelcome(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '2px', maxWidth: '440px', width: '100%', padding: isMobile ? '40px 28px' : '48px 40px', textAlign: 'center', color: '#F0ECE6' }}>
@@ -405,7 +406,7 @@ function App() {
             {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
-            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} />}
+            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}

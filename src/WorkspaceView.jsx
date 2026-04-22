@@ -4,19 +4,19 @@ import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
 
-async function createNotification(orgId, memberName, type, message, profiles) {
+async function createNotification(orgId, memberName, type, message, profiles, taskId = null) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
   if (!profile) return
-  await supabase.from('notifications').insert([{ org_id: orgId, user_id: profile.id, type, message }])
+  await supabase.from('notifications').insert([{ org_id: orgId, user_id: profile.id, type, message, task_id: taskId }])
   await fetch('/.netlify/functions/send-notification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: profile.id, type, message }) })
 }
 
-async function parseMentions(description, orgId, message, profiles) {
+async function parseMentions(description, orgId, message, profiles, taskId = null) {
   if (!description) return
   const mentions = description.match(/@([\w. ]+)/g) || []
   for (const mention of mentions) {
     const name = mention.slice(1).trim()
-    await createNotification(orgId, name, 'mention', message, profiles)
+    await createNotification(orgId, name, 'mention', message, profiles, taskId)
   }
 }
 
@@ -135,7 +135,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled }) {
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
 
@@ -174,6 +174,27 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   useEffect(() => {
     if (activeBoard) { fetchColumns(); fetchTasks() }
   }, [activeBoard?.id])
+
+  useEffect(() => {
+    if (!openTaskId || !orgId) return
+    ;(async () => {
+      const { data: t } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id), board:boards(brand_id)').eq('id', openTaskId).maybeSingle()
+      if (!t) { onOpenTaskHandled && onOpenTaskHandled(); return }
+      const brandId = t.board?.brand_id
+      if (brandId) {
+        const { data: b } = await supabase.from('brands').select('*').eq('id', brandId).maybeSingle()
+        if (b) setSelectedBrand(b)
+      } else {
+        setSelectedBrand({ id: '__internal', name: 'Internal' })
+      }
+      setEditingTask({
+        ...t,
+        assignee_ids: (t.task_assignees || []).map(r => r.user_id),
+        watcher_ids: (t.task_watchers || []).map(r => r.user_id)
+      })
+      onOpenTaskHandled && onOpenTaskHandled()
+    })()
+  }, [openTaskId, orgId])
 
   async function findOrCreateBoardForBrand(brand) {
     setLoading(true)
@@ -215,7 +236,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       await supabase.from('task_assignees').insert(toAdd.map(uid => ({ task_id: taskId, user_id: uid })))
       for (const uid of toAdd) {
         const m = members.find(p => p.id === uid)
-        if (m) await createNotification(orgId, m.full_name || m.email, 'assignment', `You were assigned to: ${taskTitle}`, members)
+        if (m) await createNotification(orgId, m.full_name || m.email, 'assignment', `You were assigned to: ${taskTitle}`, members, taskId)
       }
     }
   }
@@ -230,7 +251,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       await supabase.from('task_watchers').insert(toAdd.map(uid => ({ task_id: taskId, user_id: uid })))
       for (const uid of toAdd) {
         const m = members.find(p => p.id === uid)
-        if (m) await createNotification(orgId, m.full_name || m.email, 'watching', `You're watching: ${taskTitle}`, members)
+        if (m) await createNotification(orgId, m.full_name || m.email, 'watching', `You're watching: ${taskTitle}`, members, taskId)
       }
     }
   }
@@ -246,7 +267,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     setShowNewTask(null)
     if (inserted) {
       if (form.assignee_ids?.length) await syncAssignees(inserted.id, form.assignee_ids, form.title)
-      await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
+      await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, inserted.id)
     }
     fetchTasks()
   }
@@ -256,7 +277,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     fetchTasks()
-    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
+    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
   }
 
   async function moveTask(taskId, newColumnId) {

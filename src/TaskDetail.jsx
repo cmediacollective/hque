@@ -83,11 +83,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
       for (const uid of toNotify) {
         const member = members.find(m => m.id === uid)
         if (member && createNotification) {
-          await createNotification(orgId, member.full_name || member.email, 'comment', `${commenterName} commented on: ${task.title}`, members)
+          await createNotification(orgId, member.full_name || member.email, 'comment', `${commenterName} commented on: ${task.title}`, members, task.id)
         }
       }
       if (parseMentions) {
-        await parseMentions(commentBody, orgId, `You were mentioned in a comment on: ${task.title}`, members)
+        await parseMentions(commentBody, orgId, `You were mentioned in a comment on: ${task.title}`, members, task.id)
       }
     }
   }
