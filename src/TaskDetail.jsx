@@ -21,6 +21,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
   })
   const [saving, setSaving] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [copiedFlash, setCopiedFlash] = useState(false)
   const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
   const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
   const [showMentions, setShowMentions] = useState(false)
@@ -147,6 +148,22 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
     setTimeout(() => setSavedFlash(false), 1500)
   }
 
+  async function handleCopyLink() {
+    const url = `${window.location.origin}/?task=${task.id}`
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = url
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setCopiedFlash(true)
+    setTimeout(() => setCopiedFlash(false), 1800)
+  }
+
   const sectionLabel = (txt) => (
     <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '8px' }}>{txt}</div>
   )
@@ -160,7 +177,12 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
         <div style={{ padding: '18px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: panelBg, zIndex: 2 }}>
           <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle }}>Task</div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            {savedFlash && <span style={{ fontSize: '10px', color: '#5C9E52', letterSpacing: '0.14em', textTransform: 'uppercase' }}>✓ Saved</span>}
+            {copiedFlash && <span style={{ fontSize: '10px', color: '#5C9E52', letterSpacing: '0.14em', textTransform: 'uppercase' }}>✓ Link copied</span>}
+            {savedFlash && !copiedFlash && <span style={{ fontSize: '10px', color: '#5C9E52', letterSpacing: '0.14em', textTransform: 'uppercase' }}>✓ Saved</span>}
+            <button onClick={handleCopyLink} title='Copy shareable link to this task' style={{ padding: '6px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>
+              <span>Copy link</span>
+            </button>
             <button onClick={handleSave} disabled={saving} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.6 : 1 }}>
               {saving ? 'Saving...' : 'Save'}
             </button>

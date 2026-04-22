@@ -60,6 +60,19 @@ function App() {
     }
   }, [])
 
+  // Deep link: /?task=<id> opens that task in Workspace
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const taskId = params.get('task')
+    if (!taskId) return
+    setView('workspace')
+    setPendingTaskId(taskId)
+    params.delete('task')
+    const remaining = params.toString()
+    const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
+    window.history.replaceState({}, '', cleanUrl)
+  }, [])
+
 
   useEffect(() => {
     if (!user) return
