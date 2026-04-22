@@ -286,8 +286,8 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
           </>
         )}
 
-        <div style={{ marginTop: '28px', paddingTop: '18px', borderTop: `0.5px solid ${border}`, fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle, textAlign: 'center' }}>
-          Pick a brand/client on the left to see its board
+        <div style={{ marginTop: '24px', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle, textAlign: 'left' }}>
+          Pick a brand/client on the left to see its board to open
         </div>
       </div>
     </div>
