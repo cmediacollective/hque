@@ -25,6 +25,8 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
   const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState('')
+  const [showCommentMentions, setShowCommentMentions] = useState(false)
+  const [commentMentionQuery, setCommentMentionQuery] = useState('')
 
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
@@ -374,14 +376,44 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
               })}
             </div>
 
-            <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '14px' }}>
+            <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '14px', position: 'relative' }}>
               <textarea
                 value={newComment}
-                onChange={e => setNewComment(e.target.value)}
+                onChange={e => {
+                  const val = e.target.value
+                  setNewComment(val)
+                  const match = val.match(/(?:^|\s)@([\w.]*)$/)
+                  if (match) { setShowCommentMentions(true); setCommentMentionQuery(match[1]) }
+                  else { setShowCommentMentions(false); setCommentMentionQuery('') }
+                }}
                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) postComment() }}
-                placeholder='Add a comment... (Cmd+Enter to post)'
+                placeholder='Add a comment... (use @ to mention, Cmd+Enter to post)'
                 style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
               />
+              {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
+                <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, background: panelBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                  {members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).map(m => (
+                    <div key={m.id}
+                      onClick={() => {
+                        const name = (m.full_name || m.email).split(' ')[0]
+                        const val = newComment.replace(/@[\w.]*$/, `@${name} `)
+                        setNewComment(val)
+                        setShowCommentMentions(false)
+                        setCommentMentionQuery('')
+                      }}
+                      style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                      {m.avatar_url ? (
+                        <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
+                      )}
+                      <span style={{ fontSize: '12px', color: text }}>{m.full_name || m.email}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : `0.5px solid ${border2}`, color: newComment.trim() ? '#fff' : subtle, cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
                 {postingComment ? 'Posting...' : 'Comment'}
               </button>
