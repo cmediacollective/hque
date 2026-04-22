@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
+import MyTasksDashboard from './MyTasksDashboard'
 
 async function createNotification(orgId, memberName, type, message, profiles) {
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
@@ -136,9 +137,11 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
 
 export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true }) {
   const [members, setMembers] = useState([])
+  const [brands, setBrands] = useState([])
 
   useEffect(() => {
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -306,12 +309,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {!selectedBrand && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand/client</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>Choose a brand or client from the sidebar to see its Kanban board.</div>
-            </div>
-          </div>
+          <MyTasksDashboard userId={userId} orgId={orgId} dark={dark} brands={brands} onSelectBrand={setSelectedBrand} agencyTz={agencyTz} />
         )}
 
         {selectedBrand && (
