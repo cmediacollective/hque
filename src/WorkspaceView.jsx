@@ -23,13 +23,15 @@ const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
 function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
-  const [form, setForm] = useState({ ...initial })
+  const [form, setForm] = useState({ ...initial, assignee_ids: initial.assignee_ids || [] })
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState("")
   const [saving, setSaving] = useState(false)
+  const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
   const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
   const border = dark ? '#3A3A3A' : '#C4BFB8'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
+  const subtle = dark ? '#666' : '#888'
   const cardBg = dark ? '#222' : '#FFFFFF'
 
   const doSave = async () => {
@@ -37,6 +39,12 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
     setSaving(true)
     try { await onSave(form) } finally { setSaving(false) }
   }
+
+  const toggleAssignee = (uid) => {
+    setForm(f => ({ ...f, assignee_ids: (f.assignee_ids || []).includes(uid) ? (f.assignee_ids || []).filter(id => id !== uid) : [...(f.assignee_ids || []), uid] }))
+  }
+
+  const selectedAssignees = members.filter(m => (form.assignee_ids || []).includes(m.id))
 
   return (
     <div style={{ background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px' }}>
@@ -79,6 +87,44 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
           {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
         <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
+      </div>
+      <div style={{ marginBottom: '8px', position: 'relative' }}>
+        <div onClick={() => setAssigneeMenuOpen(o => !o)} style={{ minHeight: '28px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+          {selectedAssignees.length === 0 && <span style={{ fontSize: '10px', color: subtle }}>Assign team members</span>}
+          {selectedAssignees.map(m => (
+            <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px 2px 2px', borderRadius: '10px', fontSize: '10px', color: text }}>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} alt='' style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{(m.full_name || m.email).charAt(0).toUpperCase()}</span>
+              )}
+              <span>{(m.full_name || m.email).split(' ')[0]}</span>
+              <button onClick={e => { e.stopPropagation(); toggleAssignee(m.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '11px', padding: '0 1px', lineHeight: 1 }}>×</button>
+            </span>
+          ))}
+        </div>
+        {assigneeMenuOpen && (
+          <>
+            <div onClick={() => setAssigneeMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
+            <div style={{ position: 'absolute', top: 'calc(100% + 2px)', left: 0, right: 0, background: dark ? '#141414' : '#fff', border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 20, maxHeight: '180px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+              {members.map(m => {
+                const isSelected = (form.assignee_ids || []).includes(m.id)
+                return (
+                  <div key={m.id} onClick={e => { e.stopPropagation(); toggleAssignee(m.id) }}
+                    style={{ padding: '7px 10px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}>
+                    {m.avatar_url ? (
+                      <img src={m.avatar_url} alt='' style={{ width: '20px', height: '20px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{(m.full_name || m.email).charAt(0).toUpperCase()}</span>
+                    )}
+                    <span style={{ fontSize: '11px', color: text, flex: 1 }}>{m.full_name || m.email}</span>
+                    {isSelected && <span style={{ fontSize: '10px', color: '#5b7c99' }}>✓</span>}
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
       </div>
       <div style={{ display: 'flex', gap: '6px' }}>
         <button onClick={doSave} disabled={saving} style={{ padding: '5px 12px', fontSize: '9px', background: saving ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving ? 'default' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
@@ -195,10 +241,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       position: tasks.filter(t => t.column_id === columnId).length
     }]).select().single()
     setShowNewTask(null)
-    fetchTasks()
     if (inserted) {
+      if (form.assignee_ids?.length) await syncAssignees(inserted.id, form.assignee_ids, form.title)
       await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members)
     }
+    fetchTasks()
   }
 
   async function updateTask(form) {
@@ -238,8 +285,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           const m = members.find(mem => mem.id === uid)
           if (!m) return null
           const initials = (m.full_name || m.email).split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+          const commonStyle = { marginLeft: i === 0 ? 0 : -4, width: '20px', height: '20px', borderRadius: '50%', border: `1.5px solid ${card}`, zIndex: 3 - i, flexShrink: 0 }
+          if (m.avatar_url) {
+            return <img key={uid} src={m.avatar_url} alt={m.full_name || m.email} title={m.full_name || m.email} style={{ ...commonStyle, objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
+          }
           return (
-            <div key={uid} title={m.full_name || m.email} style={{ marginLeft: i === 0 ? 0 : -4, width: '20px', height: '20px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${card}`, zIndex: 3 - i }}>{initials}</div>
+            <div key={uid} title={m.full_name || m.email} style={{ ...commonStyle, background: '#7A9B8E', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initials}</div>
           )
         })}
         {ids.length > 3 && (
@@ -324,7 +375,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                       ))}
 
                       {showNewTask === col.id ? (
-                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', description: '' }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', description: '', assignee_ids: [] }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                       ) : (
                         <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
                       )}
