@@ -174,6 +174,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     <>
       {editing && (
         <CampaignForm
+          orgId={campaign.org_id}
           existing={campaign}
           dark={dark}
           onClose={() => setEditing(false)}
