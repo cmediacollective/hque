@@ -92,7 +92,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [members, setMembers] = useState([])
 
   useEffect(() => {
-    supabase.from('profiles').select('id, email, full_name').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
