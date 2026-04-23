@@ -21,6 +21,7 @@ async function parseMentions(description, orgId, message, profiles, taskId = nul
 }
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
+const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
 function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
@@ -273,7 +274,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function updateTask(form) {
-    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null }).eq('id', form.id)
+    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     fetchTasks()
@@ -291,6 +292,19 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
+
+  const doneColumnIds = (() => {
+    const ids = new Set()
+    if (!columns || columns.length === 0) return ids
+    let last = columns[0]
+    columns.forEach(c => {
+      const nameLower = (c.name || '').trim().toLowerCase()
+      if (DONE_COLUMN_NAMES.includes(nameLower)) ids.add(c.id)
+      if (c.position > last.position) last = c
+    })
+    ids.add(last.id)
+    return ids
+  })()
 
   const colorFromName = (name) => {
     if (!name) return '#5b7c99'
@@ -391,8 +405,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                           onDragStart={() => setDragging(task.id)}
                           onDragEnd={() => setDragging(null)}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer' }}>
-                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px' }}>{task.title}</div>
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px', marginBottom: '6px', cursor: 'pointer', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1 }}>
+                          <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -424,9 +438,9 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                     {tasks.filter(t => t.column_id === col.id).map(task => (
                       <div key={task.id}
                         onClick={() => setEditingTask({ ...task })}
-                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px 14px', marginBottom: '6px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center' }}>
+                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '12px 14px', marginBottom: '6px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1 }}>
                         <div>
-                          <div style={{ fontSize: '12px', color: text, marginBottom: '3px' }}>{task.title}</div>
+                          <div style={{ fontSize: '12px', color: text, marginBottom: '3px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: '10px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
                         </div>
                         <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px', textAlign: 'center', borderRadius: '1px' }}>{task.priority}</span>
