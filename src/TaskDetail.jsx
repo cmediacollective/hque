@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import Linkify from './Linkify'
 
+const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
+
 export default function TaskDetail({ task, dark, members = [], brands = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const panelBg = dark ? '#141414' : '#FFFFFF'
@@ -285,17 +287,37 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
 
           <div style={{ height: '24px' }} />
 
-          {columns.length > 0 && (
-            <>
-              {sectionLabel('Status')}
-              <select
-                value={form.column_id || ''}
-                onChange={e => setForm(f => ({ ...f, column_id: e.target.value }))}
-                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '20px', boxSizing: 'border-box' }}>
-                {columns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </>
-          )}
+          {columns.length > 0 && (() => {
+            const doneColumnIds = new Set()
+            let last = columns[0]
+            columns.forEach(c => {
+              const nameLower = (c.name || '').trim().toLowerCase()
+              if (DONE_COLUMN_NAMES.includes(nameLower)) doneColumnIds.add(c.id)
+              if (c.position > last.position) last = c
+            })
+            doneColumnIds.add(last.id)
+            return (
+              <>
+                {sectionLabel('Status')}
+                <select
+                  value={form.column_id || ''}
+                  onChange={async e => {
+                    const newColumnId = e.target.value
+                    const nextForm = { ...form, column_id: newColumnId }
+                    setForm(nextForm)
+                    if (doneColumnIds.has(newColumnId) && !doneColumnIds.has(form.column_id)) {
+                      try {
+                        await onSave(nextForm)
+                        onClose()
+                      } catch (_) { /* leave panel open on error */ }
+                    }
+                  }}
+                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '20px', boxSizing: 'border-box' }}>
+                  {columns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </>
+            )
+          })()}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div>
