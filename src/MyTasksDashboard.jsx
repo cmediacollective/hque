@@ -157,12 +157,98 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const watchedBuckets = bucketize(watchedTasks)
   const overdueCount = assignedTasks.filter(t => isOverdue(t.due_date)).length
 
-  const greet = () => {
-    const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 18) return 'Good afternoon'
-    return 'Good evening'
+  const HOLIDAYS = {
+    '1-1': { greeting: 'Happy New Year', note: "Fresh start. What's the one thing that would make this year great?" },
+    '2-2': { greeting: 'Happy Groundhog Day', note: 'Six more weeks of deliverables, guaranteed.' },
+    '2-14': { greeting: "Happy Valentine's Day", note: 'Love your clients (or at least their budgets).' },
+    '3-14': { greeting: 'Happy Pi Day', note: '3.14159… agencies are also a little irrational sometimes.' },
+    '3-17': { greeting: "Happy St. Patrick's Day", note: 'Get lucky with your next pitch.' },
+    '4-1': { greeting: "Happy April Fool's", note: "Today's a good day NOT to push anything risky to prod." },
+    '4-22': { greeting: 'Happy Earth Day', note: 'One planet, one roster. Be kind to both.' },
+    '5-4': { greeting: 'May the 4th Be With You', note: 'Star Wars Day. Your creators are the rebel alliance.' },
+    '5-5': { greeting: 'Happy Cinco de Mayo', note: 'Celebrate with a good campaign wrap.' },
+    '6-21': { greeting: 'Happy Summer Solstice', note: 'Longest day of the year. Use it wisely.' },
+    '7-4': { greeting: 'Happy 4th of July', note: 'Independence, fireworks, and inbox zero.' },
+    '10-31': { greeting: 'Happy Halloween', note: 'Ghost a deadline? Never. Ghost a bad brief? Maybe.' },
+    '11-11': { greeting: 'Thank you to our Veterans', note: 'Gratitude for service today.' },
+    '12-21': { greeting: 'Happy Winter Solstice', note: 'Shortest day of the year. Cozy up.' },
+    '12-24': { greeting: 'Happy Christmas Eve', note: 'Close the laptop. The campaign will survive.' },
+    '12-25': { greeting: 'Merry Christmas', note: "Rest. You've earned it." },
+    '12-31': { greeting: "Happy New Year's Eve", note: 'Recap the year. Then raise a glass.' }
   }
+
+  const FUN_NOTES = [
+    'Octopuses have three hearts and blue blood.',
+    'A group of flamingos is called a flamboyance.',
+    'Honey never spoils. Neither do great creative briefs.',
+    "The shortest war in history lasted 38 minutes.",
+    "Sea otters hold hands while sleeping so they don't drift apart.",
+    "Bananas are berries. Strawberries aren't.",
+    'The Eiffel Tower grows ~15cm taller in the summer.',
+    'A cloud can weigh more than a million pounds — talk about overhead.',
+    'Wombats poop in cubes.',
+    'The first domain ever registered was symbolics.com, in 1985.',
+    'Cows have best friends and get stressed when separated.',
+    'Honeybees can recognize human faces.',
+    'The dot over the letter i is called a tittle.',
+    'Oxford comma wars have been ongoing for 100+ years.',
+    'Slugs have four noses.',
+    'A day on Venus is longer than its year.',
+    'Bubble wrap was originally invented as wallpaper.',
+    "A shrimp's heart is in its head.",
+    'Butterflies taste with their feet.',
+    'There are more stars in the universe than grains of sand on Earth.',
+    'Penguins propose with pebbles.',
+    'Crows can recognize individual human faces and hold grudges.',
+    'The inventor of the Frisbee was cremated and made into a Frisbee.',
+    'Sloths can hold their breath longer than dolphins can.',
+    'A snail can sleep for three years.',
+    'Saturn would float if you could find a bathtub big enough.',
+    "The Great Wall of China is not actually visible from space.",
+    "Koalas have fingerprints nearly identical to humans'.",
+    'A jellyfish is 95% water.',
+    'Your stomach gets a new lining every 3–4 days.',
+    "There's a species of jellyfish that is biologically immortal.",
+    'Pineapples take two years to grow.',
+    'Bees can do math. Really.',
+    'Goats have rectangular pupils.',
+    'Giraffes have the same number of neck vertebrae as humans: seven.',
+    'Ketchup was once sold as medicine.',
+    'The unicorn is Scotland’s national animal.',
+    'Wasps invented paper 50 million years before humans.',
+    'A blue whale’s heart is the size of a small car.',
+    'A "jiffy" is a real unit of time: 1/100th of a second.',
+    "You can't hum while holding your nose closed.",
+    'Carrots were originally purple.',
+    'The plastic tip on a shoelace is called an aglet.',
+    "There's a word for the smell of rain: petrichor.",
+    'Norway once knighted a penguin.',
+    'A group of owls is called a parliament.',
+    'Your nose can detect about one trillion smells.',
+    'Apples, pears, cherries, and plums are all in the rose family.',
+    'Mosquitoes have killed more humans than all wars combined.'
+  ]
+
+  function tzParts(now, tz) {
+    try {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, month: 'numeric', day: 'numeric', hour: 'numeric', hour12: false }).formatToParts(now)
+      const get = t => parts.find(p => p.type === t)?.value
+      return { month: parseInt(get('month') || '0'), day: parseInt(get('day') || '0'), hour: parseInt(get('hour') || '0') }
+    } catch {
+      return { month: now.getMonth() + 1, day: now.getDate(), hour: now.getHours() }
+    }
+  }
+
+  const dailyVibe = (() => {
+    const now = new Date()
+    const { month, day, hour } = tzParts(now, agencyTz)
+    const h = HOLIDAYS[`${month}-${day}`]
+    if (h) return h
+    const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+    const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0))
+    const dayOfYear = Math.floor((now - start) / 86400000)
+    return { greeting: g, note: FUN_NOTES[dayOfYear % FUN_NOTES.length] }
+  })()
   const dateLabel = (() => {
     try {
       return new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: agencyTz })
@@ -228,11 +314,16 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
           <div>
             <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{dateLabel}</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', lineHeight: 1.2, color: text }}>
-              {greet()}{profileName ? ', ' + profileName : ''}
+              {dailyVibe.greeting}{profileName ? ', ' + profileName : ''}
             </div>
             <div style={{ fontSize: '12px', color: muted, marginTop: '4px' }}>
               {totalAssigned} assigned · {totalWatching} watching{overdueCount > 0 ? ' · ' + overdueCount + ' overdue' : ''}
             </div>
+            {dailyVibe.note && (
+              <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', fontStyle: 'italic', lineHeight: 1.6, maxWidth: '520px' }}>
+                {dailyVibe.note}
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
