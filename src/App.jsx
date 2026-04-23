@@ -13,6 +13,7 @@ import TrialBanner from './TrialBanner'
 import TalentInquiry from './TalentInquiry'
 import InquiriesView from './InquiriesView'
 import UpgradeWall from './UpgradeWall'
+import PastDueGate from './PastDueGate'
 import LandingPage from './LandingPage'
 import LegalPage from './LegalPage'
 import NotificationsPanel from './NotificationsPanel'
@@ -45,6 +46,9 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [pendingTaskId, setPendingTaskId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null)
+  const [pastDueSince, setPastDueSince] = useState(null)
+  const [stripeCustomerId, setStripeCustomerId] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
@@ -175,9 +179,12 @@ function App() {
     if (data?.agency_name) setAgencyName(data.agency_name)
     if (data?.agency_logo_url) setAgencyLogoUrl(data.agency_logo_url)
     if (data?.timezone) setAgencyTz(data.timezone)
-    const { data: org } = await supabase.from('organizations').select('trial_ends_at, stripe_plan').eq('id', oid).single()
+    const { data: org } = await supabase.from('organizations').select('trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id').eq('id', oid).single()
     if (org?.trial_ends_at) setTrialEndsAt(org.trial_ends_at)
     if (org?.stripe_plan) setStripePlan(org.stripe_plan)
+    setSubscriptionStatus(org?.subscription_status || null)
+    setPastDueSince(org?.past_due_since || null)
+    setStripeCustomerId(org?.stripe_customer_id || null)
   }
 
   function handleOnboardingComplete(newOrgId, newAgencyName) {
@@ -282,6 +289,8 @@ function App() {
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
   if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
+  if (subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} />
+  if (subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },

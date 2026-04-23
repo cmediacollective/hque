@@ -31,6 +31,49 @@ exports.handler = async (event) => {
 
   console.log('Verified event:', stripeEvent.type)
 
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY
+  )
+
+  if (stripeEvent.type === 'invoice.payment_failed') {
+    const invoice = stripeEvent.data.object
+    const customerId = invoice.customer
+    console.log('Payment failed for customer:', customerId)
+    if (customerId) {
+      const { data: org } = await supabase.from('organizations').select('id, past_due_since').eq('stripe_customer_id', customerId).maybeSingle()
+      if (org) {
+        const update = { subscription_status: 'past_due' }
+        if (!org.past_due_since) update.past_due_since = new Date().toISOString()
+        const { error } = await supabase.from('organizations').update(update).eq('id', org.id)
+        if (error) console.error('Supabase past_due update error:', error)
+      }
+    }
+    return { statusCode: 200, body: 'OK' }
+  }
+
+  if (stripeEvent.type === 'invoice.payment_succeeded') {
+    const invoice = stripeEvent.data.object
+    const customerId = invoice.customer
+    console.log('Payment succeeded for customer:', customerId)
+    if (customerId) {
+      const { error } = await supabase.from('organizations').update({ subscription_status: 'active', past_due_since: null }).eq('stripe_customer_id', customerId)
+      if (error) console.error('Supabase recovery update error:', error)
+    }
+    return { statusCode: 200, body: 'OK' }
+  }
+
+  if (stripeEvent.type === 'customer.subscription.deleted') {
+    const sub = stripeEvent.data.object
+    const customerId = sub.customer
+    console.log('Subscription deleted for customer:', customerId)
+    if (customerId) {
+      const { error } = await supabase.from('organizations').update({ subscription_status: 'canceled' }).eq('stripe_customer_id', customerId)
+      if (error) console.error('Supabase cancel update error:', error)
+    }
+    return { statusCode: 200, body: 'OK' }
+  }
+
   if (stripeEvent.type === 'checkout.session.completed') {
     const session = stripeEvent.data.object
     const orgId = session.metadata?.orgId
@@ -51,11 +94,6 @@ exports.handler = async (event) => {
     const priceId = fullSession.line_items?.data?.[0]?.price?.id
     console.log('PriceId from line items:', priceId)
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY
-    )
-
     let plan = null
     if (priceId === process.env.STRIPE_PRICE_STARTER) plan = 'starter'
     else if (priceId === process.env.STRIPE_PRICE_PRO) plan = 'pro'
@@ -67,7 +105,9 @@ exports.handler = async (event) => {
     const { error } = await supabase.from('organizations').update({
       stripe_customer_id: customerId,
       stripe_plan: plan,
-      trial_ends_at: null
+      trial_ends_at: null,
+      subscription_status: 'active',
+      past_due_since: null
     }).eq('id', orgId)
 
     if (error) console.error('Supabase update error:', error)
