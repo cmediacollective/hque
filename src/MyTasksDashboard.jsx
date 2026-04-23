@@ -158,60 +158,60 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const overdueCount = assignedTasks.filter(t => isOverdue(t.due_date)).length
 
   const HOLIDAYS = {
-    '1-1': { greeting: 'Happy New Year', note: "Fresh start. What's the one thing that would make this year great?" },
-    '2-2': { greeting: 'Happy Groundhog Day', note: 'Six more weeks of deliverables, guaranteed.' },
-    '2-9': { greeting: 'Happy National Pizza Day', note: 'A rare day when pineapple discourse is on-brand.' },
-    '2-14': { greeting: "Happy Valentine's Day", note: 'Love your clients (or at least their budgets).' },
-    '3-14': { greeting: 'Happy Pi Day', note: '3.14159… agencies are also a little irrational sometimes.' },
-    '3-17': { greeting: "Happy St. Patrick's Day", note: 'Get lucky with your next pitch.' },
-    '4-1': { greeting: "Happy April Fool's", note: "Today's a good day NOT to push anything risky to prod." },
-    '4-22': { greeting: 'Happy Earth Day', note: 'One planet, one roster. Be kind to both.' },
-    '5-4': { greeting: 'May the 4th Be With You', note: 'Star Wars Day. Your creators are the rebel alliance.' },
-    '5-5': { greeting: 'Happy Cinco de Mayo', note: 'Celebrate with a good campaign wrap.' },
-    '5-15': { greeting: 'Happy Chocolate Chip Day', note: 'Reward yourself. You shipped things this week.' },
-    '6-19': { greeting: 'Happy Juneteenth', note: 'Freedom, reflection, and community today.' },
-    '6-21': { greeting: 'Happy Summer Solstice', note: 'Longest day of the year. Use it wisely.' },
-    '7-4': { greeting: 'Happy 4th of July', note: 'Independence, fireworks, and inbox zero.' },
-    '7-17': { greeting: 'Happy World Emoji Day', note: '🎉 Celebrate accordingly. 💁‍♀️' },
-    '9-19': { greeting: 'Ahoy, Captain', note: "Talk Like a Pirate Day. Arrr yer pitches ready?" },
-    '9-29': { greeting: 'Happy National Coffee Day', note: 'Second cup is allowed today. Maybe third.' },
-    '10-1': { greeting: 'Happy International Coffee Day', note: 'Your creators run on it. So do you.' },
-    '10-4': { greeting: 'Happy World Animal Day', note: 'Pet a dog. Repost a rescue. Touch grass.' },
-    '10-31': { greeting: 'Happy Halloween', note: 'Ghost a deadline? Never. Ghost a bad brief? Maybe.' },
-    '11-11': { greeting: 'Thank you to our Veterans', note: 'Gratitude for service today.' },
-    '12-21': { greeting: 'Happy Winter Solstice', note: 'Shortest day of the year. Cozy up.' },
-    '12-24': { greeting: 'Happy Christmas Eve', note: 'Close the laptop. The campaign will survive.' },
-    '12-25': { greeting: 'Merry Christmas', note: "Rest. You've earned it." },
-    '12-26': { greeting: 'Happy First Day of Kwanzaa', note: 'Umoja — unity. A good theme for any team.' },
-    '12-31': { greeting: "Happy New Year's Eve", note: 'Recap the year. Then raise a glass.' }
+    '1-1': { greeting: 'Happy New Year', note: "Did you know? The Babylonians made the first recorded New Year's resolutions — about 4,000 years ago." },
+    '2-2': { greeting: 'Happy Groundhog Day', note: 'Fun fact: Punxsutawney Phil has a roughly 39% accuracy rate on winter predictions. Not great, not terrible.' },
+    '2-9': { greeting: 'Happy National Pizza Day', note: 'Did you know? Americans eat about 350 slices of pizza per second. That is a lot of cheese.' },
+    '2-14': { greeting: "Happy Valentine's Day", note: "Did you know? Over 145 million Valentine's cards are exchanged each year — second only to Christmas." },
+    '3-14': { greeting: 'Happy Pi Day', note: 'Did you know? Pi has been calculated to over 100 trillion digits. For most things, 3.14 is more than enough.' },
+    '3-17': { greeting: "Happy St. Patrick's Day", note: "Did you know? Corned beef and cabbage is actually American — in Ireland the classic is bacon and cabbage." },
+    '4-1': { greeting: "Happy April Fool's", note: "Tip: today is a good day NOT to push risky things to prod. Or to send mass emails. Save the pranks for Slack." },
+    '4-22': { greeting: 'Happy Earth Day', note: 'Did you know? The first Earth Day in 1970 brought 20 million Americans into the streets. One day can still move things — pick one small habit to change.' },
+    '5-4': { greeting: 'May the 4th Be With You', note: "Fun fact: the phrase predates the movies. British supporters told Margaret Thatcher 'May the Fourth be with you, Maggie' on May 4, 1979, the day she became PM." },
+    '5-5': { greeting: 'Happy Cinco de Mayo', note: 'Did you know? Cinco de Mayo commemorates the Battle of Puebla, not Mexican Independence Day (that is September 16).' },
+    '5-15': { greeting: 'Happy Chocolate Chip Day', note: 'Did you know? The chocolate chip cookie was invented by accident in 1938 by Ruth Wakefield at the Toll House Inn in Massachusetts.' },
+    '6-19': { greeting: 'Happy Juneteenth', note: 'Did you know? Juneteenth marks June 19, 1865 — when enslaved people in Galveston, Texas finally learned they were free, 2.5 years after the Emancipation Proclamation.' },
+    '6-21': { greeting: 'Happy Summer Solstice', note: "Did you know? At the North Pole, the sun doesn't set at all today — it's one continuous day of sunlight for about six months." },
+    '7-4': { greeting: 'Happy 4th of July', note: 'Did you know? Americans eat about 150 million hot dogs on July 4th. Enough to stretch from D.C. to L.A. more than five times.' },
+    '7-17': { greeting: 'Happy World Emoji Day', note: 'Did you know? The 😂 face was named Oxford Dictionaries Word of the Year in 2015. An emoji. As the word.' },
+    '9-19': { greeting: 'Ahoy, Captain', note: 'Fun fact: Blackbeard used to tie lit fuses in his beard before battle to look more terrifying. Marketing, 1700s style.' },
+    '9-29': { greeting: 'Happy National Coffee Day', note: 'Did you know? Americans drink about 400 million cups of coffee a day. Second cup is allowed. Third too.' },
+    '10-1': { greeting: 'Happy International Coffee Day', note: 'Did you know? Finland drinks the most coffee per capita — around 12kg per person per year. That is a lot of brew.' },
+    '10-4': { greeting: 'Happy World Animal Day', note: 'Tip: foster a pet, donate to a rescue, or just give yours an extra treat today. They will not argue.' },
+    '10-31': { greeting: 'Happy Halloween', note: 'Halloween joke: why did the skeleton skip the party? He had no body to go with. You are welcome.' },
+    '11-11': { greeting: 'Thank you to our Veterans', note: "Did you know? Veterans Day was originally 'Armistice Day' — marking the end of WWI at 11am on the 11th day of the 11th month, 1918." },
+    '12-21': { greeting: 'Happy Winter Solstice', note: 'Did you know? From today on, days start getting longer again. You officially survived the darkest day of the year.' },
+    '12-24': { greeting: 'Happy Christmas Eve', note: "Did you know? NORAD has tracked Santa's flight every year since 1955, when a kid misdialed a number and reached a military hotline." },
+    '12-25': { greeting: 'Merry Christmas', note: "Did you know? 'Jingle Bells' was originally written for Thanksgiving, not Christmas." },
+    '12-26': { greeting: 'Happy First Day of Kwanzaa', note: "Did you know? Kwanzaa means 'first fruits' in Swahili. Seven days, seven principles. Today: Umoja — unity." },
+    '12-31': { greeting: "Happy New Year's Eve", note: 'Did you know? The first Times Square ball drop was in 1907. The original ball was iron and wood, weighed 700 pounds, and held 100 lightbulbs.' }
   }
 
   // Holidays whose Gregorian date shifts each year (lunar, etc.) — add entries as needed
   const YEAR_HOLIDAYS = {
     2026: {
-      '2-17': { greeting: 'Happy Lunar New Year', note: 'Year of the Horse — ride the momentum.' },
-      '11-8': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
-      '12-4': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+      '2-17': { greeting: 'Happy Lunar New Year', note: 'Did you know? Lunar New Year triggers the largest annual human migration on Earth — hundreds of millions of people traveling home. 2026 is the Year of the Horse.' },
+      '11-8': { greeting: 'Happy Diwali', note: 'Did you know? Diwali celebrates the triumph of light over darkness and is observed across Hindu, Jain, Sikh, and Buddhist traditions worldwide.' },
+      '12-4': { greeting: 'Happy Hanukkah', note: 'Did you know? Hanukkah commemorates a single day of temple oil that miraculously lasted eight nights. Latkes and sufganiyot all week.' }
     },
     2027: {
-      '2-6': { greeting: 'Happy Lunar New Year', note: 'Year of the Goat — go gentle, go steady.' },
-      '10-29': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
-      '12-24': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+      '2-6': { greeting: 'Happy Lunar New Year', note: 'Did you know? Lunar New Year triggers the largest annual human migration on Earth. 2027 is the Year of the Goat.' },
+      '10-29': { greeting: 'Happy Diwali', note: 'Did you know? Diwali celebrates the triumph of light over darkness and is observed across Hindu, Jain, Sikh, and Buddhist traditions worldwide.' },
+      '12-24': { greeting: 'Happy Hanukkah', note: 'Did you know? Hanukkah commemorates a single day of temple oil that miraculously lasted eight nights. Latkes and sufganiyot all week.' }
     },
     2028: {
-      '1-26': { greeting: 'Happy Lunar New Year', note: 'Year of the Monkey — be playful and quick.' },
-      '11-17': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
-      '12-12': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+      '1-26': { greeting: 'Happy Lunar New Year', note: 'Did you know? Lunar New Year triggers the largest annual human migration on Earth. 2028 is the Year of the Monkey.' },
+      '11-17': { greeting: 'Happy Diwali', note: 'Did you know? Diwali celebrates the triumph of light over darkness and is observed across Hindu, Jain, Sikh, and Buddhist traditions worldwide.' },
+      '12-12': { greeting: 'Happy Hanukkah', note: 'Did you know? Hanukkah commemorates a single day of temple oil that miraculously lasted eight nights. Latkes and sufganiyot all week.' }
     },
     2029: {
-      '2-13': { greeting: 'Happy Lunar New Year', note: 'Year of the Rooster — wake the team up.' },
-      '11-5': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
-      '12-1': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+      '2-13': { greeting: 'Happy Lunar New Year', note: 'Did you know? Lunar New Year triggers the largest annual human migration on Earth. 2029 is the Year of the Rooster.' },
+      '11-5': { greeting: 'Happy Diwali', note: 'Did you know? Diwali celebrates the triumph of light over darkness and is observed across Hindu, Jain, Sikh, and Buddhist traditions worldwide.' },
+      '12-1': { greeting: 'Happy Hanukkah', note: 'Did you know? Hanukkah commemorates a single day of temple oil that miraculously lasted eight nights. Latkes and sufganiyot all week.' }
     },
     2030: {
-      '2-3': { greeting: 'Happy Lunar New Year', note: 'Year of the Dog — loyal, hardworking, good boy.' },
-      '10-26': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
-      '12-20': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+      '2-3': { greeting: 'Happy Lunar New Year', note: 'Did you know? Lunar New Year triggers the largest annual human migration on Earth. 2030 is the Year of the Dog.' },
+      '10-26': { greeting: 'Happy Diwali', note: 'Did you know? Diwali celebrates the triumph of light over darkness and is observed across Hindu, Jain, Sikh, and Buddhist traditions worldwide.' },
+      '12-20': { greeting: 'Happy Hanukkah', note: 'Did you know? Hanukkah commemorates a single day of temple oil that miraculously lasted eight nights. Latkes and sufganiyot all week.' }
     }
   }
 
@@ -296,16 +296,16 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
     // 2. Computed US holidays that shift each year
     if (month === 7 && day === nthDowOfMonth(year, 6, 0, 3)) {
-      return { greeting: 'Happy National Ice Cream Day', note: 'Two scoops is the correct answer.' }
+      return { greeting: 'Happy National Ice Cream Day', note: 'Did you know? Americans eat an average of 20 pounds of ice cream per person per year. Today, add a little extra.' }
     }
     if (month === 11 && day === nthDowOfMonth(year, 10, 4, 4)) {
-      return { greeting: 'Happy Thanksgiving', note: 'Gratitude list > to-do list today.' }
+      return { greeting: 'Happy Thanksgiving', note: 'Did you know? The first Thanksgiving in 1621 lasted three days and was more of a harvest festival than a feast. Gratitude list beats to-do list today.' }
     }
     if (month === 5 && day === nthDowOfMonth(year, 4, 0, 2)) {
-      return { greeting: "Happy Mother's Day", note: 'Call her. Or text. Or both.' }
+      return { greeting: "Happy Mother's Day", note: 'Did you know? Anna Jarvis founded Mother\'s Day in 1908 and later campaigned to abolish it, upset at how commercial it got. Call her anyway.' }
     }
     if (month === 6 && day === nthDowOfMonth(year, 5, 0, 3)) {
-      return { greeting: "Happy Father's Day", note: 'Dad jokes are a valid deliverable today.' }
+      return { greeting: "Happy Father's Day", note: "Did you know? Father's Day became an official US holiday in 1972 — 58 years after Mother's Day. Dads are patient." }
     }
 
     // 3. Fixed-date holidays
