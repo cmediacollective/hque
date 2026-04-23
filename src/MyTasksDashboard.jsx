@@ -160,6 +160,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const HOLIDAYS = {
     '1-1': { greeting: 'Happy New Year', note: "Fresh start. What's the one thing that would make this year great?" },
     '2-2': { greeting: 'Happy Groundhog Day', note: 'Six more weeks of deliverables, guaranteed.' },
+    '2-9': { greeting: 'Happy National Pizza Day', note: 'A rare day when pineapple discourse is on-brand.' },
     '2-14': { greeting: "Happy Valentine's Day", note: 'Love your clients (or at least their budgets).' },
     '3-14': { greeting: 'Happy Pi Day', note: '3.14159… agencies are also a little irrational sometimes.' },
     '3-17': { greeting: "Happy St. Patrick's Day", note: 'Get lucky with your next pitch.' },
@@ -167,14 +168,58 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     '4-22': { greeting: 'Happy Earth Day', note: 'One planet, one roster. Be kind to both.' },
     '5-4': { greeting: 'May the 4th Be With You', note: 'Star Wars Day. Your creators are the rebel alliance.' },
     '5-5': { greeting: 'Happy Cinco de Mayo', note: 'Celebrate with a good campaign wrap.' },
+    '5-15': { greeting: 'Happy Chocolate Chip Day', note: 'Reward yourself. You shipped things this week.' },
+    '6-19': { greeting: 'Happy Juneteenth', note: 'Freedom, reflection, and community today.' },
     '6-21': { greeting: 'Happy Summer Solstice', note: 'Longest day of the year. Use it wisely.' },
     '7-4': { greeting: 'Happy 4th of July', note: 'Independence, fireworks, and inbox zero.' },
+    '7-17': { greeting: 'Happy World Emoji Day', note: '🎉 Celebrate accordingly. 💁‍♀️' },
+    '9-19': { greeting: 'Ahoy, Captain', note: "Talk Like a Pirate Day. Arrr yer pitches ready?" },
+    '9-29': { greeting: 'Happy National Coffee Day', note: 'Second cup is allowed today. Maybe third.' },
+    '10-1': { greeting: 'Happy International Coffee Day', note: 'Your creators run on it. So do you.' },
+    '10-4': { greeting: 'Happy World Animal Day', note: 'Pet a dog. Repost a rescue. Touch grass.' },
     '10-31': { greeting: 'Happy Halloween', note: 'Ghost a deadline? Never. Ghost a bad brief? Maybe.' },
     '11-11': { greeting: 'Thank you to our Veterans', note: 'Gratitude for service today.' },
     '12-21': { greeting: 'Happy Winter Solstice', note: 'Shortest day of the year. Cozy up.' },
     '12-24': { greeting: 'Happy Christmas Eve', note: 'Close the laptop. The campaign will survive.' },
     '12-25': { greeting: 'Merry Christmas', note: "Rest. You've earned it." },
+    '12-26': { greeting: 'Happy First Day of Kwanzaa', note: 'Umoja — unity. A good theme for any team.' },
     '12-31': { greeting: "Happy New Year's Eve", note: 'Recap the year. Then raise a glass.' }
+  }
+
+  // Holidays whose Gregorian date shifts each year (lunar, etc.) — add entries as needed
+  const YEAR_HOLIDAYS = {
+    2026: {
+      '2-17': { greeting: 'Happy Lunar New Year', note: 'Year of the Horse — ride the momentum.' },
+      '11-8': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
+      '12-4': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+    },
+    2027: {
+      '2-6': { greeting: 'Happy Lunar New Year', note: 'Year of the Goat — go gentle, go steady.' },
+      '10-29': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
+      '12-24': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+    },
+    2028: {
+      '1-26': { greeting: 'Happy Lunar New Year', note: 'Year of the Monkey — be playful and quick.' },
+      '11-17': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
+      '12-12': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+    },
+    2029: {
+      '2-13': { greeting: 'Happy Lunar New Year', note: 'Year of the Rooster — wake the team up.' },
+      '11-5': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
+      '12-1': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+    },
+    2030: {
+      '2-3': { greeting: 'Happy Lunar New Year', note: 'Year of the Dog — loyal, hardworking, good boy.' },
+      '10-26': { greeting: 'Happy Diwali', note: 'Festival of lights. Illuminate someone else today.' },
+      '12-20': { greeting: 'Happy Hanukkah', note: 'First candle tonight. Eight nights of brightness.' }
+    }
+  }
+
+  // Nth weekday of month (1-indexed day), month 0-indexed, weekday 0=Sun
+  function nthDowOfMonth(year, monthZero, weekday, n) {
+    const first = new Date(year, monthZero, 1)
+    const offset = (weekday - first.getDay() + 7) % 7
+    return 1 + offset + (n - 1) * 7
   }
 
   const FUN_NOTES = [
@@ -242,8 +287,32 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const dailyVibe = (() => {
     const now = new Date()
     const { month, day, hour } = tzParts(now, agencyTz)
-    const h = HOLIDAYS[`${month}-${day}`]
+    const year = now.getFullYear()
+    const key = `${month}-${day}`
+
+    // 1. Year-specific (Lunar New Year, Hanukkah, Diwali)
+    const ySpecific = YEAR_HOLIDAYS[year]?.[key]
+    if (ySpecific) return ySpecific
+
+    // 2. Computed US holidays that shift each year
+    if (month === 7 && day === nthDowOfMonth(year, 6, 0, 3)) {
+      return { greeting: 'Happy National Ice Cream Day', note: 'Two scoops is the correct answer.' }
+    }
+    if (month === 11 && day === nthDowOfMonth(year, 10, 4, 4)) {
+      return { greeting: 'Happy Thanksgiving', note: 'Gratitude list > to-do list today.' }
+    }
+    if (month === 5 && day === nthDowOfMonth(year, 4, 0, 2)) {
+      return { greeting: "Happy Mother's Day", note: 'Call her. Or text. Or both.' }
+    }
+    if (month === 6 && day === nthDowOfMonth(year, 5, 0, 3)) {
+      return { greeting: "Happy Father's Day", note: 'Dad jokes are a valid deliverable today.' }
+    }
+
+    // 3. Fixed-date holidays
+    const h = HOLIDAYS[key]
     if (h) return h
+
+    // 4. Default: time-of-day greeting + rotating fun fact
     const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
     const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0))
     const dayOfYear = Math.floor((now - start) / 86400000)
