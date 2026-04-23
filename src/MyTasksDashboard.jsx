@@ -447,7 +447,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
         )}
 
         <div style={{ marginTop: '24px', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle, textAlign: 'left' }}>
-          Pick a brand/client on the left to see its board to open
+          Pick a brand/client on the left for the full board
         </div>
       </div>
     </div>
