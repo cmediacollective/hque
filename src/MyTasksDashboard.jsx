@@ -29,6 +29,16 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const [assignedTasks, setAssignedTasks] = useState([])
   const [watchedTasks, setWatchedTasks] = useState([])
   const [profileName, setProfileName] = useState('')
+  const [expandedBuckets, setExpandedBuckets] = useState(() => new Set())
+
+  function toggleBucket(key) {
+    setExpandedBuckets(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   function handleTaskClick(t) {
     if (!onSelectBrand) return
@@ -352,13 +362,19 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   }
 
   const renderBucketColumn = (bucketName, tasks, filled) => {
-    const visible = tasks.slice(0, MAX_PER_BUCKET)
+    const key = `${filled ? 'assigned' : 'watched'}-${bucketName}`
+    const expanded = expandedBuckets.has(key)
+    const visible = expanded ? tasks : tasks.slice(0, MAX_PER_BUCKET)
     const hidden = Math.max(0, tasks.length - MAX_PER_BUCKET)
     return (
       <div style={{ padding: '0 4px', minWidth: 0 }}>
         {visible.map(t => <TaskCard key={t.id} t={t} filled={filled} />)}
         {hidden > 0 && (
-          <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', padding: '6px 2px' }}>+{hidden} more</div>
+          <button
+            onClick={() => toggleBucket(key)}
+            style={{ background: 'none', border: 'none', padding: '6px 2px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', textAlign: 'left' }}>
+            {expanded ? 'Show less' : `+${hidden} more`}
+          </button>
         )}
       </div>
     )

@@ -358,7 +358,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
         {selectedBrand && (
           <>
             <div style={{ padding: '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
-              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: '0.5px solid #5b7c99', color: '#fff', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
                 <span style={{ fontSize: '12px', lineHeight: 1 }}>←</span>
                 <span>My Tasks</span>
               </button>
