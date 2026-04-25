@@ -6,7 +6,9 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Dashboard hero: tighter, everything visible without scroll.** The fun fact pull-quote now sits on the right side of the header, opposite the greeting — uses the empty space and reads as a balanced two-column hero. The "Pick a brand/client on the left for the full board" helper that used to live at the bottom of the page (often below the fold) has been moved up into the hero, sitting on a second row with the Assigned/Watching legend on the right. Whole hero now packs date, greeting, task counts, fun fact, helper copy, and legend in one frame above the divider.
+**Dashboard hero: fun fact on the right.** The fun fact pull-quote now sits on the right side of the header opposite the greeting, using the previously empty space. Hero is a clean two-column layout: greeting/counts on left, editorial pull-quote on right.
+
+**Dashboard footer pinned to the visible bottom.** The "Pick a brand/client on the left for the full board" helper and the Assigned/Watching legend now sit together in a sticky footer pinned to the bottom of the visible dashboard frame. They stay at the bottom of the page in the DOM (so they don't crowd the hero), but you no longer have to scroll past your tasks to see them — they're always anchored to the visible bottom edge.
 
 ## 2026-04-23
 

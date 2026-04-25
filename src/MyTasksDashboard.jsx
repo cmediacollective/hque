@@ -393,7 +393,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const hasAnything = totalAssigned > 0 || totalWatching > 0
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '32px 28px', background: bg }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '32px 28px 0', background: bg }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
         <div style={{ marginBottom: '28px', paddingBottom: '18px', borderBottom: `0.5px solid ${border}` }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '32px' }}>
@@ -419,15 +419,6 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             })()}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '22px', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>
-              Pick a brand/client on the left for the full board
-            </div>
-            <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', border: `1px solid ${outlinedBorder}`, borderRadius: '50%' }}></span>Watching</span>
-            </div>
-          </div>
         </div>
 
         {!hasAnything && (
@@ -476,6 +467,15 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
           </>
         )}
 
+        <div style={{ position: 'sticky', bottom: 0, marginTop: '32px', paddingTop: '14px', paddingBottom: '14px', background: bg, borderTop: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>
+            Pick a brand/client on the left for the full board
+          </div>
+          <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', border: `1px solid ${outlinedBorder}`, borderRadius: '50%' }}></span>Watching</span>
+          </div>
+        </div>
       </div>
     </div>
   )
