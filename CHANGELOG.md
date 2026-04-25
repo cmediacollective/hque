@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Dashboard fun facts: cleaner, more readable treatment.** The intro phrase ("Did you know?", "Fun fact:", "Tip:", "Halloween joke:") and the fact itself now sit on one continuous italic line, same font and size, with the intro in the brighter headline tone and the body in a muted tone. No more uppercase badge or off-baseline alignment — reads like a single sentence with a soft lead-in.
+**Dashboard fun facts: pull-quote treatment.** The fact has been pulled out from under the greeting (where it was competing with the task counts) into its own row above the bucket grid. Now styled like an editorial callout — Georgia serif italic at 15px, brand-blue left accent bar, "Did you know?" / "Fun fact:" / "Tip:" intro in brand blue, body in the bright headline tone. Reads as an intentional design moment instead of a footnote.
 
 ## 2026-04-23
 

@@ -404,22 +404,23 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             <div style={{ fontSize: '12px', color: muted, marginTop: '4px' }}>
               {totalAssigned} assigned · {totalWatching} watching{overdueCount > 0 ? ' · ' + overdueCount + ' overdue' : ''}
             </div>
-            {dailyVibe.note && (() => {
-              const m = dailyVibe.note.match(/^(Did you know\?|Fun fact:|Tip:|Halloween joke:)\s*/i)
-              const intro = m ? m[1] : 'Did you know?'
-              const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
-              return (
-                <div style={{ marginTop: '12px', maxWidth: '520px', fontSize: '12px', fontStyle: 'italic', lineHeight: 1.6, color: muted }}>
-                  <span style={{ color: text }}>{intro}</span> {body}
-                </div>
-              )
-            })()}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', border: `1px solid ${outlinedBorder}`, borderRadius: '50%' }}></span>Watching</span>
           </div>
         </div>
+
+        {dailyVibe.note && (() => {
+          const m = dailyVibe.note.match(/^(Did you know\?|Fun fact:|Tip:|Halloween joke:)\s*/i)
+          const intro = m ? m[1] : 'Did you know?'
+          const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
+          return (
+            <div style={{ borderLeft: '3px solid #5b7c99', padding: '4px 0 4px 18px', marginBottom: '32px', maxWidth: '720px', fontFamily: 'Georgia, serif', fontSize: '15px', fontStyle: 'italic', lineHeight: 1.6, color: text }}>
+              <span style={{ color: '#5b7c99' }}>{intro}</span> {body}
+            </div>
+          )
+        })()}
 
         {!hasAnything && (
           <div style={{ padding: '60px 20px', textAlign: 'center' }}>
