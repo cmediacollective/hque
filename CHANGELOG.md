@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Dashboard fun facts stand out.** The daily Did-you-know / Fun-fact / Tip line under your greeting was too quiet — small italic gray on a gray background. Now it leads with a small uppercase brand-blue label ("DID YOU KNOW", "FUN FACT", "TIP", or "HALLOWEEN JOKE" — auto-detected from the text), and the fact itself renders bigger, bold, italic, and in a brighter tone so it actually reads as a moment of personality instead of a footnote.
+**Dashboard fun facts: cleaner, more readable treatment.** The intro phrase ("Did you know?", "Fun fact:", "Tip:", "Halloween joke:") and the fact itself now sit on one continuous italic line, same font and size, with the intro in the brighter headline tone and the body in a muted tone. No more uppercase badge or off-baseline alignment — reads like a single sentence with a soft lead-in.
 
 ## 2026-04-23
 
