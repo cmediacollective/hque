@@ -29,6 +29,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const [assignedTasks, setAssignedTasks] = useState([])
   const [watchedTasks, setWatchedTasks] = useState([])
   const [profileName, setProfileName] = useState('')
+  const [birthday, setBirthday] = useState(null)
   const [expandedBuckets, setExpandedBuckets] = useState(() => new Set())
 
   function toggleBucket(key) {
@@ -57,8 +58,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
   async function fetchProfile() {
     if (!userId) return
-    const { data } = await supabase.from('profiles').select('full_name, email').eq('id', userId).single()
+    const { data } = await supabase.from('profiles').select('full_name, email, birthday').eq('id', userId).single()
     if (data) setProfileName((data.full_name || data.email || '').split(' ')[0])
+    setBirthday(data?.birthday || null)
   }
 
   async function fetchTasks() {
@@ -299,6 +301,14 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     const { month, day, hour } = tzParts(now, agencyTz)
     const year = now.getFullYear()
     const key = `${month}-${day}`
+
+    // 0. User's birthday — overrides holidays and time-of-day
+    if (birthday) {
+      const [, bMonthStr, bDayStr] = birthday.split('-')
+      if (parseInt(bMonthStr, 10) === month && parseInt(bDayStr, 10) === day) {
+        return { greeting: 'Happy Birthday', note: "Tip: take the long lunch, eat the cake, leave one task for tomorrow. You're HQue-approved to coast a little today." }
+      }
+    }
 
     // 1. Year-specific (Lunar New Year, Hanukkah, Diwali)
     const ySpecific = YEAR_HOLIDAYS[year]?.[key]

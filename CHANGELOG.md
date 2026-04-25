@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
+**Birthday greetings.** Settings → Profile now has a Birthday field (date picker, optional). On the day that matches your saved birthday, the dashboard greeting overrides everything else — holidays, "Good morning/afternoon/evening" — and instead reads "Happy Birthday, [your name]" with a celebratory tip in the pull-quote. Existing team members start with the field blank and can fill it in any time. (Required one-time Supabase setup: `birthday` column on `profiles`.)
+
 **Dashboard hero: fun fact in line with the greeting.** The fun-fact pull-quote now sits on the same horizontal row as "Good evening, [name]" — date label above, greeting + pull-quote sharing the row baseline-aligned, task counts below. Tighter vertical stack means the hero is shorter and the task buckets get more breathing room.
 
 **Dashboard footer pinned to the visible bottom.** The "Pick a brand/client on the left for the full board" helper and the Assigned/Watching legend now sit together in a sticky footer pinned to the bottom of the visible dashboard frame. They stay at the bottom of the page in the DOM (so they don't crowd the hero), but you no longer have to scroll past your tasks to see them — they're always anchored to the visible bottom edge.

@@ -25,7 +25,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [uploadMsg, setUploadMsg] = useState('')
   const fileRef = useRef(null)
 
-  const [profileForm, setProfileForm] = useState({ full_name: '', title: '', email_notifications: true })
+  const [profileForm, setProfileForm] = useState({ full_name: '', title: '', birthday: '', email_notifications: true })
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
   const [profileLoaded, setProfileLoaded] = useState(false)
@@ -48,19 +48,19 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     if (!profileLoaded || !user) return
     const timer = setTimeout(async () => {
       setProfileSaving(true)
-      await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, email_notifications: profileForm.email_notifications }).eq('id', user.id)
+      await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, birthday: profileForm.birthday || null, email_notifications: profileForm.email_notifications }).eq('id', user.id)
       setProfileSaving(false)
       setProfileSaved(true)
       setTimeout(() => setProfileSaved(false), 2000)
     }, 800)
     return () => clearTimeout(timer)
-  }, [profileForm.full_name, profileForm.title, profileForm.email_notifications, profileLoaded, user])
+  }, [profileForm.full_name, profileForm.title, profileForm.birthday, profileForm.email_notifications, profileLoaded, user])
 
   async function fetchAvatar() {
-    const { data } = await supabase.from('profiles').select('avatar_url, role, full_name, title, email_notifications').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('avatar_url, role, full_name, title, birthday, email_notifications').eq('id', user.id).single()
     if (data?.avatar_url) { setAvatarUrl(data.avatar_url); onAvatarChange?.(data.avatar_url) }
     if (data?.role) setCurrentUserRole(data.role)
-    if (data) setProfileForm({ full_name: data.full_name || '', title: data.title || '', email_notifications: data.email_notifications !== false })
+    if (data) setProfileForm({ full_name: data.full_name || '', title: data.title || '', birthday: data.birthday || '', email_notifications: data.email_notifications !== false })
     setProfileLoaded(true)
   }
 
@@ -112,7 +112,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   async function saveProfile() {
     setProfileSaving(true)
-    await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, email_notifications: profileForm.email_notifications }).eq('id', user.id)
+    await supabase.from('profiles').update({ full_name: profileForm.full_name, title: profileForm.title, birthday: profileForm.birthday || null, email_notifications: profileForm.email_notifications }).eq('id', user.id)
     setProfileSaving(false)
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 2000)
@@ -274,6 +274,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '24px' }}>JPG, PNG or GIF. Max 5MB. Your photo appears in the sidebar and team list.</div>
               {field('Full Name', inp({ value: profileForm.full_name, onChange: e => setProfileForm(f => ({ ...f, full_name: e.target.value })), placeholder: 'Your full name' }))}
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>Birthday</div>
+                {inp({ type: 'date', value: profileForm.birthday, onChange: e => setProfileForm(f => ({ ...f, birthday: e.target.value })) })}
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '6px', lineHeight: 1.5 }}>Optional. We'll wish you a happy birthday on your dashboard that day.</div>
+              </div>
               <div style={{ marginBottom: '18px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', marginBottom: '10px' }}>Email Notifications</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>
