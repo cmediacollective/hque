@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Dashboard fun facts: pull-quote treatment.** The fact has been pulled out from under the greeting (where it was competing with the task counts) into its own row above the bucket grid. Now styled like an editorial callout — Georgia serif italic at 15px, brand-blue left accent bar, "Did you know?" / "Fun fact:" / "Tip:" intro in brand blue, body in the bright headline tone. Reads as an intentional design moment instead of a footnote.
+**Dashboard fun facts: pull-quote inside the header.** The fact now lives inside the header section (above the divider, alongside the greeting and task counts) on its own row beneath the greeting+legend. Styled as an editorial callout — Georgia serif italic at 15px, brand-blue left accent bar, "Did you know?" / "Fun fact:" / "Tip:" intro in brand blue, body in the bright headline tone. Sits in the header area without competing with the task buckets below.
 
 ## 2026-04-23
 
