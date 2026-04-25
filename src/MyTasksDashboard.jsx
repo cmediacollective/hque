@@ -404,11 +404,17 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             <div style={{ fontSize: '12px', color: muted, marginTop: '4px' }}>
               {totalAssigned} assigned · {totalWatching} watching{overdueCount > 0 ? ' · ' + overdueCount + ' overdue' : ''}
             </div>
-            {dailyVibe.note && (
-              <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', fontStyle: 'italic', lineHeight: 1.6, maxWidth: '520px' }}>
-                {dailyVibe.note}
-              </div>
-            )}
+            {dailyVibe.note && (() => {
+              const m = dailyVibe.note.match(/^(Did you know\?|Fun fact:|Tip:|Halloween joke:)\s*/i)
+              const label = (m ? m[1].replace(/[?:]+$/, '') : 'Did you know').toUpperCase()
+              const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
+              return (
+                <div style={{ marginTop: '12px', maxWidth: '520px', lineHeight: 1.6 }}>
+                  <span style={{ display: 'inline-block', fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', fontWeight: 700, marginRight: '8px', verticalAlign: '2px' }}>{label}</span>
+                  <span style={{ fontSize: '12px', color: muted, fontStyle: 'italic', fontWeight: 600 }}>{body}</span>
+                </div>
+              )
+            })()}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>

@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-04-24
+
+**Dashboard fun facts stand out.** The daily Did-you-know / Fun-fact / Tip line under your greeting was too quiet — small italic gray on a gray background. Now it leads with a small uppercase brand-blue label ("DID YOU KNOW", "FUN FACT", "TIP", or "HALLOWEEN JOKE" — auto-detected from the text), and the fact itself renders bigger, bold, italic, and in a brighter tone so it actually reads as a moment of personality instead of a footnote.
+
 ## 2026-04-23
 
 **Fix: changing a task's column from the detail panel now actually saves.** Previously, opening a task and switching its status (e.g. "In Progress" → "Done") via the dropdown in the side panel looked like it worked, but the change was silently dropped on save — the card stayed in its original column and the task kept showing on your dashboard as to-do. Drag-and-drop was unaffected. Root cause: the detail-panel save was writing title/description/priority/due date but not `column_id`. Now it writes all of them, so changing status from the dropdown behaves identically to dragging the card between columns.
