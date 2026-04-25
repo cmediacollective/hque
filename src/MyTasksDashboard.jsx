@@ -395,16 +395,12 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '32px 28px 0', background: bg }}>
       <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '28px', paddingBottom: '18px', borderBottom: `0.5px solid ${border}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '32px' }}>
-            <div style={{ flexShrink: 0 }}>
-              <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{dateLabel}</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', lineHeight: 1.2, color: text }}>
-                {dailyVibe.greeting}{profileName ? ', ' + profileName : ''}
-              </div>
-              <div style={{ fontSize: '12px', color: muted, marginTop: '4px' }}>
-                {totalAssigned} assigned · {totalWatching} watching{overdueCount > 0 ? ' · ' + overdueCount + ' overdue' : ''}
-              </div>
+        <div style={{ marginBottom: '24px', paddingBottom: '14px', borderBottom: `0.5px solid ${border}` }}>
+          <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{dateLabel}</div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '32px' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', lineHeight: 1.2, color: text, flexShrink: 0 }}>
+              {dailyVibe.greeting}{profileName ? ', ' + profileName : ''}
             </div>
 
             {dailyVibe.note && (() => {
@@ -412,13 +408,16 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
               const intro = m ? m[1] : 'Did you know?'
               const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
               return (
-                <div style={{ borderLeft: '3px solid #5b7c99', padding: '4px 0 4px 18px', maxWidth: '480px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.55, color: text }}>
+                <div style={{ borderLeft: '3px solid #5b7c99', padding: '2px 0 2px 16px', maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
                   <span style={{ color: '#5b7c99' }}>{intro}</span> {body}
                 </div>
               )
             })()}
           </div>
 
+          <div style={{ fontSize: '12px', color: muted, marginTop: '6px' }}>
+            {totalAssigned} assigned · {totalWatching} watching{overdueCount > 0 ? ' · ' + overdueCount + ' overdue' : ''}
+          </div>
         </div>
 
         {!hasAnything && (
