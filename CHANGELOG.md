@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Dashboard fun facts: pull-quote inside the header.** The fact now lives inside the header section (above the divider, alongside the greeting and task counts) on its own row beneath the greeting+legend. Styled as an editorial callout — Georgia serif italic at 15px, brand-blue left accent bar, "Did you know?" / "Fun fact:" / "Tip:" intro in brand blue, body in the bright headline tone. Sits in the header area without competing with the task buckets below.
+**Dashboard hero: tighter, everything visible without scroll.** The fun fact pull-quote now sits on the right side of the header, opposite the greeting — uses the empty space and reads as a balanced two-column hero. The "Pick a brand/client on the left for the full board" helper that used to live at the bottom of the page (often below the fold) has been moved up into the hero, sitting on a second row with the Assigned/Watching legend on the right. Whole hero now packs date, greeting, task counts, fun fact, helper copy, and legend in one frame above the divider.
 
 ## 2026-04-23
 
