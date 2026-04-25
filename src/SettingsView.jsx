@@ -274,11 +274,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '24px' }}>JPG, PNG or GIF. Max 5MB. Your photo appears in the sidebar and team list.</div>
               {field('Full Name', inp({ value: profileForm.full_name, onChange: e => setProfileForm(f => ({ ...f, full_name: e.target.value })), placeholder: 'Your full name' }))}
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
-              <div style={{ marginBottom: '16px' }}>
-                <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>Birthday</div>
-                {inp({ type: 'date', value: profileForm.birthday, onChange: e => setProfileForm(f => ({ ...f, birthday: e.target.value })) })}
-                <div style={{ fontSize: '11px', color: subtle, marginTop: '6px', lineHeight: 1.5 }}>Optional. We'll wish you a happy birthday on your dashboard that day.</div>
-              </div>
+              {field('Birthday', inp({ type: 'date', value: profileForm.birthday, onChange: e => setProfileForm(f => ({ ...f, birthday: e.target.value })) }))}
               <div style={{ marginBottom: '18px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', marginBottom: '10px' }}>Email Notifications</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>

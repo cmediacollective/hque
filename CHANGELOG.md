@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-04-24
 
-**Birthday greetings.** Settings → Profile now has a Birthday field (date picker, optional). On the day that matches your saved birthday, the dashboard greeting overrides everything else — holidays, "Good morning/afternoon/evening" — and instead reads "Happy Birthday, [your name]" with a celebratory tip in the pull-quote. Existing team members start with the field blank and can fill it in any time. (Required one-time Supabase setup: `birthday` column on `profiles`.)
+**Birthday greetings, team-wide.** Settings → Profile now has a Birthday date field. On the day that matches anyone's birthday in your org, every team member's dashboard reads "Happy Birthday, [name]" — overriding holidays and the normal time-of-day greeting. Multiple birthdays on the same day combine: "Happy Birthday, Cherie & John" for two, "Happy Birthday, Cherie, John & Sarah" for three or more. Birthday cue stops on the next day. Existing members start with the field blank — fill it in any time. (Required one-time Supabase setup: `birthday` column on `profiles`.)
 
 **Dashboard hero: fun fact in line with the greeting.** The fun-fact pull-quote now sits on the same horizontal row as "Good evening, [name]" — date label above, greeting + pull-quote sharing the row baseline-aligned, task counts below. Tighter vertical stack means the hero is shorter and the task buckets get more breathing room.
 
