@@ -21,6 +21,7 @@ import FAQPage from './FAQPage'
 import PricingPage from './PricingPage'
 import BlogPage from './BlogPage'
 import BlogPostPage from './BlogPostPage'
+import Sandbox from './Sandbox'
 
 function App() {
   const [view, setView] = useState('talent')
@@ -97,6 +98,7 @@ function App() {
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
 
+  const isSandboxPage = window.location.pathname === '/sandbox'
   const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
   const isPrivacyPage = window.location.pathname === '/privacy'
   const isTermsPage = window.location.pathname === '/terms'
@@ -268,6 +270,7 @@ function App() {
     setExporting(false)
   }
 
+  if (isSandboxPage) return <Sandbox />
   if (isInquiryPage) return <TalentInquiry />
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
