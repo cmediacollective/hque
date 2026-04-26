@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-04-26
+
+**Marketing pages: less SaaS-template, more designer-built.** Three changes across the homepage, pricing, FAQ, and blog pages: (1) **Custom cursor.** Hover anywhere on a marketing page and a small steel-blue dot follows your mouse with a soft trailing ring; over a button or link, the ring grows and a tiny ↗ arrow pops inside. Desktop only — touch devices are untouched. (2) **New display font: Fraunces.** The Georgia serif used for every headline ("Run your roster…", "Simple, transparent pricing.", FAQ questions, blog titles, etc.) is now Fraunces — an editorial variable serif with optical-size and softness axes, dialed up on the big hero so the letterforms feel hand-drawn. Italic accent on the second hero line ("Not your inbox.") and the CTA. (3) **Scroll-reveal motion.** The hero now fades and lifts in on load (headline → subhead → buttons, staggered). As you scroll down, the app showcase, feature blocks, pricing cards, and FAQ tiles each fade and slide up into view instead of hard-cutting. Respects `prefers-reduced-motion`. The app itself is unchanged — only marketing pages.
+
 ## 2026-04-24
 
 **Birthday greetings, team-wide.** Settings → Profile now has a Birthday date field. On the day that matches anyone's birthday in your org, every team member's dashboard reads "Happy Birthday, [name]" — overriding holidays and the normal time-of-day greeting. Multiple birthdays on the same day combine: "Happy Birthday, Cherie & John" for two, "Happy Birthday, Cherie, John & Sarah" for three or more. Birthday cue stops on the next day. Existing members start with the field blank — fill it in any time. (Required one-time Supabase setup: `birthday` column on `profiles`.)

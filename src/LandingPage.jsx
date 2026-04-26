@@ -83,7 +83,7 @@ function BrandLogo({ color, initial, size = 44, logo }) {
   )
   return (
     <div style={{ width: size, height: size, borderRadius: '2px', background: color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.35), color: '#fff', fontWeight: 700 }}>{initial}</span>
+      <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: Math.round(size * 0.35), color: '#fff', fontWeight: 700 }}>{initial}</span>
     </div>
   )
 }
@@ -114,7 +114,7 @@ function MobileAppPreview() {
           </div>
           {/* Screen title */}
           <div style={{ padding: '16px 16px 8px' }}>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: '#1A1A1A', marginBottom: '12px' }}>{SCREENS[activeScreen].label}</div>
+            <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '18px', color: '#1A1A1A', marginBottom: '12px' }}>{SCREENS[activeScreen].label}</div>
           </div>
           {/* Content */}
           <div style={{ padding: '0 16px 16px' }}>
@@ -128,7 +128,7 @@ function MobileAppPreview() {
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '6px', color: '#5b7c99', letterSpacing: '0.1em', marginBottom: '2px' }}>{t.type}</div>
-                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
                         <div style={{ fontSize: '8px', color: '#aaa', marginTop: '1px' }}>{t.handle}</div>
                       </div>
                     </div>
@@ -147,7 +147,7 @@ function MobileAppPreview() {
                     <BrandLogo color={c.color} initial={c.initial} size={32} logo={c.logo} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.1em' }}>{c.brand}</div>
-                      <div style={{ fontFamily: 'Georgia, serif', fontSize: '12px', color: '#1A1A1A' }}>{c.name}</div>
+                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '12px', color: '#1A1A1A' }}>{c.name}</div>
                       <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>{c.budget} · {c.talent}</div>
                     </div>
                     <StatusBadge status={c.status} />
@@ -175,7 +175,7 @@ function MobileAppPreview() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                   {FAKE_STATS.map((s, i) => (
                     <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '12px', border: '0.5px solid #E0DCD6' }}>
-                      <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#1A1A1A' }}>{s.value}</div>
+                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#1A1A1A' }}>{s.value}</div>
                       {s.sub && <div style={{ fontSize: '8px', color: '#aaa', marginTop: '2px' }}>{s.sub}</div>}
                       <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>{s.label}</div>
                     </div>
@@ -231,7 +231,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
         </div>
         <div style={{ flex: 1, padding: '24px', overflow: 'hidden' }}>
           <div style={{ fontSize: '8px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#bbb', marginBottom: '6px' }}>Nova Talent Group</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1A1A1A', marginBottom: '20px' }}>{SCREENS[activeScreen].label}</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#1A1A1A', marginBottom: '20px' }}>{SCREENS[activeScreen].label}</div>
 
           {SCREENS[activeScreen].key === 'talent' && (
             <div>
@@ -250,7 +250,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                       </div>
                       <div style={{ flex: 1, minWidth: 0, paddingTop: '2px' }}>
                         <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '3px' }}>{t.type}</div>
-                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '11px', color: '#1A1A1A', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '11px', color: '#1A1A1A', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
                         <div style={{ fontSize: '9px', color: '#aaa' }}>{t.handle}</div>
                       </div>
                     </div>
@@ -279,7 +279,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                     <StatusBadge status={c.status} />
                   </div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#1A1A1A', flex: 1, lineHeight: 1.4 }}>{c.name}</div>
+                  <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '14px', color: '#1A1A1A', flex: 1, lineHeight: 1.4 }}>{c.name}</div>
                   <div style={{ paddingTop: '14px', marginTop: '14px', borderTop: '0.5px solid #E0DCD6', display: 'flex', gap: '20px' }}>
                     <div><div style={{ fontSize: '13px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div><div style={{ fontSize: '7px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Budget</div></div>
                     <div><div style={{ fontSize: '13px', color: '#888' }}>{c.talent}</div><div style={{ fontSize: '7px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Talent</div></div>
@@ -315,7 +315,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#D4CFC8', marginBottom: '1px' }}>
                 {FAKE_STATS.map((s, i) => (
                   <div key={i} style={{ background: '#FFFFFF', padding: '16px' }}>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#1A1A1A', marginBottom: '4px' }}>{s.value}</div>
+                    <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#1A1A1A', marginBottom: '4px' }}>{s.value}</div>
                     {s.sub && <div style={{ fontSize: '9px', color: '#aaa', marginBottom: '4px' }}>{s.sub}</div>}
                     <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#bbb', textTransform: 'uppercase' }}>{s.label}</div>
                   </div>
@@ -381,6 +381,20 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  useEffect(() => {
+    const els = document.querySelectorAll('[data-reveal]')
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.setAttribute('data-revealed', 'true')
+          io.unobserve(e.target)
+        }
+      })
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' })
+    els.forEach(el => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
   const pad = mobile ? '0 20px' : '0 48px'
 
   return (
@@ -395,6 +409,13 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
           .vtile { filter: grayscale(100%); transition: filter 0.4s ease; }
           .vtile:hover { filter: grayscale(0%); }
+          [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--reveal-delay, 0ms); }
+          [data-reveal][data-revealed="true"] { opacity: 1; transform: none; }
+          @keyframes heroIn { 0% { opacity: 0; transform: translateY(24px); } 100% { opacity: 1; transform: none; } }
+          .hero-in { animation: heroIn 1s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: var(--in-delay, 0ms); }
+          @media (prefers-reduced-motion: reduce) {
+            [data-reveal], .hero-in { opacity: 1 !important; transform: none !important; animation: none !important; }
+          }
         `}</style>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '6px', opacity: 0.55 }}>
           <div style={{ display: 'flex', gap: '6px', animation: 'scrollLeft 40s linear infinite', width: 'max-content' }}>
@@ -444,22 +465,22 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </div>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.85) 0%, rgba(17,17,17,0.65) 50%, rgba(17,17,17,0.85) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 2, padding: mobile ? '0 24px' : '0 48px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.08, color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)' }}>
-            Run your roster.<br /><span style={{ color: '#5b7c99' }}>Not your inbox.</span>
+          <h1 className="hero-in" style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 400', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.04, letterSpacing: '-0.02em', color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)', '--in-delay': '120ms' }}>
+            Run your roster.<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>Not your inbox.</span>
           </h1>
-          <p style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '480px', margin: '0 auto 40px' }}>
+          <p className="hero-in" style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '480px', margin: '0 auto 40px', '--in-delay': '320ms' }}>
             HQue is the operating system for agencies and brands<br/>built on talent partnerships.
           </p>
-          <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="hero-in" style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center', '--in-delay': '480ms' }}>
             <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
             <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
           </div>
-          <div style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.12em' }}>14-day free trial · No credit card required</div>
+          <div className="hero-in" style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.12em', '--in-delay': '600ms' }}>14-day free trial · No credit card required</div>
         </div>
       </section>
 
       {/* App Showcase */}
-      <section style={{ padding: mobile ? '0 20px 80px' : '80px 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <section data-reveal style={{ padding: mobile ? '0 20px 80px' : '80px 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {mobile
           ? <MobileAppPreview />
           : <DesktopAppPreview activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
@@ -468,12 +489,12 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       {/* Features */}
       <section id="features" style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '48px', textAlign: 'center' }}>What HQue does</div>
+        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '48px', textAlign: 'center' }}>What HQue does</div>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: mobile ? '40px' : '48px' }}>
-          {FEATURES.map(f => (
-            <div key={f.num}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: '#555', marginBottom: '16px' }}>{f.num}</div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{f.title}</div>
+          {FEATURES.map((f, i) => (
+            <div key={f.num} data-reveal style={{ '--reveal-delay': `${i * 120}ms` }}>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#555', marginBottom: '16px' }}>{f.num}</div>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{f.title}</div>
               <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{f.body}</div>
             </div>
           ))}
@@ -484,15 +505,15 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       {/* Pricing */}
       <section id="pricing" style={{ padding: mobile ? '60px 24px 80px' : '100px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
-        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px', textAlign: 'center' }}>Pricing</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '40px', textAlign: 'center', fontWeight: 'normal' }}>Simple, transparent pricing.</div>
+        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px', textAlign: 'center' }}>Pricing</div>
+        <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '40px', textAlign: 'center', fontWeight: 'normal', '--reveal-delay': '120ms' }}>Simple, transparent pricing.</div>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px' }}>
-          {PLANS.map(plan => (
-            <div key={plan.name} style={{ background: plan.highlight ? '#1E2428' : '#141414', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#222'}`, borderRadius: '2px', padding: '32px 28px', position: 'relative' }}>
+          {PLANS.map((plan, i) => (
+            <div key={plan.name} data-reveal style={{ background: plan.highlight ? '#1E2428' : '#141414', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#222'}`, borderRadius: '2px', padding: '32px 28px', position: 'relative', '--reveal-delay': `${i * 100}ms` }}>
               {plan.highlight && <div style={{ position: 'absolute', top: '-1px', right: '20px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '0 0 2px 2px' }}>Most Popular</div>}
               <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>{plan.name}</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
                 <span style={{ fontSize: '12px', color: '#666' }}>/month</span>
               </div>
               <div style={{ borderTop: '0.5px solid #222', paddingTop: '20px', marginBottom: '28px' }}>
@@ -524,8 +545,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             { q: 'Can my whole team use it?', a: 'Yes. Starter has 2 seats, Pro has 5, Agency has unlimited.' },
             { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel from billing settings, keep access until period ends.' },
           ].map((faq, i) => (
-            <div key={i} style={{ background: '#111', padding: '24px' }}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: '#F0ECE6', marginBottom: '8px', lineHeight: 1.4 }}>{faq.q}</div>
+            <div key={i} data-reveal style={{ background: '#111', padding: '24px', '--reveal-delay': `${i * 80}ms` }}>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '14px', color: '#F0ECE6', marginBottom: '8px', lineHeight: 1.4 }}>{faq.q}</div>
               <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.7 }}>{faq.a}</div>
             </div>
           ))}
@@ -535,9 +556,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       {/* CTA */}
       <section style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 120px', textAlign: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: mobile ? '32px' : 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2 }}>
-          Your team deserves<br />a better tool.
+        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
+        <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '32px' : 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em', '--reveal-delay': '120ms' }}>
+          Your team deserves<br /><span style={{ fontStyle: 'italic', color: '#5b7c99' }}>a better tool.</span>
         </div>
         <button onClick={onGetStarted} style={{ padding: '16px 48px', fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
           Start your free trial

@@ -82,7 +82,7 @@ function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt
           <div style={{ fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: brightness > 0.3 ? '#5b7c99' : '#333', marginBottom: '8px', transition: 'color 0.12s ease' }}>
             {post.category} · {post.readTime}
           </div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: titleSize, color: brightness > 0.2 ? (hovered ? '#fff' : '#F0ECE6') : '#2A2A2A', lineHeight: 1.25, transition: 'color 0.12s ease' }}>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: titleSize, color: brightness > 0.2 ? (hovered ? '#fff' : '#F0ECE6') : '#2A2A2A', lineHeight: 1.25, transition: 'color 0.12s ease' }}>
             {post.title}
           </div>
           {showExcerpt && (
@@ -169,7 +169,7 @@ function HeroSpotlight({ post }) {
 
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: isMobile ? '28px' : '56px', zIndex: 4 }}>
           <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '18px' }}>{post.category} · {post.readTime}</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '26px' : '42px', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px', maxWidth: '680px' }}>{post.title}</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '26px' : '42px', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px', maxWidth: '680px' }}>{post.title}</div>
           <div style={{ fontSize: '14px', color: '#888', maxWidth: '520px', lineHeight: 1.75 }}>{post.excerpt}</div>
           <div style={{ marginTop: '20px', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', opacity: hovered ? 1 : 0, transition: 'opacity 0.3s ease' }}>Read article →</div>
         </div>
@@ -204,7 +204,7 @@ export default function BlogPage({ onGetStarted }) {
       <div style={{ padding: isMobile ? '100px 24px 48px' : '130px 48px 64px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: '24px' }}>
         <div>
           <div style={{ fontSize: '9px', letterSpacing: '0.36em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>The Pitch</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '44px' : '72px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 0.95 }}>Every deal<br />starts somewhere.</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '44px' : '72px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 0.95 }}>Every deal<br />starts somewhere.</div>
         </div>
         <div style={{ fontSize: '13px', color: '#888', maxWidth: '220px', lineHeight: 1.9, paddingBottom: '10px' }}>Strategy and operations for agencies and brands building what's next.</div>
       </div>

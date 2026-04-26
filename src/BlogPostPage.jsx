@@ -18,7 +18,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
   if (!post) return (
     <div style={{ background: '#111', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '32px', color: '#F0ECE6', marginBottom: '16px' }}>Post not found</div>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '32px', color: '#F0ECE6', marginBottom: '16px' }}>Post not found</div>
         <a href="/blog" style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.14em', textTransform: 'uppercase' }}>The Pitch</a>
       </div>
     </div>
@@ -53,14 +53,14 @@ export default function BlogPostPage({ slug, onGetStarted }) {
           <span style={{ fontSize: '10px', color: '#333' }}>{post.date}</span>
         </div>
 
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '28px' : '42px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.15, marginBottom: '20px' }}>{post.title}</div>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '42px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.15, marginBottom: '20px' }}>{post.title}</div>
         <div style={{ fontSize: '16px', color: '#777', lineHeight: 1.7, marginBottom: '40px', borderLeft: '2px solid #5b7c99', paddingLeft: '20px', fontStyle: 'italic' }}>{post.excerpt}</div>
         <div style={{ height: '0.5px', background: '#1A1A1A', marginBottom: '40px' }} />
 
         <div style={{ fontSize: '16px', color: '#888', lineHeight: 1.9 }}>
           {paragraphs.map((para, i) => {
             if (para.startsWith('**') && para.endsWith('**')) {
-              return <h3 key={i} style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', fontWeight: 'normal', margin: '36px 0 16px' }}>{para.replace(/\*\*/g, '')}</h3>
+              return <h3 key={i} style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', fontWeight: 'normal', margin: '36px 0 16px' }}>{para.replace(/\*\*/g, '')}</h3>
             }
             function renderPara(text) {
               const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g
@@ -96,7 +96,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
         </div>
 
         <div style={{ marginTop: '60px', padding: '32px', background: '#141414', border: '0.5px solid #1A1A1A', borderRadius: '2px', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '8px' }}>Run your agency like this.</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#F0ECE6', marginBottom: '8px' }}>Run your agency like this.</div>
           <div style={{ fontSize: '13px', color: '#555', marginBottom: '20px', lineHeight: 1.6 }}>HQue is the operating system for agencies built on talent partnerships. Roster management, campaigns, payments — all in one place.</div>
           <button onClick={onGetStarted} style={{ padding: '12px 32px', background: '#5b7c99', border: 'none', color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '1px' }}>Start your free trial</button>
         </div>
@@ -114,7 +114,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
                   </div>
                   <div style={{ padding: '18px' }}>
                     <div style={{ fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>{p.category}</div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: '#F0ECE6', lineHeight: 1.3 }}>{p.title}</div>
+                    <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '15px', color: '#F0ECE6', lineHeight: 1.3 }}>{p.title}</div>
                   </div>
                 </div>
               </a>

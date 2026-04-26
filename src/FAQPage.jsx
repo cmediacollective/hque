@@ -33,7 +33,7 @@ export default function FAQPage() {
       <div style={{ padding: isMobile ? '60px 24px 40px' : '80px 48px 60px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: '24px' }}>
         <div>
           <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>Support</div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '36px' : '56px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.05 }}>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '36px' : '56px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.05 }}>
             Frequently<br />asked questions.
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function FAQPage() {
           return (
             <div key={idx} style={{ borderTop: '0.5px solid #1A1A1A', marginBottom: '0' }}>
               <button onClick={() => setOpen(open === idx ? null : idx)} style={{ width: '100%', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
                 <span style={{ color: '#5b7c99', fontSize: '18px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === idx ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
               </button>
               {open === idx && <div style={{ paddingBottom: '24px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
@@ -65,7 +65,7 @@ export default function FAQPage() {
           return (
             <div key={idx} style={{ borderTop: '0.5px solid #1A1A1A' }}>
               <button onClick={() => setOpen(open === idx ? null : idx)} style={{ width: '100%', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
                 <span style={{ color: '#5b7c99', fontSize: '18px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === idx ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
               </button>
               {open === idx && <div style={{ paddingBottom: '24px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
@@ -77,7 +77,7 @@ export default function FAQPage() {
       {/* CTA bar */}
       <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px' : '48px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '20px' }}>
         <div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#F0ECE6', marginBottom: '6px' }}>Still have questions?</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#F0ECE6', marginBottom: '6px' }}>Still have questions?</div>
           <div style={{ fontSize: '13px', color: '#555' }}>Our team is happy to help. We usually respond within a few hours.</div>
         </div>
         <a href="mailto:support@h-que.com" style={{ display: 'inline-block', padding: '12px 28px', background: '#5b7c99', color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '1px', whiteSpace: 'nowrap' }}>Contact support</a>

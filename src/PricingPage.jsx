@@ -76,7 +76,7 @@ export default function PricingPage({ onGetStarted }) {
       {/* Header */}
       <div style={{ padding: isMobile ? '100px 24px 40px' : '120px 48px 60px', textAlign: 'center', maxWidth: '700px', margin: '0 auto' }}>
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>Pricing</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '36px' : '52px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px' }}>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '36px' : '52px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px' }}>
           Simple, transparent pricing.
         </div>
         <div style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
@@ -93,7 +93,7 @@ export default function PricingPage({ onGetStarted }) {
             )}
             <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>{plan.name}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '12px' }}>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: '48px', color: '#F0ECE6', lineHeight: 1 }}>{plan.price}</span>
+              <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '48px', color: '#F0ECE6', lineHeight: 1 }}>{plan.price}</span>
               <span style={{ fontSize: '12px', color: '#555' }}>{plan.period}</span>
             </div>
             <div style={{ fontSize: '13px', color: '#555', lineHeight: 1.6, marginBottom: '28px', minHeight: '44px' }}>{plan.description}</div>
@@ -120,12 +120,12 @@ export default function PricingPage({ onGetStarted }) {
       {/* FAQ */}
       <div style={{ maxWidth: '700px', margin: '0 auto', padding: isMobile ? '0 24px 80px' : '0 48px 100px' }}>
         <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px', textAlign: 'center' }}>FAQ</div>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#F0ECE6', marginBottom: '40px', textAlign: 'center', fontWeight: 'normal' }}>Pricing questions</div>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '28px', color: '#F0ECE6', marginBottom: '40px', textAlign: 'center', fontWeight: 'normal' }}>Pricing questions</div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {FAQS.map((faq, i) => (
             <div key={i} style={{ borderTop: '0.5px solid #1A1A1A' }}>
               <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{ width: '100%', padding: '20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
                 <span style={{ color: '#5b7c99', fontSize: '20px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: openFaq === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
               </button>
               {openFaq === i && <div style={{ paddingBottom: '20px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
@@ -137,7 +137,7 @@ export default function PricingPage({ onGetStarted }) {
 
       {/* CTA */}
       <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '48px 24px' : '64px 48px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '28px' : '40px', color: '#F0ECE6', marginBottom: '16px', fontWeight: 'normal' }}>Ready to get started?</div>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '40px', color: '#F0ECE6', marginBottom: '16px', fontWeight: 'normal' }}>Ready to get started?</div>
         <div style={{ fontSize: '13px', color: '#555', marginBottom: '32px' }}>14-day free trial. No credit card required.</div>
         <button onClick={onGetStarted} style={{ padding: '14px 40px', background: '#5b7c99', border: 'none', color: '#fff', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '1px' }}>Start free trial</button>
       </div>
