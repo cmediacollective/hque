@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF8F5;
+  --color-ink: #1A1A1A;
+  --color-accent: #5B7C99;
+  --color-muted: #6B6B6B;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-display--font-feature-settings: "ss01";
+  --font-sans: "Inter Tight", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --text-display: clamp(64px, 12vw, 180px);
+  --text-display--line-height: 1;
+  --text-h1: clamp(48px, 8vw, 120px);
+  --text-h1--line-height: 1.05;
+  --text-h2: clamp(32px, 5vw, 64px);
+  --text-h2--line-height: 1.1;
+  --text-base: 16px;
+  --text-base--line-height: 1.7;
+  --text-caption: 11px;
+  --text-caption--line-height: 1.4;
+
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.7;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: var(--color-ink);
+    color: var(--color-cream);
+  }
+}
