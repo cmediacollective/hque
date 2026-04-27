@@ -55,10 +55,10 @@ export default function HoverRevealList({ items = [] }) {
       <ul className="list-none m-0 p-0">
         {items.map((it, i) => (
           <li key={i} className="border-t border-ink/15 last:border-b py-8">
-            <div className="font-display italic text-h1 leading-[1.05] tracking-tight text-ink">{it.label}</div>
+            <div className="font-display italic leading-[1.05] tracking-tight text-ink" style={{ fontSize: 'clamp(34px, 6.2vw, 88px)' }}>{it.label}</div>
             <img src={it.image} alt={it.label} className="w-full mt-6 block" />
             {it.caption && (
-              <div className="font-mono text-caption tracking-wide text-muted mt-3 uppercase">{it.caption}</div>
+              <div className="text-[12px] tracking-[0.14em] text-muted mt-3 uppercase">{it.caption}</div>
             )}
           </li>
         ))}
@@ -77,8 +77,8 @@ export default function HoverRevealList({ items = [] }) {
               data-cursor="hover"
               onMouseEnter={() => setHoverIdx(i)}
               onMouseLeave={() => setHoverIdx(prev => (prev === i ? null : prev))}
-              className="font-display italic text-h1 leading-[1.05] tracking-tight text-ink py-6 border-t border-ink/15 last:border-b cursor-pointer transition-opacity duration-300"
-              style={{ opacity: dim ? 0.25 : 1 }}
+              className="font-display italic leading-[1.05] tracking-tight text-ink py-6 border-t border-ink/15 last:border-b cursor-pointer transition-opacity duration-300"
+              style={{ opacity: dim ? 0.25 : 1, fontSize: 'clamp(34px, 6.2vw, 88px)' }}
             >
               {it.label}
             </li>
