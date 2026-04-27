@@ -193,7 +193,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-40 px-6 md:px-12 lg:px-20 py-5 flex items-center justify-between bg-cream/85 backdrop-blur-sm">
         <a href="/" className="block">
-          <img src="/logo-dark.svg" alt="HQue" className="w-20 md:w-[100px] h-auto" />
+          <img src="/logo-dark.svg" alt="HQue" className="w-[160px] md:w-[200px] h-auto" />
         </a>
         <div className="flex items-center gap-5 md:gap-7 text-[14px]">
           <button
@@ -212,9 +212,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       </nav>
 
       {/* HERO */}
-      <section className="min-h-screen flex flex-col px-6 md:px-12 lg:px-20 pt-28 md:pt-32 pb-12">
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10 min-h-0">
-          <div className="md:col-span-8 flex items-end">
+      <section className="min-h-screen flex flex-col px-6 md:px-12 lg:px-20 pt-28 md:pt-36 pb-12">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-10 min-h-0">
+          <div className="md:col-span-8 flex flex-col justify-end gap-8 min-h-0">
             <h1
               className="font-display italic leading-[1.02] tracking-tight text-ink"
               style={{ fontSize: 'clamp(34px, 6.2vw, 88px)' }}
@@ -224,18 +224,23 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
               <span className="block whitespace-nowrap">Every conversation.</span>
               <span className="block whitespace-nowrap text-accent">One place.</span>
             </h1>
-          </div>
-          <div className="md:col-span-4 flex flex-col gap-6 min-h-0">
-            <div className="flex-1 grid grid-cols-2 gap-2 min-h-[280px] md:min-h-0">
-              <HeroVideoColumn videos={ALL_VIDEOS} durationSec={70} />
-              <HeroVideoColumn videos={ALL_VIDEOS_REV} durationSec={85} reverse />
-            </div>
             <p className="text-[14px] leading-[1.7] max-w-md">
               HQue is the operating system for talent agencies and the brands that book them. Roster, campaigns, contracts, payments, reports. Every conversation, every deliverable, every line item, kept in one place. Built by a working agency, not a venture-funded committee, and shaped by the way real bookings actually happen. Free for fourteen days. No card required, no contracts.
             </p>
             <div className="text-[12px] tracking-[0.18em] uppercase text-muted">
               (scroll) ↓
             </div>
+          </div>
+          <div className="hidden md:grid md:col-span-4 grid-cols-2 gap-2 overflow-hidden">
+            <HeroVideoColumn videos={ALL_VIDEOS} durationSec={70} />
+            <HeroVideoColumn videos={ALL_VIDEOS_REV} durationSec={85} reverse />
+          </div>
+          <div className="md:hidden grid grid-cols-3 gap-2">
+            {ALL_VIDEOS.slice(0, 6).map(v => (
+              <div key={v} className="hque-vtile" style={{ aspectRatio: '9 / 16' }}>
+                <video src={v} autoPlay muted loop playsInline className="w-full h-full object-cover block" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
