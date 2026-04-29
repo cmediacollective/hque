@@ -101,7 +101,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     return c.type || 'Influencer'
   }
 
-  const cols = isMobile ? 'repeat(1, 1fr)' : 'repeat(4, minmax(0, 1fr))'
+  const cols = isMobile ? 'repeat(1, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>

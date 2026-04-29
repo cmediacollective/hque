@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-04-28
+
+**Talent grid is now responsive on desktop.** The talent tab no longer locks to four cards across — as the window narrows, cards reflow from four → three → two columns instead of squeezing and clipping the copy inside each card. Each card holds a minimum width (~280px), and the grid fits as many as the window allows. Mobile stays one card per row as before.
+
 ## 2026-04-26
 
 **Phase 2 marketing components: cursor, hover-reveal list, marquee.** Three reusable building blocks for the upcoming landing page redesign — built and parked in `/src/components/marketing/`, not wired into any production page yet. Review at **`h-que.com/sandbox`** (a new dev-only route that renders all three with placeholder content). (1) **`<Cursor />`** — replaces the system cursor with an 8px ink dot that lerps toward the mouse using requestAnimationFrame; over a link or any `[data-cursor="hover"]` element, it expands into a 40px outlined circle. Pure refs (no React re-renders on mousemove), translate3d only (no left/top), hidden on touch. Body cursor is hidden only while the component is mounted. (2) **`<HoverRevealList items={[...]} />`** — the artworld.agency pattern. Renders items in big italic Fraunces; on hover, the other items dim to 25% and a 280×360 image appears, trailing the cursor with a slower lerp (0.12) so it has weight. On mobile, the hover behavior turns off and items stack with the image inline below each label. (3) **`<Marquee speed={30} direction="left">`** — infinite horizontal scroll, pure CSS animation (no JS), pauses on hover. Default 30s, accepts any speed and either direction. **No production pages were changed**; existing landing/pricing/FAQ/blog still render exactly as they did.
