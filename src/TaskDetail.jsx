@@ -4,7 +4,7 @@ import Linkify from './Linkify'
 
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 
-export default function TaskDetail({ task, dark, members = [], brands = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
+export default function TaskDetail({ task, dark, members = [], brands = [], campaigns = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const panelBg = dark ? '#141414' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -19,7 +19,8 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
     ...task,
     target_brand_id: task.target_brand_id ?? (currentBrandId === '__internal' ? '' : currentBrandId ?? ''),
     assignee_ids: task.assignee_ids ?? [],
-    watcher_ids: task.watcher_ids ?? []
+    watcher_ids: task.watcher_ids ?? [],
+    campaign_id: task.campaign_id ?? ''
   })
   const [saving, setSaving] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
@@ -425,6 +426,16 @@ export default function TaskDetail({ task, dark, members = [], brands = [], colu
               <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '24px', boxSizing: 'border-box' }}>
                 <option value=''>Unassigned</option>
                 {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </>
+          )}
+
+          {campaigns.length > 0 && (
+            <>
+              {sectionLabel('Linked campaign')}
+              <select value={form.campaign_id || ''} onChange={e => setForm(f => ({ ...f, campaign_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '24px', boxSizing: 'border-box' }}>
+                <option value=''>Not linked</option>
+                {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </>
           )}

@@ -6,6 +6,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Archived campaigns now show with a strikethrough.** In every view (grid, list, board card, and detail panel header), archived campaign names render with a line through them and dimmed — same visual cue as completed tasks.
+
+**Workspace tasks are no longer auto-created from campaigns.** The auto-task and the two-way status sync are removed. Workspace tasks live independently — create them yourself in the workspace and link to a campaign with the new "Linked campaign" dropdown in the task detail panel. When you archive a campaign (via any path: detail Archive button, drag to Archived column, or the modal), any workspace tasks linked to it get cleaned up so nothing orphans in the workspace.
+
+**Removed the redundant "Archived" toggle at the top of Campaigns.** Now that the Board view has its own Archived column, the toggle was duplicate UI. Grid and list show only active campaigns; archived ones live in the Board's collapsed Archived column where they're one click away.
+
+## 2026-05-02
+
 **Campaigns has a Board view.** Third toggle in the sidebar (Grid · List · **Board**). Kanban-style columns by status — `Pitch · Active · Pending Payment · Completed · Cancelled · Archived` — with the same campaign cards stacked inside each column. Drag a card from one column to another to change its status (or drop it into Archived to archive it; drag back to bring it back). The Archived column is collapsed by default to a thin sliver showing just the count, click it to expand. Grid is still your default; the Board is for "where are we on each one at a glance". When you drag a card across columns, the linked workspace task moves to its matching column too — same two-way sync as before.
 
 **Archive / Unarchive button on the campaign detail panel.** A clear button now sits next to Edit at the top of the campaign panel — no more relying on the hover-only button on the card. Confirms before archiving, restores in one click.

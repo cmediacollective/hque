@@ -304,7 +304,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 }
                 <div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{campaign.brand || 'Campaign'}{campaign.brand_website && (<a href={campaign.brand_website.startsWith('http') ? campaign.brand_website : 'https://' + campaign.brand_website} target='_blank' rel='noreferrer' style={{ marginLeft: '8px', fontSize: '8px', letterSpacing: '0.14em', color: '#fff', background: '#5b7c99', padding: '3px 8px', borderRadius: '1px', textDecoration: 'none', textTransform: 'uppercase' }}>↗ Website</a>)}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '10px' }}>{campaign.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '10px', textDecoration: campaign.archived ? 'line-through' : 'none', opacity: campaign.archived ? 0.7 : 1 }}>{campaign.name}</div>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
                     {campaign.campaign_type && (
@@ -316,10 +316,13 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
                 <button onClick={async () => {
                   const isArchived = !!campaign.archived
-                  const ok = confirm(isArchived ? `Restore "${campaign.name}" to active campaigns?` : `Archive "${campaign.name}"? You can restore it anytime.`)
+                  const ok = confirm(isArchived ? `Restore "${campaign.name}" to active campaigns?` : `Archive "${campaign.name}"? You can restore it anytime. Any workspace tasks linked to this campaign will be removed.`)
                   if (!ok) return
                   const { error } = await supabase.from('campaigns').update({ archived: !isArchived }).eq('id', campaign.id)
                   if (error) { alert('Could not update: ' + error.message); return }
+                  if (!isArchived) {
+                    try { await supabase.from('tasks').delete().eq('campaign_id', campaign.id) } catch (_) {}
+                  }
                   if (onSaved) onSaved()
                   if (onClose) onClose()
                 }} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>

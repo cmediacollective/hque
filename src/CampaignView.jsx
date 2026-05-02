@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
-import { syncCampaignToTask } from './campaignSync'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -41,39 +40,23 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [hovering, setHovering] = useState(null)
   const [creatorCounts, setCreatorCounts] = useState({})
   const [search, setSearch] = useState('')
-  const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(null)
   const [members, setMembers] = useState([])
   const [dragging, setDragging] = useState(null)
   const [dragOverCol, setDragOverCol] = useState(null)
   const [archivedExpanded, setArchivedExpanded] = useState(false)
 
-  useEffect(() => { fetchCampaigns() }, [showArchived, orgId, view])
+  useEffect(() => { fetchCampaigns() }, [orgId, view])
 
   useEffect(() => {
     if (!orgId) return
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
 
-  const backfilledRef = useRef(false)
-  useEffect(() => {
-    if (!orgId || campaigns.length === 0 || backfilledRef.current || showArchived) return
-    backfilledRef.current = true
-    ;(async () => {
-      const ids = campaigns.map(c => c.id)
-      const { data: linked } = await supabase.from('tasks').select('campaign_id').in('campaign_id', ids)
-      const linkedSet = new Set((linked || []).map(t => t.campaign_id).filter(Boolean))
-      const missing = campaigns.filter(c => !linkedSet.has(c.id))
-      for (const c of missing) {
-        try { await syncCampaignToTask(c, orgId) } catch (_) { /* skip on error, e.g. missing column */ }
-      }
-    })()
-  }, [orgId, campaigns.length, showArchived])
-
   async function fetchCampaigns() {
     setLoading(true)
     let q = supabase.from('campaigns').select('*').eq('org_id', orgId)
-    if (view !== 'board') q = q.eq('archived', showArchived)
+    if (view !== 'board') q = q.eq('archived', false)
     const { data } = await q.order('created_at', { ascending: false })
     setCampaigns(data || [])
     if (data?.length) fetchCreatorCounts(data.map(c => c.id))
@@ -108,8 +91,13 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     }
   }
 
+  async function deleteLinkedTasks(campaignId) {
+    try { await supabase.from('tasks').delete().eq('campaign_id', campaignId) } catch (_) {}
+  }
+
   async function archiveCampaign(campaign, restore = false) {
     await supabase.from('campaigns').update({ archived: !restore }).eq('id', campaign.id)
+    if (!restore) await deleteLinkedTasks(campaign.id)
     setArchiving(null)
     fetchCampaigns()
   }
@@ -120,11 +108,6 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     if (error) {
       alert(`Could not update: ${error.message}`)
       fetchCampaigns()
-      return
-    }
-    if (field === 'status') {
-      const c = campaigns.find(x => x.id === id)
-      if (c) { try { await syncCampaignToTask({ ...c, status: value }, orgId) } catch (_) {} }
     }
   }
 
@@ -135,15 +118,15 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       if (c.archived) return
       setCampaigns(cs => cs.map(x => x.id === campaignId ? { ...x, archived: true } : x))
       const { error } = await supabase.from('campaigns').update({ archived: true }).eq('id', campaignId)
-      if (error) { alert(`Could not archive: ${error.message}`); fetchCampaigns() }
+      if (error) { alert(`Could not archive: ${error.message}`); fetchCampaigns(); return }
+      await deleteLinkedTasks(campaignId)
       return
     }
     const updates = { status: columnKey }
     if (c.archived) updates.archived = false
     setCampaigns(cs => cs.map(x => x.id === campaignId ? { ...x, ...updates } : x))
     const { error } = await supabase.from('campaigns').update(updates).eq('id', campaignId)
-    if (error) { alert(`Could not move: ${error.message}`); fetchCampaigns(); return }
-    try { await syncCampaignToTask({ ...c, ...updates }, orgId) } catch (_) {}
+    if (error) { alert(`Could not move: ${error.message}`); fetchCampaigns() }
   }
 
   const filtered = campaigns
@@ -192,16 +175,16 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
         <div onClick={() => setArchiving(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border}`, padding: '32px', maxWidth: '400px', width: '100%', borderRadius: '2px' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text, marginBottom: '12px' }}>
-              {showArchived ? 'Restore campaign?' : 'Archive campaign?'}
+              {archiving.archived ? 'Restore campaign?' : 'Archive campaign?'}
             </div>
             <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6, marginBottom: '24px' }}>
-              {showArchived
+              {archiving.archived
                 ? `"${archiving.name}" will be moved back to your active campaigns.`
-                : `"${archiving.name}" will be hidden from your active campaigns. You can restore it anytime.`}
+                : `"${archiving.name}" will be hidden from your active campaigns. Any workspace tasks linked to it will be removed. You can restore it anytime.`}
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => archiveCampaign(archiving, showArchived)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
-                {showArchived ? 'Restore' : 'Archive'}
+              <button onClick={() => archiveCampaign(archiving, archiving.archived)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                {archiving.archived ? 'Restore' : 'Archive'}
               </button>
               <button onClick={() => setArchiving(null)} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
             </div>
@@ -213,19 +196,14 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
         <span style={{ marginRight: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
           {filtered.length} {filtered.length === 1 ? 'campaign' : 'campaigns'}
         </span>
-        <button
-          onClick={() => { setShowArchived(a => !a); setSearch('') }}
-          style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${showArchived ? '#5b7c99' : border2}`, borderRadius: '1px', cursor: 'pointer', color: showArchived ? '#5b7c99' : muted, background: 'none', whiteSpace: 'nowrap' }}>
-          {showArchived ? '← Active' : 'Archived'}
-        </button>
-        {!showArchived && <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>}
+        <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>
       </div>
 
       <div style={{ padding: '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
         <input
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder={showArchived ? 'Search archived campaigns...' : 'Search by campaign name or brand...'}
+          placeholder='Search by campaign name or brand...'
           style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}
         />
       </div>
@@ -237,10 +215,10 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {search ? 'No results' : showArchived ? 'No archived campaigns' : 'No campaigns yet'}
+            {search ? 'No results' : 'No campaigns yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted }}>
-            {search ? `Nothing matched "${search}"` : showArchived ? 'Archived campaigns will appear here' : 'Click + Campaign to create your first one'}
+            {search ? `Nothing matched "${search}"` : 'Click + Campaign to create your first one'}
           </div>
         </div>
       )}
@@ -278,7 +256,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                       {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{c.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
                   <div style={{ fontSize: '11px', color: muted, marginBottom: '6px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     {c.brand || 'No brand'}
                     {c.brand_website && (
@@ -289,7 +267,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                     <button
                       onClick={e => { e.stopPropagation(); setArchiving(c) }}
                       style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', alignSelf: 'flex-start', marginTop: 'auto' }}>
-                      {showArchived ? 'Restore' : 'Archive'}
+                      {c.archived ? 'Restore' : 'Archive'}
                     </button>
                   )}
                 </div>
@@ -369,7 +347,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                 : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{brandInitial(c.brand || c.name || '?')}</div>
               }
 
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
               <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || '—'}</div>
 
               <select
@@ -462,7 +440,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                             : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                           }
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: text, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '3px' }}>{c.name}</div>
+                            <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: text, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '3px', textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
                             <div style={{ fontSize: '10px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || 'No brand'}</div>
                           </div>
                         </div>

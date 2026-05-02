@@ -4,7 +4,6 @@ import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
 import { createNotification, parseMentions } from './notify'
-import { syncTaskColumnToCampaign } from './campaignSync'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -125,10 +124,12 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
 export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, isMobile = false }) {
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
+  const [campaigns, setCampaigns] = useState([])
 
   useEffect(() => {
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
+    supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -260,12 +261,9 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function updateTask(form) {
-    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id }).eq('id', form.id)
+    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
-    if (form.column_id) {
-      try { await syncTaskColumnToCampaign(form.id, form.column_id) } catch (e) { console.warn('task→campaign sync failed', e) }
-    }
     fetchTasks()
     await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
   }
@@ -273,7 +271,6 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   async function moveTask(taskId, newColumnId) {
     await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
     setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
-    try { await syncTaskColumnToCampaign(taskId, newColumnId) } catch (e) { console.warn('task→campaign sync failed', e) }
   }
 
   async function deleteTask(taskId) {
@@ -459,6 +456,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           dark={dark}
           members={members}
           brands={[]}
+          campaigns={campaigns}
           columns={columns}
           currentBrandId={selectedBrand?.id}
           orgId={orgId}

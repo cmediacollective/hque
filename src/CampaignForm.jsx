@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
-import { syncCampaignToTask } from './campaignSync'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }) {
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -218,17 +217,14 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       notes: form.notes || null,
     }
     let campaignId = existing?.id
-    let savedCampaign = null
     if (existing) {
       const { error: updErr, data: updData } = await supabase.from('campaigns').update(payload).eq('id', existing.id).select()
       if (updErr) { setSaving(false); setError(`Could not save: ${updErr.message}`); return }
       if (!updData || updData.length === 0) { setSaving(false); setError('Save returned no rows — likely a Supabase row-level-security policy on the campaigns table is blocking the update. Let Claude know.'); return }
-      savedCampaign = updData[0]
     } else {
       const { data, error: insErr } = await supabase.from('campaigns').insert(payload).select().single()
       if (insErr) { setSaving(false); setError(`Could not create: ${insErr.message}`); return }
       campaignId = data?.id
-      savedCampaign = data
     }
     if (campaignId) {
       const { error: delErr } = await supabase.from('campaign_creators').delete().eq('campaign_id', campaignId)
@@ -237,9 +233,6 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         const { error: insErr } = await supabase.from('campaign_creators').insert(form.talent_ids.map(tid => ({ campaign_id: campaignId, creator_id: tid })))
         if (insErr) { setSaving(false); alert(`Error saving talent: ${insErr.message}`); return }
       }
-    }
-    if (savedCampaign) {
-      try { await syncCampaignToTask(savedCampaign, orgId) } catch (e) { console.warn('campaign→task sync failed', e) }
     }
     if (form.brand_id && form.brand_website !== undefined) {
       const newSite = (form.brand_website || '').trim() || null
