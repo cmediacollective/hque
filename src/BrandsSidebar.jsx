@@ -25,6 +25,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
+  const [showEmpty, setShowEmpty] = useState(false)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
@@ -133,9 +134,17 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     if (!restore && selectedBrandId === brand.id) onSelectBrand?.(null)
   }
 
-  const filtered = search
+  const isInUse = (b) => (boardCounts[b.id] || 0) > 0 || b.pinned_at || selectedBrandId === b.id
+
+  const searchFiltered = search
     ? brands.filter(b => b.name.toLowerCase().includes(search.toLowerCase()))
     : brands
+
+  const filtered = (search || showEmpty)
+    ? searchFiltered
+    : searchFiltered.filter(isInUse)
+
+  const emptyCount = search ? 0 : searchFiltered.length - filtered.length
 
   const initial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
@@ -180,15 +189,22 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         />
       </div>
 
-      <div style={{ padding: '0 14px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '0 14px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
         <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle }}>
           {showArchived ? `Archived · ${archivedBrands.length}` : `Brands · ${filtered.length}`}
         </div>
-        {archivedBrands.length > 0 && (
-          <button onClick={() => setShowArchived(!showArchived)} style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
-            {showArchived ? 'Active' : `+${archivedBrands.length} archived`}
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {!showArchived && emptyCount > 0 && (
+            <button onClick={() => setShowEmpty(s => !s)} title='Show brands with no tasks' style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
+              {showEmpty ? 'Hide empty' : `+${emptyCount} empty`}
+            </button>
+          )}
+          {archivedBrands.length > 0 && (
+            <button onClick={() => setShowArchived(!showArchived)} style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
+              {showArchived ? 'Active' : `+${archivedBrands.length} archived`}
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', borderTop: `0.5px solid ${border}` }}>
