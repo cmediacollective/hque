@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Click a task on the workspace dashboard to open it directly.** Used to switch you to the brand's board where you'd then have to click the task again to open it. Now one click opens the task panel — useful when you want to delete or edit a task you spotted in the Today / This Week / Next Week buckets without hunting for it on the kanban.
+
+## 2026-05-02
+
 **Workspace sidebar hides brands with no tasks by default.** If a brand has zero tasks, isn't pinned, and isn't currently selected, it's tucked away. A small `+N empty` link near the brand count reveals them again. Search still finds all brands. Pinned brands always stay visible. So you only see what you're actively working on.
 
 ## 2026-05-02

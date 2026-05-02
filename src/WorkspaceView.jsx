@@ -187,23 +187,28 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     if (activeBoard) { fetchColumns(); fetchTasks() }
   }, [activeBoard?.id])
 
+  async function openTaskById(id) {
+    if (!id) return
+    const { data: t } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id), board:boards(brand_id)').eq('id', id).maybeSingle()
+    if (!t) return
+    const brandId = t.board?.brand_id
+    if (brandId) {
+      const { data: b } = await supabase.from('brands').select('*').eq('id', brandId).maybeSingle()
+      if (b) setSelectedBrand(b)
+    } else {
+      setSelectedBrand({ id: '__internal', name: 'Internal' })
+    }
+    setEditingTask({
+      ...t,
+      assignee_ids: (t.task_assignees || []).map(r => r.user_id),
+      watcher_ids: (t.task_watchers || []).map(r => r.user_id)
+    })
+  }
+
   useEffect(() => {
     if (!openTaskId || !orgId) return
     ;(async () => {
-      const { data: t } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id), board:boards(brand_id)').eq('id', openTaskId).maybeSingle()
-      if (!t) { onOpenTaskHandled && onOpenTaskHandled(); return }
-      const brandId = t.board?.brand_id
-      if (brandId) {
-        const { data: b } = await supabase.from('brands').select('*').eq('id', brandId).maybeSingle()
-        if (b) setSelectedBrand(b)
-      } else {
-        setSelectedBrand({ id: '__internal', name: 'Internal' })
-      }
-      setEditingTask({
-        ...t,
-        assignee_ids: (t.task_assignees || []).map(r => r.user_id),
-        watcher_ids: (t.task_watchers || []).map(r => r.user_id)
-      })
+      await openTaskById(openTaskId)
       onOpenTaskHandled && onOpenTaskHandled()
     })()
   }, [openTaskId, orgId])
@@ -355,7 +360,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {!selectedBrand && !isMobile && (
-          <MyTasksDashboard userId={userId} orgId={orgId} dark={dark} brands={brands} onSelectBrand={setSelectedBrand} agencyTz={agencyTz} />
+          <MyTasksDashboard userId={userId} orgId={orgId} dark={dark} brands={brands} onSelectBrand={setSelectedBrand} onOpenTask={openTaskById} agencyTz={agencyTz} />
         )}
         {!selectedBrand && isMobile && (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>

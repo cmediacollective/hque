@@ -17,7 +17,7 @@ const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 }
 const MAX_PER_BUCKET = 5
 
-export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand, agencyTz = 'America/Los_Angeles' }) {
+export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand, onOpenTask, agencyTz = 'America/Los_Angeles' }) {
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
@@ -42,6 +42,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   }
 
   function handleTaskClick(t) {
+    if (onOpenTask) { onOpenTask(t.id); return }
     if (!onSelectBrand) return
     if (t.brand_id) {
       const brand = brands.find(b => b.id === t.brand_id)
