@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**One-time cleanup of leftover auto-tasks.** The first time you open the workspace after this update, any tasks that were auto-created by the old campaign→task feature get deleted. Heuristic: task has a campaign link, no description, and the title exactly matches the campaign name (the auto-task signature). Real tasks you wrote yourself or manually linked won't be touched. This is a one-shot cleanup — runs once per session, idempotent. Reminder: brands themselves can be archived from the workspace sidebar (hover a brand → click ⋯ → Archive brand) to clear them out of your sidebar entirely.
+
+## 2026-05-02
+
 **Campaign type and status are now dropdowns in the campaign form.** Replaced the row-of-button pickers with proper select dropdowns — easier to scan, especially with more options. **Media** added as a new campaign type (now: Paid · Non-paid · Gifting · Seeding · Media). The Media option is also available in the inline dropdowns on the grid card and list view.
 
 ## 2026-05-02

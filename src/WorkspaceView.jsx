@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
@@ -130,6 +130,30 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
+  }, [orgId])
+
+  const cleanedUpRef = useRef(false)
+  useEffect(() => {
+    if (!orgId || cleanedUpRef.current) return
+    cleanedUpRef.current = true
+    ;(async () => {
+      const { data: linked } = await supabase
+        .from('tasks')
+        .select('id, title, description, campaign_id')
+        .eq('org_id', orgId)
+        .not('campaign_id', 'is', null)
+      if (!linked || linked.length === 0) return
+      const ids = [...new Set(linked.map(t => t.campaign_id))]
+      const { data: camps } = await supabase.from('campaigns').select('id, name').in('id', ids)
+      const nameMap = {}
+      ;(camps || []).forEach(c => { nameMap[c.id] = c.name })
+      const orphanIds = linked
+        .filter(t => !t.description && t.title && t.title === nameMap[t.campaign_id])
+        .map(t => t.id)
+      if (orphanIds.length === 0) return
+      await supabase.from('tasks').delete().in('id', orphanIds)
+      setTasks(ts => ts.filter(t => !orphanIds.includes(t.id)))
+    })()
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
