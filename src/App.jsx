@@ -350,7 +350,7 @@ function App() {
               )}
               {view === 'campaigns' && !isMobile && (
                 <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
-                  {['grid', 'list'].map(v => (
+                  {['grid', 'list', 'board'].map(v => (
                     <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: campaignView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
                   ))}
                 </div>

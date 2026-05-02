@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Campaigns has a Board view.** Third toggle in the sidebar (Grid · List · **Board**). Kanban-style columns by status — `Pitch · Active · Pending Payment · Completed · Cancelled · Archived` — with the same campaign cards stacked inside each column. Drag a card from one column to another to change its status (or drop it into Archived to archive it; drag back to bring it back). The Archived column is collapsed by default to a thin sliver showing just the count, click it to expand. Grid is still your default; the Board is for "where are we on each one at a glance". When you drag a card across columns, the linked workspace task moves to its matching column too — same two-way sync as before.
+
+**Archive / Unarchive button on the campaign detail panel.** A clear button now sits next to Edit at the top of the campaign panel — no more relying on the hover-only button on the card. Confirms before archiving, restores in one click.
+
 **Remove a brand logo without recreating the brand.** A "Remove" button now sits next to "Change logo" in the campaign form whenever a brand has a logo. Click it (with a confirm prompt) and the logo clears from the brand record everywhere.
 
 **Campaign type now shows in the campaign detail panel.** Open any campaign and you'll see a small badge next to the Status pill — Paid, Non-paid, Gifting, or Seeding — so you don't have to open the form to check what kind of campaign it is.

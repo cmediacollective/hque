@@ -314,6 +314,17 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+                <button onClick={async () => {
+                  const isArchived = !!campaign.archived
+                  const ok = confirm(isArchived ? `Restore "${campaign.name}" to active campaigns?` : `Archive "${campaign.name}"? You can restore it anytime.`)
+                  if (!ok) return
+                  const { error } = await supabase.from('campaigns').update({ archived: !isArchived }).eq('id', campaign.id)
+                  if (error) { alert('Could not update: ' + error.message); return }
+                  if (onSaved) onSaved()
+                  if (onClose) onClose()
+                }} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>
+                  {campaign.archived ? 'Restore' : 'Archive'}
+                </button>
                 <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
               </div>

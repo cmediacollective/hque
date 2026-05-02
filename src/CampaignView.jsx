@@ -12,6 +12,15 @@ const brandColor = (name) => {
 }
 const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
+const BOARD_COLUMNS = [
+  { key: 'Pitch', label: 'Pitch' },
+  { key: 'Active', label: 'Active' },
+  { key: 'Pending Payment', label: 'Pending Payment' },
+  { key: 'Completed', label: 'Completed' },
+  { key: 'Cancelled', label: 'Cancelled' },
+  { key: '__archived', label: 'Archived' }
+]
+
 export default function CampaignView({ dark = true, orgId, campaignView = 'grid' }) {
   const isMobile = window.innerWidth < 768;
   const view = campaignView
@@ -35,8 +44,11 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(null)
   const [members, setMembers] = useState([])
+  const [dragging, setDragging] = useState(null)
+  const [dragOverCol, setDragOverCol] = useState(null)
+  const [archivedExpanded, setArchivedExpanded] = useState(false)
 
-  useEffect(() => { fetchCampaigns() }, [showArchived, orgId])
+  useEffect(() => { fetchCampaigns() }, [showArchived, orgId, view])
 
   useEffect(() => {
     if (!orgId) return
@@ -60,11 +72,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
 
   async function fetchCampaigns() {
     setLoading(true)
-    const { data } = await supabase.from('campaigns')
-      .select('*')
-      .eq('org_id', orgId)
-      .eq('archived', showArchived)
-      .order('created_at', { ascending: false })
+    let q = supabase.from('campaigns').select('*').eq('org_id', orgId)
+    if (view !== 'board') q = q.eq('archived', showArchived)
+    const { data } = await q.order('created_at', { ascending: false })
     setCampaigns(data || [])
     if (data?.length) fetchCreatorCounts(data.map(c => c.id))
     setSelected(sel => sel ? (data || []).find(d => d.id === sel.id) || sel : null)
@@ -110,7 +120,30 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     if (error) {
       alert(`Could not update: ${error.message}`)
       fetchCampaigns()
+      return
     }
+    if (field === 'status') {
+      const c = campaigns.find(x => x.id === id)
+      if (c) { try { await syncCampaignToTask({ ...c, status: value }, orgId) } catch (_) {} }
+    }
+  }
+
+  async function moveToColumn(campaignId, columnKey) {
+    const c = campaigns.find(x => x.id === campaignId)
+    if (!c) return
+    if (columnKey === '__archived') {
+      if (c.archived) return
+      setCampaigns(cs => cs.map(x => x.id === campaignId ? { ...x, archived: true } : x))
+      const { error } = await supabase.from('campaigns').update({ archived: true }).eq('id', campaignId)
+      if (error) { alert(`Could not archive: ${error.message}`); fetchCampaigns() }
+      return
+    }
+    const updates = { status: columnKey }
+    if (c.archived) updates.archived = false
+    setCampaigns(cs => cs.map(x => x.id === campaignId ? { ...x, ...updates } : x))
+    const { error } = await supabase.from('campaigns').update(updates).eq('id', campaignId)
+    if (error) { alert(`Could not move: ${error.message}`); fetchCampaigns(); return }
+    try { await syncCampaignToTask({ ...c, ...updates }, orgId) } catch (_) {}
   }
 
   const filtered = campaigns
@@ -382,6 +415,83 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               <div style={{ fontSize: '12px', color: text, fontWeight: 500 }}>{c.budget != null ? `$${Number(c.budget).toLocaleString()}` : '—'}</div>
             </div>
           ))}
+        </div>
+      )}
+
+      {!loading && view === 'board' && !isMobile && (
+        <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '16px 20px 100px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+          {BOARD_COLUMNS.map(col => {
+            const isArchivedCol = col.key === '__archived'
+            const colCampaigns = isArchivedCol
+              ? filtered.filter(c => c.archived)
+              : filtered.filter(c => !c.archived && (c.status || 'Pitch') === col.key)
+            const collapsed = isArchivedCol && !archivedExpanded
+            const colWidth = collapsed ? 56 : 280
+            const isOver = dragOverCol === col.key
+            return (
+              <div key={col.key}
+                onDragOver={e => { e.preventDefault(); setDragOverCol(col.key) }}
+                onDragLeave={() => setDragOverCol(null)}
+                onDrop={e => { e.preventDefault(); if (dragging) moveToColumn(dragging, col.key); setDragging(null); setDragOverCol(null) }}
+                style={{ width: colWidth, flexShrink: 0, background: isOver ? (dark ? '#1f2a35' : '#EEF3F7') : (dark ? '#141414' : '#EFEBE3'), border: `0.5px solid ${isOver ? '#5b7c99' : border}`, borderRadius: '2px', padding: collapsed ? '12px 8px' : '12px', minHeight: '200px', maxHeight: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column', transition: 'width 0.2s' }}>
+                <div onClick={isArchivedCol ? () => setArchivedExpanded(e => !e) : undefined}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: collapsed ? 0 : '10px', cursor: isArchivedCol ? 'pointer' : 'default', writingMode: collapsed ? 'vertical-rl' : 'horizontal-tb', transform: collapsed ? 'rotate(180deg)' : 'none' }}>
+                  <div style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: muted, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {col.label}
+                    <span style={{ fontSize: '9px', color: subtle, fontWeight: 400 }}>{colCampaigns.length}</span>
+                  </div>
+                  {isArchivedCol && !collapsed && (
+                    <button onClick={e => { e.stopPropagation(); setArchivedExpanded(false) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 2px' }}>×</button>
+                  )}
+                </div>
+                {!collapsed && (
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {colCampaigns.length === 0 && (
+                      <div style={{ fontSize: '10px', color: subtle, padding: '12px 4px', fontStyle: 'italic' }}>{isArchivedCol ? 'Nothing archived.' : 'Drop a campaign here.'}</div>
+                    )}
+                    {colCampaigns.map(c => (
+                      <div key={c.id}
+                        draggable
+                        onDragStart={() => setDragging(c.id)}
+                        onDragEnd={() => { setDragging(null); setDragOverCol(null) }}
+                        onClick={() => setSelected(c)}
+                        style={{ background: dark ? '#1A1A1A' : '#FFFFFF', border: `0.5px solid ${border}`, borderRadius: '2px', padding: '10px', cursor: 'pointer', opacity: dragging === c.id ? 0.4 : 1, transition: 'opacity 0.15s' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                          {c.brand_logo_url
+                            ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '3px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                            : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
+                          }
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', color: text, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '3px' }}>{c.name}</div>
+                            <div style={{ fontSize: '10px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || 'No brand'}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px', justifyContent: 'space-between' }}>
+                          {c.campaign_type && <span style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99' }}>{c.campaign_type}</span>}
+                          {(campaignTalent[c.id] || []).length > 0 && (
+                            <div style={{ display: 'inline-flex', alignItems: 'center' }}>
+                              {(campaignTalent[c.id] || []).slice(0, 3).map((t, i) => (
+                                <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -5, zIndex: 3 - i }}>
+                                  {t.photo_url
+                                    ? <img src={t.photo_url} alt={t.name} style={{ width: '18px', height: '18px', borderRadius: '50%', objectFit: 'cover', border: `1.5px solid ${dark ? '#1A1A1A' : '#FFFFFF'}` }} />
+                                    : <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `1.5px solid ${dark ? '#1A1A1A' : '#FFFFFF'}` }}>{(t.name || '?').charAt(0).toUpperCase()}</div>
+                                  }
+                                </div>
+                              ))}
+                              {(campaignTalent[c.id] || []).length > 3 && (
+                                <div style={{ marginLeft: -5, fontSize: '8px', color: subtle, paddingLeft: '6px' }}>+{(campaignTalent[c.id] || []).length - 3}</div>
+                              )}
+                            </div>
+                          )}
+                          {c.budget != null && <div style={{ fontSize: '10px', color: text, fontWeight: 500, marginLeft: 'auto' }}>${Number(c.budget).toLocaleString()}</div>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
