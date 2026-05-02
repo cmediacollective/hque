@@ -202,7 +202,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                 <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-                  <div style={{ fontSize: '11px', color: muted, marginBottom: '6px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
+                  <div style={{ fontSize: '11px', color: muted, marginBottom: '6px' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>
                   <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6, height: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{Array.isArray(c.niches) && c.niches.length > 0 ? c.niches.slice(0, 2).join(' · ') + (c.niches.length > 2 ? ' +' + (c.niches.length - 2) : '') : ''}</div>
                 </div>
               </div>
@@ -243,7 +243,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                 <Avatar creator={c} size={40} square={true} />
                 <div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text }}>{c.name}</div>
-                  <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{c.handles?.instagram ? `@${c.handles.instagram}` : ''}</div>
+                  <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>
                 </div>
               </div>
               <div style={{ fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5b7c99' }}>{displayType(c)}</div>

@@ -33,8 +33,14 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [search, setSearch] = useState('')
   const [showArchived, setShowArchived] = useState(false)
   const [archiving, setArchiving] = useState(null)
+  const [members, setMembers] = useState([])
 
   useEffect(() => { fetchCampaigns() }, [showArchived, orgId])
+
+  useEffect(() => {
+    if (!orgId) return
+    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+  }, [orgId])
 
   async function fetchCampaigns() {
     setLoading(true)
@@ -127,6 +133,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
           campaign={selected}
           dark={!dark}
           orgId={orgId}
+          members={members}
           onClose={() => setSelected(null)}
           onSaved={() => { setSelected(null); fetchCampaigns() }}
         />

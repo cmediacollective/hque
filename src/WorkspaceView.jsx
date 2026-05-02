@@ -3,22 +3,8 @@ import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
-
-async function createNotification(orgId, memberName, type, message, profiles, taskId = null) {
-  const profile = profiles.find(p => (p.full_name || p.email) === memberName)
-  if (!profile) return
-  await supabase.from('notifications').insert([{ org_id: orgId, user_id: profile.id, type, message, task_id: taskId }])
-  await fetch('/.netlify/functions/send-notification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: profile.id, type, message }) })
-}
-
-async function parseMentions(description, orgId, message, profiles, taskId = null) {
-  if (!description) return
-  const mentions = description.match(/@([\w. ]+)/g) || []
-  for (const mention of mentions) {
-    const name = mention.slice(1).trim()
-    await createNotification(orgId, name, 'mention', message, profiles, taskId)
-  }
-}
+import { createNotification, parseMentions } from './notify'
+import { syncTaskColumnToCampaign } from './campaignSync'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -277,6 +263,9 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
+    if (form.column_id) {
+      try { await syncTaskColumnToCampaign(form.id, form.column_id) } catch (e) { console.warn('task→campaign sync failed', e) }
+    }
     fetchTasks()
     await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
   }
@@ -284,6 +273,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   async function moveTask(taskId, newColumnId) {
     await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
     setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
+    try { await syncTaskColumnToCampaign(taskId, newColumnId) } catch (e) { console.warn('task→campaign sync failed', e) }
   }
 
   async function deleteTask(taskId) {

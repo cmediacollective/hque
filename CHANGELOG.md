@@ -4,6 +4,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-02
+
+**Campaigns now have team comments.** The campaign detail panel has a new Comments section at the bottom that works just like task comments: post, edit, delete your own. URLs and email addresses are clickable. Type `@` and a dropdown of your teammates appears — pick one and they get a notification (in-app + email) that they were mentioned. Required one-time Supabase setup: `campaign_comments` table (SQL provided separately).
+
+**Campaigns auto-create a workspace task — and the two stay in sync.** When you save a new campaign, a task with the campaign's name lands in the **To Do** column of that brand's workspace board (or your Internal board if there's no brand). After that, the two are linked: change the campaign's status and the task moves columns automatically (Pitch → To Do, Active → In Progress, Pending Payment → Review, Completed → Done). Drag the task to a new column in the workspace and the campaign's status updates to match. Existing campaigns get a task the next time you save them. Required one-time Supabase setup: `campaign_id` column on `tasks` (SQL provided separately).
+
+**Instagram handles on talent are clickable.** The `@handle` shown on the talent grid, talent list view, talent inside a campaign card, talent search dropdown, and the talent detail header all now open the Instagram profile in a new tab. (Outside of those handle fields — in notes, comments, descriptions — paste the full URL like `instagram.com/cherie` or `https://example.com` to make it a link, same as before.)
+
 ## 2026-04-28
 
 **Talent grid is now responsive on desktop.** The talent tab no longer locks to four cards across — as the window narrows, cards reflow from four → three → two columns instead of squeezing and clipping the copy inside each card. Each card holds a minimum width (~280px), and the grid fits as many as the window allows. Mobile stays one card per row as before.

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import Linkify from './Linkify'
+import { createNotification, parseMentions } from './notify'
 
 const PAYMENT_METHODS = ['PayPal', 'Venmo', 'Wire Transfer', 'Check', 'ACH', 'Other']
 
@@ -110,14 +111,95 @@ function TalentEditor({ link, onSave, onCancel }) {
   )
 }
 
-export default function CampaignDetail({ campaign: initialCampaign, onClose, onSaved, dark = true }) {
+export default function CampaignDetail({ campaign: initialCampaign, onClose, onSaved, dark = true, orgId, members = [] }) {
   const [campaign, setCampaign] = useState(initialCampaign)
   const [editing, setEditing] = useState(false)
   const [creatorLinks, setCreatorLinks] = useState([])
   const [preview, setPreview] = useState(null)
   const [editingLink, setEditingLink] = useState(null)
 
-  useEffect(() => { fetchCampaign(); fetchCreators() }, [initialCampaign.id])
+  const [comments, setComments] = useState([])
+  const [loadingComments, setLoadingComments] = useState(true)
+  const [newComment, setNewComment] = useState('')
+  const [postingComment, setPostingComment] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState(null)
+  const [editingCommentId, setEditingCommentId] = useState(null)
+  const [editingBody, setEditingBody] = useState('')
+  const [showCommentMentions, setShowCommentMentions] = useState(false)
+  const [commentMentionQuery, setCommentMentionQuery] = useState('')
+
+  useEffect(() => { fetchCampaign(); fetchCreators(); fetchComments(); fetchCurrentUser() }, [initialCampaign.id])
+
+  async function fetchCurrentUser() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) setCurrentUserId(user.id)
+  }
+
+  async function fetchComments() {
+    setLoadingComments(true)
+    const { data } = await supabase
+      .from('campaign_comments')
+      .select('*')
+      .eq('campaign_id', initialCampaign.id)
+      .order('created_at', { ascending: true })
+    setComments(data || [])
+    setLoadingComments(false)
+  }
+
+  async function postComment() {
+    if (!newComment.trim()) return
+    setPostingComment(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setPostingComment(false); return }
+    const body = newComment.trim()
+    const { error } = await supabase.from('campaign_comments').insert([{
+      campaign_id: initialCampaign.id,
+      user_id: user.id,
+      body
+    }])
+    setPostingComment(false)
+    if (!error) {
+      setNewComment('')
+      fetchComments()
+      if (orgId) {
+        await parseMentions(body, orgId, `You were mentioned in a comment on campaign: ${campaign.name}`, members)
+      }
+    }
+  }
+
+  async function saveCommentEdit(id) {
+    if (!editingBody.trim()) return
+    await supabase.from('campaign_comments').update({ body: editingBody.trim(), edited_at: new Date().toISOString() }).eq('id', id)
+    setEditingCommentId(null)
+    setEditingBody('')
+    fetchComments()
+  }
+
+  async function deleteComment(id) {
+    if (!confirm('Delete this comment?')) return
+    await supabase.from('campaign_comments').delete().eq('id', id)
+    fetchComments()
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return ''
+    const diff = Date.now() - new Date(iso).getTime()
+    const s = Math.floor(diff / 1000)
+    if (s < 60) return 'just now'
+    const m = Math.floor(s / 60)
+    if (m < 60) return `${m}m ago`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `${h}h ago`
+    const d = Math.floor(h / 24)
+    if (d < 7) return `${d}d ago`
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  function fullTime(iso) {
+    return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
+  }
+
+  const initialFromName = (n) => (n || '?').trim().charAt(0).toUpperCase()
 
   async function fetchCampaign() {
     const { data } = await supabase.from('campaigns').select('*').eq('id', initialCampaign.id).single()
@@ -292,7 +374,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: '13px', color: '#F0ECE6' }}>{link.creator.name}</div>
                           <div style={{ display: 'flex', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
-                            {link.creator.handles?.instagram && <span style={{ fontSize: '10px', color: '#777' }}>@{link.creator.handles.instagram}</span>}
+                            {link.creator.handles?.instagram && <a href={`https://instagram.com/${link.creator.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '10px', color: '#777', textDecoration: 'none' }}>@{link.creator.handles.instagram}</a>}
                             {link.role && <span style={{ fontSize: '9px', color: '#5b7c99', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{link.role}</span>}
                           </div>
                           {(link.views || link.likes || link.reach) && (
@@ -333,6 +415,97 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 </div>
               </>
             )}
+
+            <div style={{ borderTop: '0.5px solid #2A2A2A', marginTop: '36px', paddingTop: '24px' }}>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '14px' }}>Comments{comments.length > 0 ? ` (${comments.length})` : ''}</div>
+
+              {loadingComments && <div style={{ fontSize: '11px', color: '#666', padding: '6px 0' }}>Loading...</div>}
+              {!loadingComments && comments.length === 0 && <div style={{ fontSize: '11px', color: '#666', padding: '6px 0', marginBottom: '8px' }}>No comments yet. Be the first.</div>}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
+                {comments.map(c => {
+                  const author = members.find(m => m.id === c.user_id)
+                  const authorName = author?.full_name || author?.email || 'Unknown'
+                  const isMine = c.user_id === currentUserId
+                  const isEditing = editingCommentId === c.id
+                  return (
+                    <div key={c.id} style={{ display: 'flex', gap: '10px' }}>
+                      {author?.avatar_url ? (
+                        <img src={author.avatar_url} alt='' style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, flexShrink: 0 }}>{initialFromName(authorName)}</span>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+                          <span style={{ fontSize: '12px', color: '#F0ECE6', fontWeight: 500 }}>{authorName}</span>
+                          <span title={fullTime(c.created_at)} style={{ fontSize: '10px', color: '#666' }}>{timeAgo(c.created_at)}{c.edited_at ? ' · edited' : ''}</span>
+                          {isMine && !isEditing && (
+                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditingBody(c.body) }} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Edit</button>
+                              <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>
+                            </div>
+                          )}
+                        </div>
+                        {isEditing ? (
+                          <div>
+                            <textarea value={editingBody} onChange={e => setEditingBody(e.target.value)} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: '#F0ECE6', outline: 'none', resize: 'vertical', minHeight: '60px', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                            <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                              <button onClick={() => saveCommentEdit(c.id)} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Save</button>
+                              <button onClick={() => { setEditingCommentId(null); setEditingBody('') }} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #2A2A2A', color: '#666', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '12px', color: '#F0ECE6', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} /></div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div style={{ borderTop: '0.5px solid #2A2A2A', paddingTop: '14px', position: 'relative' }}>
+                <textarea
+                  value={newComment}
+                  onChange={e => {
+                    const val = e.target.value
+                    setNewComment(val)
+                    const match = val.match(/(?:^|\s)@([\w.]*)$/)
+                    if (match) { setShowCommentMentions(true); setCommentMentionQuery(match[1]) }
+                    else { setShowCommentMentions(false); setCommentMentionQuery('') }
+                  }}
+                  onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) postComment() }}
+                  placeholder='Add a comment... (use @ to mention, Cmd+Enter to post)'
+                  style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: '#F0ECE6', outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+                />
+                {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
+                  <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, background: '#141414', border: '0.5px solid #2A2A2A', borderRadius: '1px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                    {members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).map(m => (
+                      <div key={m.id}
+                        onClick={() => {
+                          const name = (m.full_name || m.email).split(' ')[0]
+                          const val = newComment.replace(/@[\w.]*$/, `@${name} `)
+                          setNewComment(val)
+                          setShowCommentMentions(false)
+                          setCommentMentionQuery('')
+                        }}
+                        style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#1a1a1a'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
+                        )}
+                        <span style={{ fontSize: '12px', color: '#F0ECE6' }}>{m.full_name || m.email}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : '0.5px solid #2A2A2A', color: newComment.trim() ? '#fff' : '#666', cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
+                  {postingComment ? 'Posting...' : 'Comment'}
+                </button>
+              </div>
+            </div>
 
           </div>
         </div>

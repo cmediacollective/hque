@@ -264,7 +264,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               <div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(creator)}</div>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: panelText, marginBottom: '2px' }}>{creator.name}</div>
-                <div style={{ fontSize: '12px', color: panelMuted }}>{creator.handles?.instagram ? `@${creator.handles.instagram}` : ''}</div>
+                <div style={{ fontSize: '12px', color: panelMuted }}>{creator.handles?.instagram ? <a href={`https://instagram.com/${creator.handles.instagram}`} target='_blank' rel='noreferrer' style={{ color: panelMuted, textDecoration: 'none' }}>@{creator.handles.instagram}</a> : ''}</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
