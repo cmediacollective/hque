@@ -180,6 +180,17 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     setUploadingLogo(false)
   }
 
+  async function handleBrandLogoRemove() {
+    if (!form.brand_id || !form.brand_logo_url) return
+    if (!confirm('Remove this brand\'s logo?')) return
+    setUploadingLogo(true)
+    const { error: brandErr } = await supabase.from('brands').update({ logo_url: null }).eq('id', form.brand_id)
+    if (brandErr) { setUploadingLogo(false); alert('Could not remove logo: ' + brandErr.message); return }
+    setBrands(bs => bs.map(b => b.id === form.brand_id ? { ...b, logo_url: null } : b))
+    setForm(f => ({ ...f, brand_logo_url: '' }))
+    setUploadingLogo(false)
+  }
+
   async function handleSave() {
     if (!form.name.trim()) return setError('Campaign name is required')
     setSaving(true)
@@ -296,6 +307,11 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
                   {uploadingLogo ? '...' : (form.brand_logo_url ? 'Change logo' : 'Add logo')}
                   <input type='file' accept='image/*' onChange={e => { handleBrandLogoUpload(e.target.files?.[0]); e.target.value = '' }} style={{ display: 'none' }} disabled={uploadingLogo} />
                 </label>
+                {form.brand_logo_url && (
+                  <button type='button' onClick={handleBrandLogoRemove} disabled={uploadingLogo} title="Remove this brand's logo" style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: uploadingLogo ? 'wait' : 'pointer', borderRadius: '1px', flexShrink: 0, opacity: uploadingLogo ? 0.6 : 1 }}>
+                    Remove
+                  </button>
+                )}
               </div>
             )}
             {showNewBrand && (

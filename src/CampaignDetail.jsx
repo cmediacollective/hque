@@ -305,7 +305,12 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 <div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{campaign.brand || 'Campaign'}{campaign.brand_website && (<a href={campaign.brand_website.startsWith('http') ? campaign.brand_website : 'https://' + campaign.brand_website} target='_blank' rel='noreferrer' style={{ marginLeft: '8px', fontSize: '8px', letterSpacing: '0.14em', color: '#fff', background: '#5b7c99', padding: '3px 8px', borderRadius: '1px', textDecoration: 'none', textTransform: 'uppercase' }}>↗ Website</a>)}</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '10px' }}>{campaign.name}</div>
-                  <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
+                    {campaign.campaign_type && (
+                      <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: '0.5px solid #5b7c99', color: '#5b7c99', borderRadius: '1px' }}>{campaign.campaign_type}</span>
+                    )}
+                  </div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>

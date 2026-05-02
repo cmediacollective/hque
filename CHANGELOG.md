@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Remove a brand logo without recreating the brand.** A "Remove" button now sits next to "Change logo" in the campaign form whenever a brand has a logo. Click it (with a confirm prompt) and the logo clears from the brand record everywhere.
+
+**Campaign type now shows in the campaign detail panel.** Open any campaign and you'll see a small badge next to the Status pill — Paid, Non-paid, Gifting, or Seeding — so you don't have to open the form to check what kind of campaign it is.
+
 **Brand logo can now be added or changed from the campaign form.** When a brand is linked to a campaign, a small "Add logo" or "Change logo" button sits next to the brand name. Click it, pick a file, and the logo updates on the brand record everywhere — no need to delete and recreate the brand. The brand row is now always visible whenever a brand is linked (used to only show when a logo was already set).
 
 **Brand info on a campaign now falls back to the brand record.** If a campaign was saved with `brand_id` set but the cached name/logo/website got out of sync, the campaign detail panel pulls those fields fresh from the linked brand. Same on the form — if a legacy campaign has the brand name as text but no `brand_id`, opening it in the form auto-matches by name and links it for you.
