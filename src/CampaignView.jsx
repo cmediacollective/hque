@@ -245,7 +245,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                       onClick={e => e.stopPropagation()}
                       title='Campaign type'
                       style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', flex: 1, minWidth: 0, maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}>
-                      {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => <option key={t} value={t}>{t}</option>)}
+                      {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                     <select
                       value={c.status || 'Pitch'}
@@ -355,7 +355,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                 onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'campaign_type', e.target.value) }}
                 onClick={e => e.stopPropagation()}
                 style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center', width: 'fit-content' }}>
-                {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => <option key={t} value={t}>{t}</option>)}
+                {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
 
               <select

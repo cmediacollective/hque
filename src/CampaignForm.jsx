@@ -342,29 +342,15 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         {field('Brand Website', inp({ value: form.brand_website || '', onChange: e => set('brand_website', e.target.value), placeholder: 'e.g. example.com' }))}
 
         {field('Campaign Type',
-          <div style={{ display: 'flex', gap: '6px' }}>
-            {['Paid', 'Non-paid', 'Gifting', 'Seeding'].map(t => (
-              <button key={t} onClick={() => set('campaign_type', t)} style={{
-                padding: '6px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                border: `0.5px solid ${form.campaign_type === t ? '#5b7c99' : border}`,
-                color: form.campaign_type === t ? '#5b7c99' : labelColor,
-                background: 'none', cursor: 'pointer', borderRadius: '1px'
-              }}>{t}</button>
-            ))}
-          </div>
+          <select value={form.campaign_type || 'Paid'} onChange={e => set('campaign_type', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+            {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
         )}
 
         {field('Status',
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => (
-              <button key={s} onClick={() => set('status', s)} style={{
-                padding: '6px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                border: `0.5px solid ${form.status === s ? '#5b7c99' : border}`,
-                color: form.status === s ? '#5b7c99' : labelColor,
-                background: 'none', cursor: 'pointer', borderRadius: '1px'
-              }}>{s}</button>
-            ))}
-          </div>
+          <select value={form.status || 'Pitch'} onChange={e => set('status', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+            {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
         )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
