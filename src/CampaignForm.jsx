@@ -69,6 +69,22 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     fetchLinkedTalent()
   }, [existing?.id])
 
+  // Auto-link legacy campaigns: if existing has brand text but no brand_id, match by name
+  useEffect(() => {
+    if (!existing?.id || !brands.length || form.brand_id) return
+    if (!existing.brand) return
+    const matched = brands.find(b => (b.name || '').toLowerCase() === existing.brand.toLowerCase())
+    if (matched) {
+      setForm(f => ({
+        ...f,
+        brand_id: matched.id,
+        brand: matched.name,
+        brand_logo_url: f.brand_logo_url || matched.logo_url || '',
+        brand_website: f.brand_website || matched.website || ''
+      }))
+    }
+  }, [existing?.id, brands.length])
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const selectBrand = (brandId) => {
@@ -149,16 +165,34 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     setUploadingLogo(false)
   }
 
+  async function handleBrandLogoUpload(file) {
+    if (!file || !form.brand_id) return
+    setUploadingLogo(true)
+    const ext = file.name.split('.').pop()
+    const path = 'brand-logos/' + Date.now() + '.' + ext
+    const { error: uploadErr } = await supabase.storage.from('media-kits').upload(path, file, { upsert: true })
+    if (uploadErr) { setUploadingLogo(false); alert('Logo upload failed: ' + uploadErr.message); return }
+    const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
+    const { error: brandErr } = await supabase.from('brands').update({ logo_url: publicUrl }).eq('id', form.brand_id)
+    if (brandErr) { setUploadingLogo(false); alert('Could not save logo to brand: ' + brandErr.message); return }
+    setBrands(bs => bs.map(b => b.id === form.brand_id ? { ...b, logo_url: publicUrl } : b))
+    setForm(f => ({ ...f, brand_logo_url: publicUrl }))
+    setUploadingLogo(false)
+  }
+
   async function handleSave() {
     if (!form.name.trim()) return setError('Campaign name is required')
     setSaving(true)
     setError('')
+    const linkedBrand = form.brand_id ? brands.find(b => b.id === form.brand_id) : null
+    const resolvedBrandText = (form.brand && form.brand.trim()) || linkedBrand?.name || null
+    const resolvedBrandLogo = form.brand_logo_url || linkedBrand?.logo_url || null
     const payload = {
       org_id: orgId,
       name: form.name,
       brand_id: form.brand_id || null,
-      brand: form.brand || null,
-      brand_logo_url: form.brand_logo_url || null,
+      brand: resolvedBrandText,
+      brand_logo_url: resolvedBrandLogo,
       brand_website: form.brand_website || null,
       campaign_type: form.campaign_type,
       status: form.status,
@@ -197,10 +231,14 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       try { await syncCampaignToTask(savedCampaign, orgId) } catch (e) { console.warn('campaign→task sync failed', e) }
     }
     if (form.brand_id && form.brand_website !== undefined) {
-      const linkedBrand = brands.find(b => b.id === form.brand_id)
       const newSite = (form.brand_website || '').trim() || null
       if (linkedBrand && (linkedBrand.website || null) !== newSite) {
-        try { await supabase.from('brands').update({ website: newSite }).eq('id', form.brand_id) } catch (e) { console.warn('brand website sync failed', e) }
+        const { error: brandUpdErr } = await supabase.from('brands').update({ website: newSite }).eq('id', form.brand_id)
+        if (brandUpdErr) {
+          console.warn('brand website sync failed', brandUpdErr)
+        } else {
+          setBrands(bs => bs.map(b => b.id === form.brand_id ? { ...b, website: newSite } : b))
+        }
       }
     }
     setSaving(false)
@@ -246,11 +284,18 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
                 {showNewBrand ? 'Cancel' : '+ New'}
               </button>
             </div>
-            {form.brand_id && form.brand_logo_url && (
+            {form.brand_id && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', padding: '8px 12px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-                <img src={form.brand_logo_url} alt={form.brand} style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '2px', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
-                <span style={{ fontSize: '12px', color: text, flex: 1 }}>{form.brand}</span>
-                {form.brand_website && <a href={form.brand_website.startsWith('http') ? form.brand_website : 'https://' + form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 30)} ↗</a>}
+                {form.brand_logo_url
+                  ? <img src={form.brand_logo_url} alt={form.brand} style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '2px', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: '#5b7c99', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '14px', flexShrink: 0 }}>{(form.brand || '?').charAt(0).toUpperCase()}</div>
+                }
+                <span style={{ fontSize: '12px', color: text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.brand}</span>
+                {form.brand_website && <a href={form.brand_website.startsWith('http') ? form.brand_website : 'https://' + form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 24)} ↗</a>}
+                <label title='Upload or change the logo for this brand' style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: uploadingLogo ? 'wait' : 'pointer', borderRadius: '1px', flexShrink: 0, opacity: uploadingLogo ? 0.6 : 1 }}>
+                  {uploadingLogo ? '...' : (form.brand_logo_url ? 'Change logo' : 'Add logo')}
+                  <input type='file' accept='image/*' onChange={e => { handleBrandLogoUpload(e.target.files?.[0]); e.target.value = '' }} style={{ display: 'none' }} disabled={uploadingLogo} />
+                </label>
               </div>
             )}
             {showNewBrand && (

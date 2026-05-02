@@ -162,10 +162,12 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     setPostingComment(false)
     if (error) {
       const msg = error.message || ''
-      if (msg.toLowerCase().includes('campaign_comments') && (error.code === '42P01' || msg.toLowerCase().includes('does not exist'))) {
-        setCommentError('Comments table is not set up in Supabase yet. Run the SQL from chat in Supabase → SQL Editor, then try again.')
-      } else if (error.code === '42501' || msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('policy')) {
-        setCommentError(`Permission blocked by Supabase RLS. (${msg})`)
+      const lower = msg.toLowerCase()
+      const isMissingTable = lower.includes('campaign_comments') && (lower.includes('schema cache') || lower.includes('does not exist') || lower.includes('could not find') || error.code === '42P01' || error.code === 'PGRST205')
+      if (isMissingTable) {
+        setCommentError("The 'campaign_comments' table doesn't exist in Supabase yet. Open Supabase → SQL Editor → paste the SQL Claude sent → click Run. Then refresh and try again.")
+      } else if (error.code === '42501' || lower.includes('row-level security') || lower.includes('policy')) {
+        setCommentError(`Blocked by Supabase row-level-security. (${msg})`)
       } else {
         setCommentError(`Could not post: ${msg || 'unknown error'}`)
       }
@@ -214,7 +216,20 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
 
   async function fetchCampaign() {
     const { data } = await supabase.from('campaigns').select('*').eq('id', initialCampaign.id).single()
-    if (data) setCampaign(data)
+    if (!data) return
+    let merged = data
+    if (data.brand_id && (!data.brand || !data.brand_logo_url || !data.brand_website)) {
+      const { data: b } = await supabase.from('brands').select('name, logo_url, website').eq('id', data.brand_id).maybeSingle()
+      if (b) {
+        merged = {
+          ...data,
+          brand: data.brand || b.name,
+          brand_logo_url: data.brand_logo_url || b.logo_url,
+          brand_website: data.brand_website || b.website
+        }
+      }
+    }
+    setCampaign(merged)
   }
 
   async function fetchCreators() {

@@ -6,6 +6,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Brand logo can now be added or changed from the campaign form.** When a brand is linked to a campaign, a small "Add logo" or "Change logo" button sits next to the brand name. Click it, pick a file, and the logo updates on the brand record everywhere — no need to delete and recreate the brand. The brand row is now always visible whenever a brand is linked (used to only show when a logo was already set).
+
+**Brand info on a campaign now falls back to the brand record.** If a campaign was saved with `brand_id` set but the cached name/logo/website got out of sync, the campaign detail panel pulls those fields fresh from the linked brand. Same on the form — if a legacy campaign has the brand name as text but no `brand_id`, opening it in the form auto-matches by name and links it for you.
+
+**Better comment-error messages.** The "comments table doesn't exist" detection now matches Supabase's actual wording ("Could not find the table … in the schema cache") and gives a step-by-step instruction to run the SQL.
+
 **Brand website is now editable on the campaign form.** A new **Brand Website** field sits right under the Brand selector — type or paste a URL once and it saves to both the campaign and the brand record itself, so every future campaign for that brand auto-fills from then on. The inline "+ New" brand creator also has a Website field now, so brands can be created with a website from day one.
 
 **Past campaigns get backfilled into the workspace.** When you open the Campaigns tab, any non-archived campaign that doesn't already have a workspace task gets one created in the right column for its status (Pitch → To Do, Active → In Progress, etc.). Runs once per session, idempotent — no duplicates if you reload.
