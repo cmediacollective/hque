@@ -127,6 +127,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
   const [editingBody, setEditingBody] = useState('')
   const [showCommentMentions, setShowCommentMentions] = useState(false)
   const [commentMentionQuery, setCommentMentionQuery] = useState('')
+  const [commentError, setCommentError] = useState('')
 
   useEffect(() => { fetchCampaign(); fetchCreators(); fetchComments(); fetchCurrentUser() }, [initialCampaign.id])
 
@@ -149,8 +150,9 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
   async function postComment() {
     if (!newComment.trim()) return
     setPostingComment(true)
+    setCommentError('')
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setPostingComment(false); return }
+    if (!user) { setPostingComment(false); setCommentError('Not signed in.'); return }
     const body = newComment.trim()
     const { error } = await supabase.from('campaign_comments').insert([{
       campaign_id: initialCampaign.id,
@@ -158,12 +160,21 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
       body
     }])
     setPostingComment(false)
-    if (!error) {
-      setNewComment('')
-      fetchComments()
-      if (orgId) {
-        await parseMentions(body, orgId, `You were mentioned in a comment on campaign: ${campaign.name}`, members)
+    if (error) {
+      const msg = error.message || ''
+      if (msg.toLowerCase().includes('campaign_comments') && (error.code === '42P01' || msg.toLowerCase().includes('does not exist'))) {
+        setCommentError('Comments table is not set up in Supabase yet. Run the SQL from chat in Supabase → SQL Editor, then try again.')
+      } else if (error.code === '42501' || msg.toLowerCase().includes('row-level security') || msg.toLowerCase().includes('policy')) {
+        setCommentError(`Permission blocked by Supabase RLS. (${msg})`)
+      } else {
+        setCommentError(`Could not post: ${msg || 'unknown error'}`)
       }
+      return
+    }
+    setNewComment('')
+    fetchComments()
+    if (orgId) {
+      await parseMentions(body, orgId, `You were mentioned in a comment on campaign: ${campaign.name}`, members)
     }
   }
 
@@ -504,6 +515,9 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : '0.5px solid #2A2A2A', color: newComment.trim() ? '#fff' : '#666', cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
                   {postingComment ? 'Posting...' : 'Comment'}
                 </button>
+                {commentError && (
+                  <div style={{ marginTop: '10px', fontSize: '11px', color: '#e74c3c', lineHeight: 1.5, padding: '8px 10px', background: 'rgba(231, 76, 60, 0.08)', border: '0.5px solid rgba(231, 76, 60, 0.3)', borderRadius: '1px' }}>{commentError}</div>
+                )}
               </div>
             </div>
 

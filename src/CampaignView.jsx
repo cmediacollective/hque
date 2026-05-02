@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
+import { syncCampaignToTask } from './campaignSync'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -41,6 +42,21 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     if (!orgId) return
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
+
+  const backfilledRef = useRef(false)
+  useEffect(() => {
+    if (!orgId || campaigns.length === 0 || backfilledRef.current || showArchived) return
+    backfilledRef.current = true
+    ;(async () => {
+      const ids = campaigns.map(c => c.id)
+      const { data: linked } = await supabase.from('tasks').select('campaign_id').in('campaign_id', ids)
+      const linkedSet = new Set((linked || []).map(t => t.campaign_id).filter(Boolean))
+      const missing = campaigns.filter(c => !linkedSet.has(c.id))
+      for (const c of missing) {
+        try { await syncCampaignToTask(c, orgId) } catch (_) { /* skip on error, e.g. missing column */ }
+      }
+    })()
+  }, [orgId, campaigns.length, showArchived])
 
   async function fetchCampaigns() {
     setLoading(true)

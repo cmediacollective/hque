@@ -6,6 +6,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-02
 
+**Brand website is now editable on the campaign form.** A new **Brand Website** field sits right under the Brand selector — type or paste a URL once and it saves to both the campaign and the brand record itself, so every future campaign for that brand auto-fills from then on. The inline "+ New" brand creator also has a Website field now, so brands can be created with a website from day one.
+
+**Past campaigns get backfilled into the workspace.** When you open the Campaigns tab, any non-archived campaign that doesn't already have a workspace task gets one created in the right column for its status (Pitch → To Do, Active → In Progress, etc.). Runs once per session, idempotent — no duplicates if you reload.
+
+**Comment errors now show on screen.** If posting a campaign comment fails, the reason appears under the Comment button instead of silently doing nothing. Most common reason: the `campaign_comments` table hasn't been created in Supabase yet — the message will tell you so.
+
 **Campaigns now have team comments.** The campaign detail panel has a new Comments section at the bottom that works just like task comments: post, edit, delete your own. URLs and email addresses are clickable. Type `@` and a dropdown of your teammates appears — pick one and they get a notification (in-app + email) that they were mentioned. Required one-time Supabase setup: `campaign_comments` table (SQL provided separately).
 
 **Campaigns auto-create a workspace task — and the two stay in sync.** When you save a new campaign, a task with the campaign's name lands in the **To Do** column of that brand's workspace board (or your Internal board if there's no brand). After that, the two are linked: change the campaign's status and the task moves columns automatically (Pitch → To Do, Active → In Progress, Pending Payment → Review, Completed → Done). Drag the task to a new column in the workspace and the campaign's status updates to match. Existing campaigns get a task the next time you save them. Required one-time Supabase setup: `campaign_id` column on `tasks` (SQL provided separately).

@@ -38,6 +38,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
   const [brands, setBrands] = useState([])
   const [showNewBrand, setShowNewBrand] = useState(false)
   const [newBrandName, setNewBrandName] = useState('')
+  const [newBrandWebsite, setNewBrandWebsite] = useState('')
   const [newBrandLogoFile, setNewBrandLogoFile] = useState(null)
   const [creatingBrand, setCreatingBrand] = useState(false)
   const [talentSearch, setTalentSearch] = useState("")
@@ -99,10 +100,12 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         logo_url = publicUrl
       }
     }
+    const websiteClean = newBrandWebsite.trim()
     const { data, error: insertErr } = await supabase.from('brands').insert([{
       org_id: orgId,
       name: newBrandName.trim(),
       logo_url,
+      website: websiteClean || null,
       status: 'active'
     }]).select().single()
     setCreatingBrand(false)
@@ -121,6 +124,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         brand_website: data.website || ''
       }))
       setNewBrandName('')
+      setNewBrandWebsite('')
       setNewBrandLogoFile(null)
       setShowNewBrand(false)
       setError('')
@@ -192,6 +196,13 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     if (savedCampaign) {
       try { await syncCampaignToTask(savedCampaign, orgId) } catch (e) { console.warn('campaign→task sync failed', e) }
     }
+    if (form.brand_id && form.brand_website !== undefined) {
+      const linkedBrand = brands.find(b => b.id === form.brand_id)
+      const newSite = (form.brand_website || '').trim() || null
+      if (linkedBrand && (linkedBrand.website || null) !== newSite) {
+        try { await supabase.from('brands').update({ website: newSite }).eq('id', form.brand_id) } catch (e) { console.warn('brand website sync failed', e) }
+      }
+    }
     setSaving(false)
     onSaved()
   }
@@ -239,7 +250,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', padding: '8px 12px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
                 <img src={form.brand_logo_url} alt={form.brand} style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '2px', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
                 <span style={{ fontSize: '12px', color: text, flex: 1 }}>{form.brand}</span>
-                {form.brand_website && <a href={form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 30)} ↗</a>}
+                {form.brand_website && <a href={form.brand_website.startsWith('http') ? form.brand_website : 'https://' + form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 30)} ↗</a>}
               </div>
             )}
             {showNewBrand && (
@@ -250,6 +261,13 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
                   onKeyDown={e => { if (e.key === 'Enter') createBrandInline() }}
                   placeholder='New brand name'
                   autoFocus
+                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
+                />
+                <input
+                  value={newBrandWebsite}
+                  onChange={e => setNewBrandWebsite(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') createBrandInline() }}
+                  placeholder='Website (optional, e.g. example.com)'
                   style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -266,6 +284,8 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
           </div>
         )}
 
+
+        {field('Brand Website', inp({ value: form.brand_website || '', onChange: e => set('brand_website', e.target.value), placeholder: 'e.g. example.com' }))}
 
         {field('Campaign Type',
           <div style={{ display: 'flex', gap: '6px' }}>
