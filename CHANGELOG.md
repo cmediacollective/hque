@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-03
 
+**Removed the duplicate payment-status row from the talent's campaign list.** The campaign status (Active / Completed / etc.) on the right of each row is now the only badge — no "Payment Pending" / payment method / payment date underneath the brand name. Payment info still lives on the campaign detail's assigned-talent row where it's editable.
+
+## 2026-05-03
+
 **Talent ↔ campaign navigation is seamless.** Clicking a campaign in a talent's detail panel used to close the talent panel. Now the talent panel stays open underneath, and the campaign panel sits on top. Close the campaign (or click the new "← Back to {talent name}" link in the campaign header) and you're right back where you were on the talent.
 
 **The "Pending" badge in the talent's campaign list is now labeled "Payment Pending".** Was confusing because the campaign next to it could be Active or Completed — the "Pending" was about that talent's payment status on the campaign, not the campaign itself. The label now reads "Payment Pending" or "Paid" so there's no ambiguity.

@@ -394,11 +394,6 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                       <div>
                         <div style={{ fontSize: '13px', color: panelText }}>{c.name}</div>
                         {c.brand && <div style={{ fontSize: '10px', color: panelMuted, marginTop: '2px' }}>{c.brand}</div>}
-                        <div style={{ display: 'flex', gap: '8px', marginTop: '5px', alignItems: 'center' }}>
-                          <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(c.payment_status)}`, color: paymentColor(c.payment_status), borderRadius: '1px' }}>{c.payment_status === 'Paid' ? 'Paid' : 'Payment Pending'}</span>
-                          {c.payment_method && <span style={{ fontSize: '9px', color: panelMuted }}>{c.payment_method}</span>}
-                          {c.payment_date && <span style={{ fontSize: '9px', color: panelMuted }}>{formatPaymentDate(c.payment_date)}</span>}
-                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', flexShrink: 0 }}>{c.status}</span>
