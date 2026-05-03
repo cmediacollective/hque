@@ -387,7 +387,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: panelCard, borderRadius: '1px', overflow: 'hidden' }}>
                   {campaigns.map(c => (
                     <div key={c.id}
-                      onClick={() => { onClose(); onOpenCampaign(c) }}
+                      onClick={() => onOpenCampaign(c)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: panelBg, cursor: 'pointer' }}
                       onMouseEnter={e => e.currentTarget.style.background = '#222'}
                       onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}>
@@ -395,7 +395,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                         <div style={{ fontSize: '13px', color: panelText }}>{c.name}</div>
                         {c.brand && <div style={{ fontSize: '10px', color: panelMuted, marginTop: '2px' }}>{c.brand}</div>}
                         <div style={{ display: 'flex', gap: '8px', marginTop: '5px', alignItems: 'center' }}>
-                          <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(c.payment_status)}`, color: paymentColor(c.payment_status), borderRadius: '1px' }}>{c.payment_status || 'Pending'}</span>
+                          <span style={{ padding: '2px 6px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(c.payment_status)}`, color: paymentColor(c.payment_status), borderRadius: '1px' }}>{c.payment_status === 'Paid' ? 'Paid' : 'Payment Pending'}</span>
                           {c.payment_method && <span style={{ fontSize: '9px', color: panelMuted }}>{c.payment_method}</span>}
                           {c.payment_date && <span style={{ fontSize: '9px', color: panelMuted }}>{formatPaymentDate(c.payment_date)}</span>}
                         </div>

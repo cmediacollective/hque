@@ -124,6 +124,8 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
           orgId={orgId}
           onClose={() => setSelectedCampaign(null)}
           onSaved={() => setSelectedCampaign(null)}
+          backToLabel={selected?.name}
+          onBack={selected ? () => setSelectedCampaign(null) : undefined}
         />
       )}
 

@@ -111,7 +111,7 @@ function TalentEditor({ link, onSave, onCancel }) {
   )
 }
 
-export default function CampaignDetail({ campaign: initialCampaign, onClose, onSaved, dark = true, orgId, members = [] }) {
+export default function CampaignDetail({ campaign: initialCampaign, onClose, onSaved, dark = true, orgId, members = [], onBack, backToLabel }) {
   const [campaign, setCampaign] = useState(initialCampaign)
   const [editing, setEditing] = useState(false)
   const [creatorLinks, setCreatorLinks] = useState([])
@@ -296,6 +296,11 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
         <div style={{ width: '580px', background: '#1A1A1A', height: '100vh', overflowY: 'auto', borderLeft: '0.5px solid #2A2A2A', display: 'flex', flexDirection: 'column' }}>
 
           <div style={{ padding: '24px 28px', borderBottom: '0.5px solid #2A2A2A', position: 'sticky', top: 0, background: '#1A1A1A', zIndex: 1 }}>
+            {onBack && (
+              <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0 0 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                ← Back{backToLabel ? ` to ${backToLabel}` : ''}
+              </button>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                 {campaign.brand_logo_url

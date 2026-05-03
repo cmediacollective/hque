@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-03
+
+**Talent ↔ campaign navigation is seamless.** Clicking a campaign in a talent's detail panel used to close the talent panel. Now the talent panel stays open underneath, and the campaign panel sits on top. Close the campaign (or click the new "← Back to {talent name}" link in the campaign header) and you're right back where you were on the talent.
+
+**The "Pending" badge in the talent's campaign list is now labeled "Payment Pending".** Was confusing because the campaign next to it could be Active or Completed — the "Pending" was about that talent's payment status on the campaign, not the campaign itself. The label now reads "Payment Pending" or "Paid" so there's no ambiguity.
+
 ## 2026-05-02
 
 **Click a task on the workspace dashboard to open it directly.** Used to switch you to the brand's board where you'd then have to click the task again to open it. Now one click opens the task panel — useful when you want to delete or edit a task you spotted in the Today / This Week / Next Week buckets without hunting for it on the kanban.
