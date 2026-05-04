@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-03
 
+**Brand contacts: light CRM on each brand.** Every brand now stores a primary contact (name, title, email, phone) plus free-text notes. Edit from three places: (1) workspace sidebar — hover a brand → ⋯ → **Edit brand** opens a panel with name, logo, website, contact fields, archive button; (2) campaign form brand row — new **Contact** button opens the same panel; (3) campaign detail — small contact block under the brand header with name/title, email (mailto link), phone (tel link). Click the block to edit. Required one-time Supabase setup: 5 columns on `brands` (SQL provided separately).
+
+## 2026-05-03
+
 **Removed the duplicate payment-status row from the talent's campaign list.** The campaign status (Active / Completed / etc.) on the right of each row is now the only badge — no "Payment Pending" / payment method / payment date underneath the brand name. Payment info still lives on the campaign detail's assigned-talent row where it's editable.
 
 ## 2026-05-03

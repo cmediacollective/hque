@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
+import BrandDetail from './BrandDetail'
 import Linkify from './Linkify'
 import { createNotification, parseMentions } from './notify'
 
@@ -117,6 +118,8 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
   const [creatorLinks, setCreatorLinks] = useState([])
   const [preview, setPreview] = useState(null)
   const [editingLink, setEditingLink] = useState(null)
+  const [editingBrandId, setEditingBrandId] = useState(null)
+  const [brandContact, setBrandContact] = useState(null)
 
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
@@ -218,8 +221,8 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     const { data } = await supabase.from('campaigns').select('*').eq('id', initialCampaign.id).single()
     if (!data) return
     let merged = data
-    if (data.brand_id && (!data.brand || !data.brand_logo_url || !data.brand_website)) {
-      const { data: b } = await supabase.from('brands').select('name, logo_url, website').eq('id', data.brand_id).maybeSingle()
+    if (data.brand_id) {
+      const { data: b } = await supabase.from('brands').select('name, logo_url, website, contact_name, contact_title, contact_email, contact_phone').eq('id', data.brand_id).maybeSingle()
       if (b) {
         merged = {
           ...data,
@@ -227,7 +230,17 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
           brand_logo_url: data.brand_logo_url || b.logo_url,
           brand_website: data.brand_website || b.website
         }
+        setBrandContact({
+          name: b.contact_name,
+          title: b.contact_title,
+          email: b.contact_email,
+          phone: b.contact_phone
+        })
+      } else {
+        setBrandContact(null)
       }
+    } else {
+      setBrandContact(null)
     }
     setCampaign(merged)
   }
@@ -292,6 +305,15 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
 
       {preview && <DocPreview url={preview.url} label={preview.label} onClose={() => setPreview(null)} />}
 
+      {editingBrandId && (
+        <BrandDetail
+          brandId={editingBrandId}
+          dark={true}
+          onClose={() => setEditingBrandId(null)}
+          onSaved={() => fetchCampaign()}
+        />
+      )}
+
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
         <div style={{ width: '580px', background: '#1A1A1A', height: '100vh', overflowY: 'auto', borderLeft: '0.5px solid #2A2A2A', display: 'flex', flexDirection: 'column' }}>
 
@@ -340,6 +362,35 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
           </div>
 
           <div style={{ padding: '28px', flex: 1 }}>
+
+            {campaign.brand_id && (
+              <div onClick={() => setEditingBrandId(campaign.brand_id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#222', borderRadius: '1px', marginBottom: '16px', cursor: 'pointer', border: '0.5px solid transparent' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#3A3A3A'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '6px' }}>Brand Contact</div>
+                  {brandContact && (brandContact.name || brandContact.email || brandContact.phone) ? (
+                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {brandContact.name && (
+                        <div>
+                          <div style={{ fontSize: '13px', color: '#F0ECE6' }}>{brandContact.name}</div>
+                          {brandContact.title && <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>{brandContact.title}</div>}
+                        </div>
+                      )}
+                      {brandContact.email && (
+                        <a href={`mailto:${brandContact.email}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none' }}>{brandContact.email}</a>
+                      )}
+                      {brandContact.phone && (
+                        <a href={`tel:${brandContact.phone}`} onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: '#aaa', textDecoration: 'none' }}>{brandContact.phone}</a>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: '#666', fontStyle: 'italic' }}>No contact saved. Click to add.</div>
+                  )}
+                </div>
+                <span style={{ fontSize: '16px', color: '#666', flexShrink: 0, marginLeft: '12px' }}>›</span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '8px' }}>
               {[

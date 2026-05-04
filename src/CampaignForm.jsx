@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import BrandDetail from './BrandDetail'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }) {
   const border = dark ? '#2A2A2A' : '#D4CFC8'
@@ -44,6 +45,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [editingBrandId, setEditingBrandId] = useState(null)
 
   useEffect(() => {
     const fetchCreators = async () => {
@@ -262,6 +264,16 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+      {editingBrandId && (
+        <BrandDetail
+          brandId={editingBrandId}
+          dark={dark}
+          onClose={() => setEditingBrandId(null)}
+          onSaved={() => {
+            supabase.from('brands').select('*').eq('org_id', orgId).neq('status', 'archived').order('name', { ascending: true }).then(({ data }) => setBrands(data || []))
+          }}
+        />
+      )}
       <div style={{ width: '480px', height: '100vh', background: cardBg, borderLeft: `0.5px solid ${border}`, overflowY: 'auto', padding: '32px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>{existing ? 'Edit Campaign' : 'New Campaign'}</div>
@@ -305,6 +317,9 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
                     Remove
                   </button>
                 )}
+                <button type='button' onClick={() => setEditingBrandId(form.brand_id)} title='View or edit brand contact' style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: '#5b7c99', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+                  Contact
+                </button>
               </div>
             )}
             {showNewBrand && (

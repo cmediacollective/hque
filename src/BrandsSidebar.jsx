@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import BrandDetail from './BrandDetail'
 
 export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
@@ -26,6 +27,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [hovering, setHovering] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
   const [showEmpty, setShowEmpty] = useState(false)
+  const [editingBrandId, setEditingBrandId] = useState(null)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
@@ -261,7 +263,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                 {openMenuId === b.id && (
                   <>
                     <div onClick={e => { e.stopPropagation(); setOpenMenuId(null) }} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
-                    <div style={{ position: 'absolute', top: '22px', right: 0, background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border2}`, borderRadius: '2px', zIndex: 20, minWidth: '120px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                    <div style={{ position: 'absolute', top: '22px', right: 0, background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border2}`, borderRadius: '2px', zIndex: 20, minWidth: '140px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); setOpenMenuId(null); setEditingBrandId(b.id) }}
+                        style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer' }}
+                        onMouseEnter={e => e.currentTarget.style.background = cardHover}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Edit brand</button>
                       <button
                         onClick={e => { e.stopPropagation(); setOpenMenuId(null); setArchiving({ brand: b, restore: false }) }}
                         style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer' }}
@@ -348,6 +355,15 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           </button>
         )}
       </div>
+
+      {editingBrandId && (
+        <BrandDetail
+          brandId={editingBrandId}
+          dark={dark}
+          onClose={() => setEditingBrandId(null)}
+          onSaved={() => { fetchBrands(); fetchBoardCounts() }}
+        />
+      )}
     </div>
   )
 }
