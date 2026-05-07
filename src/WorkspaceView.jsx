@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
+import BrandNotes from './BrandNotes'
 import { createNotification, parseMentions } from './notify'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
@@ -177,6 +178,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [editingTask, setEditingTask] = useState(null)
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
+  const [showNotes, setShowNotes] = useState(false)
 
   useEffect(() => {
     if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); return }
@@ -392,6 +394,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                   {selectedBrand.website && (<> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>)}
                 </div>
               </div>
+              {selectedBrand.id !== '__internal' && (
+                <button onClick={() => setShowNotes(true)} title='Open notes' style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontSize: '11px', lineHeight: 1 }}>✎</span>
+                  <span>Notes</span>
+                </button>
+              )}
               <div style={{ display: 'flex', gap: '0', border: `0.5px solid ${border2}`, borderRadius: '1px', flexShrink: 0 }}>
                 <button onClick={() => setViewMode('kanban')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer' }}>Kanban</button>
                 <button onClick={() => setViewMode('list')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}` }}>List</button>
@@ -495,6 +503,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           createNotification={createNotification}
           parseMentions={parseMentions}
         />
+      )}
+
+      {showNotes && selectedBrand && selectedBrand.id !== '__internal' && (
+        <BrandNotes brand={selectedBrand} onClose={() => setShowNotes(false)} />
       )}
     </div>
   )

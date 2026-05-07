@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Rolling notes per brand client.** Open any brand from the workspace sidebar and you'll see a new **✎ Notes** button next to the Kanban / List toggle. Click it to open a document-style window — like a Word doc just for that brand. Bold, italic, underline, bulleted lists, and hyperlinks are all there. Use it for biweekly meeting notes, ongoing context, anything you want to remember about that client. Auto-saves when you click out or close the window. Notes are shared with everyone in your agency. **One-time setup:** run this in Supabase → SQL Editor: `alter table brands add column if not exists meeting_notes text;`
+
+## 2026-05-06
+
 **Shareable links for campaigns.** Open any campaign and you'll see a new **↗ Copy Link** button next to Edit in the header. Click it (turns to ✓ Copied) and paste the link into Slack, email, or anywhere — opening it takes the recipient straight to that campaign panel. Works for archived campaigns too. Behind the scenes, this is just a `?campaign=<id>` URL parameter, the same approach already used for tasks.
 
 ## 2026-05-03
