@@ -29,6 +29,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
   const [mentionRect, setMentionRect] = useState(null)
   const [showColors, setShowColors] = useState(false)
   const [currentColor, setCurrentColor] = useState(null)
+  const [showLists, setShowLists] = useState(false)
   const dayHeadingInsertedRef = useRef(false)
   const previousMentionsRef = useRef(new Set())
   const saveTimerRef = useRef(null)
@@ -142,10 +143,8 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       dayHeadingInsertedRef.current = true
       return
     }
-    // If user is editing inside an existing dated section, leave it alone — preserve the old timestamp
-    if (firstHeading && !isCursorAboveNode(firstHeading)) {
-      return
-    }
+    // Always insert today's heading at the top on first edit of the session.
+    // Old headings stay put because they're contenteditable=false.
     const heading = document.createElement('h3')
     heading.setAttribute('data-day', today)
     heading.contentEditable = 'false'
@@ -157,16 +156,6 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     el.insertBefore(heading, el.firstChild)
     dayHeadingInsertedRef.current = true
     placeCursorAtStartOf(spacer)
-  }
-
-  function isCursorAboveNode(node) {
-    const sel = window.getSelection()
-    if (!sel || sel.rangeCount === 0) return true
-    const range = sel.getRangeAt(0)
-    if (!editorRef.current?.contains(range.startContainer)) return true
-    const nodeRange = document.createRange()
-    nodeRange.setStartBefore(node)
-    return range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0
   }
 
   function placeCursorAtStartOf(node) {
@@ -461,8 +450,19 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
             )}
           </div>
           <div style={{ width: '1px', background: border, alignSelf: 'stretch', margin: '0 4px' }} />
-          <ToolbarButton inv={inv} onClick={() => exec('insertUnorderedList')} title='Bulleted list'>• list</ToolbarButton>
-          <ToolbarButton inv={inv} onClick={() => exec('insertOrderedList')} title='Numbered list'>1. list</ToolbarButton>
+          <div style={{ position: 'relative' }}>
+            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowLists(s => !s)} title='Lists' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#D4CFC8'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 11px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              List <span style={{ fontSize: '9px' }}>▾</span>
+            </button>
+            {showLists && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, background: bgInner, border: `0.5px solid ${border}`, borderRadius: '2px', zIndex: 50, minWidth: '140px', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                <button onMouseDown={e => e.preventDefault()} onClick={() => { exec('insertUnorderedList'); setShowLists(false) }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}>•&nbsp;&nbsp;Bulleted</button>
+                <button onMouseDown={e => e.preventDefault()} onClick={() => { exec('insertOrderedList'); setShowLists(false) }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', borderTop: `0.5px solid ${border}` }}>1.&nbsp;&nbsp;Numbered</button>
+              </div>
+            )}
+          </div>
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>Paste a URL to link · drop files · type @ to mention</span>
         </div>

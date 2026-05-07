@@ -24,11 +24,12 @@ import BlogPostPage from './BlogPostPage'
 import Sandbox from './Sandbox'
 
 function App() {
-  const [view, setView] = useState('talent')
+  const [view, setView] = useState('workspace')
   const [talentTab, setTalentTab] = useState('roster')
   const [showArchived, setShowArchived] = useState(false)
   const [talentView, setTalentView] = useState('grid')
   const [campaignView, setCampaignView] = useState('grid')
+  const [previousCampaignView, setPreviousCampaignView] = useState('grid')
   const [showForm, setShowForm] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
@@ -324,9 +325,9 @@ function App() {
   if (subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
-    { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
+    { key: 'workspace', label: 'Workspace', pageLabel: 'Brands/Clients' },
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
-    { key: 'workspace', label: 'Work', pageLabel: 'Brands/Clients' },
+    { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
     { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
@@ -358,7 +359,7 @@ function App() {
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
               <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
             </div>
-            {[['talent', 'Talent'], ['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['reports', 'Reports']].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['reports', 'Reports']].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -378,7 +379,7 @@ function App() {
               )}
               {view === 'campaigns' && !isMobile && (
                 <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
-                  {['grid', 'list', 'board', 'archived'].map(v => (
+                  {['grid', 'list', 'board'].map(v => (
                     <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: campaignView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
                   ))}
                 </div>
@@ -414,6 +415,16 @@ function App() {
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {view === 'campaigns' && (
+                <button
+                  onClick={() => {
+                    if (campaignView === 'archived') setCampaignView(previousCampaignView || 'grid')
+                    else { setPreviousCampaignView(campaignView); setCampaignView('archived') }
+                  }}
+                  style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: campaignView === 'archived' ? '#5b7c99' : 'none', border: `0.5px solid ${campaignView === 'archived' ? '#5b7c99' : border}`, color: campaignView === 'archived' ? '#fff' : muted, cursor: 'pointer', borderRadius: '1px' }}>
+                  {campaignView === 'archived' ? 'Active' : 'Archived'}
+                </button>
+              )}
               <button onClick={() => setDark(d => !d)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
                 {dark ? 'Light' : 'Dark'}
               </button>

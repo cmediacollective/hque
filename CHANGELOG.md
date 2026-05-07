@@ -6,6 +6,15 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Workspace is now the home view + nav reorder + small fixes.**
+- **Workspace is the default landing view.** Sign in / refresh and you go straight to your workspace dashboard instead of Talent.
+- **Sidebar reordered:** Workspace → Campaigns → Talent → Reports.
+- **Notes date stamps are back.** When you start typing today, today's date heading is inserted at the top of your notes again. (Old timestamps below still get preserved as before.)
+- **List button is now a dropdown** with Bulleted / Numbered, instead of two side-by-side buttons.
+- **Archived campaigns toggle moved to the page header.** It now lives next to the Dark/Light button, only visible when you're on Campaigns. Click "Archived" → see archived only; the same button reads "Active" while you're there to toggle back to your previous view (grid/list/board).
+
+## 2026-05-06
+
 **Shareable links for brand notes + Archived campaigns view.**
 - Each brand's notes now has its own shareable URL. Open notes → click **↗ Copy Link** in the header (top right, next to ×). Paste in Slack/email — anyone with HQue access lands directly in that brand's notes.
 - Removed the inline 🔗 Link button from the notes toolbar — pasted URLs already auto-link, so it was just clutter.
