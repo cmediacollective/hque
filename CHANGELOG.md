@@ -6,6 +6,17 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Brand notes — major upgrade.** Bunch of improvements based on feedback:
+- **Pasted links are now clickable.** Drop a URL into your notes and it instantly becomes a hyperlink. ⌘-click (Mac) or Ctrl-click (Windows) any link to open it in a new tab without leaving the notes.
+- **Daily date headings.** When you start typing on a new day, a date heading like "Tuesday, May 6, 2026" appears at the top automatically. Newest at top, older notes flow down.
+- **Drag & drop files.** Drop images, PDFs, anything onto the notes window. Images render inline (click to open full-size). PDFs and other files appear as 📎 links you can click to open in a new tab.
+- **@-mention your team.** Type `@` and pick a teammate. They get a notification when you save that says "You were mentioned in notes for {brand name}".
+- **Theme inversion.** Notes open in light mode if your app is in dark mode (and vice versa) — easier on the eyes when switching contexts.
+- **No more accidental closes.** Clicking outside the notes window no longer closes it — only the × button does. Auto-saves while you type (small "Auto-saves as you type" hint up top, plus a "✓ Saved" indicator).
+- Removed the confusing "clear" button from the toolbar.
+
+## 2026-05-06
+
 **Rolling notes per brand client.** Open any brand from the workspace sidebar and you'll see a new **✎ Notes** button next to the Kanban / List toggle. Click it to open a document-style window — like a Word doc just for that brand. Bold, italic, underline, bulleted lists, and hyperlinks are all there. Use it for biweekly meeting notes, ongoing context, anything you want to remember about that client. Auto-saves when you click out or close the window. Notes are shared with everyone in your agency. **One-time setup:** run this in Supabase → SQL Editor: `alter table brands add column if not exists meeting_notes text;`
 
 ## 2026-05-06

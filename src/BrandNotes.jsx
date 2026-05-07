@@ -1,12 +1,36 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
+import { createNotification } from './notify'
 
-export default function BrandNotes({ brand, onClose, onSaved }) {
+const URL_RE = /https?:\/\/[^\s<>"']+/i
+
+export default function BrandNotes({ brand, dark = true, orgId, members = [], onClose }) {
+  // Invert theme: app dark → notes light, app light → notes dark
+  const inv = !dark
+  const bg = inv ? '#1A1A1A' : '#FBFAF7'
+  const bgInner = inv ? '#1A1A1A' : '#FFFFFF'
+  const bgPanel = inv ? '#141414' : '#F1EEE8'
+  const border = inv ? '#2A2A2A' : '#D4CFC8'
+  const text = inv ? '#E8E4DD' : '#1A1A1A'
+  const muted = inv ? '#999' : '#666'
+  const subtle = inv ? '#777' : '#888'
+  const accent = '#5b7c99'
+  const linkColor = inv ? '#7FA8C9' : '#3A6789'
+  const headingColor = inv ? '#9FBCA8' : '#4A6B57'
+
   const editorRef = useRef(null)
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState(null)
   const [error, setError] = useState('')
   const [loaded, setLoaded] = useState(false)
+  const [uploading, setUploading] = useState(0)
+  const [showMentions, setShowMentions] = useState(false)
+  const [mentionQuery, setMentionQuery] = useState('')
+  const [mentionRect, setMentionRect] = useState(null)
+  const dayHeadingInsertedRef = useRef(false)
+  const previousMentionsRef = useRef(new Set())
+  const saveTimerRef = useRef(null)
+  const dirtyRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
@@ -22,14 +46,24 @@ export default function BrandNotes({ brand, onClose, onSaved }) {
         setLoaded(true)
         return
       }
-      if (editorRef.current) editorRef.current.innerHTML = data?.meeting_notes || ''
+      if (editorRef.current) {
+        editorRef.current.innerHTML = data?.meeting_notes || ''
+        previousMentionsRef.current = collectMentions(editorRef.current)
+      }
       setLoaded(true)
     })
-    return () => { cancelled = true }
+    return () => { cancelled = true; if (saveTimerRef.current) clearTimeout(saveTimerRef.current) }
   }, [brand.id])
+
+  function collectMentions(el) {
+    const set = new Set()
+    el.querySelectorAll('span[data-mention]').forEach(s => set.add(s.getAttribute('data-mention')))
+    return set
+  }
 
   async function save() {
     if (!editorRef.current || error) return
+    if (!dirtyRef.current) return
     const html = editorRef.current.innerHTML
     setSaving(true)
     const { error: saveErr } = await supabase.from('brands').update({ meeting_notes: html || null }).eq('id', brand.id)
@@ -43,80 +77,268 @@ export default function BrandNotes({ brand, onClose, onSaved }) {
       }
       return
     }
+    dirtyRef.current = false
     setSavedAt(Date.now())
-    if (onSaved) onSaved()
+    notifyNewMentions()
+  }
+
+  function notifyNewMentions() {
+    if (!editorRef.current || !orgId) return
+    const current = collectMentions(editorRef.current)
+    const newOnes = []
+    current.forEach(name => { if (!previousMentionsRef.current.has(name)) newOnes.push(name) })
+    previousMentionsRef.current = current
+    const message = `You were mentioned in notes for ${brand.name}`
+    newOnes.forEach(name => createNotification(orgId, name, 'mention', message, members).catch(() => {}))
+  }
+
+  function scheduleSave() {
+    dirtyRef.current = true
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => { save() }, 800)
   }
 
   async function closeWithSave() {
-    await save()
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    if (dirtyRef.current) await save()
     onClose()
   }
 
   function exec(cmd) {
     document.execCommand(cmd, false, null)
     editorRef.current?.focus()
+    scheduleSave()
+  }
+
+  function todayHeadingText() {
+    const d = new Date()
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  }
+
+  function ensureTodayHeading() {
+    if (dayHeadingInsertedRef.current) return
+    const el = editorRef.current
+    if (!el) return
+    const today = todayHeadingText()
+    const firstHeading = el.querySelector('h3[data-day]')
+    if (firstHeading && firstHeading.getAttribute('data-day') === today) {
+      dayHeadingInsertedRef.current = true
+      return
+    }
+    const heading = document.createElement('h3')
+    heading.setAttribute('data-day', today)
+    heading.contentEditable = 'false'
+    heading.textContent = today
+    heading.style.cssText = `font-family: Georgia, serif; font-size: 13px; color: ${headingColor}; letter-spacing: 0.18em; text-transform: uppercase; margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 0.5px solid ${border};`
+    const spacer = document.createElement('div')
+    spacer.innerHTML = '<br>'
+    el.insertBefore(spacer, el.firstChild)
+    el.insertBefore(heading, el.firstChild)
+    dayHeadingInsertedRef.current = true
+    placeCursorAtStartOf(spacer)
+  }
+
+  function placeCursorAtStartOf(node) {
+    const range = document.createRange()
+    range.setStart(node, 0)
+    range.collapse(true)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
   }
 
   function addLink() {
     const sel = window.getSelection()
     const hasSelection = sel && sel.toString().length > 0
-    const url = prompt(hasSelection ? 'Link URL:' : 'Link URL (selected text will become the link, or paste the URL to insert as both):', 'https://')
+    const url = prompt(hasSelection ? 'Link URL:' : 'Link URL:', 'https://')
     if (!url) return
     let href = url.trim()
     if (!/^https?:\/\//i.test(href) && !href.startsWith('mailto:') && !href.startsWith('/')) href = 'https://' + href
     if (!hasSelection) {
-      document.execCommand('insertHTML', false, `<a href="${href.replace(/"/g, '&quot;')}" target="_blank" rel="noreferrer">${href}</a>`)
+      document.execCommand('insertHTML', false, `<a href="${escapeAttr(href)}" target="_blank" rel="noreferrer">${escapeHtml(href)}</a>&nbsp;`)
     } else {
       document.execCommand('createLink', false, href)
-      // Make pasted links open in a new tab
       setTimeout(() => {
         editorRef.current?.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noreferrer' })
       }, 0)
     }
     editorRef.current?.focus()
+    scheduleSave()
   }
+
+  function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+  function escapeAttr(s) { return s.replace(/"/g, '&quot;').replace(/&/g, '&amp;') }
 
   function handlePaste(e) {
     e.preventDefault()
-    const text = e.clipboardData.getData('text/plain')
-    document.execCommand('insertText', false, text)
+    const text = (e.clipboardData?.getData('text/plain') || '').trim()
+    if (!text) return
+    if (URL_RE.test(text) && !/\s/.test(text)) {
+      let href = text
+      if (!/^https?:\/\//i.test(href)) href = 'https://' + href
+      document.execCommand('insertHTML', false, `<a href="${escapeAttr(href)}" target="_blank" rel="noreferrer">${escapeHtml(text)}</a>&nbsp;`)
+    } else {
+      document.execCommand('insertText', false, text)
+    }
+    scheduleSave()
+  }
+
+  function handleEditorClick(e) {
+    const a = e.target.closest('a')
+    if (!a) return
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault()
+      window.open(a.href, '_blank', 'noopener,noreferrer')
+    }
   }
 
   function handleKeyDown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
       e.preventDefault()
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
       save()
+    }
+    // Ensure today's heading is created right before the user types meaningful content
+    if (!dayHeadingInsertedRef.current && !e.metaKey && !e.ctrlKey && e.key.length === 1) {
+      ensureTodayHeading()
     }
   }
 
-  const savedLabel = saving ? 'Saving…' : savedAt ? '✓ Saved' : ''
+  function handleInput() {
+    if (!dayHeadingInsertedRef.current) ensureTodayHeading()
+    updateMentionPicker()
+    scheduleSave()
+  }
+
+  function updateMentionPicker() {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) { setShowMentions(false); return }
+    const range = sel.getRangeAt(0)
+    if (!editorRef.current?.contains(range.startContainer)) { setShowMentions(false); return }
+    const node = range.startContainer
+    if (node.nodeType !== Node.TEXT_NODE) { setShowMentions(false); return }
+    const before = node.textContent.slice(0, range.startOffset)
+    const m = before.match(/(?:^|\s)@([\w.]*)$/)
+    if (!m) { setShowMentions(false); return }
+    setMentionQuery(m[1])
+    const rect = range.getBoundingClientRect()
+    setMentionRect({ left: rect.left, top: rect.bottom + 4 })
+    setShowMentions(true)
+  }
+
+  function insertMention(member) {
+    const name = (member.full_name || member.email).split(' ')[0]
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    const range = sel.getRangeAt(0)
+    const node = range.startContainer
+    if (node.nodeType !== Node.TEXT_NODE) return
+    const before = node.textContent.slice(0, range.startOffset)
+    const m = before.match(/(?:^|\s)@([\w.]*)$/)
+    if (!m) return
+    const start = range.startOffset - m[0].trimStart().length
+    const replaceRange = document.createRange()
+    replaceRange.setStart(node, start)
+    replaceRange.setEnd(node, range.startOffset)
+    replaceRange.deleteContents()
+    const span = document.createElement('span')
+    span.setAttribute('data-mention', name)
+    span.contentEditable = 'false'
+    span.textContent = `@${name}`
+    span.style.cssText = `display: inline-block; padding: 1px 6px; margin: 0 1px; background: ${accent}22; color: ${linkColor}; border-radius: 3px; font-weight: 500;`
+    replaceRange.insertNode(span)
+    const afterText = document.createTextNode(' ')
+    span.parentNode.insertBefore(afterText, span.nextSibling)
+    const newRange = document.createRange()
+    newRange.setStart(afterText, 1)
+    newRange.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(newRange)
+    setShowMentions(false)
+    scheduleSave()
+  }
+
+  async function handleDrop(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    const files = Array.from(e.dataTransfer?.files || [])
+    if (!files.length) return
+    for (const file of files) await uploadAndInsert(file)
+  }
+
+  async function uploadAndInsert(file) {
+    setUploading(n => n + 1)
+    try {
+      const safeName = file.name.replace(/[^\w.\-]+/g, '_')
+      const path = `notes/${brand.id}/${Date.now()}-${safeName}`
+      const { error: upErr } = await supabase.storage.from('media-kits').upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+      if (upErr) {
+        alert('Upload failed: ' + upErr.message)
+        return
+      }
+      const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
+      const isImg = (file.type || '').startsWith('image/')
+      let html
+      if (isImg) {
+        html = `<img src="${escapeAttr(publicUrl)}" alt="${escapeAttr(file.name)}" style="max-width:100%; border-radius:2px; margin:8px 0; cursor:pointer; display:block;" data-attachment="image" />`
+      } else {
+        html = `<a href="${escapeAttr(publicUrl)}" target="_blank" rel="noreferrer" data-attachment="file">📎 ${escapeHtml(file.name)}</a>&nbsp;`
+      }
+      editorRef.current?.focus()
+      if (!dayHeadingInsertedRef.current) ensureTodayHeading()
+      document.execCommand('insertHTML', false, html)
+      scheduleSave()
+    } finally {
+      setUploading(n => n - 1)
+    }
+  }
+
+  function handleImgClick(e) {
+    const img = e.target.closest('img[data-attachment="image"]')
+    if (!img) return
+    e.preventDefault()
+    window.open(img.src, '_blank', 'noopener,noreferrer')
+  }
+
+  const filteredMembers = members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 6)
+
+  const savedLabel = saving
+    ? 'Saving…'
+    : uploading > 0
+      ? `Uploading ${uploading}…`
+      : savedAt
+        ? '✓ Saved'
+        : ''
 
   return (
-    <div onClick={e => e.target === e.currentTarget && closeWithSave()}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-      <div style={{ width: '100%', maxWidth: '780px', height: '85vh', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '2px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ width: '100%', maxWidth: '780px', height: '85vh', background: bgInner, border: `0.5px solid ${border}`, borderRadius: '2px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-        <div style={{ padding: '18px 24px', borderBottom: '0.5px solid #2A2A2A', display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+        <div style={{ padding: '18px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0, background: bg }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>Notes</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{brand.name}</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: accent, marginBottom: '4px' }}>Notes</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{brand.name}</div>
           </div>
-          <div style={{ fontSize: '9px', color: '#7A9B8E', letterSpacing: '0.14em', minWidth: '60px', textAlign: 'right' }}>{savedLabel}</div>
-          <button onClick={closeWithSave} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '0 4px' }}>×</button>
+          <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.14em', textAlign: 'right' }}>
+            <div style={{ color: '#7A9B8E', minHeight: '12px' }}>{savedLabel}</div>
+            <div style={{ marginTop: '2px', fontStyle: 'italic', textTransform: 'none', letterSpacing: 0 }}>Auto-saves as you type</div>
+          </div>
+          <button onClick={closeWithSave} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '0 4px' }}>×</button>
         </div>
 
-        <div style={{ padding: '10px 24px', borderBottom: '0.5px solid #2A2A2A', display: 'flex', gap: '6px', flexShrink: 0, background: '#141414' }}>
-          <ToolbarButton onClick={() => exec('bold')} title='Bold (⌘B)'><b>B</b></ToolbarButton>
-          <ToolbarButton onClick={() => exec('italic')} title='Italic (⌘I)'><i>I</i></ToolbarButton>
-          <ToolbarButton onClick={() => exec('underline')} title='Underline (⌘U)'><u>U</u></ToolbarButton>
-          <div style={{ width: '1px', background: '#2A2A2A', margin: '4px 4px' }} />
-          <ToolbarButton onClick={() => exec('insertUnorderedList')} title='Bulleted list'>•&nbsp;list</ToolbarButton>
-          <ToolbarButton onClick={addLink} title='Insert link'>🔗 Link</ToolbarButton>
-          <ToolbarButton onClick={() => exec('removeFormat')} title='Clear formatting'>clear</ToolbarButton>
+        <div style={{ padding: '10px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', gap: '6px', flexShrink: 0, background: bgPanel, alignItems: 'center' }}>
+          <ToolbarButton inv={inv} onClick={() => exec('bold')} title='Bold (⌘B)'><b>B</b></ToolbarButton>
+          <ToolbarButton inv={inv} onClick={() => exec('italic')} title='Italic (⌘I)'><i>I</i></ToolbarButton>
+          <ToolbarButton inv={inv} onClick={() => exec('underline')} title='Underline (⌘U)'><u>U</u></ToolbarButton>
+          <div style={{ width: '1px', background: border, alignSelf: 'stretch', margin: '0 4px' }} />
+          <ToolbarButton inv={inv} onClick={() => exec('insertUnorderedList')} title='Bulleted list'>•&nbsp;list</ToolbarButton>
+          <ToolbarButton inv={inv} onClick={addLink} title='Insert link'>🔗 Link</ToolbarButton>
+          <div style={{ flex: 1 }} />
+          <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>Drop files · type @ to mention · ⌘-click links</span>
         </div>
 
         {error && (
-          <div style={{ padding: '12px 24px', background: '#3A1A1A', color: '#F0B0B0', fontSize: '11px', lineHeight: 1.5, borderBottom: '0.5px solid #5A2A2A', flexShrink: 0 }}>
+          <div style={{ padding: '12px 24px', background: '#3A1A1A', color: '#F0B0B0', fontSize: '11px', lineHeight: 1.5, borderBottom: `0.5px solid #5A2A2A`, flexShrink: 0 }}>
             {error}
           </div>
         )}
@@ -125,35 +347,60 @@ export default function BrandNotes({ brand, onClose, onSaved }) {
           ref={editorRef}
           contentEditable={!error && loaded}
           suppressContentEditableWarning
-          onBlur={save}
+          onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
+          onClick={e => { handleEditorClick(e); handleImgClick(e) }}
+          onDrop={handleDrop}
+          onDragOver={e => { e.preventDefault() }}
           style={{
             flex: 1,
             overflowY: 'auto',
             padding: '24px 32px',
             fontSize: '14px',
             lineHeight: 1.7,
-            color: '#E8E4DD',
+            color: text,
             outline: 'none',
             fontFamily: 'Georgia, serif',
-            background: '#1A1A1A'
+            background: bgInner
           }}
           data-placeholder='Start typing your notes…'
         />
 
+        {showMentions && filteredMembers.length > 0 && mentionRect && (
+          <div style={{ position: 'fixed', left: mentionRect.left, top: mentionRect.top, background: bgPanel, border: `0.5px solid ${border}`, borderRadius: '2px', zIndex: 300, minWidth: '220px', maxHeight: '220px', overflowY: 'auto', boxShadow: '0 6px 18px rgba(0,0,0,0.25)' }}>
+            {filteredMembers.map(m => (
+              <div key={m.id}
+                onMouseDown={e => { e.preventDefault(); insertMention(m) }}
+                style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: text, fontSize: '12px' }}
+                onMouseEnter={e => e.currentTarget.style.background = inv ? '#222' : '#E8E4DD'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                {m.avatar_url ? (
+                  <img src={m.avatar_url} alt='' style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{((m.full_name || m.email) || '?').charAt(0).toUpperCase()}</span>
+                )}
+                <span>{m.full_name || m.email}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <style>{`
-          [contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: #555; pointer-events: none; }
-          [contenteditable] a { color: #5b7c99; text-decoration: underline; }
+          [contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: ${subtle}; pointer-events: none; }
+          [contenteditable] a { color: ${linkColor}; text-decoration: underline; }
           [contenteditable] ul { padding-left: 22px; margin: 8px 0; }
           [contenteditable] li { margin: 4px 0; }
+          [contenteditable] h3[data-day] { user-select: none; }
         `}</style>
       </div>
     </div>
   )
 }
 
-function ToolbarButton({ onClick, title, children }) {
+function ToolbarButton({ onClick, title, children, inv }) {
+  const border = inv ? '#2A2A2A' : '#D4CFC8'
+  const color = inv ? '#BBB' : '#3A3A3A'
   return (
     <button
       onMouseDown={e => e.preventDefault()}
@@ -161,8 +408,8 @@ function ToolbarButton({ onClick, title, children }) {
       title={title}
       style={{
         background: 'none',
-        border: '0.5px solid #2A2A2A',
-        color: '#BBB',
+        border: `0.5px solid ${border}`,
+        color,
         cursor: 'pointer',
         padding: '5px 11px',
         fontSize: '11px',

@@ -506,7 +506,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       )}
 
       {showNotes && selectedBrand && selectedBrand.id !== '__internal' && (
-        <BrandNotes brand={selectedBrand} onClose={() => setShowNotes(false)} />
+        <BrandNotes brand={selectedBrand} dark={dark} orgId={orgId} members={members} onClose={() => setShowNotes(false)} />
       )}
     </div>
   )
