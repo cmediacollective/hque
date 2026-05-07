@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Link previews in brand notes.** Paste a URL into a brand's notes and a preview card appears underneath — image, title, description, source. Click the card (regular click) to open the page in a new tab. Works for any public URL with Open Graph or Twitter card metadata (which is most of the modern web). Powered by a new Netlify function (`/.netlify/functions/link-preview`) that fetches the page and reads its meta tags. Cards are saved with the rest of your notes, so they persist next time you open them.
+
+## 2026-05-06
+
 **Brand notes — major upgrade.** Bunch of improvements based on feedback:
 - **Pasted links are now clickable.** Drop a URL into your notes and it instantly becomes a hyperlink. ⌘-click (Mac) or Ctrl-click (Windows) any link to open it in a new tab without leaving the notes.
 - **Daily date headings.** When you start typing on a new day, a date heading like "Tuesday, May 6, 2026" appears at the top automatically. Newest at top, older notes flow down.

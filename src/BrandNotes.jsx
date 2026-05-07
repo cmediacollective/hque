@@ -155,7 +155,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     let href = url.trim()
     if (!/^https?:\/\//i.test(href) && !href.startsWith('mailto:') && !href.startsWith('/')) href = 'https://' + href
     if (!hasSelection) {
-      document.execCommand('insertHTML', false, `<a href="${escapeAttr(href)}" target="_blank" rel="noreferrer">${escapeHtml(href)}</a>&nbsp;`)
+      insertLinkWithPreview(href, href)
     } else {
       document.execCommand('createLink', false, href)
       setTimeout(() => {
@@ -169,6 +169,46 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
   function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
   function escapeAttr(s) { return s.replace(/"/g, '&quot;').replace(/&/g, '&amp;') }
 
+  function insertLinkWithPreview(href, displayText) {
+    const id = 'lp-' + Math.random().toString(36).slice(2, 9)
+    const placeholderHtml = `<div data-preview-loading="${id}" contenteditable="false" style="display:flex;align-items:center;gap:8px;padding:10px 14px;margin:8px 0;background:${bgPanel};border:0.5px solid ${border};border-radius:3px;font-size:11px;color:${subtle};font-family:inherit;letter-spacing:0.04em;"><span style="display:inline-block;width:10px;height:10px;border:1.5px solid ${subtle};border-top-color:transparent;border-radius:50%;animation:hque-spin 0.7s linear infinite;"></span>Loading preview…</div>`
+    const linkHtml = `<a href="${escapeAttr(href)}" target="_blank" rel="noreferrer">${escapeHtml(displayText || href)}</a>&nbsp;`
+    document.execCommand('insertHTML', false, linkHtml + placeholderHtml + '<br>')
+    fetchPreviewAndReplace(href, id)
+  }
+
+  async function fetchPreviewAndReplace(url, id) {
+    try {
+      const res = await fetch(`/.netlify/functions/link-preview?url=${encodeURIComponent(url)}`)
+      const data = await res.json().catch(() => null)
+      const el = editorRef.current?.querySelector(`[data-preview-loading="${id}"]`)
+      if (!el) return
+      if (!data || data.error || (!data.title && !data.image && !data.description)) {
+        el.remove()
+        scheduleSave()
+        return
+      }
+      el.outerHTML = renderPreviewCard(data, url)
+      scheduleSave()
+    } catch (_) {
+      const el = editorRef.current?.querySelector(`[data-preview-loading="${id}"]`)
+      el?.remove()
+    }
+  }
+
+  function renderPreviewCard(data, fallbackUrl) {
+    const href = escapeAttr(data.url || fallbackUrl)
+    const title = data.title ? escapeHtml(data.title) : escapeHtml(hostnameOf(data.url || fallbackUrl) || 'Link')
+    const desc = data.description ? `<div style="font-size:11px;color:${subtle};line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(data.description)}</div>` : ''
+    const site = data.siteName ? `<div style="font-size:9px;color:${subtle};letter-spacing:0.08em;text-transform:uppercase;margin-top:6px;">${escapeHtml(data.siteName)}</div>` : ''
+    const img = data.image ? `<img src="${escapeAttr(data.image)}" alt="" style="width:96px;height:96px;object-fit:cover;flex-shrink:0;border-right:0.5px solid ${border};background:${bgPanel};" onerror="this.style.display='none'" />` : ''
+    return `<a data-link-preview="1" contenteditable="false" href="${href}" target="_blank" rel="noreferrer" style="display:flex;align-items:stretch;margin:8px 0;background:${bgPanel};border:0.5px solid ${border};border-radius:3px;text-decoration:none;color:inherit;overflow:hidden;max-width:560px;">${img}<div style="flex:1;min-width:0;padding:10px 14px;display:flex;flex-direction:column;justify-content:center;"><div style="font-weight:600;font-size:13px;color:${text};line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">${title}</div>${desc}${site}</div></a>`
+  }
+
+  function hostnameOf(u) {
+    try { return new URL(u).hostname.replace(/^www\./, '') } catch { return null }
+  }
+
   function handlePaste(e) {
     e.preventDefault()
     const text = (e.clipboardData?.getData('text/plain') || '').trim()
@@ -176,7 +216,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     if (URL_RE.test(text) && !/\s/.test(text)) {
       let href = text
       if (!/^https?:\/\//i.test(href)) href = 'https://' + href
-      document.execCommand('insertHTML', false, `<a href="${escapeAttr(href)}" target="_blank" rel="noreferrer">${escapeHtml(text)}</a>&nbsp;`)
+      insertLinkWithPreview(href, text)
     } else {
       document.execCommand('insertText', false, text)
     }
@@ -186,6 +226,13 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
   function handleEditorClick(e) {
     const a = e.target.closest('a')
     if (!a) return
+    // Preview cards open on a normal click (they're block elements you'd never edit inline)
+    if (a.hasAttribute('data-link-preview')) {
+      e.preventDefault()
+      window.open(a.href, '_blank', 'noopener,noreferrer')
+      return
+    }
+    // Inline links open on ⌘/Ctrl-click so plain clicks still let you place a cursor
     if (e.metaKey || e.ctrlKey) {
       e.preventDefault()
       window.open(a.href, '_blank', 'noopener,noreferrer')
@@ -389,9 +436,12 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
         <style>{`
           [contenteditable][data-placeholder]:empty:before { content: attr(data-placeholder); color: ${subtle}; pointer-events: none; }
           [contenteditable] a { color: ${linkColor}; text-decoration: underline; }
+          [contenteditable] a[data-link-preview] { text-decoration: none; }
+          [contenteditable] a[data-link-preview]:hover { border-color: ${accent} !important; }
           [contenteditable] ul { padding-left: 22px; margin: 8px 0; }
           [contenteditable] li { margin: 4px 0; }
           [contenteditable] h3[data-day] { user-select: none; }
+          @keyframes hque-spin { to { transform: rotate(360deg); } }
         `}</style>
       </div>
     </div>
