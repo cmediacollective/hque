@@ -46,6 +46,7 @@ function App() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
   const [pendingTaskId, setPendingTaskId] = useState(null)
+  const [pendingCampaignId, setPendingCampaignId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
   const [pastDueSince, setPastDueSince] = useState(null)
@@ -73,6 +74,19 @@ function App() {
     setView('workspace')
     setPendingTaskId(taskId)
     params.delete('task')
+    const remaining = params.toString()
+    const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
+    window.history.replaceState({}, '', cleanUrl)
+  }, [])
+
+  // Deep link: /?campaign=<id> opens that campaign in Campaigns
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const campaignId = params.get('campaign')
+    if (!campaignId) return
+    setView('campaigns')
+    setPendingCampaignId(campaignId)
+    params.delete('campaign')
     const remaining = params.toString()
     const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
     window.history.replaceState({}, '', cleanUrl)
@@ -432,7 +446,7 @@ function App() {
             {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
             {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} isMobile={isMobile} />}
-            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} />}
+            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
           </div>

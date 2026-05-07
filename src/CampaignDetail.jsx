@@ -121,6 +121,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
   const [editingBrandId, setEditingBrandId] = useState(null)
   const [brandContact, setBrandContact] = useState(null)
 
+  const [linkCopied, setLinkCopied] = useState(false)
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
   const [newComment, setNewComment] = useState('')
@@ -354,6 +355,21 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                   if (onClose) onClose()
                 }} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>
                   {campaign.archived ? 'Restore' : 'Archive'}
+                </button>
+                <button onClick={async () => {
+                  const url = `${window.location.origin}${window.location.pathname}?campaign=${campaign.id}`
+                  try {
+                    await navigator.clipboard.writeText(url)
+                  } catch (_) {
+                    const ta = document.createElement('textarea')
+                    ta.value = url; document.body.appendChild(ta); ta.select()
+                    try { document.execCommand('copy') } catch (_) {}
+                    document.body.removeChild(ta)
+                  }
+                  setLinkCopied(true)
+                  setTimeout(() => setLinkCopied(false), 1500)
+                }} title="Copy shareable link" style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: linkCopied ? '#7A9B8E' : '#999', cursor: 'pointer', borderRadius: '1px' }}>
+                  {linkCopied ? '✓ Copied' : '↗ Copy Link'}
                 </button>
                 <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>

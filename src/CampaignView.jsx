@@ -20,7 +20,7 @@ const BOARD_COLUMNS = [
   { key: '__archived', label: 'Archived' }
 ]
 
-export default function CampaignView({ dark = true, orgId, campaignView = 'grid' }) {
+export default function CampaignView({ dark = true, orgId, campaignView = 'grid', openCampaignId, onOpenCampaignHandled }) {
   const isMobile = window.innerWidth < 768;
   const view = campaignView
   const bg = dark ? '#1A1A1A' : '#F5F3EF'
@@ -52,6 +52,18 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     if (!orgId) return
     supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
   }, [orgId])
+
+  // Open a campaign passed in via deep link (?campaign=<id>)
+  useEffect(() => {
+    if (!openCampaignId || !orgId) return
+    let cancelled = false
+    supabase.from('campaigns').select('*').eq('id', openCampaignId).eq('org_id', orgId).maybeSingle().then(({ data }) => {
+      if (cancelled) return
+      if (data) setSelected(data)
+      onOpenCampaignHandled && onOpenCampaignHandled()
+    })
+    return () => { cancelled = true }
+  }, [openCampaignId, orgId])
 
   async function fetchCampaigns() {
     setLoading(true)

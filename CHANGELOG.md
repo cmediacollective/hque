@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-06
+
+**Shareable links for campaigns.** Open any campaign and you'll see a new **↗ Copy Link** button next to Edit in the header. Click it (turns to ✓ Copied) and paste the link into Slack, email, or anywhere — opening it takes the recipient straight to that campaign panel. Works for archived campaigns too. Behind the scenes, this is just a `?campaign=<id>` URL parameter, the same approach already used for tasks.
+
 ## 2026-05-03
 
 **Brand contacts: light CRM on each brand.** Every brand now stores a primary contact (name, title, email, phone) plus free-text notes. Edit from three places: (1) workspace sidebar — hover a brand → ⋯ → **Edit brand** opens a panel with name, logo, website, contact fields, archive button; (2) campaign form brand row — new **Contact** button opens the same panel; (3) campaign detail — small contact block under the brand header with name/title, email (mailto link), phone (tel link). Click the block to edit. Required one-time Supabase setup: 5 columns on `brands` (SQL provided separately).
