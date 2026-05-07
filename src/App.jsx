@@ -325,7 +325,7 @@ function App() {
   if (subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
-    { key: 'workspace', label: 'Workspace', pageLabel: 'Brands/Clients' },
+    { key: 'workspace', label: 'Workspace', pageLabel: 'Workspace' },
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
     { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
