@@ -197,8 +197,8 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {!showArchived && emptyCount > 0 && (
-            <button onClick={() => setShowEmpty(s => !s)} title='Show brands with no tasks' style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
-              {showEmpty ? 'Hide empty' : `+${emptyCount} empty`}
+            <button onClick={() => setShowEmpty(s => !s)} title='Brands that don’t have any tasks yet' style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
+              {showEmpty ? 'Hide' : `+${emptyCount} no tasks`}
             </button>
           )}
           {archivedBrands.length > 0 && (

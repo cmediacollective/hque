@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Clearer label in the workspace sidebar.** The "+16 empty" toggle (which hides brands that have no tasks yet) now reads "+16 no tasks" so it's obvious what's being collapsed. Hover for a tooltip too.
+
+## 2026-05-06
+
 **Workspace is now the home view + nav reorder + small fixes.**
 - **Workspace is the default landing view.** Sign in / refresh and you go straight to your workspace dashboard instead of Talent.
 - **Sidebar reordered:** Workspace → Campaigns → Talent → Reports.
