@@ -6,6 +6,15 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**More brand notes polish.**
+- **Editing past days no longer kills the timestamp.** When you reopen tomorrow and edit something under today's heading, the heading stays put. A new heading for tomorrow only appears at the top when you actually start writing new content above the existing dates.
+- **× button on dropped files.** Hover over an embedded image and a small × appears in the top-right; PDFs and other files show a × beside the filename. Click to remove the attachment cleanly. Old attachments dropped before this change get the × treatment automatically the next time you open the notes.
+- **Bulleted lists now show bullets.** And there's a new **1. list** button next to it for numbered lists.
+- **Strikethrough button** added to the toolbar (next to bold/italic/underline).
+- **Text color picker.** Small colored swatch in the toolbar opens a 8-color palette plus a "Default" option to revert to the theme's text color.
+
+## 2026-05-06
+
 **Link previews in brand notes.** Paste a URL into a brand's notes and a preview card appears underneath — image, title, description, source. Click the card (regular click) to open the page in a new tab. Works for any public URL with Open Graph or Twitter card metadata (which is most of the modern web). Powered by a new Netlify function (`/.netlify/functions/link-preview`) that fetches the page and reads its meta tags. Cards are saved with the rest of your notes, so they persist next time you open them.
 
 ## 2026-05-06

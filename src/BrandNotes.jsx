@@ -27,6 +27,8 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState('')
   const [mentionRect, setMentionRect] = useState(null)
+  const [showColors, setShowColors] = useState(false)
+  const [currentColor, setCurrentColor] = useState(null)
   const dayHeadingInsertedRef = useRef(false)
   const previousMentionsRef = useRef(new Set())
   const saveTimerRef = useRef(null)
@@ -48,12 +50,27 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       }
       if (editorRef.current) {
         editorRef.current.innerHTML = data?.meeting_notes || ''
+        wrapExistingAttachments(editorRef.current)
         previousMentionsRef.current = collectMentions(editorRef.current)
       }
       setLoaded(true)
     })
     return () => { cancelled = true; if (saveTimerRef.current) clearTimeout(saveTimerRef.current) }
   }, [brand.id])
+
+  // Place cursor at the very top of the editor when notes finish loading,
+  // so first keystrokes create today's heading above any existing dated content.
+  useEffect(() => {
+    if (!loaded || error || !editorRef.current) return
+    const el = editorRef.current
+    el.focus()
+    const range = document.createRange()
+    range.selectNodeContents(el)
+    range.collapse(true)
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+  }, [loaded, error])
 
   function collectMentions(el) {
     const set = new Set()
@@ -104,8 +121,8 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     onClose()
   }
 
-  function exec(cmd) {
-    document.execCommand(cmd, false, null)
+  function exec(cmd, value = null) {
+    document.execCommand(cmd, false, value)
     editorRef.current?.focus()
     scheduleSave()
   }
@@ -125,6 +142,10 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       dayHeadingInsertedRef.current = true
       return
     }
+    // If user is editing inside an existing dated section, leave it alone — preserve the old timestamp
+    if (firstHeading && !isCursorAboveNode(firstHeading)) {
+      return
+    }
     const heading = document.createElement('h3')
     heading.setAttribute('data-day', today)
     heading.contentEditable = 'false'
@@ -136,6 +157,16 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     el.insertBefore(heading, el.firstChild)
     dayHeadingInsertedRef.current = true
     placeCursorAtStartOf(spacer)
+  }
+
+  function isCursorAboveNode(node) {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return true
+    const range = sel.getRangeAt(0)
+    if (!editorRef.current?.contains(range.startContainer)) return true
+    const nodeRange = document.createRange()
+    nodeRange.setStartBefore(node)
+    return range.compareBoundaryPoints(Range.START_TO_START, nodeRange) <= 0
   }
 
   function placeCursorAtStartOf(node) {
@@ -207,6 +238,45 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
 
   function hostnameOf(u) {
     try { return new URL(u).hostname.replace(/^www\./, '') } catch { return null }
+  }
+
+  function imageWrapperHtml(publicUrl, fileName) {
+    return `<div data-attachment-wrapper="image" contenteditable="false" style="position:relative;display:inline-block;margin:8px 0;max-width:100%;line-height:0;"><img src="${escapeAttr(publicUrl)}" alt="${escapeAttr(fileName)}" data-attachment="image" style="max-width:100%;border-radius:2px;cursor:pointer;display:block;" /><button type="button" data-attachment-delete="1" title="Remove" style="position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.7);color:#fff;border:none;cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;">×</button></div>&nbsp;`
+  }
+
+  function fileWrapperHtml(publicUrl, fileName) {
+    return `<span data-attachment-wrapper="file" contenteditable="false" style="display:inline-flex;align-items:center;gap:8px;margin:4px 4px 4px 0;padding:4px 4px 4px 8px;background:${bgPanel};border:0.5px solid ${border};border-radius:2px;line-height:1.4;"><a href="${escapeAttr(publicUrl)}" target="_blank" rel="noreferrer" data-attachment="file" style="color:${linkColor};text-decoration:none;font-size:12px;">📎 ${escapeHtml(fileName)}</a><button type="button" data-attachment-delete="1" title="Remove" style="background:none;border:none;color:${subtle};cursor:pointer;font-size:13px;line-height:1;padding:0 4px;">×</button></span>&nbsp;`
+  }
+
+  function wrapExistingAttachments(el) {
+    // Migrate previously-saved bare imgs/file links into wrappers with × buttons
+    el.querySelectorAll('img[data-attachment="image"]').forEach(img => {
+      if (img.closest('[data-attachment-wrapper]')) return
+      const tmp = document.createElement('template')
+      tmp.innerHTML = imageWrapperHtml(img.src, img.alt || 'image')
+      const wrapper = tmp.content.firstChild
+      img.replaceWith(wrapper)
+    })
+    el.querySelectorAll('a[data-attachment="file"]').forEach(a => {
+      if (a.closest('[data-attachment-wrapper]')) return
+      const tmp = document.createElement('template')
+      tmp.innerHTML = fileWrapperHtml(a.href, a.textContent.replace(/^📎\s*/, ''))
+      const wrapper = tmp.content.firstChild
+      a.replaceWith(wrapper)
+    })
+  }
+
+  function handleAttachmentDelete(e) {
+    const btn = e.target.closest('[data-attachment-delete]')
+    if (!btn) return false
+    e.preventDefault()
+    e.stopPropagation()
+    const wrapper = btn.closest('[data-attachment-wrapper]')
+    if (wrapper) {
+      wrapper.remove()
+      scheduleSave()
+    }
+    return true
   }
 
   function handlePaste(e) {
@@ -325,12 +395,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       }
       const { data: { publicUrl } } = supabase.storage.from('media-kits').getPublicUrl(path)
       const isImg = (file.type || '').startsWith('image/')
-      let html
-      if (isImg) {
-        html = `<img src="${escapeAttr(publicUrl)}" alt="${escapeAttr(file.name)}" style="max-width:100%; border-radius:2px; margin:8px 0; cursor:pointer; display:block;" data-attachment="image" />`
-      } else {
-        html = `<a href="${escapeAttr(publicUrl)}" target="_blank" rel="noreferrer" data-attachment="file">📎 ${escapeHtml(file.name)}</a>&nbsp;`
-      }
+      const html = isImg ? imageWrapperHtml(publicUrl, file.name) : fileWrapperHtml(publicUrl, file.name)
       editorRef.current?.focus()
       if (!dayHeadingInsertedRef.current) ensureTodayHeading()
       document.execCommand('insertHTML', false, html)
@@ -373,12 +438,32 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           <button onClick={closeWithSave} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '0 4px' }}>×</button>
         </div>
 
-        <div style={{ padding: '10px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', gap: '6px', flexShrink: 0, background: bgPanel, alignItems: 'center' }}>
+        <div style={{ padding: '10px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', gap: '6px', flexShrink: 0, background: bgPanel, alignItems: 'center', position: 'relative' }}>
           <ToolbarButton inv={inv} onClick={() => exec('bold')} title='Bold (⌘B)'><b>B</b></ToolbarButton>
           <ToolbarButton inv={inv} onClick={() => exec('italic')} title='Italic (⌘I)'><i>I</i></ToolbarButton>
           <ToolbarButton inv={inv} onClick={() => exec('underline')} title='Underline (⌘U)'><u>U</u></ToolbarButton>
+          <ToolbarButton inv={inv} onClick={() => exec('strikeThrough')} title='Strikethrough'><s>S</s></ToolbarButton>
+          <div style={{ position: 'relative' }}>
+            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowColors(s => !s)} title='Text color' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#D4CFC8'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 8px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ display: 'inline-block', width: '14px', height: '14px', borderRadius: '2px', background: currentColor || (inv ? '#E8E4DD' : '#1A1A1A'), border: `0.5px solid ${border}` }} />
+              <span style={{ fontSize: '9px' }}>▾</span>
+            </button>
+            {showColors && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, background: bgInner, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '8px', display: 'grid', gridTemplateColumns: 'repeat(4, 22px)', gap: '6px', zIndex: 50, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                {['#1A1A1A', '#FFFFFF', '#E74C3C', '#E67E22', '#F1C40F', '#27AE60', '#3498DB', '#9B59B6'].map(c => (
+                  <button key={c} onMouseDown={e => e.preventDefault()} onClick={() => { exec('foreColor', c); setCurrentColor(c); setShowColors(false) }}
+                    style={{ width: '22px', height: '22px', background: c, border: `0.5px solid ${border}`, borderRadius: '2px', cursor: 'pointer', padding: 0 }} />
+                ))}
+                <button onMouseDown={e => e.preventDefault()} onClick={() => { exec('foreColor', text); setCurrentColor(null); setShowColors(false) }}
+                  style={{ gridColumn: '1 / -1', fontSize: '10px', padding: '6px 8px', background: 'none', border: `0.5px solid ${border}`, color: text, cursor: 'pointer', borderRadius: '1px', fontFamily: 'inherit', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  Default
+                </button>
+              </div>
+            )}
+          </div>
           <div style={{ width: '1px', background: border, alignSelf: 'stretch', margin: '0 4px' }} />
-          <ToolbarButton inv={inv} onClick={() => exec('insertUnorderedList')} title='Bulleted list'>•&nbsp;list</ToolbarButton>
+          <ToolbarButton inv={inv} onClick={() => exec('insertUnorderedList')} title='Bulleted list'>• list</ToolbarButton>
+          <ToolbarButton inv={inv} onClick={() => exec('insertOrderedList')} title='Numbered list'>1. list</ToolbarButton>
           <ToolbarButton inv={inv} onClick={addLink} title='Insert link'>🔗 Link</ToolbarButton>
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>Drop files · type @ to mention · ⌘-click links</span>
@@ -397,7 +482,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
-          onClick={e => { handleEditorClick(e); handleImgClick(e) }}
+          onClick={e => { if (handleAttachmentDelete(e)) return; handleEditorClick(e); handleImgClick(e) }}
           onDrop={handleDrop}
           onDragOver={e => { e.preventDefault() }}
           style={{
@@ -438,9 +523,12 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           [contenteditable] a { color: ${linkColor}; text-decoration: underline; }
           [contenteditable] a[data-link-preview] { text-decoration: none; }
           [contenteditable] a[data-link-preview]:hover { border-color: ${accent} !important; }
-          [contenteditable] ul { padding-left: 22px; margin: 8px 0; }
+          [contenteditable] ul { padding-left: 26px; margin: 8px 0; list-style: disc outside; }
+          [contenteditable] ol { padding-left: 26px; margin: 8px 0; list-style: decimal outside; }
           [contenteditable] li { margin: 4px 0; }
           [contenteditable] h3[data-day] { user-select: none; }
+          [contenteditable] [data-attachment-wrapper="image"] button[data-attachment-delete] { opacity: 0.55; transition: opacity 0.15s; }
+          [contenteditable] [data-attachment-wrapper="image"]:hover button[data-attachment-delete] { opacity: 1; }
           @keyframes hque-spin { to { transform: rotate(360deg); } }
         `}</style>
       </div>
