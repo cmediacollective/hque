@@ -47,6 +47,7 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [pendingTaskId, setPendingTaskId] = useState(null)
   const [pendingCampaignId, setPendingCampaignId] = useState(null)
+  const [pendingBrandNotesId, setPendingBrandNotesId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
   const [pastDueSince, setPastDueSince] = useState(null)
@@ -87,6 +88,19 @@ function App() {
     setView('campaigns')
     setPendingCampaignId(campaignId)
     params.delete('campaign')
+    const remaining = params.toString()
+    const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
+    window.history.replaceState({}, '', cleanUrl)
+  }, [])
+
+  // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const brandId = params.get('brand_notes')
+    if (!brandId) return
+    setView('workspace')
+    setPendingBrandNotesId(brandId)
+    params.delete('brand_notes')
     const remaining = params.toString()
     const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
     window.history.replaceState({}, '', cleanUrl)
@@ -364,7 +378,7 @@ function App() {
               )}
               {view === 'campaigns' && !isMobile && (
                 <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
-                  {['grid', 'list', 'board'].map(v => (
+                  {['grid', 'list', 'board', 'archived'].map(v => (
                     <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: campaignView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
                   ))}
                 </div>
@@ -445,7 +459,7 @@ function App() {
             {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
             {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
-            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} isMobile={isMobile} />}
+            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />}
             {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
             {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
             {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}

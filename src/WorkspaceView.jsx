@@ -122,7 +122,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, isMobile = false }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false }) {
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
   const [campaigns, setCampaigns] = useState([])
@@ -214,6 +214,21 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       onOpenTaskHandled && onOpenTaskHandled()
     })()
   }, [openTaskId, orgId])
+
+  // Deep link: open a brand's notes panel directly via ?brand_notes=<id>
+  useEffect(() => {
+    if (!openBrandNotesId || !orgId) return
+    let cancelled = false
+    supabase.from('brands').select('id, name, logo_url, website').eq('id', openBrandNotesId).eq('org_id', orgId).maybeSingle().then(({ data }) => {
+      if (cancelled) return
+      if (data) {
+        setSelectedBrand(data)
+        setShowNotes(true)
+      }
+      onOpenBrandNotesHandled && onOpenBrandNotesHandled()
+    })
+    return () => { cancelled = true }
+  }, [openBrandNotesId, orgId])
 
   async function findOrCreateBoardForBrand(brand) {
     setLoading(true)

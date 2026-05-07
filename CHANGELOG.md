@@ -6,6 +6,13 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-06
 
+**Shareable links for brand notes + Archived campaigns view.**
+- Each brand's notes now has its own shareable URL. Open notes → click **↗ Copy Link** in the header (top right, next to ×). Paste in Slack/email — anyone with HQue access lands directly in that brand's notes.
+- Removed the inline 🔗 Link button from the notes toolbar — pasted URLs already auto-link, so it was just clutter.
+- New **Archived** view in the campaigns sidebar (alongside Grid / List / Board). All campaigns you've archived live here; archive an active one and it'll show up in this view automatically.
+
+## 2026-05-06
+
 **More brand notes polish.**
 - **Editing past days no longer kills the timestamp.** When you reopen tomorrow and edit something under today's heading, the heading stays put. A new heading for tomorrow only appears at the top when you actually start writing new content above the existing dates.
 - **× button on dropped files.** Hover over an embedded image and a small × appears in the top-right; PDFs and other files show a × beside the filename. Click to remove the attachment cleanly. Old attachments dropped before this change get the × treatment automatically the next time you open the notes.

@@ -178,23 +178,19 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     sel.addRange(range)
   }
 
-  function addLink() {
-    const sel = window.getSelection()
-    const hasSelection = sel && sel.toString().length > 0
-    const url = prompt(hasSelection ? 'Link URL:' : 'Link URL:', 'https://')
-    if (!url) return
-    let href = url.trim()
-    if (!/^https?:\/\//i.test(href) && !href.startsWith('mailto:') && !href.startsWith('/')) href = 'https://' + href
-    if (!hasSelection) {
-      insertLinkWithPreview(href, href)
-    } else {
-      document.execCommand('createLink', false, href)
-      setTimeout(() => {
-        editorRef.current?.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noreferrer' })
-      }, 0)
+  const [linkCopied, setLinkCopied] = useState(false)
+  async function copyShareLink() {
+    const url = `${window.location.origin}${window.location.pathname}?brand_notes=${brand.id}`
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch (_) {
+      const ta = document.createElement('textarea')
+      ta.value = url; document.body.appendChild(ta); ta.select()
+      try { document.execCommand('copy') } catch (_) {}
+      document.body.removeChild(ta)
     }
-    editorRef.current?.focus()
-    scheduleSave()
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 1500)
   }
 
   function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
@@ -435,6 +431,9 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
             <div style={{ color: '#7A9B8E', minHeight: '12px' }}>{savedLabel}</div>
             <div style={{ marginTop: '2px', fontStyle: 'italic', textTransform: 'none', letterSpacing: 0 }}>Auto-saves as you type</div>
           </div>
+          <button onClick={copyShareLink} title='Copy a shareable link to these notes' style={{ padding: '6px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: linkCopied ? '#7A9B8E' : muted, cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+            {linkCopied ? '✓ Copied' : '↗ Copy Link'}
+          </button>
           <button onClick={closeWithSave} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '24px', lineHeight: 1, padding: '0 4px' }}>×</button>
         </div>
 
@@ -464,9 +463,8 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           <div style={{ width: '1px', background: border, alignSelf: 'stretch', margin: '0 4px' }} />
           <ToolbarButton inv={inv} onClick={() => exec('insertUnorderedList')} title='Bulleted list'>• list</ToolbarButton>
           <ToolbarButton inv={inv} onClick={() => exec('insertOrderedList')} title='Numbered list'>1. list</ToolbarButton>
-          <ToolbarButton inv={inv} onClick={addLink} title='Insert link'>🔗 Link</ToolbarButton>
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>Drop files · type @ to mention · ⌘-click links</span>
+          <span style={{ fontSize: '9px', color: subtle, letterSpacing: '0.1em' }}>Paste a URL to link · drop files · type @ to mention</span>
         </div>
 
         {error && (

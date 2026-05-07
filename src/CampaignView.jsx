@@ -68,7 +68,8 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   async function fetchCampaigns() {
     setLoading(true)
     let q = supabase.from('campaigns').select('*').eq('org_id', orgId)
-    if (view !== 'board') q = q.eq('archived', false)
+    if (view === 'archived') q = q.eq('archived', true)
+    else if (view !== 'board') q = q.eq('archived', false)
     const { data } = await q.order('created_at', { ascending: false })
     setCampaigns(data || [])
     if (data?.length) fetchCreatorCounts(data.map(c => c.id))
@@ -208,7 +209,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
         <span style={{ marginRight: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
           {filtered.length} {filtered.length === 1 ? 'campaign' : 'campaigns'}
         </span>
-        <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>
+        {view !== 'archived' && (
+          <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>
+        )}
       </div>
 
       <div style={{ padding: '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
@@ -227,15 +230,15 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {search ? 'No results' : 'No campaigns yet'}
+            {search ? 'No results' : view === 'archived' ? 'No archived campaigns' : 'No campaigns yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted }}>
-            {search ? `Nothing matched "${search}"` : 'Click + Campaign to create your first one'}
+            {search ? `Nothing matched "${search}"` : view === 'archived' ? 'Campaigns you archive will appear here.' : 'Click + Campaign to create your first one'}
           </div>
         </div>
       )}
 
-      {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
+      {!loading && (view === 'grid' || view === 'archived' || isMobile) && filtered.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
           {filtered.map(c => (
             <div key={c.id}
