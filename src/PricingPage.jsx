@@ -66,6 +66,7 @@ export default function PricingPage({ onGetStarted }) {
     canonical: 'https://h-que.com/pricing',
   })
   const [openFaq, setOpenFaq] = useState(null)
+  const [hoveredPlan, setHoveredPlan] = useState(null)
   const isMobile = window.innerWidth < 768
 
   return (
@@ -85,31 +86,64 @@ export default function PricingPage({ onGetStarted }) {
       </div>
 
       {/* Plans */}
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '24px', background: 'none' }}>
-        {PLANS.map(plan => (
-          <div key={plan.name} style={{ background: plan.highlight ? '#1E2428' : '#111', padding: '36px 28px', position: 'relative' }}>
-            {plan.highlight && (
-              <div style={{ position: 'absolute', top: '-1px', right: '20px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '0 0 2px 2px' }}>Most Popular</div>
-            )}
-            <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>{plan.name}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '12px' }}>
-              <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '48px', color: '#F0ECE6', lineHeight: 1 }}>{plan.price}</span>
-              <span style={{ fontSize: '12px', color: '#555' }}>{plan.period}</span>
+      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '20px', alignItems: 'start' }}>
+        {PLANS.map(plan => {
+          const isHovered = hoveredPlan === plan.name
+          return (
+            <div
+              key={plan.name}
+              onMouseEnter={() => setHoveredPlan(plan.name)}
+              onMouseLeave={() => setHoveredPlan(null)}
+              style={{
+                background: plan.highlight ? '#1A2024' : '#141414',
+                border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#333' : '#222')}`,
+                borderRadius: '3px',
+                padding: isMobile ? '32px 26px' : '38px 30px',
+                position: 'relative',
+                transform: !isMobile && isHovered ? 'translateY(-4px)' : 'translateY(0)',
+                boxShadow: plan.highlight ? '0 1px 44px rgba(91,124,153,0.10)' : 'none',
+                transition: 'transform 0.2s ease, border-color 0.2s ease',
+              }}
+            >
+              {plan.highlight && (
+                <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>
+              )}
+              <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>{plan.name}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px', marginBottom: '14px' }}>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '52px', color: '#F0ECE6', lineHeight: 1 }}>{plan.price}</span>
+                <span style={{ fontSize: '12px', color: '#666' }}>{plan.period}</span>
+              </div>
+              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.65, marginBottom: '26px', minHeight: '44px' }}>{plan.description}</div>
+              <div style={{ borderTop: '0.5px solid #262626', paddingTop: '24px', marginBottom: '28px' }}>
+                {plan.features.map(f => {
+                  const inherited = f.startsWith('Everything in')
+                  return (
+                    <div key={f} style={{ display: 'flex', gap: '11px', marginBottom: '13px', alignItems: 'flex-start' }}>
+                      <span style={{ color: '#5b7c99', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>✓</span>
+                      <span style={{ fontSize: '13px', color: inherited ? '#9C978F' : '#888', fontWeight: inherited ? 500 : 400, lineHeight: 1.5 }}>{f}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <button
+                onClick={onGetStarted}
+                style={{
+                  width: '100%', padding: '13px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+                  background: plan.highlight ? '#5b7c99' : 'none',
+                  border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#3A3A3A' : '#2A2A2A')}`,
+                  color: plan.highlight ? '#fff' : (isHovered ? '#F0ECE6' : '#999'),
+                  cursor: 'pointer', borderRadius: '2px',
+                  transition: 'color 0.2s ease, border-color 0.2s ease',
+                }}
+              >
+                <span>Start free trial</span>
+                <span style={{ display: 'inline-block', transform: isHovered ? 'translateX(3px)' : 'translateX(0)', transition: 'transform 0.2s ease' }}>→</span>
+              </button>
             </div>
-            <div style={{ fontSize: '13px', color: '#555', lineHeight: 1.6, marginBottom: '28px', minHeight: '44px' }}>{plan.description}</div>
-            <div style={{ borderTop: '0.5px solid #1E1E1E', paddingTop: '24px', marginBottom: '28px' }}>
-              {plan.features.map(f => (
-                <div key={f} style={{ display: 'flex', gap: '12px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                  <span style={{ color: '#5b7c99', fontSize: '12px', flexShrink: 0, marginTop: '1px' }}>✓</span>
-                  <span style={{ fontSize: '13px', color: '#777', lineHeight: 1.5 }}>{f}</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={onGetStarted} style={{ width: '100%', padding: '13px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: plan.highlight ? '#5b7c99' : 'none', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#2A2A2A'}`, color: plan.highlight ? '#fff' : '#666', cursor: 'pointer', borderRadius: '1px' }}>
-              Start free trial
-            </button>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Compare note */}
