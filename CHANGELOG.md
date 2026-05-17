@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-16
+
+**Refreshed the pricing cards on the marketing site.** The three plan cards (Starter / Pro / Agency) on `/pricing` got a visual update: each card now has a thin border with softly rounded corners and lifts slightly when you hover over it. The "Pro" plan is highlighted with a slate-blue border and a soft glow, and its "Most Popular" label sits as a clean tab on the top edge. The "Start free trial" button gained an arrow that slides on hover, and the "Everything in Starter/Pro" feature rows are subtly emphasized so the tiers read as building on each other. Prices are unchanged ($49 / $99 / $199).
+
 ## 2026-05-06
 
 **Workspace page header now says "Workspace"** (was "Brands/Clients"), matching the sidebar label.
