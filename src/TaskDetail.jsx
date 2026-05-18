@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
+import { addTaskWatchers } from './notify'
 import Linkify from './Linkify'
 
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -95,7 +96,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
         }
       }
       if (parseMentions) {
-        await parseMentions(commentBody, orgId, `You were mentioned in a comment on: ${task.title}`, members, task.id)
+        const mentioned = await parseMentions(commentBody, orgId, `You were mentioned in a comment on: ${task.title}`, members, task.id)
+        if (mentioned && mentioned.length) {
+          await addTaskWatchers(task.id, mentioned)
+          setForm(f => ({ ...f, watcher_ids: [...new Set([...(f.watcher_ids || []), ...mentioned])] }))
+        }
       }
     }
   }

@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-18
 
+**You now auto-follow tasks you're assigned to or mentioned in.** Anyone assigned to a task, or @-mentioned in the task or one of its comments, automatically becomes a watcher of that task — so they keep getting updates without having to add themselves. (No extra "you're now watching" email; you just get the assignment or mention notification.)
+
+**Campaign notifications are now clickable.** When you're @-mentioned in a comment on a campaign, that notification in the bell now opens the campaign — previously those notifications were dead ends. (Needs a one-time database update; see notes.)
+
 **Tasks now send deadline reminder emails.** When a task has a due date and someone assigned to it, that person gets an email: the day before it's due, the day it's due, and the day after if it's still not done. (That's on top of the email they already get when first assigned.) A daily check runs around noon Pacific. Reminders skip tasks that are already in a Done column, and respect each person's email-notifications setting. There's also a preview tool to see the email designs without setting up real tasks.
 
 **The Workspace sidebar now shows every brand/client.** Previously, brands with no tasks yet were hidden behind a small "+N no tasks" link, so a brand someone just added wouldn't appear in the list — you had to search for it. Now every active brand shows in the sidebar all the time. Archived brands are still kept separate under the "+N archived" toggle.

@@ -180,7 +180,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     setNewComment('')
     fetchComments()
     if (orgId) {
-      await parseMentions(body, orgId, `You were mentioned in a comment on campaign: ${campaign.name}`, members)
+      await parseMentions(body, orgId, `You were mentioned in a comment on campaign: ${campaign.name}`, members, null, campaign.id)
     }
   }
 

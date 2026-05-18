@@ -4,7 +4,7 @@ import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
 import BrandNotes from './BrandNotes'
-import { createNotification, parseMentions } from './notify'
+import { createNotification, parseMentions, addTaskWatchers } from './notify'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -301,7 +301,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     setShowNewTask(null)
     if (inserted) {
       if (form.assignee_ids?.length) await syncAssignees(inserted.id, form.assignee_ids, form.title)
-      await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, inserted.id)
+      const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, inserted.id)
+      await addTaskWatchers(inserted.id, [...(form.assignee_ids || []), ...mentioned])
     }
     fetchTasks()
   }
@@ -310,8 +311,9 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
+    const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
+    await addTaskWatchers(form.id, [...(form.assignee_ids || []), ...mentioned])
     fetchTasks()
-    await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
   }
 
   async function moveTask(taskId, newColumnId) {

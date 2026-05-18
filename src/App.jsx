@@ -337,7 +337,7 @@ function App() {
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
-      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} />}
+      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />}
       {showWelcome && (
         <div onClick={() => setShowWelcome(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '2px', maxWidth: '440px', width: '100%', padding: isMobile ? '40px 28px' : '48px 40px', textAlign: 'center', color: '#F0ECE6' }}>
