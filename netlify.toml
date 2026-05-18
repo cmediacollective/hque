@@ -3,6 +3,10 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Runs daily at 19:00 UTC — noon Pacific (11 AM during winter / standard time).
+[functions."task-reminders"]
+  schedule = "0 19 * * *"
+
 [[redirects]]
   from = "/privacy"
   to = "/index.html"
