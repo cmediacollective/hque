@@ -36,9 +36,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [pwSuccess, setPwSuccess] = useState(false)
 
   const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState('member')
   const [inviting, setInviting] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
+  const [pendingInvites, setPendingInvites] = useState([])
   const [currentUserRole, setCurrentUserRole] = useState('member')
 
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
@@ -75,6 +77,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchTeam() {
     const { data } = await supabase.from('profiles').select('*').eq('org_id', orgId).order('created_at', { ascending: true })
     setTeamMembers(data || [])
+    const { data: invites } = await supabase.from('invitations').select('*').eq('org_id', orgId).is('accepted_at', null).order('created_at', { ascending: true })
+    setPendingInvites(invites || [])
   }
 
   async function uploadAgencyLogo(file) {
@@ -162,7 +166,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
     // Store the invitation so when they log in we can auto-attach them to the org
     const { error: inviteErr } = await supabase.from('invitations').upsert(
-      [{ email, org_id: orgId, role: 'member' }],
+      [{ email, org_id: orgId, role: inviteRole }],
       { onConflict: 'email,org_id' }
     )
 
@@ -177,7 +181,15 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     if (error) return setInviteMsg(`Error: ${error.message}`)
     setInviteMsg(`Invite sent to ${email}`)
     setInviteEmail('')
+    fetchTeam()
     setTimeout(() => setInviteMsg(''), 4000)
+  }
+
+  async function cancelInvite(invite) {
+    if (!confirm(`Cancel the invitation to ${invite.email}?`)) return
+    const { error } = await supabase.from('invitations').delete().ilike('email', invite.email).eq('org_id', orgId)
+    if (error) { alert(`Could not cancel invitation: ${error.message}`); return }
+    fetchTeam()
   }
 
   async function updateRole(id, role) {
@@ -204,6 +216,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   const roleColor = (r) => r === 'owner' ? '#5b7c99' : r === 'admin' ? '#888' : '#666'
+
+  // Pending invites that haven't been accepted and aren't already members.
+  const visiblePending = pendingInvites.filter(inv => !teamMembers.some(m => (m.email || '').toLowerCase() === inv.email.toLowerCase()))
 
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
@@ -393,12 +408,16 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
+                  <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} title='Access level for this person' style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 10px', fontSize: '12px', color: text, outline: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                    <option value='member'>Member</option>
+                    <option value='admin'>Admin</option>
+                  </select>
                   <button onClick={inviteUser} disabled={inviting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: inviting ? 0.7 : 1, whiteSpace: 'nowrap' }}>
                     {inviting ? 'Sending...' : 'Send Invite'}
                   </button>
                 </div>
                 {inviteMsg && <div style={{ fontSize: '11px', color: inviteMsg.startsWith('Error') ? '#e74c3c' : '#5C9E52', marginTop: '10px' }}>{inviteMsg}</div>}
-                <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in. No password needed on their end.</div>
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in (no password needed), and join with the access level you pick above.</div>
               </div>
             )}
 
@@ -442,6 +461,33 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               ))}
               {teamMembers.length === 0 && <div style={{ padding: '20px', background: card, fontSize: '12px', color: subtle }}>No team members yet.</div>}
             </div>
+
+            {visiblePending.length > 0 && (
+              <>
+                {sectionDivider('Pending Invitations')}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
+                  {visiblePending.map(invite => (
+                    <div key={invite.email} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: `1px dashed ${border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: subtle, fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                        {invite.email?.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{invite.email}</div>
+                        <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>
+                          Invited as {invite.role || 'member'}{invite.created_at ? ` · ${new Date(invite.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#b8860b', border: '0.5px solid #b8860b', padding: '3px 8px', borderRadius: '1px', whiteSpace: 'nowrap' }}>Pending</span>
+                      {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
+                        <button onClick={() => cancelInvite(invite)} title='Cancel this invitation' style={{ background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '1px' }}>
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
