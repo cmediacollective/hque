@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-18
+
+**The Workspace sidebar now shows every brand/client.** Previously, brands with no tasks yet were hidden behind a small "+N no tasks" link, so a brand someone just added wouldn't appear in the list — you had to search for it. Now every active brand shows in the sidebar all the time. Archived brands are still kept separate under the "+N archived" toggle.
+
 ## 2026-05-17
 
 **The homepage pricing section now matches the redesigned cards.** The pricing cards on the homepage got the same refresh as the `/pricing` page — `3px` rounded corners and a cleaner border, a subtle lift on hover, a slate-blue border and soft glow on the "Pro" card, the "Most Popular" label as a tab on the top edge, and a sliding arrow on the "Get started" button. No price changes.

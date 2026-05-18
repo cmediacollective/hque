@@ -26,7 +26,6 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [archiving, setArchiving] = useState(null)
   const [hovering, setHovering] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
-  const [showEmpty, setShowEmpty] = useState(false)
   const [editingBrandId, setEditingBrandId] = useState(null)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
@@ -136,17 +135,9 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     if (!restore && selectedBrandId === brand.id) onSelectBrand?.(null)
   }
 
-  const isInUse = (b) => (boardCounts[b.id] || 0) > 0 || b.pinned_at || selectedBrandId === b.id
-
-  const searchFiltered = search
+  const filtered = search
     ? brands.filter(b => b.name.toLowerCase().includes(search.toLowerCase()))
     : brands
-
-  const filtered = (search || showEmpty)
-    ? searchFiltered
-    : searchFiltered.filter(isInUse)
-
-  const emptyCount = search ? 0 : searchFiltered.length - filtered.length
 
   const initial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
@@ -196,11 +187,6 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           {showArchived ? `Archived · ${archivedBrands.length}` : `Brands · ${filtered.length}`}
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {!showArchived && emptyCount > 0 && (
-            <button onClick={() => setShowEmpty(s => !s)} title='Brands that don’t have any tasks yet' style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
-              {showEmpty ? 'Hide' : `+${emptyCount} no tasks`}
-            </button>
-          )}
           {archivedBrands.length > 0 && (
             <button onClick={() => setShowArchived(!showArchived)} style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
               {showArchived ? 'Active' : `+${archivedBrands.length} archived`}
