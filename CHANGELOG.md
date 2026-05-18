@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-18
 
+**The dashboard now shows tasks with no due date.** Your "My Tasks" dashboard used to only show tasks due within the next two weeks (Today / This Week / Next Week), so a task with no due date — or one due further out — was invisible even though it counted toward your "assigned / watching" totals. There's now a fourth column, **"Later / No date"**, that catches every one of those, for both Assigned and Watching.
+
 **Team invites now show as "Pending" and let you set an access level.** On Settings → Team, when you invite someone you now pick whether they join as a Member or an Admin, right next to the email field. Anyone you've invited who hasn't accepted yet appears in a new "Pending Invitations" list with a Pending badge — so you can confirm the invite went out — and you can cancel a pending invite if you sent it by mistake.
 
 **You now auto-follow tasks you're assigned to or mentioned in.** Anyone assigned to a task, or @-mentioned in the task or one of its comments, automatically becomes a watcher of that task — so they keep getting updates without having to add themselves. (No extra "you're now watching" email; you just get the assignment or mention notification.)

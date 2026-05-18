@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
 function bucketFor(dueDate, todayMidnight) {
-  if (!dueDate) return null
+  if (!dueDate) return 'Later'
   const due = new Date(dueDate + 'T00:00:00')
   const msInDay = 24 * 60 * 60 * 1000
   const days = Math.round((due - todayMidnight) / msInDay)
@@ -10,7 +10,7 @@ function bucketFor(dueDate, todayMidnight) {
   if (days === 0) return 'Today'
   if (days <= 7) return 'This Week'
   if (days <= 14) return 'Next Week'
-  return null
+  return 'Later'
 }
 
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -169,7 +169,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   }
 
   function bucketize(tasks) {
-    const buckets = { Today: [], 'This Week': [], 'Next Week': [] }
+    const buckets = { Today: [], 'This Week': [], 'Next Week': [], Later: [] }
     tasks.forEach(t => {
       const b = bucketFor(t.due_date, todayMidnight)
       if (b && buckets[b]) buckets[b].push(t)
@@ -365,7 +365,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     }
   })()
 
-  const BUCKETS = ['Today', 'This Week', 'Next Week']
+  const BUCKETS = ['Today', 'This Week', 'Next Week', 'Later']
 
   const TaskCard = ({ t, filled = true }) => {
     const overdue = isOverdue(t.due_date) && filled
@@ -461,17 +461,17 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
         {hasAnything && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, marginBottom: '8px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr 1fr', gap: 0, marginBottom: '8px' }}>
               <div></div>
               {BUCKETS.map(b => {
                 const isToday = b === 'Today'
                 return (
-                  <div key={b} style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: isToday ? '#5b7c99' : muted, fontWeight: isToday ? 500 : 400, padding: '0 4px' }}>{b}</div>
+                  <div key={b} style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: isToday ? '#5b7c99' : muted, fontWeight: isToday ? 500 : 400, padding: '0 4px' }}>{b === 'Later' ? 'Later / No date' : b}</div>
                 )
               })}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, alignItems: 'start', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start', marginBottom: '20px' }}>
               <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Assigned</div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>To me</div>
@@ -482,7 +482,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             </div>
 
             {totalWatching > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', gap: 0, alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start' }}>
                 <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Watching</div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>Keep tabs</div>
