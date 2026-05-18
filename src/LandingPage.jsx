@@ -359,6 +359,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
   const [scrolled, setScrolled] = useState(false)
   const [mobile, setMobile] = useState(isMob())
   const [openFaq, setOpenFaq] = useState(null)
+  const [hoveredPlan, setHoveredPlan] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const intervalRef = useRef(null)
 
@@ -508,25 +509,58 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px', textAlign: 'center' }}>Pricing</div>
         <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '40px', textAlign: 'center', fontWeight: 'normal', '--reveal-delay': '120ms' }}>Simple, transparent pricing.</div>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: '16px' }}>
-          {PLANS.map((plan, i) => (
-            <div key={plan.name} data-reveal style={{ background: plan.highlight ? '#1E2428' : '#141414', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#222'}`, borderRadius: '2px', padding: '32px 28px', position: 'relative', '--reveal-delay': `${i * 100}ms` }}>
-              {plan.highlight && <div style={{ position: 'absolute', top: '-1px', right: '20px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '3px 10px', borderRadius: '0 0 2px 2px' }}>Most Popular</div>}
-              <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>{plan.name}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
-                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
-                <span style={{ fontSize: '12px', color: '#666' }}>/month</span>
-              </div>
-              <div style={{ borderTop: '0.5px solid #222', paddingTop: '20px', marginBottom: '28px' }}>
-                {plan.features.map(f => (
-                  <div key={f} style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'flex-start' }}>
-                    <span style={{ color: '#5b7c99', fontSize: '12px', flexShrink: 0, marginTop: '1px' }}>✓</span>
-                    <span style={{ fontSize: '13px', color: '#777', lineHeight: 1.5 }}>{f}</span>
+          {PLANS.map((plan, i) => {
+            const isHovered = hoveredPlan === plan.name
+            return (
+              <div key={plan.name} data-reveal style={{ '--reveal-delay': `${i * 100}ms` }}>
+                <div
+                  onMouseEnter={() => setHoveredPlan(plan.name)}
+                  onMouseLeave={() => setHoveredPlan(null)}
+                  style={{
+                    background: plan.highlight ? '#1A2024' : '#141414',
+                    border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#333' : '#222')}`,
+                    borderRadius: '3px',
+                    padding: '32px 28px',
+                    position: 'relative',
+                    transform: !mobile && isHovered ? 'translateY(-4px)' : 'translateY(0)',
+                    boxShadow: plan.highlight ? '0 1px 44px rgba(91,124,153,0.10)' : 'none',
+                    transition: 'transform 0.2s ease, border-color 0.2s ease',
+                  }}
+                >
+                  {plan.highlight && <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>}
+                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>{plan.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
+                    <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
+                    <span style={{ fontSize: '12px', color: '#666' }}>/month</span>
                   </div>
-                ))}
+                  <div style={{ borderTop: '0.5px solid #262626', paddingTop: '20px', marginBottom: '28px' }}>
+                    {plan.features.map(f => (
+                      <div key={f} style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'flex-start' }}>
+                        <span style={{ color: '#5b7c99', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>✓</span>
+                        <span style={{ fontSize: '13px', color: '#888', lineHeight: 1.5 }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={onGetStarted}
+                    style={{
+                      width: '100%', padding: '12px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
+                      background: plan.highlight ? '#5b7c99' : 'none',
+                      border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#3A3A3A' : '#2A2A2A')}`,
+                      color: plan.highlight ? '#fff' : (isHovered ? '#F0ECE6' : '#999'),
+                      cursor: 'pointer', borderRadius: '2px',
+                      transition: 'color 0.2s ease, border-color 0.2s ease',
+                    }}
+                  >
+                    <span>Get started</span>
+                    <span style={{ display: 'inline-block', transform: isHovered ? 'translateX(3px)' : 'translateX(0)', transition: 'transform 0.2s ease' }}>→</span>
+                  </button>
+                </div>
               </div>
-              <button onClick={onGetStarted} style={{ width: '100%', padding: '12px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: plan.highlight ? '#5b7c99' : 'none', border: `0.5px solid ${plan.highlight ? '#5b7c99' : '#333'}`, color: plan.highlight ? '#fff' : '#777', cursor: 'pointer', borderRadius: '1px' }}>Get started</button>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#555' }}>14-day free trial on all plans · No credit card required</div>
       </section>
