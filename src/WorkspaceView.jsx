@@ -179,6 +179,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [columns, setColumns] = useState([])
   const [hoveringTask, setHoveringTask] = useState(null)
   const [doneExpanded, setDoneExpanded] = useState(false)
+  const [taskSort, setTaskSort] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('hque.taskSort')) || 'created')
+  useEffect(() => { try { localStorage.setItem('hque.taskSort', taskSort) } catch (_) {} }, [taskSort])
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('kanban')
@@ -336,6 +338,24 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
 
+  // Sort tasks within a column according to the chosen Sort-by setting.
+  // 'created' leaves them in fetch order (manual). 'due' puts soonest first
+  // (tasks with no due date go to the end). 'priority' is High → Medium → Low.
+  function sortTasks(list) {
+    if (taskSort === 'due') {
+      return [...list].sort((a, b) => {
+        const ad = a.due_date || '9999-12-31'
+        const bd = b.due_date || '9999-12-31'
+        return ad.localeCompare(bd)
+      })
+    }
+    if (taskSort === 'priority') {
+      const rank = { High: 0, Medium: 1, Low: 2 }
+      return [...list].sort((a, b) => (rank[a.priority] ?? 3) - (rank[b.priority] ?? 3))
+    }
+    return list
+  }
+
   const doneColumnIds = (() => {
     const ids = new Set()
     if (!columns || columns.length === 0) return ids
@@ -445,6 +465,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                   <span>Notes</span>
                 </button>
               )}
+              <select value={taskSort} onChange={e => setTaskSort(e.target.value)} title='Sort tasks within each column' style={{ padding: '6px 26px 6px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border2}`, color: muted, borderRadius: '4px', cursor: 'pointer', flexShrink: 0, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', boxShadow: taskShadow, fontFamily: 'inherit' }}>
+                <option value='created'>Sort: Default</option>
+                <option value='due'>Sort: Due date</option>
+                <option value='priority'>Sort: Priority</option>
+              </select>
               <div style={{ display: 'flex', gap: '0', border: `1px solid ${border2}`, borderRadius: '4px', flexShrink: 0, overflow: 'hidden', boxShadow: taskShadow }}>
                 <button onClick={() => setViewMode('kanban')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer', fontWeight: viewMode === 'kanban' ? 500 : 400 }}>Kanban</button>
                 <button onClick={() => setViewMode('list')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}`, fontWeight: viewMode === 'list' ? 500 : 400 }}>List</button>
@@ -487,7 +512,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
-                      {tasks.filter(t => t.column_id === col.id).map(task => (
+                      {sortTasks(tasks.filter(t => t.column_id === col.id)).map(task => (
                         <div key={task.id}
                           draggable
                           onDragStart={() => setDragging(task.id)}

@@ -8,6 +8,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 **Workspace toolbar buttons stand out more.** The Notes button now has a blue outline so it reads as a real button, and the Kanban / List toggle is a crisper segmented control with a filled background and a soft shadow — both no longer look flat against the page.
 
+**Sort tasks by due date or priority.** The Workspace board (and List view) now has a "Sort" dropdown in the toolbar. Pick *Due date* and within each column the soonest-due tasks bubble to the top; pick *Priority* to put High → Medium → Low; pick *Default* to leave them in the order they were created. Your choice is remembered. (Drag-and-drop between columns still works as before.)
+
 **Workspace notes: highlighting, deleting a date, and date order.** Three fixes to the brand notes:
 - *Highlighting now shows.* Selecting text in a note used to highlight invisibly (a dark highlight on the dark notes background), so it looked like nothing happened. Selected text now shows a clear blue highlight, so you can see what you've grabbed to copy or delete.
 - *Delete a whole date.* Hover any date heading in a note and a × appears — click it to remove that date and all of its notes at once (with a confirmation first).
