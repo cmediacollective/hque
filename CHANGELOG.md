@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-19
 
-**Mini calendar in the sidebar.** A small month calendar now sits right in the left menu. The current month shows by default with today's date highlighted, and small arrows let you glance back at past months or ahead to future ones. The month and year are in HQue's brand blue and serif font. It's purely a quick reference — nothing is plotted on it and nothing is booked.
+**Mini calendar in the sidebar.** A small month calendar now sits right in the left menu. The current month shows by default with today's date highlighted, and small arrows let you glance back at past months or ahead to future ones. "Today" is determined by your agency's time zone setting (Settings → org time zone), so it's correct no matter where the person viewing it is located. The month and year are in HQue's brand blue and serif font. It's purely a quick reference — nothing is plotted on it and nothing is booked.
 
 **Invited team members can reliably join.** Previously, when someone you invited signed in, the step that attaches them to your agency could quietly fail while the invitation was still marked "accepted" — leaving that person stuck forever on the "Create your agency workspace" screen with no way out. Joining an agency now happens in one atomic server-side step: the invitation is only consumed once the person is successfully attached, so a half-failed join can't strand anyone. The onboarding screen also now has a "Sign out" button as a safety net, plus a note reminding invitees to sign in with the exact email their invite was sent to.
 

@@ -369,7 +369,7 @@ function App() {
                 fontWeight: view === key ? '500' : '400'
               }}>{label}</button>
             ))}
-            <MiniCalendar dark={dark} />
+            <MiniCalendar dark={dark} agencyTz={agencyTz} />
             <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
               {view === 'talent' && !isMobile && (
                 <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
