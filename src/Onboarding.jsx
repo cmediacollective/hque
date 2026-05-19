@@ -77,8 +77,17 @@ export default function Onboarding({ user, onComplete }) {
           {saving ? 'Creating your workspace...' : 'Create Workspace'}
         </button>
 
-        <div style={{ marginTop: '20px', fontSize: '11px', color: '#555', textAlign: 'center' }}>
+        <div style={{ marginTop: '20px', fontSize: '11px', color: '#555', textAlign: 'center', lineHeight: 1.7 }}>
           Signed in as {user.email}
+          <div style={{ marginTop: '10px' }}>
+            Were you invited to an existing agency? Make sure you signed in with the
+            exact email your invitation was sent to.
+          </div>
+          <button
+            onClick={async () => { await supabase.auth.signOut(); window.location.reload() }}
+            style={{ marginTop: '10px', background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '11px', textDecoration: 'underline', padding: 0 }}>
+            Sign out
+          </button>
         </div>
       </div>
     </div>

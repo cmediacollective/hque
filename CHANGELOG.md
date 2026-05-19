@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-19
 
+**Invited team members can reliably join.** Previously, when someone you invited signed in, the step that attaches them to your agency could quietly fail while the invitation was still marked "accepted" — leaving that person stuck forever on the "Create your agency workspace" screen with no way out. Joining an agency now happens in one atomic server-side step: the invitation is only consumed once the person is successfully attached, so a half-failed join can't strand anyone. The onboarding screen also now has a "Sign out" button as a safety net, plus a note reminding invitees to sign in with the exact email their invite was sent to.
+
 **Cleaner brand campaign cards.** The campaign lines inside each brand card had too many divider lines. A brand with a single campaign now shows no separator line at all, and a brand with several campaigns shows just one thin line between each — so the cards read cleaner.
 
 ---
