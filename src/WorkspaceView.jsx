@@ -170,11 +170,15 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   // Raised task cards: soft shadow, with a gentle lift on hover.
   const taskShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.06)'
   const taskShadowHover = dark ? '0 5px 16px rgba(0,0,0,0.55)' : '0 3px 6px rgba(0,0,0,0.08), 0 8px 18px rgba(0,0,0,0.1)'
+  // Kanban columns as raised panels.
+  const colPanel = dark ? '#1E1E1E' : '#EDEAE5'
+  const colShadow = dark ? '0 1px 4px rgba(0,0,0,0.35)' : '0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.05)'
 
   const [selectedBrand, setSelectedBrand] = useState(null)
   const [activeBoard, setActiveBoard] = useState(null)
   const [columns, setColumns] = useState([])
   const [hoveringTask, setHoveringTask] = useState(null)
+  const [doneExpanded, setDoneExpanded] = useState(false)
   const [tasks, setTasks] = useState([])
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('kanban')
@@ -345,6 +349,15 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     return ids
   })()
 
+  // The rightmost column, collapsed by default when it's a "done"-type column,
+  // so it stays visible at the board edge without taking a full column's width.
+  const collapsibleColId = (() => {
+    if (!columns || columns.length === 0) return null
+    let last = columns[0]
+    columns.forEach(c => { if (c.position > last.position) last = c })
+    return DONE_COLUMN_NAMES.includes((last.name || '').trim().toLowerCase()) ? last.id : null
+  })()
+
   const colorFromName = (name) => {
     if (!name) return '#5b7c99'
     const colors = ['#5B7C99', '#B784A7', '#7A9B8E', '#A87575', '#8C6BAA', '#D4A574', '#6B8E7F']
@@ -430,17 +443,36 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
             {loading && (<div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>)}
 
             {!loading && viewMode === 'kanban' && (
-              <div style={{ display: 'flex', gap: '1px', background: gridBg, flex: 1, overflowX: 'auto', overflowY: 'hidden' }}>
-                {columns.map(col => (
+              <div style={{ display: 'flex', gap: '14px', background: bg, flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '14px 16px' }}>
+                {columns.map(col => {
+                  const accent = colorFromName(col.name)
+                  const colCount = tasks.filter(t => t.column_id === col.id).length
+                  const collapsed = col.id === collapsibleColId && !doneExpanded
+                  return (
                   <div key={col.id}
-                    style={{ flex: '0 0 260px', minWidth: '260px', background: dragOver === col.id ? colHover : colBg, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    style={{ flex: collapsed ? '0 0 46px' : '0 0 270px', minWidth: collapsed ? '46px' : '270px', background: dragOver === col.id ? colHover : colPanel, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: `0.5px solid ${border}`, borderTop: `3px solid ${accent}`, borderRadius: '8px', boxShadow: colShadow, transition: 'flex-basis 0.18s ease, min-width 0.18s ease' }}
                     onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
 
-                    <div style={{ padding: '14px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                      <div style={{ fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name}</div>
-                      <div style={{ fontSize: '10px', color: subtle }}>{tasks.filter(t => t.column_id === col.id).length}</div>
+                    {collapsed ? (
+                      <div onClick={() => setDoneExpanded(true)} title='Click to open this column'
+                        style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '14px 0', cursor: 'pointer' }}>
+                        <span style={{ fontSize: '13px', color: subtle, lineHeight: 1 }}>‹</span>
+                        <div style={{ writingMode: 'vertical-rl', fontSize: '9px', letterSpacing: '0.26em', textTransform: 'uppercase', color: text }}>{col.name}</div>
+                        <div style={{ fontSize: '9px', color: '#fff', background: accent, borderRadius: '9px', minWidth: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px', boxSizing: 'border-box' }}>{colCount}</div>
+                      </div>
+                    ) : (
+                    <>
+                    <div style={{ padding: '12px 14px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px', minWidth: 0 }}>
+                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: accent, flexShrink: 0 }} />
+                        <span style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{col.name}</span>
+                        <span style={{ fontSize: '9px', color: subtle, background: dark ? '#2A2A2A' : '#E0DCD6', borderRadius: '8px', padding: '1px 7px', flexShrink: 0 }}>{colCount}</span>
+                      </div>
+                      {col.id === collapsibleColId && (
+                        <button onClick={() => setDoneExpanded(false)} title='Collapse this column' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>›</button>
+                      )}
                     </div>
 
                     <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px 0' }}>
@@ -472,8 +504,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
                       )}
                     </div>
+                    </>
+                    )}
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
 

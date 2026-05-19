@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-19
 
+**Kanban columns pop, and the Done column is no longer hidden.** Each column on the Workspace board is now a proper raised panel — its own background, rounded corners, a soft shadow, a color-coded accent stripe across the top, and a clearer header with a count badge. And the rightmost "Done" column, which used to sit off-screen where you couldn't tell it existed, now shows as a slim always-visible strip at the edge of the board (its name runs vertically with a task count). Click the strip to expand it to a full column, and the › button in its header to collapse it again — so Done is always visible without shrinking any of the other columns.
+
 **Cards stand out across the app.** The brand cards in the Campaigns grid, the talent cards in Talent, and the task cards in Workspace (both the board and list views) no longer sit flat against the page — each is now a raised card with rounded corners, a soft shadow, and a little spacing around it, and it gently lifts when you hover over it. On the campaign cards, the talent photos are also a touch larger and sit neatly in the top-right corner of each campaign.
 
 **Mini calendar in the sidebar.** A small month calendar now sits right in the left menu. The current month shows by default with today's date highlighted, and small arrows let you glance back at past months or ahead to future ones. "Today" is determined by your agency's time zone setting (Settings → org time zone), so it's correct no matter where the person viewing it is located. The month and year are in HQue's brand blue and serif font. It's purely a quick reference — nothing is plotted on it and nothing is booked.
