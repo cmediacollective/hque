@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-18
 
+**The site loads faster.** The whole app used to download as one 877 KB file before anything could show — including the marketing pages app users never see, and all the app screens marketing visitors never see. It's now split into on-demand pieces: the main file dropped to ~243 KB, and each screen (Campaigns, Reports, Settings, etc.) loads only when you actually open it. First load is noticeably lighter.
+
 **Brand/client logos are a bit larger.** The square logo thumbnails in the sidebar, workspace brand header, edit-brand screen, and Reports were bumped up slightly so they're easier to see.
 
 **The dashboard now shows tasks with no due date.** Your "My Tasks" dashboard used to only show tasks due within the next two weeks (Today / This Week / Next Week), so a task with no due date — or one due further out — was invisible even though it counted toward your "assigned / watching" totals. There's now a fourth column, **"Later / No date"**, that catches every one of those, for both Assigned and Watching.

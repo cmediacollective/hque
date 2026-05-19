@@ -1,27 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { supabase } from './supabase'
-import AddCreatorForm from './AddCreatorForm'
-import TalentView from './TalentView'
-import WorkspaceView from './WorkspaceView'
-import CampaignView from './CampaignView'
-import ReportsView from './ReportsView'
-import SettingsView from './SettingsView'
-import Onboarding from './Onboarding'
 import Login from './Login'
 import SignUp from './SignUp'
 import TrialBanner from './TrialBanner'
-import TalentInquiry from './TalentInquiry'
-import InquiriesView from './InquiriesView'
-import UpgradeWall from './UpgradeWall'
-import PastDueGate from './PastDueGate'
-import LandingPage from './LandingPage'
-import LegalPage from './LegalPage'
+import AddCreatorForm from './AddCreatorForm'
 import NotificationsPanel from './NotificationsPanel'
-import FAQPage from './FAQPage'
-import PricingPage from './PricingPage'
-import BlogPage from './BlogPage'
-import BlogPostPage from './BlogPostPage'
-import Sandbox from './Sandbox'
+
+// Heavier views and the marketing pages load on demand so the first
+// page load only downloads what it actually needs.
+const TalentView = lazy(() => import('./TalentView'))
+const WorkspaceView = lazy(() => import('./WorkspaceView'))
+const CampaignView = lazy(() => import('./CampaignView'))
+const ReportsView = lazy(() => import('./ReportsView'))
+const SettingsView = lazy(() => import('./SettingsView'))
+const InquiriesView = lazy(() => import('./InquiriesView'))
+const Onboarding = lazy(() => import('./Onboarding'))
+const UpgradeWall = lazy(() => import('./UpgradeWall'))
+const PastDueGate = lazy(() => import('./PastDueGate'))
+const LandingPage = lazy(() => import('./LandingPage'))
+const LegalPage = lazy(() => import('./LegalPage'))
+const FAQPage = lazy(() => import('./FAQPage'))
+const PricingPage = lazy(() => import('./PricingPage'))
+const BlogPage = lazy(() => import('./BlogPage'))
+const BlogPostPage = lazy(() => import('./BlogPostPage'))
+const TalentInquiry = lazy(() => import('./TalentInquiry'))
+const Sandbox = lazy(() => import('./Sandbox'))
 
 function App() {
   const [view, setView] = useState('workspace')
@@ -334,6 +337,12 @@ function App() {
 
   const viewLabel = navItems.find(n => n.key === view)?.pageLabel || navItems.find(n => n.key === view)?.label || 'HQue'
 
+  const viewLoader = (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+      <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading…</div>
+    </div>
+  )
+
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
@@ -467,13 +476,15 @@ function App() {
           <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
 
           <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
-            {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
-            {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
-            {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
-            {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />}
-            {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
-            {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
-            {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
+            <Suspense fallback={viewLoader}>
+              {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
+              {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
+              {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
+              {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />}
+              {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
+              {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
+              {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
+            </Suspense>
           </div>
         </main>
       </div>
