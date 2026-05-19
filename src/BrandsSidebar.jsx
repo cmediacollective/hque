@@ -226,7 +226,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               position: 'relative'
             }}>
             {b.logo_url ? (
-              <img src={b.logo_url} alt={b.name} style={{ width: '28px', height: '28px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
+              <img src={b.logo_url} alt={b.name} style={{ width: 'auto', height: '28px', maxWidth: '70px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
             ) : (
               <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: colorFromName(b.name), color: '#fff', fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {initial(b.name)}
