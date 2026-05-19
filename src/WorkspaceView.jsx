@@ -398,11 +398,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 <span>My Tasks</span>
               </button>
               {selectedBrand.id === '__internal' ? (
-                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
+                <div style={{ width: '44px', height: '44px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
               ) : selectedBrand.logo_url ? (
-                <img src={selectedBrand.logo_url} alt={selectedBrand.name} style={{ width: 'auto', height: '36px', maxWidth: '130px', objectFit: 'contain', borderRadius: '4px', background: '#fff', padding: '3px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => { e.target.style.display = 'none' }} />
+                <img src={selectedBrand.logo_url} alt={selectedBrand.name} style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '4px', background: '#fff', padding: '3px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => { e.target.style.display = 'none' }} />
               ) : (
-                <div style={{ width: '36px', height: '36px', borderRadius: '4px', background: colorFromName(selectedBrand.name), color: '#fff', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{(selectedBrand.name || '?').charAt(0).toUpperCase()}</div>
+                <div style={{ width: '44px', height: '44px', borderRadius: '4px', background: colorFromName(selectedBrand.name), color: '#fff', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{(selectedBrand.name || '?').charAt(0).toUpperCase()}</div>
               )}
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, lineHeight: 1.2 }}>{selectedBrand.name}</div>

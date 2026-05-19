@@ -136,8 +136,8 @@ export default function ReportsView({ dark = true, orgId }) {
                 onMouseLeave={e => e.currentTarget.style.background = card}>
 
                 {c.brand_logo_url
-                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: 'auto', height: '36px', maxWidth: '130px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border2}`, background: '#fff', padding: '3px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
+                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border2}`, background: '#fff', padding: '3px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
                 }
 
                 <div style={{ flex: 1, minWidth: 0 }}>

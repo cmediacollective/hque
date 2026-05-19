@@ -143,8 +143,8 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
               {form.logo_url
-                ? <img src={form.logo_url} alt={form.name} style={{ width: 'auto', height: '56px', maxWidth: '200px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '4px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: '#5b7c99', color: '#fff', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{initial(form.name)}</div>
+                ? <img src={form.logo_url} alt={form.name} style={{ width: '66px', height: '66px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '4px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                : <div style={{ width: '66px', height: '66px', borderRadius: '2px', background: '#5b7c99', color: '#fff', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{initial(form.name)}</div>
               }
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 <label style={{ padding: '5px 10px', fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', border: `0.5px solid ${border2}`, color: muted, cursor: uploadingLogo ? 'wait' : 'pointer', borderRadius: '1px', opacity: uploadingLogo ? 0.6 : 1 }}>

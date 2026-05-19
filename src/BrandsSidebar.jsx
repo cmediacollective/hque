@@ -226,9 +226,9 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               position: 'relative'
             }}>
             {b.logo_url ? (
-              <img src={b.logo_url} alt={b.name} style={{ width: 'auto', height: '28px', maxWidth: '70px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
+              <img src={b.logo_url} alt={b.name} style={{ width: '34px', height: '34px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
             ) : (
-              <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: colorFromName(b.name), color: '#fff', fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: '34px', height: '34px', borderRadius: '3px', background: colorFromName(b.name), color: '#fff', fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 {initial(b.name)}
               </div>
             )}
@@ -286,7 +286,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                 background: selectedBrandId === '__internal' ? selectedBg : 'transparent',
                 borderLeft: selectedBrandId === '__internal' ? '2px solid #5b7c99' : '2px solid transparent'
               }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
+              <div style={{ width: '34px', height: '34px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>
               <span style={{ fontSize: '13px', color: selectedBrandId === '__internal' ? text : muted, flex: 1 }}>Unassigned</span>
               <span style={{ fontSize: '10px', color: subtle }}>{boardCounts.__internal || 0}</span>
             </div>
@@ -295,7 +295,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
         {showArchived && archivedBrands.map(b => (
           <div key={b.id} style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '28px', height: '28px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: subtle, fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: subtle, fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               {initial(b.name)}
             </div>
             <span style={{ fontSize: '13px', color: subtle, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
