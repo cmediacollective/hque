@@ -223,7 +223,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     if (!data) return
     let merged = data
     if (data.brand_id) {
-      const { data: b } = await supabase.from('brands').select('name, logo_url, website, contact_name, contact_title, contact_email, contact_phone').eq('id', data.brand_id).maybeSingle()
+      const { data: b } = await supabase.from('brands').select('name, logo_url, website').eq('id', data.brand_id).maybeSingle()
       if (b) {
         merged = {
           ...data,
@@ -231,15 +231,11 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
           brand_logo_url: data.brand_logo_url || b.logo_url,
           brand_website: data.brand_website || b.website
         }
-        setBrandContact({
-          name: b.contact_name,
-          title: b.contact_title,
-          email: b.contact_email,
-          phone: b.contact_phone
-        })
-      } else {
-        setBrandContact(null)
       }
+    }
+    if (data.contact_id) {
+      const { data: c } = await supabase.from('brand_contacts').select('name, title, email, phone').eq('id', data.contact_id).maybeSingle()
+      setBrandContact(c || null)
     } else {
       setBrandContact(null)
     }
@@ -384,7 +380,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 onMouseEnter={e => e.currentTarget.style.borderColor = '#3A3A3A'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '6px' }}>Brand Contact</div>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '6px' }}>Campaign Contact</div>
                   {brandContact && (brandContact.name || brandContact.email || brandContact.phone) ? (
                     <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
                       {brandContact.name && (
@@ -401,7 +397,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                       )}
                     </div>
                   ) : (
-                    <div style={{ fontSize: '11px', color: '#666', fontStyle: 'italic' }}>No contact saved. Click to add.</div>
+                    <div style={{ fontSize: '11px', color: '#666', fontStyle: 'italic' }}>No contact set for this campaign — edit the campaign to choose one.</div>
                   )}
                 </div>
                 <span style={{ fontSize: '16px', color: '#666', flexShrink: 0, marginLeft: '12px' }}>›</span>

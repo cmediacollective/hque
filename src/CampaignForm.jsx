@@ -16,6 +16,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     brand: existing.brand || '',
     brand_logo_url: existing.brand_logo_url || '',
     brand_website: existing.brand_website || '',
+    contact_id: existing.contact_id || '',
     campaign_type: existing.campaign_type || 'Paid',
     status: existing.status || 'Pitch',
     budget: existing.budget || '',
@@ -29,13 +30,14 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     notes: existing.notes || '',
     talent_ids: existing.campaign_creators?.map(ct => ct.creator_id) || [],
   } : {
-    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
+    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', contact_id: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
     timeline: '', brief_url: '', contract_url: '', notes: '', talent_ids: []
   })
 
   const [creators, setCreators] = useState([])
   const [brands, setBrands] = useState([])
+  const [brandContacts, setBrandContacts] = useState([])
   const [showNewBrand, setShowNewBrand] = useState(false)
   const [newBrandName, setNewBrandName] = useState('')
   const [newBrandWebsite, setNewBrandWebsite] = useState('')
@@ -85,6 +87,25 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       }))
     }
   }, [existing?.id, brands.length])
+
+  // Load the selected brand's contacts; default the campaign to its primary contact.
+  useEffect(() => {
+    if (!form.brand_id) { setBrandContacts([]); return }
+    let cancelled = false
+    supabase.from('brand_contacts').select('*').eq('brand_id', form.brand_id)
+      .order('is_primary', { ascending: false }).order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return
+        const list = data || []
+        setBrandContacts(list)
+        setForm(f => {
+          if (f.contact_id && list.some(c => c.id === f.contact_id)) return f
+          const primary = list.find(c => c.is_primary) || list[0]
+          return { ...f, contact_id: primary?.id || '' }
+        })
+      })
+    return () => { cancelled = true }
+  }, [form.brand_id])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -206,6 +227,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
       brand: resolvedBrandText,
       brand_logo_url: resolvedBrandLogo,
       brand_website: form.brand_website || null,
+      contact_id: form.contact_id || null,
       campaign_type: form.campaign_type,
       status: form.status,
       budget: form.budget ? parseFloat(form.budget) : null,
@@ -355,6 +377,20 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
 
 
         {field('Brand Website', inp({ value: form.brand_website || '', onChange: e => set('brand_website', e.target.value), placeholder: 'e.g. example.com' }))}
+
+        {form.brand_id && field('Campaign Contact',
+          <div>
+            <select value={form.contact_id || ''} onChange={e => set('contact_id', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+              <option value=''>— No contact —</option>
+              {brandContacts.map(c => (
+                <option key={c.id} value={c.id}>{(c.name || c.email || 'Unnamed') + (c.title ? ` · ${c.title}` : '') + (c.is_primary ? ' (primary)' : '')}</option>
+              ))}
+            </select>
+            {brandContacts.length === 0 && (
+              <div style={{ fontSize: '10px', color: labelColor, marginTop: '6px' }}>No contacts for this brand yet — use the “Contact” button above to add people.</div>
+            )}
+          </div>
+        )}
 
         {field('Campaign Type',
           <select value={form.campaign_type || 'Paid'} onChange={e => set('campaign_type', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>

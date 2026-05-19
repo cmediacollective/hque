@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
-import Linkify from './Linkify'
 
 export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) {
   const bg = dark ? '#1A1A1A' : '#FFFFFF'
@@ -11,6 +10,7 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
   const subtle = dark ? '#777' : '#888'
   const inputBg = dark ? '#141414' : '#F5F3EF'
   const labelColor = dark ? '#777' : '#888'
+  const cardBg = dark ? '#222' : '#F9F7F3'
 
   const [brand, setBrand] = useState(null)
   const [form, setForm] = useState(null)
@@ -20,6 +20,11 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
   const [error, setError] = useState('')
   const [uploadingLogo, setUploadingLogo] = useState(false)
 
+  const [contacts, setContacts] = useState([])
+  const [contactDraft, setContactDraft] = useState(null)
+  const [savingContact, setSavingContact] = useState(false)
+  const [contactError, setContactError] = useState('')
+
   useEffect(() => { fetchBrand() }, [brandId])
 
   async function fetchBrand() {
@@ -28,18 +33,16 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
     const { data } = await supabase.from('brands').select('*').eq('id', brandId).maybeSingle()
     if (data) {
       setBrand(data)
-      setForm({
-        name: data.name || '',
-        website: data.website || '',
-        logo_url: data.logo_url || '',
-        contact_name: data.contact_name || '',
-        contact_title: data.contact_title || '',
-        contact_email: data.contact_email || '',
-        contact_phone: data.contact_phone || '',
-        contact_notes: data.contact_notes || ''
-      })
+      setForm({ name: data.name || '', website: data.website || '', logo_url: data.logo_url || '' })
     }
+    await fetchContacts()
     setLoading(false)
+  }
+
+  async function fetchContacts() {
+    const { data } = await supabase.from('brand_contacts').select('*').eq('brand_id', brandId)
+      .order('is_primary', { ascending: false }).order('created_at', { ascending: true })
+    setContacts(data || [])
   }
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -70,27 +73,10 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
     if (!form?.name?.trim()) { setError('Brand name is required'); return }
     setSaving(true)
     setError('')
-    let website = (form.website || '').trim()
-    const payload = {
-      name: form.name.trim(),
-      website: website || null,
-      contact_name: form.contact_name?.trim() || null,
-      contact_title: form.contact_title?.trim() || null,
-      contact_email: form.contact_email?.trim() || null,
-      contact_phone: form.contact_phone?.trim() || null,
-      contact_notes: form.contact_notes?.trim() || null
-    }
-    const { error: updErr } = await supabase.from('brands').update(payload).eq('id', brandId)
+    const website = (form.website || '').trim()
+    const { error: updErr } = await supabase.from('brands').update({ name: form.name.trim(), website: website || null }).eq('id', brandId)
     setSaving(false)
-    if (updErr) {
-      const msg = updErr.message || ''
-      if (msg.toLowerCase().includes('contact_') && (msg.toLowerCase().includes('schema cache') || msg.toLowerCase().includes('does not exist'))) {
-        setError("Contact columns aren't set up in Supabase yet. Run the SQL Claude sent, then try again.")
-      } else {
-        setError('Could not save: ' + msg)
-      }
-      return
-    }
+    if (updErr) { setError('Could not save: ' + (updErr.message || '')); return }
     setSavedFlash(true)
     setTimeout(() => setSavedFlash(false), 1500)
     if (onSaved) onSaved()
@@ -106,6 +92,58 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
     if (onClose) onClose()
   }
 
+  async function saveContact() {
+    if (!contactDraft) return
+    const name = (contactDraft.name || '').trim()
+    const email = (contactDraft.email || '').trim()
+    if (!name && !email) { setContactError('Add at least a name or an email.'); return }
+    setSavingContact(true)
+    setContactError('')
+    const row = {
+      name: name || null,
+      title: (contactDraft.title || '').trim() || null,
+      email: email || null,
+      phone: (contactDraft.phone || '').trim() || null,
+      notes: (contactDraft.notes || '').trim() || null,
+    }
+    let err
+    if (contactDraft.id) {
+      ;({ error: err } = await supabase.from('brand_contacts').update(row).eq('id', contactDraft.id))
+    } else {
+      ;({ error: err } = await supabase.from('brand_contacts').insert([{
+        ...row, brand_id: brandId, org_id: brand?.org_id, is_primary: contacts.length === 0
+      }]))
+    }
+    setSavingContact(false)
+    if (err) {
+      const msg = (err.message || '').toLowerCase()
+      if (msg.includes('brand_contacts') && (msg.includes('does not exist') || msg.includes('schema cache') || err.code === '42P01' || err.code === 'PGRST205')) {
+        setContactError("The contacts table isn't set up in Supabase yet. Run the SQL Claude sent, then try again.")
+      } else {
+        setContactError('Could not save: ' + (err.message || 'unknown error'))
+      }
+      return
+    }
+    setContactDraft(null)
+    fetchContacts()
+  }
+
+  async function deleteContact(c) {
+    if (!confirm(`Remove ${c.name || c.email || 'this contact'}?`)) return
+    await supabase.from('brand_contacts').delete().eq('id', c.id)
+    const remaining = contacts.filter(x => x.id !== c.id)
+    if (c.is_primary && remaining.length > 0 && !remaining.some(x => x.is_primary)) {
+      await supabase.from('brand_contacts').update({ is_primary: true }).eq('id', remaining[0].id)
+    }
+    fetchContacts()
+  }
+
+  async function makePrimary(c) {
+    await supabase.from('brand_contacts').update({ is_primary: false }).eq('brand_id', brandId)
+    await supabase.from('brand_contacts').update({ is_primary: true }).eq('id', c.id)
+    fetchContacts()
+  }
+
   const inp = (props) => (
     <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
   )
@@ -118,6 +156,26 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
   )
 
   const initial = (n) => (n || '?').trim().charAt(0).toUpperCase()
+
+  const miniInput = { width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }
+  const smallBtn = { padding: '4px 9px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }
+
+  const renderContactEditor = () => (
+    <div style={{ padding: '12px', border: `0.5px solid ${border2}`, borderRadius: '1px', marginBottom: '8px', background: cardBg }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+        <input placeholder='Name' value={contactDraft.name} onChange={e => setContactDraft(d => ({ ...d, name: e.target.value }))} style={miniInput} autoFocus />
+        <input placeholder='Title' value={contactDraft.title} onChange={e => setContactDraft(d => ({ ...d, title: e.target.value }))} style={miniInput} />
+      </div>
+      <input placeholder='Email' type='email' value={contactDraft.email} onChange={e => setContactDraft(d => ({ ...d, email: e.target.value }))} style={{ ...miniInput, marginBottom: '8px' }} />
+      <input placeholder='Phone' value={contactDraft.phone} onChange={e => setContactDraft(d => ({ ...d, phone: e.target.value }))} style={{ ...miniInput, marginBottom: '8px' }} />
+      <textarea placeholder='Notes (optional)' value={contactDraft.notes || ''} onChange={e => setContactDraft(d => ({ ...d, notes: e.target.value }))} style={{ ...miniInput, marginBottom: '8px', minHeight: '54px', resize: 'vertical', fontFamily: 'inherit' }} />
+      {contactError && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '8px' }}>{contactError}</div>}
+      <div style={{ display: 'flex', gap: '6px' }}>
+        <button onClick={saveContact} disabled={savingContact} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: savingContact ? 0.6 : 1 }}>{savingContact ? 'Saving...' : 'Save contact'}</button>
+        <button onClick={() => { setContactDraft(null); setContactError('') }} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+      </div>
+    </div>
+  )
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 250, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
@@ -163,25 +221,53 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
             {field('Website', inp({ value: form.website, onChange: e => set('website', e.target.value), placeholder: 'e.g. example.com' }))}
 
             <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '20px', marginTop: '8px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>Contact</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                {field('Name', inp({ value: form.contact_name, onChange: e => set('contact_name', e.target.value), placeholder: 'e.g. Sarah Lee' }))}
-                {field('Title', inp({ value: form.contact_title, onChange: e => set('contact_title', e.target.value), placeholder: 'e.g. Marketing Manager' }))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '14px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99' }}>Contacts</div>
+                <div style={{ fontSize: '10px', color: subtle }}>The people you work with at this brand. Campaigns pick one.</div>
               </div>
-              {field('Email', inp({ value: form.contact_email, onChange: e => set('contact_email', e.target.value), placeholder: 'e.g. sarah@brand.com', type: 'email' }))}
-              {field('Phone', inp({ value: form.contact_phone, onChange: e => set('contact_phone', e.target.value), placeholder: 'e.g. (555) 123-4567' }))}
-              {field('Notes',
-                <textarea value={form.contact_notes} onChange={e => set('contact_notes', e.target.value)} placeholder='Anything to remember about this contact — preferred channel, last meeting, etc.' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', fontFamily: 'inherit' }} />
+
+              {contacts.length === 0 && !contactDraft && (
+                <div style={{ fontSize: '11px', color: subtle, fontStyle: 'italic', marginBottom: '10px' }}>No contacts yet. Add the people you work with here.</div>
+              )}
+
+              {contacts.map(c => (
+                contactDraft && contactDraft.id === c.id ? (
+                  <div key={c.id}>{renderContactEditor()}</div>
+                ) : (
+                  <div key={c.id} style={{ padding: '12px', border: `0.5px solid ${border}`, borderRadius: '1px', marginBottom: '8px', background: cardBg }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: '13px', color: text, display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          {c.name || c.email || 'Unnamed contact'}
+                          {c.is_primary && <span style={{ fontSize: '7px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', border: '0.5px solid #5b7c99', padding: '2px 5px', borderRadius: '1px' }}>Primary</span>}
+                        </div>
+                        {c.title && <div style={{ fontSize: '10px', color: muted, marginTop: '3px' }}>{c.title}</div>}
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '5px', flexWrap: 'wrap' }}>
+                          {c.email && <a href={`mailto:${c.email}`} style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none' }}>{c.email}</a>}
+                          {c.phone && <a href={`tel:${c.phone}`} style={{ fontSize: '11px', color: muted, textDecoration: 'none' }}>{c.phone}</a>}
+                        </div>
+                        {c.notes && <div style={{ fontSize: '11px', color: subtle, marginTop: '6px', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{c.notes}</div>}
+                      </div>
+                      <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                        {!c.is_primary && <button onClick={() => makePrimary(c)} title='Make primary contact' style={{ ...smallBtn, color: subtle }}>★</button>}
+                        <button onClick={() => { setContactError(''); setContactDraft({ id: c.id, name: c.name || '', title: c.title || '', email: c.email || '', phone: c.phone || '', notes: c.notes || '' }) }} style={smallBtn}>Edit</button>
+                        <button onClick={() => deleteContact(c)} style={smallBtn}>Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                )
+              ))}
+
+              {contactDraft && !contactDraft.id && renderContactEditor()}
+
+              {!contactDraft && (
+                <button onClick={() => { setContactError(''); setContactDraft({ name: '', title: '', email: '', phone: '', notes: '' }) }} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                  + Add contact
+                </button>
               )}
             </div>
 
-            {form.contact_notes && (
-              <div style={{ marginTop: '4px', fontSize: '11px', color: subtle, lineHeight: 1.6 }}>
-                <Linkify text={form.contact_notes} />
-              </div>
-            )}
-
-            {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '8px', padding: '8px 10px', background: 'rgba(231, 76, 60, 0.08)', border: '0.5px solid rgba(231, 76, 60, 0.3)', borderRadius: '1px' }}>{error}</div>}
+            {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '16px', padding: '8px 10px', background: 'rgba(231, 76, 60, 0.08)', border: '0.5px solid rgba(231, 76, 60, 0.3)', borderRadius: '1px' }}>{error}</div>}
 
             <div style={{ borderTop: `0.5px solid ${border}`, marginTop: '32px', paddingTop: '16px' }}>
               <button onClick={handleArchive} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
