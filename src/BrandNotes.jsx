@@ -52,6 +52,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       if (editorRef.current) {
         editorRef.current.innerHTML = data?.meeting_notes || ''
         wrapExistingAttachments(editorRef.current)
+        decorateHeadings(editorRef.current)
         previousMentionsRef.current = collectMentions(editorRef.current)
       }
       setLoaded(true)
@@ -159,6 +160,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     heading.contentEditable = 'false'
     heading.textContent = today
     heading.style.cssText = `font-family: Georgia, serif; font-size: 13px; color: ${headingColor}; letter-spacing: 0.18em; text-transform: uppercase; margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 0.5px solid ${border};`
+    decorateHeading(heading)
     const spacer = document.createElement('div')
     spacer.innerHTML = '<br>'
     el.insertBefore(spacer, el.firstChild)
@@ -258,6 +260,53 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       const wrapper = tmp.content.firstChild
       a.replaceWith(wrapper)
     })
+  }
+
+  // Give a day heading a delete button (so a whole date can be removed).
+  function decorateHeading(h) {
+    if (h.querySelector('[data-day-delete]')) return
+    const labelText = h.textContent
+    h.textContent = ''
+    h.style.display = 'flex'
+    h.style.justifyContent = 'space-between'
+    h.style.alignItems = 'center'
+    const span = document.createElement('span')
+    span.textContent = labelText
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.setAttribute('data-day-delete', '1')
+    btn.contentEditable = 'false'
+    btn.title = 'Delete this date and its notes'
+    btn.textContent = '×'
+    btn.style.cssText = `background:none;border:none;color:${subtle};cursor:pointer;font-size:15px;line-height:1;padding:0 4px;flex-shrink:0;`
+    h.appendChild(span)
+    h.appendChild(btn)
+  }
+
+  function decorateHeadings(el) {
+    el.querySelectorAll('h3[data-day]').forEach(decorateHeading)
+  }
+
+  function handleDayHeadingDelete(e) {
+    const btn = e.target.closest('[data-day-delete]')
+    if (!btn) return false
+    e.preventDefault()
+    e.stopPropagation()
+    const heading = btn.closest('h3[data-day]')
+    if (!heading) return true
+    const label = heading.getAttribute('data-day') || 'this date'
+    if (!confirm(`Delete "${label}" and all of its notes? This can't be undone.`)) return true
+    // Remove the heading and everything below it until the next day heading.
+    let node = heading.nextSibling
+    heading.remove()
+    while (node && !(node.nodeType === 1 && node.matches && node.matches('h3[data-day]'))) {
+      const next = node.nextSibling
+      node.remove()
+      node = next
+    }
+    dirtyRef.current = true
+    scheduleSave()
+    return true
   }
 
   function handleAttachmentDelete(e) {
@@ -489,7 +538,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
-          onClick={e => { if (handleAttachmentDelete(e)) return; handleEditorClick(e); handleImgClick(e) }}
+          onClick={e => { if (handleDayHeadingDelete(e)) return; if (handleAttachmentDelete(e)) return; handleEditorClick(e); handleImgClick(e) }}
           onDrop={handleDrop}
           onDragOver={e => { e.preventDefault() }}
           style={{
@@ -537,6 +586,10 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           [contenteditable] ol { padding-left: 26px; margin: 8px 0; list-style: decimal outside; }
           [contenteditable] li { margin: 4px 0; }
           [contenteditable] h3[data-day] { user-select: text; -webkit-user-select: text; }
+          [contenteditable]::selection { background: #5b7c99; color: #ffffff; }
+          [contenteditable] ::selection { background: #5b7c99; color: #ffffff; }
+          [contenteditable] h3[data-day] button[data-day-delete] { opacity: 0; transition: opacity 0.15s; }
+          [contenteditable] h3[data-day]:hover button[data-day-delete] { opacity: 0.6; }
           [contenteditable] [data-attachment-wrapper="image"] button[data-attachment-delete] { opacity: 0.55; transition: opacity 0.15s; }
           [contenteditable] [data-attachment-wrapper="image"]:hover button[data-attachment-delete] { opacity: 1; }
           @keyframes hque-spin { to { transform: rotate(360deg); } }

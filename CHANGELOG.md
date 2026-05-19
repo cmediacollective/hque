@@ -8,7 +8,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 **Workspace toolbar buttons stand out more.** The Notes button now has a blue outline so it reads as a real button, and the Kanban / List toggle is a crisper segmented control with a filled background and a soft shadow — both no longer look flat against the page.
 
-**Workspace notes: dates no longer go backwards.** When you opened a brand's notes, it added a heading for your "today" at the top — but if a teammate had already started a heading for a later date, yours was stacked above it, so the dates ran out of order. Now a new date heading is only created when it's genuinely newer than the latest one already in the note; otherwise your additions go under the existing top heading. Text selection in notes was also made more reliable — you can highlight across the whole note, including date headings, to copy or delete a range at once.
+**Workspace notes: highlighting, deleting a date, and date order.** Three fixes to the brand notes:
+- *Highlighting now shows.* Selecting text in a note used to highlight invisibly (a dark highlight on the dark notes background), so it looked like nothing happened. Selected text now shows a clear blue highlight, so you can see what you've grabbed to copy or delete.
+- *Delete a whole date.* Hover any date heading in a note and a × appears — click it to remove that date and all of its notes at once (with a confirmation first).
+- *Dates no longer go backwards.* A new date heading is only created when it's genuinely newer than the latest one already in the note; otherwise your additions go under the existing top heading.
 
 **Header buttons stand out.** The top-right buttons — Dark/Light, the notification bell, Export, and + Talent — are no longer flat. The first three now have a filled background, rounded corners and a soft shadow, and the + Talent button has a blue glow, so the toolbar reads as real, tappable buttons.
 
