@@ -366,6 +366,17 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     return colors[Math.abs(hash) % colors.length]
   }
 
+  // The little dot beside each column name. Known stages get a fixed color.
+  const columnAccent = (name) => {
+    const n = (name || '').trim().toLowerCase()
+    if (['hold', 'on hold', 'blocked'].includes(n)) return '#c0392b'
+    if (['review', 'in review'].includes(n)) return '#5b7c99'
+    if (['done', 'completed', 'complete', 'shipped', 'closed'].includes(n)) return '#5C9E52'
+    if (['in progress', 'doing', 'active'].includes(n)) return '#C4962E'
+    if (['to do', 'todo', 'do', 'backlog'].includes(n)) return dark ? '#888' : '#999'
+    return colorFromName(name)
+  }
+
   const renderAvatars = (task) => {
     const ids = task.assignee_ids || []
     if (ids.length === 0) return null
@@ -445,12 +456,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
             {!loading && viewMode === 'kanban' && (
               <div style={{ display: 'flex', gap: '14px', background: bg, flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '14px 16px' }}>
                 {columns.map(col => {
-                  const accent = colorFromName(col.name)
+                  const accent = columnAccent(col.name)
                   const colCount = tasks.filter(t => t.column_id === col.id).length
                   const collapsed = col.id === collapsibleColId && !doneExpanded
                   return (
                   <div key={col.id}
-                    style={{ flex: collapsed ? '0 0 46px' : '0 0 270px', minWidth: collapsed ? '46px' : '270px', background: dragOver === col.id ? colHover : colPanel, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: `0.5px solid ${border}`, borderTop: `3px solid ${accent}`, borderRadius: '8px', boxShadow: colShadow, transition: 'flex-basis 0.18s ease, min-width 0.18s ease' }}
+                    style={{ flex: collapsed ? '0 0 46px' : '0 0 270px', minWidth: collapsed ? '46px' : '270px', background: dragOver === col.id ? colHover : colPanel, display: 'flex', flexDirection: 'column', overflow: 'hidden', border: `0.5px solid ${border}`, borderRadius: '8px', boxShadow: colShadow, transition: 'flex-basis 0.18s ease, min-width 0.18s ease' }}
                     onDragOver={e => { e.preventDefault(); setDragOver(col.id) }}
                     onDragLeave={() => setDragOver(null)}
                     onDrop={e => { e.preventDefault(); if (dragging) moveTask(dragging, col.id); setDragging(null); setDragOver(null) }}>
