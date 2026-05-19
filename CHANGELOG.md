@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-19
 
-**New Calendar view.** There's a new "Calendar" item in the left menu, under Reports. It's a simple, view-only month calendar — the current month opens by default, with arrows to look back at past months or ahead to future ones, and today's date highlighted. Your campaigns appear right on it: a filled blue marker on the day a campaign starts, an outlined marker on the day it ends, so you can see your month at a glance. The month and year heading are in HQue's brand blue and serif font. It's purely for viewing — nothing is booked or changed from here.
+**Mini calendar in the sidebar.** A small month calendar now sits right in the left menu. The current month shows by default with today's date highlighted, and small arrows let you glance back at past months or ahead to future ones. The month and year are in HQue's brand blue and serif font. It's purely a quick reference — nothing is plotted on it and nothing is booked.
 
 **Invited team members can reliably join.** Previously, when someone you invited signed in, the step that attaches them to your agency could quietly fail while the invitation was still marked "accepted" — leaving that person stuck forever on the "Create your agency workspace" screen with no way out. Joining an agency now happens in one atomic server-side step: the invitation is only consumed once the person is successfully attached, so a half-failed join can't strand anyone. The onboarding screen also now has a "Sign out" button as a safety net, plus a note reminding invitees to sign in with the exact email their invite was sent to.
 
