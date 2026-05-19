@@ -440,14 +440,14 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 </div>
               </div>
               {selectedBrand.id !== '__internal' && (
-                <button onClick={() => setShowNotes(true)} title='Open notes' style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <button onClick={() => setShowNotes(true)} title='Open notes' style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '1px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
                   <span style={{ fontSize: '11px', lineHeight: 1 }}>✎</span>
                   <span>Notes</span>
                 </button>
               )}
-              <div style={{ display: 'flex', gap: '0', border: `0.5px solid ${border2}`, borderRadius: '1px', flexShrink: 0 }}>
-                <button onClick={() => setViewMode('kanban')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer' }}>Kanban</button>
-                <button onClick={() => setViewMode('list')} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : 'none', border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}` }}>List</button>
+              <div style={{ display: 'flex', gap: '0', border: `1px solid ${border2}`, borderRadius: '4px', flexShrink: 0, overflow: 'hidden', boxShadow: taskShadow }}>
+                <button onClick={() => setViewMode('kanban')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer', fontWeight: viewMode === 'kanban' ? 500 : 400 }}>Kanban</button>
+                <button onClick={() => setViewMode('list')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}`, fontWeight: viewMode === 'list' ? 500 : 400 }}>List</button>
               </div>
             </div>
 
