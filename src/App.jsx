@@ -12,6 +12,7 @@ const TalentView = lazy(() => import('./TalentView'))
 const WorkspaceView = lazy(() => import('./WorkspaceView'))
 const CampaignView = lazy(() => import('./CampaignView'))
 const ReportsView = lazy(() => import('./ReportsView'))
+const CalendarView = lazy(() => import('./CalendarView'))
 const SettingsView = lazy(() => import('./SettingsView'))
 const InquiriesView = lazy(() => import('./InquiriesView'))
 const Onboarding = lazy(() => import('./Onboarding'))
@@ -322,6 +323,7 @@ function App() {
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
     { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
+    { key: 'calendar', label: 'Calendar', pageLabel: 'Calendar' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
 
@@ -358,7 +360,7 @@ function App() {
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
               <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['reports', 'Reports']].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['reports', 'Reports'], ['calendar', 'Calendar']].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -473,6 +475,7 @@ function App() {
               {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />}
               {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
               {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
+              {view === 'calendar' && <CalendarView dark={dark} orgId={orgId} />}
               {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
             </Suspense>
           </div>
@@ -487,7 +490,7 @@ function App() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'
             }}>
               <span style={{ fontSize: '16px', lineHeight: 1, opacity: view === item.key ? 1 : 0.5 }}>
-                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'reports' ? '▮' : '◎'}
+                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'reports' ? '▮' : item.key === 'calendar' ? '▤' : '◎'}
               </span>
               <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: view === item.key ? '#5b7c99' : muted }}>
                 {item.label}
