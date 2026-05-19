@@ -80,17 +80,35 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     if (!userId || !orgId) return
     setLoading(true)
 
-    const { data: boards } = await supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived')
-    const boardIds = (boards || []).map(b => b.id)
+    // Wave 1 — these three lookups don't depend on each other, so run them together.
+    const [boardsRes, assignedRes, watchedRes] = await Promise.all([
+      supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived'),
+      supabase.from('task_assignees').select('task_id').eq('user_id', userId),
+      supabase.from('task_watchers').select('task_id').eq('user_id', userId),
+    ])
+
+    const boards = boardsRes.data || []
+    const boardIds = boards.map(b => b.id)
     if (boardIds.length === 0) { setLoading(false); return }
 
     const boardBrandMap = {}
-    ;(boards || []).forEach(b => { boardBrandMap[b.id] = b.brand_id })
+    boards.forEach(b => { boardBrandMap[b.id] = b.brand_id })
 
-    const { data: cols } = await supabase.from('board_columns').select('id, name, board_id, position').in('board_id', boardIds)
+    const assignedIds = [...new Set((assignedRes.data || []).map(r => r.task_id))]
+    const watchedIds = [...new Set((watchedRes.data || []).map(r => r.task_id))].filter(id => !assignedIds.includes(id))
+
+    const allIds = [...assignedIds, ...watchedIds]
+    if (allIds.length === 0) { setAssignedTasks([]); setWatchedTasks([]); setLoading(false); return }
+
+    // Wave 2 — columns and tasks can now load together.
+    const [colsRes, tasksRes] = await Promise.all([
+      supabase.from('board_columns').select('id, name, board_id, position').in('board_id', boardIds),
+      supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').in('id', allIds).in('board_id', boardIds),
+    ])
+
     const doneColumnIds = new Set()
     const lastColumnPerBoard = {}
-    ;(cols || []).forEach(c => {
+    ;(colsRes.data || []).forEach(c => {
       const nameLower = (c.name || '').trim().toLowerCase()
       if (DONE_COLUMN_NAMES.includes(nameLower)) doneColumnIds.add(c.id)
       if (!lastColumnPerBoard[c.board_id] || c.position > lastColumnPerBoard[c.board_id].position) {
@@ -99,22 +117,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     })
     Object.values(lastColumnPerBoard).forEach(c => doneColumnIds.add(c.id))
 
-    const { data: assignedLinks } = await supabase.from('task_assignees').select('task_id').eq('user_id', userId)
-    const assignedIds = [...new Set((assignedLinks || []).map(r => r.task_id))]
-
-    const { data: watchedLinks } = await supabase.from('task_watchers').select('task_id').eq('user_id', userId)
-    const watchedIdsRaw = [...new Set((watchedLinks || []).map(r => r.task_id))]
-    const watchedIds = watchedIdsRaw.filter(id => !assignedIds.includes(id))
-
-    const allIds = [...assignedIds, ...watchedIds]
-    if (allIds.length === 0) { setAssignedTasks([]); setWatchedTasks([]); setLoading(false); return }
-
-    const { data: tasks } = await supabase.from('tasks')
-      .select('*, task_assignees(user_id), task_watchers(user_id)')
-      .in('id', allIds)
-      .in('board_id', boardIds)
-
-    const openTasks = (tasks || []).filter(t => !doneColumnIds.has(t.column_id))
+    const openTasks = (tasksRes.data || []).filter(t => !doneColumnIds.has(t.column_id))
 
     const brandIds = [...new Set(openTasks.map(t => boardBrandMap[t.board_id]).filter(Boolean))]
     let brandMap = {}

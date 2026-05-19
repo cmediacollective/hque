@@ -32,8 +32,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
 
   async function fetchBrands() {
-    const { data: brandsData } = await supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true })
-    const { data: pinsData } = await supabase.from('user_brand_pins').select('brand_id, pinned_at')
+    const [brandsRes, pinsRes] = await Promise.all([
+      supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true }),
+      supabase.from('user_brand_pins').select('brand_id, pinned_at')
+    ])
+    const brandsData = brandsRes.data
+    const pinsData = pinsRes.data
     const pinMap = {}
     ;(pinsData || []).forEach(p => { pinMap[p.brand_id] = p.pinned_at })
 
@@ -63,8 +67,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
   async function fetchBoardCounts() {
     // Fetch boards (to map brand_id ↔ board_id) and all non-archived tasks
-    const { data: boards } = await supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived')
-    const { data: tasks } = await supabase.from('tasks').select('board_id').eq('org_id', orgId)
+    const [boardsRes, tasksRes] = await Promise.all([
+      supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived'),
+      supabase.from('tasks').select('board_id').eq('org_id', orgId)
+    ])
+    const boards = boardsRes.data
+    const tasks = tasksRes.data
 
     // Build a map of board_id → brand_id (null brand_id = unassigned board)
     const boardToBrand = {}
