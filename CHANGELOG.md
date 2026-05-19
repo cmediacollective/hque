@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-19
 
-**Campaign cards stand out more.** The brand cards in the Campaigns grid no longer sit flat against the page — each one is now a raised card with rounded corners, a soft shadow, and a little spacing around it, and it gently lifts when you hover over it. The talent photos on each campaign are also a touch larger and sit neatly in the top-right corner of the campaign.
+**Cards stand out across the app.** The brand cards in the Campaigns grid, the talent cards in Talent, and the task cards in Workspace (both the board and list views) no longer sit flat against the page — each is now a raised card with rounded corners, a soft shadow, and a little spacing around it, and it gently lifts when you hover over it. On the campaign cards, the talent photos are also a touch larger and sit neatly in the top-right corner of each campaign.
 
 **Mini calendar in the sidebar.** A small month calendar now sits right in the left menu. The current month shows by default with today's date highlighted, and small arrows let you glance back at past months or ahead to future ones. "Today" is determined by your agency's time zone setting (Settings → org time zone), so it's correct no matter where the person viewing it is located. The month and year are in HQue's brand blue and serif font. It's purely a quick reference — nothing is plotted on it and nothing is booked.
 

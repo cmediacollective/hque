@@ -39,6 +39,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
   const gridBg = dark ? '#2A2A2A' : '#D4CFC8'
+  // Raised cards in the grid: a card surface lifted off the page, plus shadow.
+  const cardBg = dark ? '#212121' : '#FFFFFF'
+  const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
+  const cardShadowHover = dark ? '0 8px 22px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.07), 0 12px 26px rgba(0,0,0,0.11)'
 
   useEffect(() => { fetchCreators() }, [showArchived])
 
@@ -189,10 +193,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       )}
 
       {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: isMobile ? '12px' : '16px', flex: 1, overflowY: 'auto', padding: isMobile ? '14px 14px 100px' : '20px 20px 100px' }}>
           {filtered.map(c => (
             <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '16px' : '18px', cursor: 'pointer', position: 'relative' }}
+              style={{ background: cardBg, padding: isMobile ? '16px' : '18px', cursor: 'pointer', position: 'relative', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hovering === c.id ? cardShadowHover : cardShadow, transform: hovering === c.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
