@@ -8,6 +8,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 **Workspace toolbar buttons stand out more.** The Notes button now has a blue outline so it reads as a real button, and the Kanban / List toggle is a crisper segmented control with a filled background and a soft shadow — both no longer look flat against the page.
 
+**Header buttons stand out.** The top-right buttons — Dark/Light, the notification bell, Export, and + Talent — are no longer flat. The first three now have a filled background, rounded corners and a soft shadow, and the + Talent button has a blue glow, so the toolbar reads as real, tappable buttons.
+
 **Sidebar view toggles match.** The Grid / List (and Grid / List / Board) toggle in the left sidebar is now the same crisp segmented control — filled background, rounded corners, soft shadow, and the active view in blue — so it matches the Workspace toggle.
 
 **Kanban columns pop, and the Done column is no longer hidden.** Each column on the Workspace board is now a proper raised panel — its own background, rounded corners, a soft shadow, and a clearer header with a small color dot and a count badge. The dot colors follow the stage: Hold is red, Review is blue, In Progress is amber, Done/Complete is green, and To Do is grey. And the rightmost "Done" column, which used to sit off-screen where you couldn't tell it existed, now shows as a slim always-visible strip at the edge of the board (its name runs vertically with a task count). Click the strip to expand it to a full column, and the › button in its header to collapse it again — so Done is always visible without shrinking any of the other columns.

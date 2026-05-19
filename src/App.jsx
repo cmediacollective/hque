@@ -430,13 +430,13 @@ function App() {
                   {campaignView === 'archived' ? 'Active' : 'Archived'}
                 </button>
               )}
-              <button onClick={() => setDark(d => !d)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+              <button onClick={() => setDark(d => !d)} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '4px', boxShadow: dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)' }}>
                 {dark ? 'Light' : 'Dark'}
               </button>
-              <button onClick={() => setShowNotifications(n => !n)} style={{ position: 'relative', background: 'none', border: 'none', color: muted, cursor: 'pointer', padding: '5px 8px', lineHeight: 1, display: 'flex', alignItems: 'center' }}><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>{unreadCount > 0 && <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#5b7c99', color: '#fff', borderRadius: '50%', width: '14px', height: '14px', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unreadCount}</span>}</button>
+              <button onClick={() => setShowNotifications(n => !n)} style={{ position: 'relative', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border}`, color: muted, cursor: 'pointer', padding: '6px 9px', lineHeight: 1, display: 'flex', alignItems: 'center', borderRadius: '4px', boxShadow: dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)' }}><svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'><path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/><path d='M13.73 21a2 2 0 0 1-3.46 0'/></svg>{unreadCount > 0 && <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#5b7c99', color: '#fff', borderRadius: '50%', width: '14px', height: '14px', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unreadCount}</span>}</button>
               {view === 'talent' && talentTab === 'roster' && !isMobile && (
                 <div style={{ position: 'relative' }}>
-                  <button onClick={() => setShowExportMenu(m => !m)} disabled={exporting} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: exporting ? 0.6 : 1 }}>
+                  <button onClick={() => setShowExportMenu(m => !m)} disabled={exporting} style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '4px', opacity: exporting ? 0.6 : 1, boxShadow: dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)' }}>
                     {exporting ? 'Exporting...' : 'Export ▾'}
                   </button>
                   {showExportMenu && (
@@ -448,7 +448,7 @@ function App() {
                 </div>
               )}
               {view === 'talent' && talentTab === 'roster' && (
-                <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '6px 12px' : '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Talent</button>
+                <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '7px 14px' : '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', boxShadow: '0 2px 8px rgba(91,124,153,0.45)' }}>+ Talent</button>
               )}
               {isMobile && (
                 <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
