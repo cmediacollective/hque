@@ -32,6 +32,10 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
   const gridBg = dark ? '#2A2A2A' : '#D4CFC8'
+  // Raised brand cards in the grid: a card surface lifted off the page, plus shadow.
+  const cardBg = dark ? '#212121' : '#FFFFFF'
+  const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
+  const cardShadowHover = dark ? '0 8px 22px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.07), 0 12px 26px rgba(0,0,0,0.11)'
 
   const [campaigns, setCampaigns] = useState([])
   const [loading, setLoading] = useState(true)
@@ -46,6 +50,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [dragging, setDragging] = useState(null)
   const [dragOverCol, setDragOverCol] = useState(null)
   const [archivedExpanded, setArchivedExpanded] = useState(false)
+  const [hoveringCard, setHoveringCard] = useState(null)
 
   useEffect(() => { fetchCampaigns() }, [orgId, view])
 
@@ -267,9 +272,12 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       )}
 
       {!loading && (view === 'grid' || view === 'archived' || isMobile) && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: isMobile ? '12px' : '16px', flex: 1, overflowY: 'auto', alignContent: 'start', padding: isMobile ? '14px 14px 100px' : '20px 20px 100px' }}>
           {brandGroups.map(group => (
-            <div key={group.key} style={{ background: card, padding: isMobile ? '16px' : '20px' }}>
+            <div key={group.key}
+              onMouseEnter={() => setHoveringCard(group.key)}
+              onMouseLeave={() => setHoveringCard(null)}
+              style={{ background: cardBg, padding: isMobile ? '16px' : '20px', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hoveringCard === group.key ? cardShadowHover : cardShadow, transform: hoveringCard === group.key ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease' }}>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                 {group.logo
@@ -319,17 +327,17 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                         </div>
                       </div>
                       {(campaignTalent[c.id] || []).length > 0 && (
-                        <div style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, paddingTop: '2px' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0 }}>
                           {(campaignTalent[c.id] || []).slice(0, 3).map((t, i) => (
-                            <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -7, zIndex: 3 - i }}>
+                            <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: 3 - i }}>
                               {t.photo_url
-                                ? <img src={t.photo_url} alt={t.name} style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${card}`, display: 'block' }} />
-                                : <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>{(t.name || '?').charAt(0).toUpperCase()}</div>
+                                ? <img src={t.photo_url} alt={t.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${cardBg}`, display: 'block' }} />
+                                : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${cardBg}` }}>{(t.name || '?').charAt(0).toUpperCase()}</div>
                               }
                             </div>
                           ))}
                           {campaignTalent[c.id].length > 3 && (
-                            <div style={{ marginLeft: -7, width: '24px', height: '24px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>+{campaignTalent[c.id].length - 3}</div>
+                            <div style={{ marginLeft: -8, width: '28px', height: '28px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${cardBg}` }}>+{campaignTalent[c.id].length - 3}</div>
                           )}
                         </div>
                       )}
