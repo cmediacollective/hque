@@ -139,9 +139,18 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     if (!el) return
     const today = todayHeadingText()
     const firstHeading = el.querySelector('h3[data-day]')
-    if (firstHeading && firstHeading.getAttribute('data-day') === today) {
-      dayHeadingInsertedRef.current = true
-      return
+    if (firstHeading) {
+      const existing = firstHeading.getAttribute('data-day') || ''
+      const existingDate = new Date(existing)
+      const todayDate = new Date(today)
+      // If the newest heading is already today's — or a date ahead of today —
+      // don't add an older heading above it. Keep writing under the existing one.
+      if (existing === today || (!isNaN(existingDate) && !isNaN(todayDate) && existingDate >= todayDate)) {
+        dayHeadingInsertedRef.current = true
+        const after = firstHeading.nextSibling
+        if (after) placeCursorAtStartOf(after)
+        return
+      }
     }
     // Always insert today's heading at the top on first edit of the session.
     // Old headings stay put because they're contenteditable=false.
@@ -492,7 +501,10 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
             color: text,
             outline: 'none',
             fontFamily: 'Georgia, serif',
-            background: bgInner
+            background: bgInner,
+            userSelect: 'text',
+            WebkitUserSelect: 'text',
+            cursor: 'text'
           }}
           data-placeholder='Start typing your notes…'
         />
@@ -524,7 +536,7 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
           [contenteditable] ul { padding-left: 26px; margin: 8px 0; list-style: disc outside; }
           [contenteditable] ol { padding-left: 26px; margin: 8px 0; list-style: decimal outside; }
           [contenteditable] li { margin: 4px 0; }
-          [contenteditable] h3[data-day] { user-select: none; }
+          [contenteditable] h3[data-day] { user-select: text; -webkit-user-select: text; }
           [contenteditable] [data-attachment-wrapper="image"] button[data-attachment-delete] { opacity: 0.55; transition: opacity 0.15s; }
           [contenteditable] [data-attachment-wrapper="image"]:hover button[data-attachment-delete] { opacity: 1; }
           @keyframes hque-spin { to { transform: rotate(360deg); } }
