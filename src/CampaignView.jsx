@@ -267,87 +267,82 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       )}
 
       {!loading && (view === 'grid' || view === 'archived' || isMobile) && filtered.length > 0 && (
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px', background: bg }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
           {brandGroups.map(group => (
-            <div key={group.key}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: isMobile ? '16px 14px 8px' : '22px 28px 10px' }}>
+            <div key={group.key} style={{ background: card, padding: isMobile ? '16px' : '20px' }}>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                 {group.logo
-                  ? <img src={group.logo} alt={group.name} style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '2px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: brandColor(group.name), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(group.name)}</div>
+                  ? <img src={group.logo} alt={group.name} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '52px', height: '52px', borderRadius: '2px', background: brandColor(group.name), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(group.name)}</div>
                 }
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: text }}>{group.name}</div>
-                <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle }}>
-                  {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()} total` : ''}
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, lineHeight: 1.25 }}>{group.name}</div>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: subtle, marginTop: '4px' }}>
+                    {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()}` : ''}
+                  </div>
                 </div>
               </div>
-              <div style={{ borderTop: `0.5px solid ${border}`, margin: isMobile ? '0 14px 12px' : '0 28px 16px' }}>
+
+              <div style={{ borderTop: `0.5px solid ${border}` }}>
                 {group.campaigns.map(c => (
                   <div key={c.id}
-                    style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '13px 2px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}
+                    onClick={() => setSelected(c)}
                     onMouseEnter={() => setHovering(c.id)}
                     onMouseLeave={() => setHovering(null)}
-                    onClick={() => setSelected(c)}>
-
-                    {c.brand_logo_url
-                      ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '3px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                      : <div style={{ width: '44px', height: '44px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
-                    }
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, lineHeight: 1.3, textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px 14px', flexWrap: 'wrap', marginTop: '7px' }}>
-                        <select
-                          value={c.campaign_type || 'Paid'}
-                          onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'campaign_type', e.target.value) }}
-                          onClick={e => e.stopPropagation()}
-                          title='Campaign type'
-                          style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}>
-                          {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <select
-                          value={c.status || 'Pitch'}
-                          onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
-                          onClick={e => e.stopPropagation()}
-                          title='Status'
-                          style={{ padding: '2px 18px 2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
-                          {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        {c.budget != null && <span style={{ fontSize: '11px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</span>}
-                        {(c.start_date || c.end_date) && <span style={{ fontSize: '11px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</span>}
-                        {c.contact_id && contactMap[c.contact_id] && <span style={{ fontSize: '11px', color: muted }}>{contactMap[c.contact_id].name || contactMap[c.contact_id].email}</span>}
-                        {c.brand_website && (
-                          <a href={c.brand_website.startsWith('http') ? c.brand_website : 'https://' + c.brand_website} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} title={c.brand_website} style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a>
-                        )}
-                        {c.brief_url && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border}`, padding: '2px 6px', borderRadius: '1px' }}>Brief</span>}
-                        {c.contract_url && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border}`, padding: '2px 6px', borderRadius: '1px' }}>Contract</span>}
+                    style={{ padding: '12px 4px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, lineHeight: 1.3, textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px 12px', flexWrap: 'wrap', marginTop: '6px' }}>
+                          <select
+                            value={c.campaign_type || 'Paid'}
+                            onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'campaign_type', e.target.value) }}
+                            onClick={e => e.stopPropagation()}
+                            title='Campaign type'
+                            style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', background: 'none', border: 'none', outline: 'none', cursor: 'pointer', padding: '0 14px 0 0', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%235b7c99' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right center' }}>
+                            {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <select
+                            value={c.status || 'Pitch'}
+                            onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
+                            onClick={e => e.stopPropagation()}
+                            title='Status'
+                            style={{ padding: '2px 18px 2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
+                            {['Pitch', 'Active', 'Pending Payment', 'Completed', 'Cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          {c.budget != null && <span style={{ fontSize: '11px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</span>}
+                          {(c.start_date || c.end_date) && <span style={{ fontSize: '11px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</span>}
+                          {c.contact_id && contactMap[c.contact_id] && <span style={{ fontSize: '11px', color: muted }}>{contactMap[c.contact_id].name || contactMap[c.contact_id].email}</span>}
+                          {c.brief_url && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border}`, padding: '2px 6px', borderRadius: '1px' }}>Brief</span>}
+                          {c.contract_url && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border}`, padding: '2px 6px', borderRadius: '1px' }}>Contract</span>}
+                        </div>
                       </div>
+                      {(campaignTalent[c.id] || []).length > 0 && (
+                        <div style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, paddingTop: '2px' }}>
+                          {(campaignTalent[c.id] || []).slice(0, 3).map((t, i) => (
+                            <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -7, zIndex: 3 - i }}>
+                              {t.photo_url
+                                ? <img src={t.photo_url} alt={t.name} style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${card}`, display: 'block' }} />
+                                : <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>{(t.name || '?').charAt(0).toUpperCase()}</div>
+                              }
+                            </div>
+                          ))}
+                          {campaignTalent[c.id].length > 3 && (
+                            <div style={{ marginLeft: -7, width: '24px', height: '24px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${card}` }}>+{campaignTalent[c.id].length - 3}</div>
+                          )}
+                        </div>
+                      )}
+                      {hovering === c.id && (
+                        <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ flexShrink: 0, padding: '3px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                          {c.archived ? 'Restore' : 'Archive'}
+                        </button>
+                      )}
                     </div>
-
-                    {(campaignTalent[c.id] || []).length > 0 && (
-                      <div style={{ display: 'inline-flex', alignItems: 'center', flexShrink: 0, paddingTop: '3px' }}>
-                        {(campaignTalent[c.id] || []).slice(0, 4).map((t, i) => (
-                          <div key={t.id} title={t.name} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: 4 - i }}>
-                            {t.photo_url
-                              ? <img src={t.photo_url} alt={t.name} style={{ width: '26px', height: '26px', borderRadius: '50%', objectFit: 'cover', border: `2px solid ${bg}`, display: 'block' }} />
-                              : <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#5b7c99', color: '#fff', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${bg}` }}>{(t.name || '?').charAt(0).toUpperCase()}</div>
-                            }
-                          </div>
-                        ))}
-                        {campaignTalent[c.id].length > 4 && (
-                          <div style={{ marginLeft: -8, width: '26px', height: '26px', borderRadius: '50%', background: dark ? '#333' : '#E0DCD6', color: muted, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500, border: `2px solid ${bg}` }}>+{campaignTalent[c.id].length - 4}</div>
-                        )}
-                      </div>
-                    )}
-
-                    {hovering === c.id && (
-                      <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ flexShrink: 0, padding: '4px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-                        {c.archived ? 'Restore' : 'Archive'}
-                      </button>
-                    )}
-
                   </div>
                 ))}
               </div>
+
             </div>
           ))}
         </div>
