@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-18
 
+**Campaigns are grouped by brand.** The campaign grid now organizes campaigns into a clean section per brand/client — a header showing the brand and a roll-up (how many campaigns, total budget), then that brand's campaign cards laid out beneath it. It looks tidy whether a brand has one campaign or ten, so as you run repeat campaigns with a brand it naturally becomes a per-brand history. Within a brand, campaigns are ordered newest-first.
+
 **Campaign cards now show the contact.** The campaign cards (grid view) and rows (list view) now display the campaign's point of contact alongside the brand, status, budget, and date range — so you can see who you're dealing with without opening the campaign. (Phase 2 of the campaign CRM work.)
 
 **Brands now keep a roster of contacts, and each campaign picks one.** A brand/client can hold as many contacts as you need — name, title, email, phone, notes — managed on the brand screen, with one starred as the primary. Each campaign then picks which contact it's dealing with from that brand's roster (defaulting to the primary), so different campaigns with the same brand can have different points of contact. The campaign detail screen shows that campaign's chosen contact. (Phase 1 of the campaign CRM work.)

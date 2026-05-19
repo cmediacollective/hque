@@ -167,8 +167,23 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       if (!aBrand && bBrand) return 1
       if (aBrand && !bBrand) return -1
       if (aBrand !== bBrand) return aBrand.localeCompare(bBrand)
+      const ad = a.start_date || a.created_at || ''
+      const bd = b.start_date || b.created_at || ''
+      if (ad !== bd) return bd.localeCompare(ad)
       return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
     })
+
+  // Group the filtered campaigns by brand for the sectioned layout.
+  const brandGroups = []
+  filtered.forEach(c => {
+    const key = (c.brand || '').trim().toLowerCase()
+    let g = brandGroups.find(x => x.key === key)
+    if (!g) { g = { key, name: c.brand || 'No brand / Internal', logo: null, campaigns: [], count: 0, budget: 0 }; brandGroups.push(g) }
+    g.campaigns.push(c)
+    g.count++
+    g.budget += Number(c.budget) || 0
+    if (!g.logo && c.brand_logo_url) g.logo = c.brand_logo_url
+  })
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : '#888'
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
@@ -252,13 +267,26 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       )}
 
       {!loading && (view === 'grid' || view === 'archived' || isMobile) && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
-          {filtered.map(c => (
-            <div key={c.id}
-              style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '24px', cursor: 'pointer', position: 'relative' }}
-              onMouseEnter={() => setHovering(c.id)}
-              onMouseLeave={() => setHovering(null)}
-              onClick={() => setSelected(c)}>
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px', background: bg }}>
+          {brandGroups.map(group => (
+            <div key={group.key}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: isMobile ? '16px 14px 8px' : '22px 28px 10px' }}>
+                {group.logo
+                  ? <img src={group.logo} alt={group.name} style={{ width: '28px', height: '28px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '2px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: brandColor(group.name), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(group.name)}</div>
+                }
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '16px', color: text }}>{group.name}</div>
+                <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle }}>
+                  {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()} total` : ''}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: isMobile ? '0 14px 8px' : '0 28px 14px' }}>
+                {group.campaigns.map(c => (
+                  <div key={c.id}
+                    style={{ flex: '0 1 340px', background: hovering === c.id ? cardHover : card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: isMobile ? '14px' : '24px', cursor: 'pointer', position: 'relative' }}
+                    onMouseEnter={() => setHovering(c.id)}
+                    onMouseLeave={() => setHovering(null)}
+                    onClick={() => setSelected(c)}>
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
                 {c.brand_logo_url
@@ -357,6 +385,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                 </div>
               )}
 
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
