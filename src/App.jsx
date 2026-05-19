@@ -372,17 +372,21 @@ function App() {
             <MiniCalendar dark={dark} agencyTz={agencyTz} />
             <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
               {view === 'talent' && !isMobile && (
-                <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
-                  {['grid', 'list'].map(v => (
-                    <button key={v} onClick={() => setTalentView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: talentView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: talentView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
-                  ))}
+                <div style={{ padding: '8px 16px 4px' }}>
+                  <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '4px', overflow: 'hidden', boxShadow: dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)' }}>
+                    {['grid', 'list'].map((v, i) => (
+                      <button key={v} onClick={() => setTalentView(v)} style={{ flex: 1, padding: '6px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: talentView === v ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: talentView === v ? '#fff' : muted, cursor: 'pointer', fontWeight: talentView === v ? 500 : 400 }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                    ))}
+                  </div>
                 </div>
               )}
               {view === 'campaigns' && !isMobile && (
-                <div style={{ padding: '8px 16px 4px', display: 'flex', gap: '4px' }}>
-                  {['grid', 'list', 'board'].map(v => (
-                    <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '5px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? (dark ? '#2A2A2A' : '#E0DCD6') : 'none', border: `0.5px solid ${border}`, color: campaignView === v ? text : muted, cursor: 'pointer', borderRadius: '1px' }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
-                  ))}
+                <div style={{ padding: '8px 16px 4px' }}>
+                  <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '4px', overflow: 'hidden', boxShadow: dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)' }}>
+                    {['grid', 'list', 'board'].map((v, i) => (
+                      <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '6px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: campaignView === v ? '#fff' : muted, cursor: 'pointer', fontWeight: campaignView === v ? 500 : 400 }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
+                    ))}
+                  </div>
                 </div>
               )}
               <button onClick={() => setView('settings')} style={{
