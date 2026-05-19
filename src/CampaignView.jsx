@@ -284,13 +284,13 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                 </div>
               </div>
 
-              <div style={{ borderTop: `0.5px solid ${border}` }}>
-                {group.campaigns.map(c => (
+              <div>
+                {group.campaigns.map((c, idx) => (
                   <div key={c.id}
                     onClick={() => setSelected(c)}
                     onMouseEnter={() => setHovering(c.id)}
                     onMouseLeave={() => setHovering(null)}
-                    style={{ padding: '12px 4px', borderBottom: `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}>
+                    style={{ padding: '10px 4px', borderTop: idx === 0 ? 'none' : `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, lineHeight: 1.3, textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>

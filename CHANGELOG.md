@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-19
+
+**Cleaner brand campaign cards.** The campaign lines inside each brand card had too many divider lines. A brand with a single campaign now shows no separator line at all, and a brand with several campaigns shows just one thin line between each — so the cards read cleaner.
+
+---
+
 ## 2026-05-18
 
 **Campaigns are grouped into one card per brand.** The campaign grid now shows one card per brand/client — the brand's logo and name once at the top with a roll-up (number of campaigns, total budget), and that brand's campaigns listed inside the card. Cards flow in the grid like before, so there's no dead space, and a brand with several campaigns simply shows them all stacked in its card — a running history. Each campaign line shows type, status, budget, dates, contact and talent, with status/type editable inline; click a line to open the campaign. Within a brand, campaigns are ordered newest-first.
