@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
@@ -167,8 +167,20 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       if (!aBrand && bBrand) return 1
       if (aBrand && !bBrand) return -1
       if (aBrand !== bBrand) return aBrand.localeCompare(bBrand)
+      const ad = a.start_date || a.created_at || ''
+      const bd = b.start_date || b.created_at || ''
+      if (ad !== bd) return bd.localeCompare(ad)
       return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase())
     })
+
+  // Roll-up per brand for the grid section headers.
+  const brandStats = {}
+  filtered.forEach(c => {
+    const k = (c.brand || '').trim().toLowerCase()
+    if (!brandStats[k]) brandStats[k] = { count: 0, budget: 0 }
+    brandStats[k].count++
+    brandStats[k].budget += Number(c.budget) || 0
+  })
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : '#888'
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
@@ -253,8 +265,25 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
 
       {!loading && (view === 'grid' || view === 'archived' || isMobile) && filtered.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1px', background: gridBg, flex: 1, overflowY: 'auto', alignContent: 'start', paddingBottom: '100px' }}>
-          {filtered.map(c => (
-            <div key={c.id}
+          {filtered.map((c, i) => {
+            const brandKey = (c.brand || '').trim().toLowerCase()
+            const showHeader = i === 0 || brandKey !== (filtered[i - 1].brand || '').trim().toLowerCase()
+            const stats = brandStats[brandKey] || { count: 0, budget: 0 }
+            return (
+            <Fragment key={c.id}>
+            {showHeader && (
+              <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: '10px', padding: isMobile ? '14px 14px 6px' : '20px 24px 8px', background: bg }}>
+                {c.brand_logo_url
+                  ? <img src={c.brand_logo_url} alt={c.brand} style={{ width: '26px', height: '26px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '2px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '26px', height: '26px', borderRadius: '2px', background: brandColor(c.brand || c.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(c.brand || c.name || '?')}</div>
+                }
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text }}>{c.brand || 'No brand / Internal'}</div>
+                <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle }}>
+                  {stats.count} {stats.count === 1 ? 'campaign' : 'campaigns'}{stats.budget > 0 ? ` · $${stats.budget.toLocaleString()} total` : ''}
+                </div>
+              </div>
+            )}
+            <div
               style={{ background: hovering === c.id ? cardHover : card, padding: isMobile ? '14px' : '24px', cursor: 'pointer', position: 'relative' }}
               onMouseEnter={() => setHovering(c.id)}
               onMouseLeave={() => setHovering(null)}
@@ -358,7 +387,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               )}
 
             </div>
-          ))}
+            </Fragment>
+            )
+          })}
         </div>
       )}
 
