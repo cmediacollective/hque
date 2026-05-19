@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-18
 
+**Campaign cards now show the contact.** The campaign cards (grid view) and rows (list view) now display the campaign's point of contact alongside the brand, status, budget, and date range — so you can see who you're dealing with without opening the campaign. (Phase 2 of the campaign CRM work.)
+
 **Brands now keep a roster of contacts, and each campaign picks one.** A brand/client can hold as many contacts as you need — name, title, email, phone, notes — managed on the brand screen, with one starred as the primary. Each campaign then picks which contact it's dealing with from that brand's roster (defaulting to the primary), so different campaigns with the same brand can have different points of contact. The campaign detail screen shows that campaign's chosen contact. (Phase 1 of the campaign CRM work.)
 
 **The site loads faster.** The whole app used to download as one 877 KB file before anything could show — including the marketing pages app users never see, and all the app screens marketing visitors never see. It's now split into on-demand pieces: the main file dropped to ~243 KB, and each screen (Campaigns, Reports, Settings, etc.) loads only when you actually open it. First load is noticeably lighter. The dashboard and brand sidebar were also reworked to run their database lookups in parallel instead of one after another, so those screens fill in faster.

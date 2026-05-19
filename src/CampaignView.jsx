@@ -39,6 +39,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [showForm, setShowForm] = useState(false)
   const [hovering, setHovering] = useState(null)
   const [creatorCounts, setCreatorCounts] = useState({})
+  const [contactMap, setContactMap] = useState({})
   const [search, setSearch] = useState('')
   const [archiving, setArchiving] = useState(null)
   const [members, setMembers] = useState([])
@@ -72,7 +73,10 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     else if (view !== 'board') q = q.eq('archived', false)
     const { data } = await q.order('created_at', { ascending: false })
     setCampaigns(data || [])
-    if (data?.length) fetchCreatorCounts(data.map(c => c.id))
+    if (data?.length) {
+      fetchCreatorCounts(data.map(c => c.id))
+      fetchContacts(data)
+    }
     setSelected(sel => sel ? (data || []).find(d => d.id === sel.id) || sel : null)
     setLoading(false)
   }
@@ -102,6 +106,15 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       })
       setCampaignTalent(perCampaign)
     }
+  }
+
+  async function fetchContacts(campaignRows) {
+    const ids = [...new Set(campaignRows.map(c => c.contact_id).filter(Boolean))]
+    if (ids.length === 0) { setContactMap({}); return }
+    const { data } = await supabase.from('brand_contacts').select('id, name, title, email').in('id', ids)
+    const m = {}
+    ;(data || []).forEach(c => { m[c.id] = c })
+    setContactMap(m)
   }
 
   async function deleteLinkedTasks(campaignId) {
@@ -289,7 +302,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               </div>
 
               <div style={{ display: 'flex', gap: '20px', paddingTop: '14px', borderTop: `0.5px solid ${border}`, alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '16px 20px', alignItems: 'center', flexWrap: 'wrap' }}>
                   {c.budget != null && (
                     <div>
                       <div style={{ fontSize: '13px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</div>
@@ -300,6 +313,12 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                     <div>
                       <div style={{ fontSize: '12px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</div>
                       <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Dates</div>
+                    </div>
+                  )}
+                  {c.contact_id && contactMap[c.contact_id] && (
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '12px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>{contactMap[c.contact_id].name || contactMap[c.contact_id].email}</div>
+                      <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Contact</div>
                     </div>
                   )}
                 </div>
@@ -363,7 +382,12 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               }
 
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
-              <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || '—'}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand || '—'}</div>
+                {c.contact_id && contactMap[c.contact_id] && (
+                  <div style={{ fontSize: '9px', color: subtle, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '2px' }}>{contactMap[c.contact_id].name || contactMap[c.contact_id].email}</div>
+                )}
+              </div>
 
               <select
                 value={c.campaign_type || 'Paid'}
