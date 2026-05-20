@@ -440,8 +440,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
               const intro = m ? m[1] : 'Did you know?'
               const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
               return (
-                <div style={{ borderLeft: '3px solid #5b7c99', padding: '2px 0 2px 16px', maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
-                  <span style={{ color: '#5b7c99' }}>{intro}</span> {body}
+                <div style={{ padding: '2px 0', maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
+                  <div style={{ color: '#5b7c99', borderBottom: '3px solid #5b7c99', paddingBottom: '4px', marginBottom: '8px', display: 'inline-block' }}>{intro}</div>
+                  <div>{body}</div>
                 </div>
               )
             })()}
