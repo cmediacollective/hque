@@ -30,6 +30,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   const [watcherMenuOpen, setWatcherMenuOpen] = useState(false)
   const [showMentions, setShowMentions] = useState(false)
   const [mentionQuery, setMentionQuery] = useState('')
+  const [editingDescription, setEditingDescription] = useState(false)
   const [showCommentMentions, setShowCommentMentions] = useState(false)
   const [commentMentionQuery, setCommentMentionQuery] = useState('')
 
@@ -262,27 +263,39 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
           />
 
           {sectionLabel('Task Description')}
-          <textarea
-            value={form.description || ''}
-            onChange={e => {
-              const val = e.target.value
-              setForm(f => ({ ...f, description: val }))
-              const lastWord = val.split(/\s/).pop()
-              if (lastWord.startsWith('@')) { setShowMentions(true); setMentionQuery(lastWord.slice(1)) }
-              else { setShowMentions(false); setMentionQuery('') }
-            }}
-            placeholder='Add more detail... (use @ to mention a team member)'
-            style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', color: text, fontSize: '13px', lineHeight: 1.6, outline: 'none', resize: 'vertical', height: '100px', padding: '10px 12px', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '4px' }}
-          />
+          {editingDescription || !form.description ? (
+            <textarea
+              value={form.description || ''}
+              autoFocus={editingDescription}
+              onChange={e => {
+                const val = e.target.value
+                setForm(f => ({ ...f, description: val }))
+                const lastWord = val.split(/\s/).pop()
+                if (lastWord.startsWith('@')) { setShowMentions(true); setMentionQuery(lastWord.slice(1)) }
+                else { setShowMentions(false); setMentionQuery('') }
+              }}
+              onBlur={() => { if (form.description) setEditingDescription(false) }}
+              placeholder='Add more detail... (use @ to mention a team member)'
+              style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', color: text, fontSize: '13px', lineHeight: 1.6, outline: 'none', resize: 'vertical', height: '100px', padding: '10px 12px', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '4px' }}
+            />
+          ) : (
+            <div onClick={() => setEditingDescription(true)}
+              title='Click to edit'
+              style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', color: text, fontSize: '13px', lineHeight: 1.6, padding: '10px 12px', boxSizing: 'border-box', minHeight: '100px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text', marginBottom: '4px' }}>
+              <Linkify text={form.description} />
+            </div>
+          )}
           {showMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).length > 0 && (
             <div style={{ background: panelBg, border: `0.5px solid ${border}`, borderRadius: '1px', marginBottom: '10px', overflow: 'hidden' }}>
               {members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).map(m => (
-                <div key={m.id} onClick={() => {
-                  const name = m.full_name || m.email
-                  const val = form.description.replace(/@[\w.]*$/, `@${name} `)
-                  setForm(f => ({ ...f, description: val }))
-                  setShowMentions(false)
-                }} style={{ padding: '7px 10px', fontSize: '11px', color: text, cursor: 'pointer' }}
+                <div key={m.id}
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={() => {
+                    const name = m.full_name || m.email
+                    const val = form.description.replace(/@[\w.]*$/, `@${name} `)
+                    setForm(f => ({ ...f, description: val }))
+                    setShowMentions(false)
+                  }} style={{ padding: '7px 10px', fontSize: '11px', color: text, cursor: 'pointer' }}
                 onMouseEnter={e => e.currentTarget.style.background = dark ? '#2A2A2A' : '#f5f5f5'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   @{m.full_name || m.email}

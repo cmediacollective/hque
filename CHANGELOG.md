@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-20
+
+**Clickable links in task descriptions.** Open any task and the description now shows links as actual clickable links (URLs, emails, @mentions). Clicking a link opens it; clicking the rest of the description switches into edit mode so you can keep editing as before. Task comments were already clickable; descriptions now match.
+
+---
+
 ## 2026-05-19
 
 **Workspace toolbar buttons stand out more.** The Notes button now has a blue outline so it reads as a real button, and the Kanban / List toggle is a crisper segmented control with a filled background and a soft shadow — both no longer look flat against the page.
