@@ -6,7 +6,7 @@ export async function createNotification(orgId, memberName, type, message, profi
   const row = { org_id: orgId, user_id: profile.id, type, message, task_id: taskId }
   if (campaignId) row.campaign_id = campaignId
   await supabase.from('notifications').insert([row])
-  await fetch('/.netlify/functions/send-notification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: profile.id, type, message }) })
+  await fetch('/.netlify/functions/send-notification', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: profile.id, type, message, task_id: taskId, campaign_id: campaignId }) })
   return profile.id
 }
 
