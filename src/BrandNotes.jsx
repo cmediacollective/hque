@@ -4,7 +4,7 @@ import { createNotification } from './notify'
 
 const URL_RE = /https?:\/\/[^\s<>"']+/i
 
-export default function BrandNotes({ brand, dark = true, orgId, members = [], onClose }) {
+export default function BrandNotes({ brand, userId, dark = true, orgId, members = [], onClose }) {
   // Invert theme: app dark → notes light, app light → notes dark
   const inv = !dark
   const bg = inv ? '#1A1A1A' : '#FBFAF7'
@@ -57,8 +57,14 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
       }
       setLoaded(true)
     })
+    // Mark this brand's notes as read for this user — clears the "NEW" badge.
+    if (userId && brand.id) {
+      supabase.from('brand_notes_views')
+        .upsert({ brand_id: brand.id, user_id: userId, last_viewed_at: new Date().toISOString() }, { onConflict: 'brand_id,user_id' })
+        .then(() => {})
+    }
     return () => { cancelled = true; if (saveTimerRef.current) clearTimeout(saveTimerRef.current) }
-  }, [brand.id])
+  }, [brand.id, userId])
 
   // Place cursor at the very top of the editor when notes finish loading,
   // so first keystrokes create today's heading above any existing dated content.
@@ -85,7 +91,11 @@ export default function BrandNotes({ brand, dark = true, orgId, members = [], on
     if (!dirtyRef.current) return
     const html = editorRef.current.innerHTML
     setSaving(true)
-    const { error: saveErr } = await supabase.from('brands').update({ meeting_notes: html || null }).eq('id', brand.id)
+    let { error: saveErr } = await supabase.from('brands').update({ meeting_notes: html || null, meeting_notes_updated_at: new Date().toISOString() }).eq('id', brand.id)
+    if (saveErr && (saveErr.message || '').toLowerCase().includes('meeting_notes_updated_at')) {
+      // The updated-at column doesn't exist yet — fall back to a plain notes save.
+      ;({ error: saveErr } = await supabase.from('brands').update({ meeting_notes: html || null }).eq('id', brand.id))
+    }
     setSaving(false)
     if (saveErr) {
       const lower = (saveErr.message || '').toLowerCase()

@@ -189,6 +189,32 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
   const [showNotes, setShowNotes] = useState(false)
+  const [notesNew, setNotesNew] = useState(false)
+
+  // Whether this user has unseen activity in the selected brand's notes.
+  // True if the notes were edited within the last 48 hours and the user
+  // hasn't opened them since that edit.
+  useEffect(() => {
+    setNotesNew(false)
+    if (!selectedBrand?.id || selectedBrand.id === '__internal' || !userId) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [brandRes, viewRes] = await Promise.all([
+          supabase.from('brands').select('meeting_notes_updated_at').eq('id', selectedBrand.id).maybeSingle(),
+          supabase.from('brand_notes_views').select('last_viewed_at').eq('brand_id', selectedBrand.id).eq('user_id', userId).maybeSingle()
+        ])
+        if (cancelled) return
+        const updated = brandRes.data?.meeting_notes_updated_at
+        if (!updated) return
+        const cutoff = Date.now() - 48 * 60 * 60 * 1000
+        if (new Date(updated).getTime() < cutoff) return
+        const viewed = viewRes.data?.last_viewed_at
+        if (!viewed || new Date(updated).getTime() > new Date(viewed).getTime()) setNotesNew(true)
+      } catch (_) { /* missing column/table — badge silently stays off */ }
+    })()
+    return () => { cancelled = true }
+  }, [selectedBrand?.id, userId, showNotes])
 
   useEffect(() => {
     if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); return }
@@ -460,9 +486,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 </div>
               </div>
               {selectedBrand.id !== '__internal' && (
-                <button onClick={() => setShowNotes(true)} title='Open notes' style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '1px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
+                <button onClick={() => { setShowNotes(true); setNotesNew(false) }} title={notesNew ? 'New activity since your last visit' : 'Open notes'} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '1px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
                   <span style={{ fontSize: '11px', lineHeight: 1 }}>✎</span>
                   <span>Notes</span>
+                  {notesNew && <span style={{ marginLeft: '2px', fontSize: '7px', letterSpacing: '0.2em', padding: '1px 5px', background: '#5C9E52', color: '#fff', borderRadius: '8px', fontWeight: 600 }}>NEW</span>}
                 </button>
               )}
               <select value={taskSort} onChange={e => setTaskSort(e.target.value)} title='Sort tasks within each column' style={{ padding: '6px 26px 6px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border2}`, color: muted, borderRadius: '4px', cursor: 'pointer', flexShrink: 0, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', boxShadow: taskShadow, fontFamily: 'inherit' }}>
@@ -602,7 +629,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       )}
 
       {showNotes && selectedBrand && selectedBrand.id !== '__internal' && (
-        <BrandNotes brand={selectedBrand} dark={dark} orgId={orgId} members={members} onClose={() => setShowNotes(false)} />
+        <BrandNotes brand={selectedBrand} userId={userId} dark={dark} orgId={orgId} members={members} onClose={() => setShowNotes(false)} />
       )}
     </div>
   )

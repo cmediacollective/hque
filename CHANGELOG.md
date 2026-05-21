@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-20
 
+**"NEW" badge on the Notes button.** When a brand's notes have been edited recently, the Notes button now shows a small green NEW pill so anyone on the team can see at a glance that there's something new to read for that brand. The badge clears for you the moment you open the notes, and disappears for everyone 48 hours after the last edit even if no one opened it.
+
 **Notification emails open the right thing.** The "Open" button in HQue's notification emails used to drop you on the HQue home — you'd then have to hunt for the task or campaign the email was about. Now the button deep-links straight to the specific task ("Open task") or campaign ("Open campaign") that the notification refers to.
 
 **Clickable links in task descriptions.** Open any task and the description now shows links as actual clickable links (URLs, emails, @mentions). Clicking a link opens it; clicking the rest of the description switches into edit mode so you can keep editing as before. Task comments were already clickable; descriptions now match.
