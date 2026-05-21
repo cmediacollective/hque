@@ -81,7 +81,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em',
       textTransform: 'uppercase',
       border: `1px solid ${active ? '#5b7c99' : border2}`,
-      borderRadius: '14px', cursor: 'pointer',
+      borderRadius: '4px', cursor: 'pointer',
       color: active ? '#fff' : muted,
       background: active ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'),
       boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : (dark ? '0 1px 2px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.04)'),
@@ -175,7 +175,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         {showArchived && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             
-            <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '5px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: '1px solid #5b7c99', borderRadius: '14px', cursor: 'pointer', color: '#fff', background: '#5b7c99', boxShadow: '0 2px 6px rgba(91,124,153,0.35)', fontWeight: 500 }}>← Active Roster</button>
+            <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '5px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: '1px solid #5b7c99', borderRadius: '4px', cursor: 'pointer', color: '#fff', background: '#5b7c99', boxShadow: '0 2px 6px rgba(91,124,153,0.35)', fontWeight: 500 }}>← Active Roster</button>
           </div>
         )}
       </div>
