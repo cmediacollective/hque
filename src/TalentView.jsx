@@ -78,11 +78,16 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
   const chip = (label, active, onClick) => (
     <button onClick={onClick} style={{
-      padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em',
-      textTransform: 'uppercase', border: `0.5px solid ${active ? '#5b7c99' : border2}`,
-      borderRadius: '1px', cursor: 'pointer', color: active ? '#5b7c99' : muted,
-      background: 'none', whiteSpace: 'nowrap', fontWeight: active ? '500' : '400',
-      flexShrink: 0
+      padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em',
+      textTransform: 'uppercase',
+      border: `1px solid ${active ? '#5b7c99' : border2}`,
+      borderRadius: '14px', cursor: 'pointer',
+      color: active ? '#fff' : muted,
+      background: active ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'),
+      boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : (dark ? '0 1px 2px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.04)'),
+      whiteSpace: 'nowrap', fontWeight: active ? 500 : 400,
+      flexShrink: 0,
+      transition: 'background 0.15s, color 0.15s, box-shadow 0.15s'
     }}>{label}</button>
   )
 
@@ -170,13 +175,22 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         {showArchived && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             
-            <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '4px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid #5b7c99`, borderRadius: '1px', cursor: 'pointer', color: '#5b7c99', background: 'none' }}>&lt;- Active Roster</button>
+            <button onClick={() => { onToggleArchived && onToggleArchived(false); setTypeFilter('All Types'); setNicheFilter(null); setSearch('') }} style={{ padding: '5px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: '1px solid #5b7c99', borderRadius: '14px', cursor: 'pointer', color: '#fff', background: '#5b7c99', boxShadow: '0 2px 6px rgba(91,124,153,0.35)', fontWeight: 500 }}>← Active Roster</button>
           </div>
         )}
       </div>
 
       <div style={{ padding: isMobile ? '6px 12px' : '8px 28px', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search by name or @handle...' style={{ width: '100%', background: dark ? '#141414' : '#F0EDE8', border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '7px 12px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+        <div style={{ position: 'relative' }}>
+          <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: subtle, pointerEvents: 'none' }}>
+            <circle cx='11' cy='11' r='8' /><line x1='21' y1='21' x2='16.65' y2='16.65' />
+          </svg>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search by name or @handle...'
+            onFocus={e => { e.target.style.borderColor = '#5b7c99'; e.target.style.boxShadow = '0 0 0 2px rgba(91,124,153,0.18)' }}
+            onBlur={e => { e.target.style.borderColor = border2; e.target.style.boxShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)' }}
+            style={{ width: '100%', background: dark ? '#1A1A1A' : '#FFFFFF', border: `1px solid ${border2}`, borderRadius: '6px', padding: '8px 12px 8px 32px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box', boxShadow: dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)', transition: 'border-color 0.15s, box-shadow 0.15s' }} />
+        </div>
       </div>
 
       {loading && <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>}
