@@ -4,7 +4,7 @@ import { createNotification } from './notify'
 
 const URL_RE = /https?:\/\/[^\s<>"']+/i
 
-export default function BrandNotes({ brand, userId, dark = true, orgId, members = [], onClose }) {
+export default function BrandNotes({ brand, userId, agencyTz, dark = true, orgId, members = [], onClose }) {
   // Invert theme: app dark → notes light, app light → notes dark
   const inv = !dark
   const bg = inv ? '#1A1A1A' : '#FBFAF7'
@@ -141,7 +141,13 @@ export default function BrandNotes({ brand, userId, dark = true, orgId, members 
 
   function todayHeadingText() {
     const d = new Date()
-    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+    // Use the agency's time zone so everyone on the team agrees on what
+    // "today" is, regardless of where the editing person is sitting.
+    try {
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: agencyTz || undefined })
+    } catch {
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+    }
   }
 
   function ensureTodayHeading() {
@@ -150,19 +156,15 @@ export default function BrandNotes({ brand, userId, dark = true, orgId, members 
     if (!el) return
     const today = todayHeadingText()
     const firstHeading = el.querySelector('h3[data-day]')
-    if (firstHeading) {
-      const existing = firstHeading.getAttribute('data-day') || ''
-      const existingDate = new Date(existing)
-      const todayDate = new Date(today)
-      // If the newest heading is already today's — or a date ahead of today —
-      // don't add an older heading above it. Keep writing under the existing one.
-      if (existing === today || (!isNaN(existingDate) && !isNaN(todayDate) && existingDate >= todayDate)) {
-        dayHeadingInsertedRef.current = true
-        const after = firstHeading.nextSibling
-        if (after) placeCursorAtStartOf(after)
-        return
-      }
+    if (firstHeading && firstHeading.getAttribute('data-day') === today) {
+      // The top heading is already today — append under it instead of duplicating.
+      dayHeadingInsertedRef.current = true
+      const after = firstHeading.nextSibling
+      if (after) placeCursorAtStartOf(after)
+      return
     }
+    // Otherwise — yesterday or earlier at the top — insert a fresh today heading
+    // at the very top so the newest day is always first (running log).
     // Always insert today's heading at the top on first edit of the session.
     // Old headings stay put because they're contenteditable=false.
     const heading = document.createElement('h3')

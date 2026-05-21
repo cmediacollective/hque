@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-20
 
+**Notes work as a running log.** The brand-notes editor now keeps a true running log: when you open a note on a new day and start typing, a fresh heading for *today* (in your agency's time zone) is inserted at the very top, with yesterday's section preserved right below. If today's heading already exists, your additions merge into it. This also fixes the underlying cause of headings drifting into "tomorrow" — everyone on the team now agrees on what "today" means based on the agency's time zone, not each person's browser clock.
+
 **"NEW" badge on the Notes button.** When a brand's notes have been edited recently, the Notes button now shows a small green NEW pill so anyone on the team can see at a glance that there's something new to read for that brand. The badge clears for you the moment you open the notes, and disappears for everyone 48 hours after the last edit even if no one opened it.
 
 **Notification emails open the right thing.** The "Open" button in HQue's notification emails used to drop you on the HQue home — you'd then have to hunt for the task or campaign the email was about. Now the button deep-links straight to the specific task ("Open task") or campaign ("Open campaign") that the notification refers to.
