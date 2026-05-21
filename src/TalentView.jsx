@@ -142,7 +142,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, padding: '32px', width: '100%', maxWidth: '380px', borderRadius: '2px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
-              {showArchived ? 'Restore creator?' : 'Archive creator?'}
+              {showArchived ? 'Restore talent?' : 'Archive talent?'}
             </div>
             <div style={{ fontSize: '12px', color: muted, marginBottom: '24px' }}>
               {showArchived ? `${archiving.name} will be moved back to your active roster.` : `${archiving.name} will be hidden from your roster but can be restored anytime.`}
@@ -198,10 +198,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       {!loading && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
-            {search ? 'No results' : showArchived ? 'No archived creators' : 'No talent yet'}
+            {search ? 'No results' : showArchived ? 'No archived talent' : 'No talent yet'}
           </div>
           <div style={{ fontSize: '12px', color: muted, letterSpacing: '0.08em' }}>
-            {search ? `Nothing matched "${search}"` : showArchived ? 'Archived creators will appear here' : 'Click + Talent to add your first creator'}
+            {search ? `Nothing matched "${search}"` : showArchived ? 'Archived talent will appear here' : 'Click + Talent to add your first one'}
           </div>
         </div>
       )}
