@@ -243,7 +243,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
           {filtered.length} {filtered.length === 1 ? 'campaign' : 'campaigns'}
         </span>
         {view !== 'archived' && (
-          <button onClick={() => setShowForm(true)} style={{ padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>+ Campaign</button>
+          <button onClick={() => setShowForm(true)} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', boxShadow: '0 2px 8px rgba(91,124,153,0.45)' }}>+ Campaign</button>
         )}
       </div>
 

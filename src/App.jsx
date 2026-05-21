@@ -426,7 +426,7 @@ function App() {
                     if (campaignView === 'archived') setCampaignView(previousCampaignView || 'grid')
                     else { setPreviousCampaignView(campaignView); setCampaignView('archived') }
                   }}
-                  style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: campaignView === 'archived' ? '#5b7c99' : 'none', border: `0.5px solid ${campaignView === 'archived' ? '#5b7c99' : border}`, color: campaignView === 'archived' ? '#fff' : muted, cursor: 'pointer', borderRadius: '1px' }}>
+                  style={{ padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: campaignView === 'archived' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: `1px solid ${campaignView === 'archived' ? '#5b7c99' : border}`, color: campaignView === 'archived' ? '#fff' : muted, cursor: 'pointer', borderRadius: '4px', boxShadow: campaignView === 'archived' ? '0 2px 6px rgba(91,124,153,0.35)' : (dark ? '0 1px 3px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.06)') }}>
                   {campaignView === 'archived' ? 'Active' : 'Archived'}
                 </button>
               )}
