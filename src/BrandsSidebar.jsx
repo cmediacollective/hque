@@ -182,25 +182,32 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
       )}
 
       <div style={{ padding: '14px 14px 10px' }}>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder='Search brands/clients...'
-          style={{ width: '100%', padding: '7px 10px', fontSize: '12px', background: dark ? '#141414' : '#F5F3EF', border: `0.5px solid ${border}`, borderRadius: '1px', color: text, outline: 'none', boxSizing: 'border-box' }}
-        />
+        <div style={{ position: 'relative' }}>
+          <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'
+            style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: subtle, pointerEvents: 'none' }}>
+            <circle cx='11' cy='11' r='8' /><line x1='21' y1='21' x2='16.65' y2='16.65' />
+          </svg>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder='Search brands/clients...'
+            onFocus={e => { e.target.style.borderColor = '#5b7c99'; e.target.style.boxShadow = '0 0 0 2px rgba(91,124,153,0.18)' }}
+            onBlur={e => { e.target.style.borderColor = border; e.target.style.boxShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)' }}
+            style={{ width: '100%', padding: '8px 10px 8px 30px', fontSize: '12px', background: dark ? '#1A1A1A' : '#F5F3EF', border: `1px solid ${border}`, borderRadius: '6px', color: text, outline: 'none', boxSizing: 'border-box', boxShadow: dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)', transition: 'border-color 0.15s, box-shadow 0.15s' }}
+          />
+        </div>
       </div>
 
-      <div style={{ padding: '0 14px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-        <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: subtle }}>
+      <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+        <div style={{ fontSize: '8.5px', letterSpacing: '0.22em', textTransform: 'uppercase', color: muted, fontWeight: 500 }}>
           {showArchived ? `Archived · ${archivedBrands.length}` : `Brands · ${filtered.length}`}
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {archivedBrands.length > 0 && (
-            <button onClick={() => setShowArchived(!showArchived)} style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', cursor: 'pointer', padding: 0 }}>
-              {showArchived ? 'Active' : `+${archivedBrands.length} archived`}
-            </button>
-          )}
-        </div>
+        {archivedBrands.length > 0 && (
+          <button onClick={() => setShowArchived(!showArchived)}
+            style={{ background: showArchived ? '#5b7c99' : 'rgba(91,124,153,0.12)', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: showArchived ? '#fff' : '#5b7c99', cursor: 'pointer', padding: '3px 9px', borderRadius: '10px', fontWeight: 600 }}>
+            {showArchived ? 'Active' : `+${archivedBrands.length} Archived`}
+          </button>
+        )}
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', borderTop: `0.5px solid ${border}` }}>
