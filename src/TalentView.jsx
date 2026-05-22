@@ -5,7 +5,9 @@ import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Books', 'Specialty']
+// Keep this list identical to NICHES in AddCreatorForm.jsx — the filter chips
+// must match the categories a creator can actually be tagged with.
+const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books', 'Specialty']
 
 
 function totalFollowers(creator) {
