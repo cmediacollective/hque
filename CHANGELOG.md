@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-22
 
+**All talent filter categories are now visible at once.** The category filter chips (Actor, Sports, Wellness, Beauty, etc.) used to sit in a single row that scrolled sideways — fine with a laptop touchpad, but impossible to reach with a regular mouse, so the categories farther to the right were effectively hidden. On desktop the chips now wrap onto multiple lines, so every category is visible and clickable without any scrolling. (Mobile keeps its swipe-to-scroll row.)
+
 **Broken invite links no longer dump people on the marketing page.** When you invite a teammate, HQue emails them a one-time sign-in link. Those links expire fast and can only be opened once — and sometimes an email provider's security scanner quietly "clicks" the link first, using it up before the person ever gets to it. Until now, that left an invited teammate stranded on the public "Start your free trial" page with no idea what went wrong. Now, a broken or expired link lands them on a clear recovery screen that explains what happened and lets them request a fresh link in one step — using the same email their invitation was sent to.
 
 ---

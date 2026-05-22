@@ -159,7 +159,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
       <div style={{ padding: isMobile ? '8px 12px' : '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
         {!showArchived && (
-          <div style={{ display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
+          <div style={isMobile
+            ? { display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }
+            : { display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }
+          }>
             {TYPES.map(t => chip(t, typeFilter === t, () => setTypeFilter(t)))}
             <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 2px', flexShrink: 0 }} />
             {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
