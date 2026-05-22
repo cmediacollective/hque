@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react'
 import { supabase } from './supabase'
 import Login from './Login'
 import SignUp from './SignUp'
+import InviteRecovery from './InviteRecovery'
 import TrialBanner from './TrialBanner'
 import AddCreatorForm from './AddCreatorForm'
 import NotificationsPanel from './NotificationsPanel'
@@ -26,6 +27,20 @@ const BlogPage = lazy(() => import('./BlogPage'))
 const BlogPostPage = lazy(() => import('./BlogPostPage'))
 const TalentInquiry = lazy(() => import('./TalentInquiry'))
 const Sandbox = lazy(() => import('./Sandbox'))
+
+// Captured at module load — before anything can clear the URL — so a broken
+// magic / invite link (expired or already used) is detected instead of the
+// person being silently dropped on the marketing page.
+const initialAuthError = (() => {
+  try {
+    const h = new URLSearchParams((window.location.hash || '').replace(/^#/, ''))
+    const q = new URLSearchParams(window.location.search || '')
+    const err = h.get('error') || q.get('error')
+    const code = h.get('error_code') || q.get('error_code')
+    if (err || code) return true
+  } catch (e) {}
+  return false
+})()
 
 function App() {
   const [view, setView] = useState('workspace')
@@ -61,6 +76,15 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
   const [stripePlan, setStripePlan] = useState(null)
+  const [authError, setAuthError] = useState(initialAuthError)
+
+  // A broken magic / invite link leaves an error in the URL — clear it so a
+  // refresh doesn't re-trigger the recovery screen.
+  useEffect(() => {
+    if (initialAuthError) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
 
   // Detect successful checkout return from Stripe and show welcome modal
   useEffect(() => {
@@ -312,6 +336,7 @@ function App() {
       <div style={{ fontSize: '9px', color: '#555', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
     </div>
   )
+  if (!user && authError) return <InviteRecovery onBackToSignIn={() => { setAuthError(false); setShowLogin(true) }} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
   if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />

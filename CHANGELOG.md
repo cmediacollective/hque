@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-22
+
+**Broken invite links no longer dump people on the marketing page.** When you invite a teammate, HQue emails them a one-time sign-in link. Those links expire fast and can only be opened once — and sometimes an email provider's security scanner quietly "clicks" the link first, using it up before the person ever gets to it. Until now, that left an invited teammate stranded on the public "Start your free trial" page with no idea what went wrong. Now, a broken or expired link lands them on a clear recovery screen that explains what happened and lets them request a fresh link in one step — using the same email their invitation was sent to.
+
+---
+
 ## 2026-05-20
 
 **Notes work as a running log.** The brand-notes editor now keeps a true running log: when you open a note on a new day and start typing, a fresh heading for *today* (in your agency's time zone) is inserted at the very top, with yesterday's section preserved right below. If today's heading already exists, your additions merge into it. This also fixes the underlying cause of headings drifting into "tomorrow" — everyone on the team now agrees on what "today" means based on the agency's time zone, not each person's browser clock.
