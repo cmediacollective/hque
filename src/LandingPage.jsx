@@ -119,77 +119,109 @@ function MobileAppPreview() {
           {/* Content */}
           <div style={{ padding: '0 16px 16px' }}>
             {SCREENS[activeScreen].key === 'talent' && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {FAKE_TALENT.slice(0, 4).map((t, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '10px', border: '0.5px solid #E0DCD6' }}>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '2px', overflow: 'hidden', flexShrink: 0 }}>
-                        <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div>
+                <div style={{ display: 'flex', gap: '5px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                  {['All', 'Influencer', 'UGC', 'Wellness'].map((chip, i) => {
+                    const active = i === 0
+                    return (
+                      <span key={chip} style={{ padding: '3px 8px', fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#D4CFC8'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 1px 4px rgba(91,124,153,0.3)' : '0 1px 2px rgba(0,0,0,0.04)' }}>{chip}</span>
+                    )
+                  })}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  {FAKE_TALENT.slice(0, 4).map((t, i) => (
+                    <div key={i} style={{ background: '#fff', borderRadius: '5px', padding: '10px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start', marginBottom: '8px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '3px', overflow: 'hidden', flexShrink: 0 }}>
+                          <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '6px', color: '#5b7c99', letterSpacing: '0.1em', marginBottom: '2px' }}>{t.type}</div>
+                          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
+                          <div style={{ fontSize: '8px', color: '#aaa', marginTop: '1px' }}>{t.handle}</div>
+                        </div>
                       </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '6px', color: '#5b7c99', letterSpacing: '0.1em', marginBottom: '2px' }}>{t.type}</div>
-                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.name}</div>
-                        <div style={{ fontSize: '8px', color: '#aaa', marginTop: '1px' }}>{t.handle}</div>
+                      <div style={{ paddingTop: '6px', borderTop: '0.5px solid #EDE8E1' }}>
+                        <div style={{ fontSize: '10px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
+                        <div style={{ fontSize: '6px', color: '#bbb', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Followers</div>
                       </div>
                     </div>
-                    <div style={{ paddingTop: '6px', borderTop: '0.5px solid #E0DCD6' }}>
-                      <div style={{ fontSize: '10px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
-                      <div style={{ fontSize: '6px', color: '#bbb', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Followers</div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
             {SCREENS[activeScreen].key === 'campaigns' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {FAKE_CAMPAIGNS.slice(0, 3).map((c, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '12px', border: '0.5px solid #E0DCD6', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={32} logo={c.logo} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.1em' }}>{c.brand}</div>
-                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '12px', color: '#1A1A1A' }}>{c.name}</div>
-                      <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>{c.budget} · {c.talent}</div>
+                  <div key={i} style={{ background: '#fff', borderRadius: '6px', padding: '12px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <BrandLogo color={c.color} initial={c.initial} size={32} logo={c.logo} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '12px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand}</div>
+                        <div style={{ fontSize: '8px', color: '#999', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{c.talent}</div>
+                      </div>
+                      <StatusBadge status={c.status} />
                     </div>
-                    <StatusBadge status={c.status} />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '0.5px solid #EDE8E1' }}>
+                      <div style={{ fontSize: '10px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0, marginRight: '8px' }}>{c.name}</div>
+                      <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
             {SCREENS[activeScreen].key === 'workspace' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['TO DO', 'IN PROGRESS', 'DONE'].map(col => (
-                  <div key={col}>
-                    <div style={{ fontSize: '7px', letterSpacing: '0.18em', color: col === 'DONE' ? '#5C9E52' : '#aaa', marginBottom: '6px', textTransform: 'uppercase' }}>{col} · {FAKE_TASKS.filter(t => t.col === col).length}</div>
-                    {FAKE_TASKS.filter(t => t.col === col).slice(0, 1).map((task, i) => (
-                      <div key={i} style={{ background: col === 'DONE' ? '#E8E4DE' : '#fff', borderRadius: '4px', padding: '10px', border: '0.5px solid #E0DCD6' }}>
-                        <div style={{ fontSize: '11px', color: col === 'DONE' ? '#aaa' : '#1A1A1A', textDecoration: col === 'DONE' ? 'line-through' : 'none', marginBottom: '4px' }}>{task.title}</div>
-                        <span style={{ fontSize: '7px', border: `0.5px solid ${task.priority === 'HIGH' ? '#c0392b' : '#5b7c99'}`, color: task.priority === 'HIGH' ? '#c0392b' : '#5b7c99', padding: '1px 5px', borderRadius: '1px' }}>{task.priority}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  { name: 'TO DO', dot: '#aaa' },
+                  { name: 'IN PROGRESS', dot: '#C4962E' },
+                  { name: 'DONE', dot: '#5C9E52' },
+                ].map(col => {
+                  const tasks = FAKE_TASKS.filter(t => t.col === col.name)
+                  const done = col.name === 'DONE'
+                  return (
+                    <div key={col.name}>
+                      <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#888', marginBottom: '6px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: col.dot }} />
+                        {col.name} · {tasks.length}
                       </div>
-                    ))}
-                  </div>
-                ))}
+                      {tasks.slice(0, 1).map((task, i) => {
+                        const prColor = done ? '#bbb' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#999'
+                        return (
+                          <div key={i} style={{ background: done ? '#F5F3EF' : '#fff', borderRadius: '5px', padding: '10px', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', opacity: done ? 0.7 : 1 }}>
+                            <div style={{ fontSize: '11px', color: done ? '#aaa' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none', marginBottom: '6px' }}>{task.title}</div>
+                            <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${prColor}`, color: prColor, padding: '1px 6px', borderRadius: '2px' }}>{task.priority}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })}
               </div>
             )}
             {SCREENS[activeScreen].key === 'reports' && (
               <div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                   {FAKE_STATS.map((s, i) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: '4px', padding: '12px', border: '0.5px solid #E0DCD6' }}>
+                    <div key={i} style={{ background: '#fff', borderRadius: '5px', padding: '12px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                      <div style={{ fontSize: '7px', color: '#999', letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: '4px' }}>{s.label}</div>
                       <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#1A1A1A' }}>{s.value}</div>
                       {s.sub && <div style={{ fontSize: '8px', color: '#aaa', marginTop: '2px' }}>{s.sub}</div>}
-                      <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
-                {FAKE_CAMPAIGNS.slice(0, 2).map((c, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: '0.5px solid #E0DCD6' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={24} logo={c.logo} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '11px', color: '#1A1A1A' }}>{c.name}</div>
+                <div style={{ background: '#fff', borderRadius: '5px', padding: '8px 12px 2px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <div style={{ fontSize: '7px', letterSpacing: '0.18em', color: '#999', marginBottom: '4px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
+                  {FAKE_CAMPAIGNS.slice(0, 2).map((c, i, arr) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0', borderBottom: i === arr.length - 1 ? 'none' : '0.5px solid #EDE8E1' }}>
+                      <BrandLogo color={c.color} initial={c.initial} size={24} logo={c.logo} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
                     </div>
-                    <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -235,17 +267,20 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
 
           {SCREENS[activeScreen].key === 'talent' && (
             <div>
-              <div style={{ display: 'flex', gap: '5px', marginBottom: '12px', flexWrap: 'wrap' }}>
-                {['All Types', 'Influencer', 'UGC', 'Actor', 'Wellness', 'Beauty', 'Fashion'].map((chip, i) => (
-                  <span key={chip} style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: `0.5px solid ${i === 0 ? '#5b7c99' : '#C4CFC8'}`, color: i === 0 ? '#5b7c99' : '#aaa', borderRadius: '1px', whiteSpace: 'nowrap' }}>{chip}</span>
-                ))}
-                <span style={{ marginLeft: 'auto', padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', border: '0.5px solid #C4CFC8', color: '#aaa', borderRadius: '1px' }}>Export PDF</span>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {['All Types', 'Influencer', 'UGC', 'Actor', 'Wellness', 'Beauty', 'Fashion', 'Travel'].map((chip, i) => {
+                  const active = i === 0
+                  return (
+                    <span key={chip} style={{ padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#D4CFC8'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : '0 1px 2px rgba(0,0,0,0.04)', fontWeight: active ? 500 : 400 }}>{chip}</span>
+                  )
+                })}
+                <span style={{ marginLeft: 'auto', padding: '4px 12px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', borderRadius: '4px', boxShadow: '0 2px 6px rgba(91,124,153,0.35)' }}>+ Talent</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#D4CFC8' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                 {FAKE_TALENT.map((t, i) => (
-                  <div key={i} style={{ background: '#FFFFFF', padding: '14px', opacity: 1 - (i * 0.04) }}>
+                  <div key={i} style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
-                      <div style={{ width: '52px', height: '52px', borderRadius: '2px', background: '#E8E4DE', flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '3px', background: '#E8E4DE', flexShrink: 0, overflow: 'hidden' }}>
                         <img src={t.photo} alt={t.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0, paddingTop: '2px' }}>
@@ -254,7 +289,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                         <div style={{ fontSize: '9px', color: '#aaa' }}>{t.handle}</div>
                       </div>
                     </div>
-                    <div style={{ paddingTop: '8px', borderTop: '0.5px solid #E0DCD6', display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{ paddingTop: '8px', borderTop: '0.5px solid #EDE8E1', display: 'flex', justifyContent: 'space-between' }}>
                       <div>
                         <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{t.followers}</div>
                         <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Followers</div>
@@ -271,18 +306,26 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
           )}
 
           {SCREENS[activeScreen].key === 'campaigns' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1px', background: '#D4CFC8' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {FAKE_CAMPAIGNS.map((c, i) => (
-                <div key={i} style={{ background: '#FFFFFF', padding: '20px', display: 'flex', flexDirection: 'column', minHeight: '160px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={44} logo={c.logo} />
+                <div key={i} style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '16px 18px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                    <BrandLogo color={c.color} initial={c.initial} size={40} logo={c.logo} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#1A1A1A', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand}</div>
+                      <div style={{ fontSize: '9px', letterSpacing: '0.12em', color: '#999', textTransform: 'uppercase' }}>{c.talent}</div>
+                    </div>
                     <StatusBadge status={c.status} />
                   </div>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.16em', color: '#5b7c99', marginBottom: '6px' }}>{c.brand}</div>
-                  <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '14px', color: '#1A1A1A', flex: 1, lineHeight: 1.4 }}>{c.name}</div>
-                  <div style={{ paddingTop: '14px', marginTop: '14px', borderTop: '0.5px solid #E0DCD6', display: 'flex', gap: '20px' }}>
-                    <div><div style={{ fontSize: '13px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div><div style={{ fontSize: '7px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Budget</div></div>
-                    <div><div style={{ fontSize: '13px', color: '#888' }}>{c.talent}</div><div style={{ fontSize: '7px', color: '#aaa', letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: '3px' }}>Talent</div></div>
+                  <div style={{ paddingTop: '10px', borderTop: '0.5px solid #EDE8E1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '7px', letterSpacing: '0.18em', color: '#5b7c99', textTransform: 'uppercase', marginBottom: '3px' }}>Campaign</div>
+                      <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '12px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
+                      <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '2px' }}>Budget</div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -290,44 +333,59 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
           )}
 
           {SCREENS[activeScreen].key === 'workspace' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: '#D4CFC8', height: '360px', overflow: 'hidden' }}>
-              {['TO DO', 'IN PROGRESS', 'DONE'].map(col => (
-                <div key={col} style={{ background: '#F5F3EF', padding: '14px', overflowY: 'auto' }}>
-                  <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: col === 'DONE' ? '#5C9E52' : '#aaa', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', textTransform: 'uppercase' }}>
-                    <span>{col}</span><span>{FAKE_TASKS.filter(t => t.col === col).length}</span>
-                  </div>
-                  {FAKE_TASKS.filter(t => t.col === col).map((task, i) => (
-                    <div key={i} style={{ background: col === 'DONE' ? '#E8E4DE' : '#FFFFFF', border: `0.5px solid ${col === 'DONE' ? '#D4CFC8' : '#E0DCD6'}`, borderRadius: '1px', padding: '12px', marginBottom: '8px', opacity: col === 'DONE' ? 0.7 : 1 }}>
-                      <div style={{ fontSize: '11px', color: col === 'DONE' ? '#aaa' : '#1A1A1A', marginBottom: '8px', lineHeight: 1.4, textDecoration: col === 'DONE' ? 'line-through' : 'none' }}>{task.title}</div>
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${col === 'DONE' ? '#ccc' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#aaa'}`, color: col === 'DONE' ? '#ccc' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#888', padding: '1px 5px', borderRadius: '1px' }}>{task.priority}</span>
-                        <span style={{ fontSize: '9px', color: '#bbb' }}>{task.date}</span>
-                      </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', height: '360px', overflow: 'hidden' }}>
+              {[
+                { name: 'TO DO', dot: '#aaa' },
+                { name: 'IN PROGRESS', dot: '#C4962E' },
+                { name: 'DONE', dot: '#5C9E52' },
+              ].map(col => {
+                const tasks = FAKE_TASKS.filter(t => t.col === col.name)
+                const done = col.name === 'DONE'
+                return (
+                  <div key={col.name} style={{ background: '#FFFFFF', border: '0.5px solid #D4CFC8', borderRadius: '8px', padding: '12px 12px 14px', overflowY: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ fontSize: '8px', letterSpacing: '0.22em', color: '#888', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textTransform: 'uppercase' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: col.dot, display: 'inline-block' }} />
+                        {col.name}
+                      </span>
+                      <span style={{ color: '#bbb' }}>{tasks.length}</span>
                     </div>
-                  ))}
-                </div>
-              ))}
+                    {tasks.map((task, i) => {
+                      const prColor = done ? '#bbb' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#999'
+                      return (
+                        <div key={i} style={{ background: done ? '#F5F3EF' : '#FFFFFF', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, borderRadius: '5px', padding: '11px 12px', marginBottom: '8px', boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.06)', opacity: done ? 0.65 : 1 }}>
+                          <div style={{ fontSize: '11px', color: done ? '#aaa' : '#1A1A1A', marginBottom: '8px', lineHeight: 1.4, textDecoration: done ? 'line-through' : 'none' }}>{task.title}</div>
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '7px', letterSpacing: '0.12em', border: `0.5px solid ${prColor}`, color: prColor, padding: '1px 6px', borderRadius: '2px' }}>{task.priority}</span>
+                            <span style={{ fontSize: '9px', color: '#bbb' }}>{task.date}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })}
             </div>
           )}
 
           {SCREENS[activeScreen].key === 'reports' && (
             <div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: '#D4CFC8', marginBottom: '1px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '14px' }}>
                 {FAKE_STATS.map((s, i) => (
-                  <div key={i} style={{ background: '#FFFFFF', padding: '16px' }}>
-                    <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#1A1A1A', marginBottom: '4px' }}>{s.value}</div>
-                    {s.sub && <div style={{ fontSize: '9px', color: '#aaa', marginBottom: '4px' }}>{s.sub}</div>}
-                    <div style={{ fontSize: '7px', letterSpacing: '0.16em', color: '#bbb', textTransform: 'uppercase' }}>{s.label}</div>
+                  <div key={i} style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '14px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                    <div style={{ fontSize: '7px', letterSpacing: '0.18em', color: '#999', textTransform: 'uppercase', marginBottom: '6px' }}>{s.label}</div>
+                    <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#1A1A1A', marginBottom: '2px' }}>{s.value}</div>
+                    {s.sub && <div style={{ fontSize: '9px', color: '#aaa' }}>{s.sub}</div>}
                   </div>
                 ))}
               </div>
-              <div style={{ background: '#F5F3EF', padding: '14px 16px' }}>
-                <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#bbb', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
+              <div style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '14px 16px 4px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                <div style={{ fontSize: '7px', letterSpacing: '0.2em', color: '#999', marginBottom: '10px', textTransform: 'uppercase' }}>Campaign Breakdown</div>
                 {FAKE_CAMPAIGNS.map((c, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: '0.5px solid #E0DCD6' }}>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '9px 0', borderBottom: i === FAKE_CAMPAIGNS.length - 1 ? 'none' : '0.5px solid #EDE8E1' }}>
                     <BrandLogo color={c.color} initial={c.initial} size={28} logo={c.logo} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.12em' }}>{c.brand}</div>
+                      <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.14em', textTransform: 'uppercase' }}>{c.brand}</div>
                       <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                     </div>
                     <div style={{ fontSize: '12px', color: '#1A1A1A', fontWeight: 500, minWidth: '64px', textAlign: 'right' }}>{c.budget}</div>
