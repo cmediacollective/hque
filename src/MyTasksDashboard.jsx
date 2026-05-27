@@ -476,7 +476,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start', marginBottom: '20px' }}>
-              <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
+              <div style={{ paddingTop: '8px', paddingRight: '12px' }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Assigned</div>
                 <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>To me</div>
               </div>
@@ -487,7 +487,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
             {totalWatching > 0 && (
               <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr 1fr', gap: 0, alignItems: 'start' }}>
-                <div style={{ paddingTop: '8px', borderRight: `0.5px solid ${border}`, paddingRight: '12px' }}>
+                <div style={{ paddingTop: '8px', paddingRight: '12px' }}>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, marginBottom: '2px' }}>Watching</div>
                   <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>Keep tabs</div>
                 </div>

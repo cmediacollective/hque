@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-27
+
+**Cleaned up the vertical lines on the home dashboard.** The "Assigned" and "Watching" rows had a thin vertical divider running down the left side of the task cards, which looked like a stray red bar in some screenshots. The line is gone — task cards now sit clean against the row label.
+
+---
+
 ## 2026-05-25
 
 **Marketing-site demo now looks like the actual product.** The HQue marketing page has a small in-browser demo that cycles through Talent, Campaigns, Workspace, and Reports. It had drifted away from how HQue actually looks today — flat 1px-line tiles, no shadows, no colored column dots, dated chip styling. All four frames (and the mobile phone preview) are now refreshed to match the current platform: raised cards with soft shadows and rounded corners, colored dots in front of each kanban column name (To Do = grey, In Progress = gold, Done = green), the modern filter-chip style with a real "+ Talent" button, and a brand-card layout for Campaigns and Reports. All the original fake accounts (Nova Talent Group and the sample talent/brands/tasks) stay the same.
