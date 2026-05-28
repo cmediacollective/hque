@@ -197,6 +197,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     '5-4': { greeting: 'May the 4th Be With You', note: "Fun fact: the phrase predates the movies. British supporters told Margaret Thatcher 'May the Fourth be with you, Maggie' on May 4, 1979, the day she became PM." },
     '5-5': { greeting: 'Happy Cinco de Mayo', note: 'Did you know? Cinco de Mayo commemorates the Battle of Puebla, not Mexican Independence Day (that is September 16).' },
     '5-15': { greeting: 'Happy Chocolate Chip Day', note: 'Did you know? The chocolate chip cookie was invented by accident in 1938 by Ruth Wakefield at the Toll House Inn in Massachusetts.' },
+    '6-1': { greeting: 'Happy Pride Month', note: 'Did you know? Pride is held in June to mark the Stonewall uprising of June 1969 in New York City. The first Pride marches followed one year later, in June 1970.' },
     '6-19': { greeting: 'Happy Juneteenth', note: 'Did you know? Juneteenth marks June 19, 1865 — when enslaved people in Galveston, Texas finally learned they were free, 2.5 years after the Emancipation Proclamation.' },
     '6-21': { greeting: 'Happy Summer Solstice', note: "Did you know? At the North Pole, the sun doesn't set at all today — it's one continuous day of sunlight for about six months." },
     '7-4': { greeting: 'Happy 4th of July', note: 'Did you know? Americans eat about 150 million hot dogs on July 4th. Enough to stretch from D.C. to L.A. more than five times.' },

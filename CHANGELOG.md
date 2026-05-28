@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-27
 
+**Added Pride Month to the dashboard greeting.** On June 1, the home dashboard now greets the team with "Happy Pride Month" and a short note about the June 1969 Stonewall origin, alongside the existing rotating holidays and fun facts.
+
 **Lightened up the light theme — less beige.** The light mode had a warm, tan/beige cast across the whole app (especially the left-hand brand menu). Pulled some of the yellow out and lightened every surface a few shades so it reads as a clean warm off-white instead of beige. Backgrounds, cards, borders, hover and selected states all shifted together, so the look stays consistent across the dashboard, workspace, talent, campaigns, reports, and settings.
 
 **Cleaned up the vertical lines on the home dashboard.** The "Assigned" and "Watching" rows had a thin vertical divider running down the left side of the task cards, which looked like a stray red bar in some screenshots. The line is gone — task cards now sit clean against the row label.
