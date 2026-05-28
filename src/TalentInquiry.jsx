@@ -119,7 +119,7 @@ export default function TalentInquiry() {
   }
 
   const inp = (props) => (
-    <input {...props} style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #D4CFC8', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }} />
+    <input {...props} style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #DBD7D0', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#1A1A1A', outline: 'none', boxSizing: 'border-box' }} />
   )
 
   const field = (label, required, children) => (
@@ -134,13 +134,13 @@ export default function TalentInquiry() {
   )
 
   if (loading) return (
-    <div style={{ background: '#F5F3EF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ fontSize: '9px', color: '#999', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
     </div>
   )
 
   if (!org) return (
-    <div style={{ background: '#F5F3EF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '140px', marginBottom: '32px', display: 'block', margin: '0 auto 32px', filter: 'invert(1)' }} />
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1A1A1A', marginBottom: '10px' }}>Agency not found</div>
@@ -151,7 +151,7 @@ export default function TalentInquiry() {
   )
 
   if (submitted) return (
-    <div style={{ background: '#F5F3EF', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '0 20px' }}>
         {org?.isAgencyTier && org.logoUrl ? (
           <img src={org.logoUrl} alt={org.displayName} style={{ maxWidth: '140px', maxHeight: '60px', objectFit: 'contain', marginBottom: '40px', display: 'block', margin: '0 auto 40px' }} onError={e => { e.target.style.display = 'none' }} />
@@ -171,7 +171,7 @@ export default function TalentInquiry() {
   )
 
   return (
-    <div style={{ background: '#F5F3EF', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#1A1A1A' }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#1A1A1A' }}>
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px' }}>
 
         <div style={{ marginBottom: '40px' }}>
@@ -185,7 +185,7 @@ export default function TalentInquiry() {
           <div style={{ fontSize: '13px', color: '#888', lineHeight: 1.7 }}>Fill out the form below to apply to join {org.displayName}'s talent roster. Fields marked with * are required.</div>
         </div>
 
-        <div style={{ background: '#FFFFFF', border: '0.5px solid #D4CFC8', borderRadius: '2px', padding: '32px' }}>
+        <div style={{ background: '#FFFFFF', border: '0.5px solid #DBD7D0', borderRadius: '2px', padding: '32px' }}>
 
           {section('Basic Info')}
           {field('Full Name', true, inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'Your full name' }))}
@@ -196,8 +196,8 @@ export default function TalentInquiry() {
               <input ref={fileRef} type='file' accept='image/*' onChange={handlePhotoSelect} style={{ display: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 {photoPreview
-                  ? <img src={photoPreview} alt='preview' style={{ width: '56px', height: '56px', borderRadius: '2px', objectFit: 'cover', border: '0.5px solid #D4CFC8', flexShrink: 0 }} />
-                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: '#F0EDE8', border: '0.5px solid #D4CFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>📷</div>
+                  ? <img src={photoPreview} alt='preview' style={{ width: '56px', height: '56px', borderRadius: '2px', objectFit: 'cover', border: '0.5px solid #DBD7D0', flexShrink: 0 }} />
+                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: '#F0EDE8', border: '0.5px solid #DBD7D0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0 }}>📷</div>
                 }
                 <div>
                   <button onClick={() => fileRef.current?.click()} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', marginBottom: '4px' }}>
@@ -213,7 +213,7 @@ export default function TalentInquiry() {
           {field('Location', false, inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
 
           {field('Primary Niche', false,
-            <select value={form.niche} onChange={e => set('niche', e.target.value)} style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #D4CFC8', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: form.niche ? '#1A1A1A' : '#aaa', outline: 'none' }}>
+            <select value={form.niche} onChange={e => set('niche', e.target.value)} style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #DBD7D0', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: form.niche ? '#1A1A1A' : '#aaa', outline: 'none' }}>
               <option value=''>Select a niche...</option>
               {NICHES.map(n => <option key={n} value={n}>{n}</option>)}
             </select>
@@ -241,12 +241,12 @@ export default function TalentInquiry() {
 
           {section('About You')}
           {field('Short Bio', false,
-            <textarea value={form.bio} onChange={e => set('bio', e.target.value)} placeholder='Tell us a bit about yourself and your content...' style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #D4CFC8', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#1A1A1A', outline: 'none', height: '100px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            <textarea value={form.bio} onChange={e => set('bio', e.target.value)} placeholder='Tell us a bit about yourself and your content...' style={{ width: '100%', background: '#F8F6F2', border: '0.5px solid #DBD7D0', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#1A1A1A', outline: 'none', height: '100px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
           )}
 
-          <div style={{ padding: '16px', background: '#F8F6F2', border: '0.5px solid #D4CFC8', borderRadius: '1px', marginBottom: '24px' }}>
+          <div style={{ padding: '16px', background: '#F8F6F2', border: '0.5px solid #DBD7D0', borderRadius: '1px', marginBottom: '24px' }}>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
-              <div onClick={() => set('hque_opted_in', !form.hque_opted_in)} style={{ width: '16px', height: '16px', borderRadius: '2px', border: form.hque_opted_in ? '0.5px solid #5b7c99' : '0.5px solid #C4BFB8', background: form.hque_opted_in ? '#5b7c99' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}>{form.hque_opted_in && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}</div>
+              <div onClick={() => set('hque_opted_in', !form.hque_opted_in)} style={{ width: '16px', height: '16px', borderRadius: '2px', border: form.hque_opted_in ? '0.5px solid #5b7c99' : '0.5px solid #CCC7BF', background: form.hque_opted_in ? '#5b7c99' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: '2px' }}>{form.hque_opted_in && <span style={{ color: '#fff', fontSize: '10px', lineHeight: 1 }}>✓</span>}</div>
               <div style={{ fontSize: '12px', color: '#888', lineHeight: 1.6 }}>
                 I'd like to receive talent opportunities and updates from HQue. You can unsubscribe at any time.
               </div>

@@ -3,12 +3,12 @@ import { supabase } from './supabase'
 
 export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) {
   const bg = dark ? '#1A1A1A' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#3A3A3A' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
-  const inputBg = dark ? '#141414' : '#F5F3EF'
+  const inputBg = dark ? '#141414' : '#F8F7F3'
   const labelColor = dark ? '#777' : '#888'
   const cardBg = dark ? '#222' : '#F9F7F3'
 

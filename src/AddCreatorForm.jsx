@@ -10,8 +10,8 @@ const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) 
 
 export default function AddCreatorForm({ onClose, onSaved, existing, dark = true, orgId }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const inputBg = dark ? '#141414' : '#F5F3EF'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const inputBg = dark ? '#141414' : '#F8F7F3'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const label = dark ? '#666' : '#888'
   const overlay = dark ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.4)'

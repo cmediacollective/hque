@@ -3,8 +3,8 @@ import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }) {
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const cardBg = dark ? '#111' : '#fff'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const labelColor = dark ? '#888' : '#666'

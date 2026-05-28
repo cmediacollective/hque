@@ -32,15 +32,15 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const [hovering, setHovering] = useState(null)
   const [search, setSearch] = useState('')
 
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#1A1A1A' : '#FFFFFF'
   const cardHover = dark ? '#222' : '#F0EDE8'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#444' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#444' : '#CCC7BF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
-  const gridBg = dark ? '#2A2A2A' : '#D4CFC8'
+  const gridBg = dark ? '#2A2A2A' : '#DBD7D0'
   // Raised cards in the grid: a card surface lifted off the page, plus shadow.
   const cardBg = dark ? '#212121' : '#FFFFFF'
   const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'

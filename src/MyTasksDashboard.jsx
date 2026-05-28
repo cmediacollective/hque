@@ -18,11 +18,11 @@ const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 }
 const MAX_PER_BUCKET = 5
 
 export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand, onOpenTask, agencyTz = 'America/Los_Angeles' }) {
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
   const outlinedBorder = dark ? '#3A3A3A' : '#B8B0A4'
 
   const [loading, setLoading] = useState(true)

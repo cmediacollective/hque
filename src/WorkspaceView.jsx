@@ -16,8 +16,8 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   const [mentionQuery, setMentionQuery] = useState("")
   const [saving, setSaving] = useState(false)
   const [assigneeMenuOpen, setAssigneeMenuOpen] = useState(false)
-  const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
-  const border = dark ? '#3A3A3A' : '#C4BFB8'
+  const inputBg = dark ? '#1A1A1A' : '#F8F7F3'
+  const border = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const subtle = dark ? '#666' : '#888'
   const cardBg = dark ? '#222' : '#FFFFFF'
@@ -157,15 +157,15 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     })()
   }, [orgId])
 
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#3A3A3A' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
-  const gridBg = dark ? '#2A2A2A' : '#D4CFC8'
-  const colBg = dark ? '#1A1A1A' : '#F5F3EF'
+  const gridBg = dark ? '#2A2A2A' : '#DBD7D0'
+  const colBg = dark ? '#1A1A1A' : '#F8F7F3'
   const colHover = dark ? '#222' : '#EDEAE5'
   // Raised task cards: soft shadow, with a gentle lift on hover.
   const taskShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.06)'

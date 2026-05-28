@@ -5,8 +5,8 @@ export default function NotificationsPanel({ user, dark, onClose, onOpenTask, on
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'

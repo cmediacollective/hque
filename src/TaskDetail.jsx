@@ -8,12 +8,12 @@ const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 export default function TaskDetail({ task, dark, members = [], brands = [], campaigns = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const panelBg = dark ? '#141414' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#3A3A3A' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#AAA' : '#666'
   const subtle = dark ? '#666' : '#888'
-  const inputBg = dark ? '#1A1A1A' : '#F5F3EF'
+  const inputBg = dark ? '#1A1A1A' : '#F8F7F3'
   const cardBg = dark ? '#1A1A1A' : '#F9F7F3'
 
   const [form, setForm] = useState({
@@ -376,7 +376,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                     return (
                       <div key={m.id} onClick={e => { e.stopPropagation(); toggleAssignee(m.id) }}
                         style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}
-                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF' }}
+                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F8F7F3' }}
                         onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
                         {m.avatar_url ? (
                           <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -421,7 +421,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                     return (
                       <div key={m.id} onClick={e => { e.stopPropagation(); toggleWatcher(m.id) }}
                         style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', background: isSelected ? (dark ? '#1a1a1a' : '#F0EDE8') : 'transparent' }}
-                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF' }}
+                        onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = dark ? '#1a1a1a' : '#F8F7F3' }}
                         onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
                         {m.avatar_url ? (
                           <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -569,7 +569,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                         setCommentMentionQuery('')
                       }}
                       style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
-                      onMouseEnter={e => e.currentTarget.style.background = dark ? '#1a1a1a' : '#F5F3EF'}
+                      onMouseEnter={e => e.currentTarget.style.background = dark ? '#1a1a1a' : '#F8F7F3'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       {m.avatar_url ? (
                         <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />

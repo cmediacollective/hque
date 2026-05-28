@@ -4,13 +4,13 @@ import BrandDetail from './BrandDetail'
 
 export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#3A3A3A' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#AAA' : '#666'
   const subtle = dark ? '#666' : '#888'
-  const cardHover = dark ? '#1A1A1A' : '#F5F3EF'
-  const selectedBg = dark ? '#1A1A1A' : '#EEEAE3'
+  const cardHover = dark ? '#1A1A1A' : '#F0EDE7'
+  const selectedBg = dark ? '#1A1A1A' : '#ECEAE4'
 
   const [brands, setBrands] = useState([])
   const [archivedBrands, setArchivedBrands] = useState([])

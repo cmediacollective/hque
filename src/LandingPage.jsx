@@ -106,9 +106,9 @@ function MobileAppPreview() {
     <div style={{ width: '100%', maxWidth: '340px', margin: '0 auto' }}>
       {/* Phone frame */}
       <div style={{ background: '#1A1A1A', borderRadius: '24px', padding: '12px', boxShadow: '0 24px 60px rgba(0,0,0,0.5)' }}>
-        <div style={{ background: '#F5F3EF', borderRadius: '16px', overflow: 'hidden', minHeight: '460px' }}>
+        <div style={{ background: '#F8F7F3', borderRadius: '16px', overflow: 'hidden', minHeight: '460px' }}>
           {/* Mobile header */}
-          <div style={{ background: '#ECEAE6', padding: '12px 16px', borderBottom: '0.5px solid #D4CFC8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ background: '#ECEAE6', padding: '12px 16px', borderBottom: '0.5px solid #DBD7D0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <img src="/logo.svg" alt="HQue" style={{ width: '60px', filter: 'invert(1)' }} />
             <div style={{ fontSize: '10px', letterSpacing: '0.1em', color: '#999', textTransform: 'uppercase' }}>Nova Talent Group</div>
           </div>
@@ -124,7 +124,7 @@ function MobileAppPreview() {
                   {['All', 'Influencer', 'UGC', 'Wellness'].map((chip, i) => {
                     const active = i === 0
                     return (
-                      <span key={chip} style={{ padding: '3px 8px', fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#D4CFC8'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 1px 4px rgba(91,124,153,0.3)' : '0 1px 2px rgba(0,0,0,0.04)' }}>{chip}</span>
+                      <span key={chip} style={{ padding: '3px 8px', fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#DBD7D0'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 1px 4px rgba(91,124,153,0.3)' : '0 1px 2px rgba(0,0,0,0.04)' }}>{chip}</span>
                     )
                   })}
                 </div>
@@ -188,7 +188,7 @@ function MobileAppPreview() {
                       {tasks.slice(0, 1).map((task, i) => {
                         const prColor = done ? '#bbb' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#999'
                         return (
-                          <div key={i} style={{ background: done ? '#F5F3EF' : '#fff', borderRadius: '5px', padding: '10px', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', opacity: done ? 0.7 : 1 }}>
+                          <div key={i} style={{ background: done ? '#F8F7F3' : '#fff', borderRadius: '5px', padding: '10px', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.05)', opacity: done ? 0.7 : 1 }}>
                             <div style={{ fontSize: '11px', color: done ? '#aaa' : '#1A1A1A', textDecoration: done ? 'line-through' : 'none', marginBottom: '6px' }}>{task.title}</div>
                             <span style={{ fontSize: '7px', letterSpacing: '0.1em', border: `0.5px solid ${prColor}`, color: prColor, padding: '1px 6px', borderRadius: '2px' }}>{task.priority}</span>
                           </div>
@@ -226,7 +226,7 @@ function MobileAppPreview() {
             )}
           </div>
           {/* Bottom nav */}
-          <div style={{ borderTop: '0.5px solid #D4CFC8', background: '#ECEAE6', display: 'flex', padding: '8px 0' }}>
+          <div style={{ borderTop: '0.5px solid #DBD7D0', background: '#ECEAE6', display: 'flex', padding: '8px 0' }}>
             {SCREENS.map((s, i) => (
               <button key={i} onClick={() => { setActiveScreen(i); clearInterval(intervalRef.current) }} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                 <span style={{ fontSize: '14px', opacity: i === activeScreen ? 1 : 0.4 }}>
@@ -252,9 +252,9 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
         </div>
         <div style={{ flex: 1, background: '#111', borderRadius: '4px', padding: '4px 12px', fontSize: '10px', color: '#555', textAlign: 'center' }}>h-que.com</div>
       </div>
-      <div style={{ background: '#F5F3EF', border: '0.5px solid #D4CFC8', borderTop: 'none', borderRadius: '0 0 8px 8px', height: '520px', display: 'flex', overflow: 'hidden', position: 'relative' }}>
-        <div style={{ width: '180px', borderRight: '0.5px solid #D4CFC8', padding: '24px 0', flexShrink: 0, background: '#ECEAE6' }}>
-          <div style={{ padding: '0 16px 20px', borderBottom: '0.5px solid #D4CFC8', marginBottom: '16px' }}>
+      <div style={{ background: '#F8F7F3', border: '0.5px solid #DBD7D0', borderTop: 'none', borderRadius: '0 0 8px 8px', height: '520px', display: 'flex', overflow: 'hidden', position: 'relative' }}>
+        <div style={{ width: '180px', borderRight: '0.5px solid #DBD7D0', padding: '24px 0', flexShrink: 0, background: '#ECEAE6' }}>
+          <div style={{ padding: '0 16px 20px', borderBottom: '0.5px solid #DBD7D0', marginBottom: '16px' }}>
             <img src="/logo.svg" alt="HQue" style={{ width: '80px', filter: 'invert(1)' }} />
           </div>
           {SCREENS.map((s, i) => (
@@ -271,7 +271,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                 {['All Types', 'Influencer', 'UGC', 'Actor', 'Wellness', 'Beauty', 'Fashion', 'Travel'].map((chip, i) => {
                   const active = i === 0
                   return (
-                    <span key={chip} style={{ padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#D4CFC8'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : '0 1px 2px rgba(0,0,0,0.04)', fontWeight: active ? 500 : 400 }}>{chip}</span>
+                    <span key={chip} style={{ padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#DBD7D0'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : '0 1px 2px rgba(0,0,0,0.04)', fontWeight: active ? 500 : 400 }}>{chip}</span>
                   )
                 })}
                 <span style={{ marginLeft: 'auto', padding: '4px 12px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', borderRadius: '4px', boxShadow: '0 2px 6px rgba(91,124,153,0.35)' }}>+ Talent</span>
@@ -342,7 +342,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                 const tasks = FAKE_TASKS.filter(t => t.col === col.name)
                 const done = col.name === 'DONE'
                 return (
-                  <div key={col.name} style={{ background: '#FFFFFF', border: '0.5px solid #D4CFC8', borderRadius: '8px', padding: '12px 12px 14px', overflowY: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  <div key={col.name} style={{ background: '#FFFFFF', border: '0.5px solid #DBD7D0', borderRadius: '8px', padding: '12px 12px 14px', overflowY: 'auto', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ fontSize: '8px', letterSpacing: '0.22em', color: '#888', marginBottom: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textTransform: 'uppercase' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                         <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: col.dot, display: 'inline-block' }} />
@@ -353,7 +353,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                     {tasks.map((task, i) => {
                       const prColor = done ? '#bbb' : task.priority === 'HIGH' ? '#c0392b' : task.priority === 'MEDIUM' ? '#5b7c99' : '#999'
                       return (
-                        <div key={i} style={{ background: done ? '#F5F3EF' : '#FFFFFF', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, borderRadius: '5px', padding: '11px 12px', marginBottom: '8px', boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.06)', opacity: done ? 0.65 : 1 }}>
+                        <div key={i} style={{ background: done ? '#F8F7F3' : '#FFFFFF', border: `0.5px solid ${done ? '#E0DCD6' : '#E8E4DE'}`, borderRadius: '5px', padding: '11px 12px', marginBottom: '8px', boxShadow: done ? 'none' : '0 1px 3px rgba(0,0,0,0.06)', opacity: done ? 0.65 : 1 }}>
                           <div style={{ fontSize: '11px', color: done ? '#aaa' : '#1A1A1A', marginBottom: '8px', lineHeight: 1.4, textDecoration: done ? 'line-through' : 'none' }}>{task.title}</div>
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                             <span style={{ fontSize: '7px', letterSpacing: '0.12em', border: `0.5px solid ${prColor}`, color: prColor, padding: '1px 6px', borderRadius: '2px' }}>{task.priority}</span>

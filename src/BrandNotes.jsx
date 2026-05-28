@@ -10,7 +10,7 @@ export default function BrandNotes({ brand, userId, agencyTz, dark = true, orgId
   const bg = inv ? '#1A1A1A' : '#FBFAF7'
   const bgInner = inv ? '#1A1A1A' : '#FFFFFF'
   const bgPanel = inv ? '#141414' : '#F1EEE8'
-  const border = inv ? '#2A2A2A' : '#D4CFC8'
+  const border = inv ? '#2A2A2A' : '#DBD7D0'
   const text = inv ? '#E8E4DD' : '#1A1A1A'
   const muted = inv ? '#999' : '#666'
   const subtle = inv ? '#777' : '#888'
@@ -502,7 +502,7 @@ export default function BrandNotes({ brand, userId, agencyTz, dark = true, orgId
           <ToolbarButton inv={inv} onClick={() => exec('underline')} title='Underline (⌘U)'><u>U</u></ToolbarButton>
           <ToolbarButton inv={inv} onClick={() => exec('strikeThrough')} title='Strikethrough'><s>S</s></ToolbarButton>
           <div style={{ position: 'relative' }}>
-            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowColors(s => !s)} title='Text color' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#D4CFC8'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 8px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowColors(s => !s)} title='Text color' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#DBD7D0'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 8px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ display: 'inline-block', width: '14px', height: '14px', borderRadius: '2px', background: currentColor || (inv ? '#E8E4DD' : '#1A1A1A'), border: `0.5px solid ${border}` }} />
               <span style={{ fontSize: '9px' }}>▾</span>
             </button>
@@ -521,7 +521,7 @@ export default function BrandNotes({ brand, userId, agencyTz, dark = true, orgId
           </div>
           <div style={{ width: '1px', background: border, alignSelf: 'stretch', margin: '0 4px' }} />
           <div style={{ position: 'relative' }}>
-            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowLists(s => !s)} title='Lists' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#D4CFC8'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 11px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <button onMouseDown={e => e.preventDefault()} onClick={() => setShowLists(s => !s)} title='Lists' style={{ background: 'none', border: `0.5px solid ${inv ? '#2A2A2A' : '#DBD7D0'}`, color: inv ? '#BBB' : '#3A3A3A', cursor: 'pointer', padding: '5px 11px', fontSize: '11px', borderRadius: '1px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
               List <span style={{ fontSize: '9px' }}>▾</span>
             </button>
             {showLists && (
@@ -612,7 +612,7 @@ export default function BrandNotes({ brand, userId, agencyTz, dark = true, orgId
 }
 
 function ToolbarButton({ onClick, title, children, inv }) {
-  const border = inv ? '#2A2A2A' : '#D4CFC8'
+  const border = inv ? '#2A2A2A' : '#DBD7D0'
   const color = inv ? '#BBB' : '#3A3A3A'
   return (
     <button

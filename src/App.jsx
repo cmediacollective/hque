@@ -148,9 +148,9 @@ function App() {
     window.$crisp.push(['set', 'user:email', [user.email]])
   }, [user])
 
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const nav = dark ? '#111111' : '#E8E4DE'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'

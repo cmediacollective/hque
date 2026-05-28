@@ -19,7 +19,7 @@ function todayInTz(tz) {
 export default function MiniCalendar({ dark = true, agencyTz }) {
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const subtle = dark ? '#777' : '#888'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
   const blue = '#5b7c99'
 
   // Track the displayed month as an offset from "this month" so the calendar

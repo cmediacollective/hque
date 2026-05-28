@@ -8,8 +8,8 @@ const STATUSES = ['Contacted', 'Responded', 'Declined', 'Booked']
 
 
 function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, dark, orgId }) {
-  const border = dark ? '#3A3A3A' : '#C4BFB8'
-  const inputBg = dark ? '#141414' : '#F5F3EF'
+  const border = dark ? '#3A3A3A' : '#CCC7BF'
+  const inputBg = dark ? '#141414' : '#F8F7F3'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const subtle = dark ? '#777' : '#888'
 
@@ -137,8 +137,8 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
 }
 
 export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = false }) {
-  const panelBg = dark ? '#1A1A1A' : '#F5F3EF'
-  const panelBorder = dark ? '#2A2A2A' : '#D4CFC8'
+  const panelBg = dark ? '#1A1A1A' : '#F8F7F3'
+  const panelBorder = dark ? '#2A2A2A' : '#DBD7D0'
   const panelText = dark ? '#F2EEE8' : '#1A1A1A'
   const panelMuted = dark ? '#888' : '#666'
   const panelCard = dark ? '#222' : '#FFFFFF'

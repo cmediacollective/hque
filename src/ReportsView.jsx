@@ -10,10 +10,10 @@ const brandColor = (name) => {
 const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
 export default function ReportsView({ dark = true, orgId }) {
-  const bg = dark ? '#1A1A1A' : '#F5F3EF'
+  const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#D4CFC8'
-  const border2 = dark ? '#3A3A3A' : '#C4BFB8'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const border2 = dark ? '#3A3A3A' : '#CCC7BF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
