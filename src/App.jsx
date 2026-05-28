@@ -149,7 +149,7 @@ function App() {
   }, [user])
 
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
-  const nav = dark ? '#111111' : '#E8E4DE'
+  const nav = dark ? '#111111' : '#F0EDE7'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const text = dark ? '#F2EEE8' : '#1A1A1A'
   const muted = dark ? '#888' : '#666'
