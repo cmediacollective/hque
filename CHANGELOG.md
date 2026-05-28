@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-27
 
+**Fixed the duplicate website field in the New Campaign form.** When adding a brand, the form was asking for the website twice — once inside the "+ New brand" box and again in a standalone "Brand Website" field below it. The standalone field now only appears when an existing brand is selected (and you're not mid-way through adding a new one), so you're never asked for the same website twice.
+
 **Added Pride Month to the dashboard greeting.** On June 1, the home dashboard now greets the team with "Happy Pride Month" and a short note about the June 1969 Stonewall origin, alongside the existing rotating holidays and fun facts.
 
 **Lightened up the light theme — less beige.** The light mode had a warm, tan/beige cast across the whole app (especially the left-hand brand menu). Pulled some of the yellow out and lightened every surface a few shades so it reads as a clean warm off-white instead of beige. Backgrounds, cards, borders, hover and selected states all shifted together, so the look stays consistent across the dashboard, workspace, talent, campaigns, reports, and settings.

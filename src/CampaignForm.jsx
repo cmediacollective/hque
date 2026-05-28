@@ -376,7 +376,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
         )}
 
 
-        {field('Brand Website', inp({ value: form.brand_website || '', onChange: e => set('brand_website', e.target.value), placeholder: 'e.g. example.com' }))}
+        {form.brand_id && !showNewBrand && field('Brand Website', inp({ value: form.brand_website || '', onChange: e => set('brand_website', e.target.value), placeholder: 'e.g. example.com' }))}
 
         {form.brand_id && field('Campaign Contact',
           <div>
