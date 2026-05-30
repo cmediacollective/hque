@@ -530,14 +530,14 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           <h1 className="hero-in" style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 400', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.04, letterSpacing: '-0.02em', color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)', '--in-delay': '120ms' }}>
             Run your roster.<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>Not your inbox.</span>
           </h1>
-          <p className="hero-in" style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 40px', '--in-delay': '320ms' }}>
+          <p className="hero-in" style={{ fontSize: mobile ? '14px' : '15px', color: '#DCDCDC', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 40px', '--in-delay': '320ms' }}>
             Whether you run an agency, manage talent campaigns in-house, or are building something on your own — HQue is how you manage your talent, track every campaign, and close deals without the chaos.
           </p>
           <div className="hero-in" style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center', '--in-delay': '480ms' }}>
             <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
             <a href="/#how-it-works" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
           </div>
-          <div className="hero-in" style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.12em', '--in-delay': '600ms' }}>14-day free trial · No credit card required</div>
+          <div className="hero-in" style={{ marginTop: '20px', fontSize: '12px', color: '#DCDCDC', letterSpacing: '0.12em', '--in-delay': '600ms' }}>14-day free trial · No credit card required</div>
         </div>
       </section>
 
@@ -552,7 +552,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           ].map((p, i) => (
             <div key={p.label} data-reveal style={{ '--reveal-delay': `${i * 120}ms` }}>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{p.label}</div>
-              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{p.body}</div>
+              <div style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.8 }}>{p.body}</div>
             </div>
           ))}
         </div>
@@ -583,7 +583,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             <div key={f.num} data-reveal style={{ '--reveal-delay': `${i * 120}ms` }}>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#555', marginBottom: '16px' }}>{f.num}</div>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{f.title}</div>
-              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{f.body}</div>
+              <div style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.8 }}>{f.body}</div>
             </div>
           ))}
         </div>
@@ -594,7 +594,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '24px', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
           Built for every<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>type of talent.</span>
         </div>
-        <div data-reveal style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 32px', '--reveal-delay': '120ms' }}>
+        <div data-reveal style={{ fontSize: mobile ? '14px' : '15px', color: '#DCDCDC', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 32px', '--reveal-delay': '120ms' }}>
           Actors. UGC creators. Influencers. Speakers. Hosts. Podcast guests. Athletes. Whatever your roster looks like, HQue works with it.
         </div>
         <div data-reveal style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', '--reveal-delay': '240ms' }}>
@@ -632,7 +632,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                   {plan.highlight && <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>}
                   <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '10px' }}>{plan.name}</div>
                   {plan.description && (
-                    <div style={{ fontSize: '12px', color: '#888', lineHeight: 1.5, marginBottom: '20px', minHeight: mobile ? 0 : '54px' }}>{plan.description}</div>
+                    <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.5, marginBottom: '20px', minHeight: mobile ? 0 : '54px' }}>{plan.description}</div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
                     <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
@@ -642,7 +642,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                     {plan.features.map(f => (
                       <div key={f} style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'flex-start' }}>
                         <span style={{ color: '#5b7c99', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                        <span style={{ fontSize: '13px', color: '#888', lineHeight: 1.5 }}>{f}</span>
+                        <span style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.5 }}>{f}</span>
                       </div>
                     ))}
                   </div>
@@ -668,7 +668,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
             )
           })}
         </div>
-        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#555' }}>14-day free trial on all plans · No credit card required</div>
+        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: '#DCDCDC' }}>14-day free trial on all plans · No credit card required</div>
       </section>
 
 
@@ -687,7 +687,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           ].map((faq, i) => (
             <div key={i} data-reveal style={{ background: '#111', padding: '24px', '--reveal-delay': `${i * 80}ms` }}>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '14px', color: '#F0ECE6', marginBottom: '8px', lineHeight: 1.4 }}>{faq.q}</div>
-              <div style={{ fontSize: '12px', color: '#555', lineHeight: 1.7 }}>{faq.a}</div>
+              <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7 }}>{faq.a}</div>
             </div>
           ))}
         </div>
@@ -710,7 +710,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: mobile ? '32px' : '48px', marginBottom: '48px' }}>
           <div>
             <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
-            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
+            <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#BBB' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
@@ -746,8 +746,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#666', fontStyle: 'italic' }}>Made for people who work with talent.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic' }}>Made for people who work with talent.</span>
         </div>
       </footer>
     <HQueChat />

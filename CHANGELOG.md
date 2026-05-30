@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Marketing homepage: lighter body copy.** Bumped all paragraph and descriptive body text across the marketing homepage to #DCDCDC for better readability against the dark background. Hero subhead, persona descriptions, feature bodies, pricing tier descriptions and feature lists, FAQ answers, trust lines, and footer taglines are all included. Headings, eyebrow labels, buttons, nav links, and pill tags are unchanged.
+
 **Marketing homepage refresh — copy + structure.** A focused pass across the marketing page to widen the audience message (agencies, brands, *and* entrepreneurs) and tighten the hierarchy:
 - Page title now reads "HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs" (browser tab + SEO).
 - Nav has a third link, **The Pitch**, pointing at /blog.
