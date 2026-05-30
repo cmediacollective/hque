@@ -418,7 +418,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
 
         {field('Status',
           <select value={form.status || 'Pitch'} onChange={e => set('status', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-            {['Pitch', 'Contracts Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
+            {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         )}
 

@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-29
 
-**Two new campaign statuses: Contracts Pending and Dead.** Contracts Pending sits between Pitch and Active (use it for campaigns where you've agreed in principle but paperwork is still being signed). Dead lives at the bottom of the dropdown for campaigns that didn't pan out and aren't being pursued anymore. Both have their own status colors so they're easy to spot on the Campaigns view.
+**Two new campaign statuses: Contract Pending and Dead.** Contract Pending sits between Pitch and Active (use it for campaigns where you've agreed in principle but paperwork is still being signed). Dead lives at the bottom of the dropdown for campaigns that didn't pan out and aren't being pursued anymore. Both have their own status colors so they're easy to spot on the Campaigns view.
 
 **Bigger click target on Campaign cards.** Previously you had to click directly on a campaign row to open it, which was a small target. Now clicking anywhere on a brand card opens the first campaign inside it. The brand logo and name still link to the website, and individual campaign rows still open their own campaign — just the empty space around them is now active too.
 

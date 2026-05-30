@@ -191,7 +191,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     if (!g.website && c.brand_website) g.website = c.brand_website
   })
 
-  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : s === 'Contracts Pending' ? '#A67C52' : s === 'Dead' ? '#5A5A5A' : '#888'
+  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : s === 'Contract Pending' ? '#A67C52' : s === 'Dead' ? '#5A5A5A' : '#888'
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : null
 
   return (
@@ -340,7 +340,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                             onClick={e => e.stopPropagation()}
                             title='Status'
                             style={{ padding: '2px 18px 2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
-                            {['Pitch', 'Contracts Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
+                            {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                           {c.budget != null && <span style={{ fontSize: '11px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</span>}
                           {(c.start_date || c.end_date) && <span style={{ fontSize: '11px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</span>}
@@ -419,7 +419,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                 onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
                 onClick={e => e.stopPropagation()}
                 style={{ padding: '3px 16px 3px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center', width: 'fit-content' }}>
-                {['Pitch', 'Contracts Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
+                {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
               </select>
 
               <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
