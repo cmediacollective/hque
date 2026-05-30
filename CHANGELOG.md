@@ -4,6 +4,24 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-30
+
+**Marketing homepage refresh — copy + structure.** A focused pass across the marketing page to widen the audience message (agencies, brands, *and* entrepreneurs) and tighten the hierarchy:
+- Page title now reads "HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs" (browser tab + SEO).
+- Nav has a third link, **The Pitch**, pointing at /blog.
+- Hero adds an eyebrow ("THE PLATFORM BUILT FOR TALENT-DRIVEN WORK") above the headline. Subheadline rewritten to speak to all three audiences. "See how it works" anchors to the new product section.
+- New **Built For** section between the hero and the product screenshots, with three columns — Agencies, Brand Teams, Entrepreneurs.
+- The product screenshots area now has a section eyebrow ("THE PLATFORM") and a real headline ("One platform. Every part of the deal."). Anchor id #how-it-works added.
+- **Features** section gets a proper headline ("Built for the way talent work actually runs.") and refreshed copy on all three feature blocks.
+- New **Talent Types** section between Features and Pricing, with the headline "Built for every type of talent.", a body line listing actors / UGC / influencers / speakers / etc., and a row of pill tags.
+- **Pricing**: each tier now has a one-line description, the third tier renamed from "Agency" to **Business**, and the Get Started buttons link to /signup?plan=starter|pro|business.
+- **FAQ**: rewrote the "Who is HQue for?" and "Can my whole team use it?" answers (with Business replacing Agency in the seats line).
+- **Footer**: new tagline under the logo ("The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.") and a small italic tagline at the very bottom ("Made for people who work with talent.").
+
+No visual styles, colors, fonts, spacing, or animations were changed — just copy and structure.
+
+---
+
 ## 2026-05-29
 
 **Reports: month filter and cleaner status cards.** Next to the year chips there's now a Month dropdown — pick a specific month and the status counts, payment totals, and campaign list scope to just that month. The two charts still show the full 12-month year so you keep context, but the selected month is highlighted (and the other months dim back). Also removed the colored left bar on the status cards at the top — they're cleaner now and the status name itself carries the color.

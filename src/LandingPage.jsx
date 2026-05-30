@@ -64,15 +64,15 @@ const SCREENS = [
 ]
 
 const FEATURES = [
-  { num: '01', title: 'Your entire roster, one place.', body: 'Talent profiles, social handles, rates, outreach history — everything your team needs to move fast and book deals.' },
-  { num: '02', title: 'Campaigns that close.', body: 'Track every deal from pitch to payment. Know exactly what\'s booked, what\'s pending, and what\'s overdue.' },
-  { num: '03', title: 'Built for agencies, not spreadsheets.', body: 'A platform that thinks the way you do. Multi-user, multi-campaign, with a talent inquiry form your clients will actually fill out.' },
+  { num: '01', title: 'Your entire roster, one place.', body: 'Every talent profile, contact, social handle, rate card, and outreach history — organized and accessible so your team can move fast and book the right person every time.' },
+  { num: '02', title: 'Campaigns that close.', body: 'From first pitch to final payment, track every campaign in one place. Know exactly what\'s active, what\'s pending, and what needs attention before it becomes a problem.' },
+  { num: '03', title: 'A workspace built for your team.', body: 'Tasks, deliverables, and team collaboration — all tied to the campaigns and talent you\'re already managing. No more switching between five tools to get one thing done.' },
 ]
 
 const PLANS = [
-  { name: 'Starter', price: '$49', features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form'] },
-  { name: 'Pro', price: '$99', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'], highlight: true },
-  { name: 'Agency', price: '$199', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support', 'Custom branding on PDFs & talent inquiries'] },
+  { name: 'Starter', slug: 'starter', price: '$49', description: 'For entrepreneurs and small teams just getting started.', features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form'] },
+  { name: 'Pro', slug: 'pro', price: '$99', description: 'For growing agencies and brand teams that need more power.', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'], highlight: true },
+  { name: 'Business', slug: 'business', price: '$199', description: 'For established agencies and teams running multiple campaigns and clients.', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support', 'Custom branding on PDFs & talent inquiries'] },
 ]
 
 function BrandLogo({ color, initial, size = 44, logo }) {
@@ -409,8 +409,8 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
 
 export default function LandingPage({ onGetStarted, onSignIn }) {
   useSEO({
-    title: 'HQue — Agency OS for Talent & Influencer Agencies',
-    description: 'HQue is the operating system for talent and influencer agencies. Manage your roster, campaigns, payments, and team — all in one place.',
+    title: 'HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs',
+    description: 'Whether you run an agency, manage talent campaigns in-house, or are building something on your own — HQue is how you manage your talent, track every campaign, and close deals without the chaos.',
     canonical: 'https://h-que.com',
   })
   const [activeScreen, setActiveScreen] = useState(0)
@@ -524,22 +524,48 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </div>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(17,17,17,0.85) 0%, rgba(17,17,17,0.65) 50%, rgba(17,17,17,0.85) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 2, padding: mobile ? '0 24px' : '0 48px' }}>
+          <div className="hero-in" style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '20px', '--in-delay': '40ms' }}>
+            The platform built for talent-driven work
+          </div>
           <h1 className="hero-in" style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100, "wght" 400', fontSize: mobile ? 'clamp(36px, 10vw, 56px)' : 'clamp(42px, 7vw, 88px)', fontWeight: 'normal', lineHeight: 1.04, letterSpacing: '-0.02em', color: '#F0ECE6', margin: '0 0 24px', maxWidth: '900px', textShadow: '0 2px 20px rgba(0,0,0,0.6)', '--in-delay': '120ms' }}>
             Run your roster.<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>Not your inbox.</span>
           </h1>
-          <p className="hero-in" style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '480px', margin: '0 auto 40px', '--in-delay': '320ms' }}>
-            HQue is the operating system for agencies and brands<br/>built on talent partnerships.
+          <p className="hero-in" style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 40px', '--in-delay': '320ms' }}>
+            Whether you run an agency, manage talent campaigns in-house, or are building something on your own — HQue is how you manage your talent, track every campaign, and close deals without the chaos.
           </p>
           <div className="hero-in" style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center', '--in-delay': '480ms' }}>
             <button onClick={onGetStarted} style={{ padding: '14px 36px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', width: mobile ? '100%' : 'auto' }}>Start free trial</button>
-            <a href="#features" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
+            <a href="/#how-it-works" style={{ padding: '14px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', textDecoration: 'none' }}>See how it works →</a>
           </div>
           <div className="hero-in" style={{ marginTop: '20px', fontSize: '12px', color: '#aaa', letterSpacing: '0.12em', '--in-delay': '600ms' }}>14-day free trial · No credit card required</div>
         </div>
       </section>
 
+      {/* Built For */}
+      <section style={{ padding: mobile ? '80px 24px 60px' : '120px 48px 80px', maxWidth: '1000px', margin: '0 auto' }}>
+        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '48px', textAlign: 'center' }}>Built for</div>
+        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: mobile ? '40px' : '48px' }}>
+          {[
+            { label: 'Agencies', body: 'Talent agencies, management firms, and booking teams. Run your full roster, manage campaigns across clients, and track every deal from pitch to payment.' },
+            { label: 'Brand Teams', body: 'In-house marketing and partnerships teams. Organize your talent relationships, plan seasonal campaigns, and keep your whole team aligned — all in one place.' },
+            { label: 'Entrepreneurs', body: 'Founders, independent managers, and one-person teams building something. Stay on top of your talent, manage your outreach, and run your campaigns like a seasoned pro.' },
+          ].map((p, i) => (
+            <div key={p.label} data-reveal style={{ '--reveal-delay': `${i * 120}ms` }}>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{p.label}</div>
+              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{p.body}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* App Showcase */}
-      <section data-reveal style={{ padding: mobile ? '0 20px 80px' : '80px 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <section id="how-it-works" data-reveal style={{ padding: mobile ? '40px 20px 80px' : '40px 48px 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ maxWidth: '1000px', width: '100%', marginBottom: mobile ? '40px' : '56px', textAlign: 'center' }}>
+          <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>The platform</div>
+          <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '40px', color: '#F0ECE6', lineHeight: 1.15, letterSpacing: '-0.02em', fontWeight: 'normal', '--reveal-delay': '120ms' }}>
+            One platform.<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>Every part of the deal.</span>
+          </div>
+        </div>
         {mobile
           ? <MobileAppPreview />
           : <DesktopAppPreview activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
@@ -548,7 +574,10 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       {/* Features */}
       <section id="features" style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 120px', maxWidth: '1000px', margin: '0 auto' }}>
-        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '48px', textAlign: 'center' }}>What HQue does</div>
+        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px', textAlign: 'center' }}>Features</div>
+        <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '56px', textAlign: 'center', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em', '--reveal-delay': '120ms' }}>
+          Built for the way<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>talent work actually runs.</span>
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: mobile ? '40px' : '48px' }}>
           {FEATURES.map((f, i) => (
             <div key={f.num} data-reveal style={{ '--reveal-delay': `${i * 120}ms` }}>
@@ -556,6 +585,21 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '20px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.3 }}>{f.title}</div>
               <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.8 }}>{f.body}</div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Talent Types */}
+      <section style={{ padding: mobile ? '40px 24px 60px' : '60px 48px 80px', maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+        <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '28px' : '36px', color: '#F0ECE6', marginBottom: '24px', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+          Built for every<br /><span style={{ color: '#5b7c99', fontStyle: 'italic' }}>type of talent.</span>
+        </div>
+        <div data-reveal style={{ fontSize: mobile ? '14px' : '15px', color: '#aaa', lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 32px', '--reveal-delay': '120ms' }}>
+          Actors. UGC creators. Influencers. Speakers. Hosts. Podcast guests. Athletes. Whatever your roster looks like, HQue works with it.
+        </div>
+        <div data-reveal style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', '--reveal-delay': '240ms' }}>
+          {['Actors', 'UGC Creators', 'Influencers', 'Speakers', 'Hosts', 'Podcast Guests', 'Athletes', 'Models', 'Voiceover', 'Wellness', 'Beauty', 'Fashion'].map(t => (
+            <span key={t} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: '0.5px solid #2A2A2A', background: '#141414', color: '#aaa', borderRadius: '4px' }}>{t}</span>
           ))}
         </div>
       </section>
@@ -586,7 +630,10 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                   }}
                 >
                   {plan.highlight && <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>}
-                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>{plan.name}</div>
+                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '10px' }}>{plan.name}</div>
+                  {plan.description && (
+                    <div style={{ fontSize: '12px', color: '#888', lineHeight: 1.5, marginBottom: '20px', minHeight: mobile ? 0 : '54px' }}>{plan.description}</div>
+                  )}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
                     <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
                     <span style={{ fontSize: '12px', color: '#666' }}>/month</span>
@@ -599,22 +646,23 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={onGetStarted}
+                  <a
+                    href={`/signup?plan=${plan.slug}`}
                     style={{
-                      width: '100%', padding: '12px',
+                      width: '100%', padding: '12px', boxSizing: 'border-box',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                       fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
-                      background: plan.highlight ? '#5b7c99' : 'none',
+                      background: plan.highlight ? '#5b7c99' : 'transparent',
                       border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#3A3A3A' : '#2A2A2A')}`,
                       color: plan.highlight ? '#fff' : (isHovered ? '#F0ECE6' : '#999'),
                       cursor: 'pointer', borderRadius: '2px',
+                      textDecoration: 'none',
                       transition: 'color 0.2s ease, border-color 0.2s ease',
                     }}
                   >
                     <span>Get started</span>
                     <span style={{ display: 'inline-block', transform: isHovered ? 'translateX(3px)' : 'translateX(0)', transition: 'transform 0.2s ease' }}>→</span>
-                  </button>
+                  </a>
                 </div>
               </div>
             )
@@ -633,8 +681,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : '1fr 1fr', gap: '1px', background: '#1A1A1A' }}>
           {[
             { q: 'Is there a free trial?', a: 'Yes — 14 days, no credit card required. Full access from day one.' },
-            { q: 'Who is HQue for?', a: 'Influencer agencies, talent managers, and brand partnerships teams.' },
-            { q: 'Can my whole team use it?', a: 'Yes. Starter has 2 seats, Pro has 5, Agency has unlimited.' },
+            { q: 'Who is HQue for?', a: 'HQue is built for anyone who works with talent. That includes talent agencies, casting and management firms, in-house brand and partnerships teams, and entrepreneurs building their roster from the ground up. If you\'re booking, managing, or running campaigns with any kind of talent — creators, actors, hosts, speakers, UGC talent — HQue was built for you.' },
+            { q: 'Can my whole team use it?', a: 'Yes. Starter includes 2 seats, Pro includes 5, and Business has unlimited team members. Everyone on your team gets full access.' },
             { q: 'Can I cancel anytime?', a: 'Yes. No contracts. Cancel from billing settings, keep access until period ends.' },
           ].map((faq, i) => (
             <div key={i} data-reveal style={{ background: '#111', padding: '24px', '--reveal-delay': `${i * 80}ms` }}>
@@ -662,7 +710,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: mobile ? '32px' : '48px', marginBottom: '48px' }}>
           <div>
             <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
-            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
+            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#BBB' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>
@@ -699,6 +747,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
           <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#666', fontStyle: 'italic' }}>Made for people who work with talent.</span>
         </div>
       </footer>
     <HQueChat />

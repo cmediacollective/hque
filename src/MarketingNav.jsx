@@ -15,6 +15,7 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
   const links = [
     { label: 'Features', href: '/#features' },
     { label: 'Pricing', href: '/pricing' },
+    { label: 'The Pitch', href: '/blog' },
   ]
 
   return (
