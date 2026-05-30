@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-29
 
+**Reports: month filter and cleaner status cards.** Next to the year chips there's now a Month dropdown — pick a specific month and the status counts, payment totals, and campaign list scope to just that month. The two charts still show the full 12-month year so you keep context, but the selected month is highlighted (and the other months dim back). Also removed the colored left bar on the status cards at the top — they're cleaner now and the status name itself carries the color.
+
 **Reports section revamped.** The Reports page is now organized around a year you pick at the top (defaults to this year, with a chip for every year you have campaigns in). What's new:
 - A row of cards across the top showing how many campaigns of each status — Pitch, Contract Pending, Active, Pending Payment, Completed, Cancelled, Dead — happened in the selected year. Each card is color-coded to match the status color used elsewhere.
 - A new **Campaign Activity by Month** chart: one stacked bar per month, height = number of campaigns that started that month, colored bands inside the bar showing how many landed in each status. A legend below makes it easy to read.

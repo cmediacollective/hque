@@ -43,6 +43,7 @@ export default function ReportsView({ dark = true, orgId }) {
   const [loading, setLoading] = useState(true)
   const [selectedCampaign, setSelectedCampaign] = useState(null)
   const [year, setYear] = useState(new Date().getFullYear())
+  const [month, setMonth] = useState('all') // 'all' or 0..11
 
   useEffect(() => { fetchAll() }, [orgId])
 
@@ -78,14 +79,23 @@ export default function ReportsView({ dark = true, orgId }) {
     })
   }, [campaigns, year])
 
+  // Further filtered by month if a specific month is picked.
+  const scopedCampaigns = useMemo(() => {
+    if (month === 'all') return yearCampaigns
+    return yearCampaigns.filter(c => {
+      const d = campaignDate(c)
+      return d && d.getMonth() === month
+    })
+  }, [yearCampaigns, month])
+
   const statusCounts = useMemo(() => {
     const counts = {}
     STATUSES.forEach(s => counts[s] = 0)
-    yearCampaigns.forEach(c => {
+    scopedCampaigns.forEach(c => {
       if (counts[c.status] != null) counts[c.status]++
     })
     return counts
-  }, [yearCampaigns])
+  }, [scopedCampaigns])
 
   const monthlyByStatus = useMemo(() => {
     return MONTHS.map((m, i) => {
@@ -115,14 +125,14 @@ export default function ReportsView({ dark = true, orgId }) {
   }, [yearCampaigns])
 
   const maxBudget = Math.max(...monthlyBudget.map(m => m.total), 1)
-  const totalBudgetYear = yearCampaigns.reduce((s, c) => s + (Number(c.budget) || 0), 0)
+  const scopedBudget = scopedCampaigns.reduce((s, c) => s + (Number(c.budget) || 0), 0)
 
-  const yearLinks = useMemo(() => {
-    const ids = new Set(yearCampaigns.map(c => c.id))
+  const scopedLinks = useMemo(() => {
+    const ids = new Set(scopedCampaigns.map(c => c.id))
     return links.filter(l => ids.has(l.campaign_id))
-  }, [yearCampaigns, links])
-  const paidThisYear = yearLinks.filter(l => l.payment_status === 'Paid').length
-  const pendingThisYear = yearLinks.filter(l => l.payment_status !== 'Paid').length
+  }, [scopedCampaigns, links])
+  const paidScoped = scopedLinks.filter(l => l.payment_status === 'Paid').length
+  const pendingScoped = scopedLinks.filter(l => l.payment_status !== 'Paid').length
 
   const campaignLinks = (campaignId) => links.filter(l => l.campaign_id === campaignId)
   const getCreator = (id) => creators.find(c => c.id === id)
@@ -139,27 +149,44 @@ export default function ReportsView({ dark = true, orgId }) {
   return (
     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: bg, padding: '28px' }}>
 
-      {/* Header + year picker */}
+      {/* Header + year/month pickers */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text }}>Reports</div>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Year</div>
-          {availableYears.map(y => (
-            <button key={y} onClick={() => setYear(y)} style={{
-              padding: '5px 12px', fontSize: '10px', letterSpacing: '0.14em',
-              background: y === year ? '#5b7c99' : 'none',
-              color: y === year ? '#fff' : muted,
-              border: `0.5px solid ${y === year ? '#5b7c99' : border2}`,
-              borderRadius: '1px', cursor: 'pointer'
-            }}>{y}</button>
-          ))}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Year</div>
+            {availableYears.map(y => (
+              <button key={y} onClick={() => setYear(y)} style={{
+                padding: '5px 12px', fontSize: '10px', letterSpacing: '0.14em',
+                background: y === year ? '#5b7c99' : 'none',
+                color: y === year ? '#fff' : muted,
+                border: `0.5px solid ${y === year ? '#5b7c99' : border2}`,
+                borderRadius: '1px', cursor: 'pointer'
+              }}>{y}</button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+            <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Month</div>
+            <select value={month} onChange={e => setMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))} style={{
+              padding: '5px 22px 5px 10px', fontSize: '10px', letterSpacing: '0.14em',
+              background: month !== 'all' ? '#5b7c99' : (dark ? '#141414' : '#fff'),
+              color: month !== 'all' ? '#fff' : muted,
+              border: `0.5px solid ${month !== 'all' ? '#5b7c99' : border2}`,
+              borderRadius: '1px', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+              backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${month !== 'all' ? '%23ffffff' : encodeURIComponent(muted)}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`,
+              backgroundRepeat: 'no-repeat', backgroundPosition: 'right 7px center'
+            }}>
+              <option value='all'>All months</option>
+              {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Status totals — one chip per status */}
+      {/* Status totals — one card per status */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', marginBottom: '20px' }}>
         {STATUSES.map(s => (
-          <div key={s} style={{ padding: '14px 14px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px', borderLeft: `3px solid ${STATUS_COLOR[s]}` }}>
+          <div key={s} style={{ padding: '14px 14px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{statusCounts[s]}</div>
             <div style={{ fontSize: '8px', color: STATUS_COLOR[s], letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>{s}</div>
           </div>
@@ -173,13 +200,15 @@ export default function ReportsView({ dark = true, orgId }) {
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Campaign Activity by Month</div>
             <div style={{ fontSize: '10px', color: muted }}>{year} — by start date, includes archived</div>
           </div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>{yearCampaigns.length} <span style={{ fontSize: '11px', color: muted, letterSpacing: '0.18em', textTransform: 'uppercase', marginLeft: '6px' }}>campaigns</span></div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>{scopedCampaigns.length} <span style={{ fontSize: '11px', color: muted, letterSpacing: '0.18em', textTransform: 'uppercase', marginLeft: '6px' }}>{month === 'all' ? 'campaigns' : MONTHS[month] + ' campaigns'}</span></div>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '180px' }}>
           {monthlyByStatus.map((m, i) => {
             const isCurrent = i === currentMonth && year === currentYear
+            const isSelected = month !== 'all' && i === month
+            const dim = month !== 'all' && !isSelected
             return (
-              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
+              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end', opacity: dim ? 0.3 : 1, transition: 'opacity 0.15s' }}>
                 {m.total > 0 && (
                   <div style={{ fontSize: '10px', color: text, fontWeight: 500 }}>{m.total}</div>
                 )}
@@ -190,7 +219,7 @@ export default function ReportsView({ dark = true, orgId }) {
                     return <div key={s} title={`${s}: ${count}`} style={{ height: ((count / m.total) * 100) + '%', background: STATUS_COLOR[s] }} />
                   })}
                 </div>
-                <div style={{ fontSize: '9px', color: isCurrent ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: isCurrent ? 600 : 400 }}>{m.month}</div>
+                <div style={{ fontSize: '9px', color: isSelected ? '#5b7c99' : (isCurrent ? '#5b7c99' : muted), letterSpacing: '0.06em', fontWeight: isSelected || isCurrent ? 600 : 400 }}>{m.month}</div>
               </div>
             )
           })}
@@ -212,18 +241,20 @@ export default function ReportsView({ dark = true, orgId }) {
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Budget by Month</div>
             <div style={{ fontSize: '10px', color: muted }}>{year} — based on campaign start dates</div>
           </div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>${totalBudgetYear.toLocaleString()}</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>${scopedBudget.toLocaleString()}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '140px' }}>
           {monthlyBudget.map((m, i) => {
             const isCurrent = i === currentMonth && year === currentYear
+            const isSelected = month !== 'all' && i === month
+            const dim = month !== 'all' && !isSelected
             return (
-              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
+              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end', opacity: dim ? 0.3 : 1, transition: 'opacity 0.15s' }}>
                 {m.total > 0 && <div style={{ fontSize: '8px', color: '#5b7c99', fontWeight: 500, whiteSpace: 'nowrap' }}>
                   {'$' + (m.total >= 1000 ? (m.total / 1000).toFixed(0) + 'K' : m.total)}
                 </div>}
-                <div style={{ width: '100%', background: m.total > 0 ? (isCurrent ? '#5b7c99' : (dark ? '#2A3A4A' : '#C4D4E0')) : (dark ? '#1E1E1E' : '#E8E4DE'), borderRadius: '1px 1px 0 0', height: m.total > 0 ? Math.max((m.total / maxBudget) * 90, 6) + 'px' : '3px', transition: 'height 0.3s ease' }} />
-                <div style={{ fontSize: '8px', color: isCurrent ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: isCurrent ? 600 : 400 }}>{m.month}</div>
+                <div style={{ width: '100%', background: m.total > 0 ? (isCurrent || isSelected ? '#5b7c99' : (dark ? '#2A3A4A' : '#C4D4E0')) : (dark ? '#1E1E1E' : '#E8E4DE'), borderRadius: '1px 1px 0 0', height: m.total > 0 ? Math.max((m.total / maxBudget) * 90, 6) + 'px' : '3px', transition: 'height 0.3s ease' }} />
+                <div style={{ fontSize: '8px', color: isSelected || isCurrent ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: isSelected || isCurrent ? 600 : 400 }}>{m.month}</div>
               </div>
             )
           })}
@@ -233,9 +264,9 @@ export default function ReportsView({ dark = true, orgId }) {
       {/* Payments + Talent summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px', marginBottom: '8px' }}>
         <div style={{ padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{paidThisYear} <span style={{ fontSize: '12px', color: muted }}>paid</span></div>
-          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Payments — {year}</div>
-          <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{pendingThisYear} pending</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{paidScoped} <span style={{ fontSize: '12px', color: muted }}>paid</span></div>
+          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Payments — {month === 'all' ? year : `${MONTHS[month]} ${year}`}</div>
+          <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{pendingScoped} pending</div>
         </div>
         <div style={{ padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{creators.length}</div>
@@ -243,10 +274,10 @@ export default function ReportsView({ dark = true, orgId }) {
         </div>
       </div>
 
-      {section(`Campaign Breakdown — ${year}`)}
+      {section(`Campaign Breakdown — ${month === 'all' ? year : `${MONTHS[month]} ${year}`}`)}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
-        {yearCampaigns.map(c => {
+        {scopedCampaigns.map(c => {
           const campLinks = campaignLinks(c.id)
           const paid = campLinks.filter(l => l.payment_status === 'Paid').length
           const pending = campLinks.filter(l => l.payment_status !== 'Paid').length
@@ -337,10 +368,10 @@ export default function ReportsView({ dark = true, orgId }) {
         })}
       </div>
 
-      {yearCampaigns.length === 0 && (
+      {scopedCampaigns.length === 0 && (
         <div style={{ padding: '80px 0', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No campaigns in {year}</div>
-          <div style={{ fontSize: '12px', color: muted }}>Switch years above or create a new campaign</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No campaigns in {month === 'all' ? year : `${MONTHS[month]} ${year}`}</div>
+          <div style={{ fontSize: '12px', color: muted }}>Try a different month or year, or create a new campaign</div>
         </div>
       )}
 
