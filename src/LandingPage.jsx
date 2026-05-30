@@ -634,9 +634,9 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                   }}
                 >
                   {plan.highlight && <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>}
-                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '10px' }}>{plan.name}</div>
+                  <div style={{ fontSize: '13px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '10px' }}>{plan.name}</div>
                   {plan.description && (
-                    <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.5, marginBottom: '20px', minHeight: mobile ? 0 : '54px' }}>{plan.description}</div>
+                    <div style={{ fontSize: '15px', color: '#DCDCDC', lineHeight: 1.5, marginBottom: '20px', minHeight: mobile ? 0 : '54px' }}>{plan.description}</div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '28px' }}>
                     <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '40px', color: '#F0ECE6' }}>{plan.price}</span>
@@ -646,7 +646,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                     {plan.features.map(f => (
                       <div key={f} style={{ display: 'flex', gap: '10px', marginBottom: '12px', alignItems: 'flex-start' }}>
                         <span style={{ color: '#5b7c99', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                        <span style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.5 }}>{f}</span>
+                        <span style={{ fontSize: '15px', color: '#DCDCDC', lineHeight: 1.5 }}>{f}</span>
                       </div>
                     ))}
                   </div>
