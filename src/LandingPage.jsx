@@ -614,11 +614,15 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           {PLANS.map((plan, i) => {
             const isHovered = hoveredPlan === plan.name
             return (
-              <div key={plan.name} data-reveal style={{ '--reveal-delay': `${i * 100}ms` }}>
+              <div key={plan.name} data-reveal style={{ '--reveal-delay': `${i * 100}ms`, display: 'flex' }}>
                 <div
                   onMouseEnter={() => setHoveredPlan(plan.name)}
                   onMouseLeave={() => setHoveredPlan(null)}
                   style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box',
                     background: plan.highlight ? '#1A2024' : '#141414',
                     border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#333' : '#222')}`,
                     borderRadius: '3px',
@@ -650,6 +654,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
                     href={`/signup?plan=${plan.slug}`}
                     style={{
                       width: '100%', padding: '12px', boxSizing: 'border-box',
+                      marginTop: 'auto',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                       fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
                       background: plan.highlight ? '#5b7c99' : 'transparent',

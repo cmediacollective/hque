@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Marketing pricing cards now align.** The three pricing cards on the homepage now stretch to the same height and all three "Get started" buttons sit on the same baseline at the bottom — previously the Business tier sat lower because it has an extra feature. The features list keeps its natural position under the price; the extra space sits between the features and the button.
+
 **Marketing homepage: lighter body copy.** Bumped all paragraph and descriptive body text across the marketing homepage to #DCDCDC for better readability against the dark background. Hero subhead, persona descriptions, feature bodies, pricing tier descriptions and feature lists, FAQ answers, trust lines, and footer taglines are all included. Headings, eyebrow labels, buttons, nav links, and pill tags are unchanged.
 
 **Marketing homepage refresh — copy + structure.** A focused pass across the marketing page to widen the audience message (agencies, brands, *and* entrepreneurs) and tighten the hierarchy:
