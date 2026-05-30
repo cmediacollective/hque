@@ -169,7 +169,7 @@ export default function ReportsView({ dark = true, orgId }) {
             <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Month</div>
             <select value={month} onChange={e => setMonth(e.target.value === 'all' ? 'all' : Number(e.target.value))} style={{
               padding: '5px 22px 5px 10px', fontSize: '10px', letterSpacing: '0.14em',
-              background: month !== 'all' ? '#5b7c99' : (dark ? '#141414' : '#fff'),
+              backgroundColor: month !== 'all' ? '#5b7c99' : (dark ? '#141414' : '#fff'),
               color: month !== 'all' ? '#fff' : muted,
               border: `0.5px solid ${month !== 'all' ? '#5b7c99' : border2}`,
               borderRadius: '1px', cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
