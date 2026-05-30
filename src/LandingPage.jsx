@@ -714,7 +714,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: mobile ? '40px 24px' : '60px 48px 40px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: mobile ? '32px' : '48px', marginBottom: '48px' }}>
           <div>
-            <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
+            <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
             <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
               <a href="https://instagram.com/theofficialHQue" target="_blank" rel="noreferrer" style={{ color: '#BBB' }}>
