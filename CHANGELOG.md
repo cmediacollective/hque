@@ -6,6 +6,13 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Chat widget rebuilt as a topic-based flow.** The homepage chatbot no longer takes free-text input. Instead:
+- First open shows a required email capture ("Before we dive in —" / "Drop your email and we'll send you helpful resources, tips, and updates from HQue."). Email is validated for format and then submitted to Mailchimp via the existing function. "No spam. Unsubscribe anytime." sits under the button.
+- After submitting, the user sees a greeting and eight tappable topic buttons: What is HQue?, Who is it for?, How does pricing work?, Is there a free trial?, What types of talent can I manage?, How is this different from a spreadsheet or CRM?, Can my whole team use it?, Talk to support.
+- Each topic opens a curated answer with relevant CTA buttons at the bottom (Start Free Trial → /signup, See Pricing → /#pricing, or Email Support → mailto:support@h-que.com). A "← Back" link returns to the topic list.
+- Header keeps the "HQue Assistant" label and now shows a green "● Online" indicator.
+- The previous LLM-backed free-text chat is no longer reachable from the UI; the underlying chat function is left in place for now.
+
 **Closing CTA "READY?" eyebrow now visible.** The "READY?" label above the "Your team deserves a better tool." headline was getting hidden by the section's gradient overlay (an absolutely-positioned background that, per CSS paint order, was rendering on top of the eyebrow). The eyebrow, headline, and button now sit explicitly above the overlay so the eyebrow renders in the same small-caps blue style as every other section label on the page.
 
 **Footer bottom tagline no longer clips.** "Made for people who work with talent." in the bottom right of the footer was getting cut off at narrower desktop widths. It's now set to never wrap mid-line and never shrink — if there isn't room next to the copyright, it drops cleanly to the next line instead.
