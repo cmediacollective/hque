@@ -26,7 +26,7 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
 
         {isMobile ? (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <button onClick={onGetStarted} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5C9E52', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
+            <button onClick={onGetStarted} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
             <button onClick={() => setMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span style={{ display: 'block', width: '20px', height: '1px', background: '#888', transition: 'all 0.2s', transform: menuOpen ? 'rotate(45deg) translate(3px, 3px)' : 'none' }} />
               <span style={{ display: 'block', width: '20px', height: '1px', background: '#888', transition: 'all 0.2s', opacity: menuOpen ? 0 : 1 }} />
@@ -39,7 +39,7 @@ export default function MarketingNav({ onSignIn, onGetStarted }) {
               <a key={l.label} href={l.href} style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#fff', textDecoration: 'none' }}>{l.label}</a>
             ))}
             {onSignIn && <button onClick={onSignIn} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #555', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Sign in</button>}
-            <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5C9E52', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
+            <button onClick={onGetStarted} style={{ padding: '8px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Start free</button>
           </div>
         )}
       </nav>

@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Green removed; blog grid now uniform 3 columns.** Two fixes:
+- Reverted the "Start free" nav button across the site back to the steel-blue #5b7c99 used by the homepage hero CTA. Replaced the active filter pill on the blog page's green fill with a clean white-on-dark inversion (cream fill #F0ECE6 with dark text #0E0E0E) so it reads as "selected" without introducing a new color.
+- Unified the post grid below the featured hero into a single 3-column layout — same gutter, same image height, same card height (cards stretch in their grid cells). The previous mixed layout (3-col row + asymmetric 5fr/8fr row + 4-col bottom row) is gone, and the orphan card that used to sit alone on the last row is now centered with a clean 1-up or 2-up flex row when the post count doesn't divide evenly into 3. The mid-page CTA banner stays where it was, between cards 6 and 7.
+
 **The Pitch blog index — readability + simpler hover + green nav CTA.** Five focused changes:
 - Removed the "X min read" text from every post card (hero and small cards). Each card now shows just the category and the date.
 - Bumped the category label on all cards (hero, 3-col, 4-col) up to a more readable 11px so it's not microscopic. Letter-spacing and caps treatment unchanged. Dates nudged up slightly to stay in proportion.

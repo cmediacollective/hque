@@ -14,7 +14,9 @@ function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt
       onMouseLeave={() => setHovered(false)}
       style={{
         textDecoration: 'none',
-        display: 'block',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
         transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
         transition: 'transform 0.2s ease',
       }}
@@ -25,6 +27,9 @@ function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt
           overflow: 'hidden',
           borderRadius: '4px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
         }}
       >
         {/* Image */}
@@ -120,10 +125,11 @@ export default function BlogPage({ onGetStarted }) {
   const filteredPosts = activeCategory === 'All' ? POSTS : POSTS.filter(p => p.category === activeCategory)
 
   const hero = filteredPosts[0]
-  const col1 = filteredPosts.slice(1, 4)
-  const portrait = filteredPosts[4]
-  const wide = filteredPosts[5]
-  const bottom = filteredPosts.slice(6)
+  const afterHero = filteredPosts.slice(1)
+  // First two rows of three (cards 1–6 after the hero) sit above the CTA banner.
+  const beforeCta = afterHero.slice(0, 6)
+  // Remaining cards land below the CTA banner.
+  const afterCta = afterHero.slice(6)
 
   const [newsletterEmail, setNewsletterEmail] = useState('')
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false)
@@ -167,9 +173,9 @@ export default function BlogPage({ onGetStarted }) {
                   fontSize: '9px',
                   letterSpacing: '0.22em',
                   textTransform: 'uppercase',
-                  background: active ? '#5C9E52' : 'transparent',
-                  color: active ? '#fff' : '#aaa',
-                  border: `0.5px solid ${active ? '#5C9E52' : '#2A2A2A'}`,
+                  background: active ? '#F0ECE6' : 'transparent',
+                  color: active ? '#0E0E0E' : '#aaa',
+                  border: `0.5px solid ${active ? '#F0ECE6' : '#2A2A2A'}`,
                   borderRadius: '3px',
                   cursor: 'pointer',
                   fontFamily: 'inherit',
@@ -190,21 +196,14 @@ export default function BlogPage({ onGetStarted }) {
 
         {hero && <HeroSpotlight post={hero} />}
 
-        {col1.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px' }}>
-            {col1.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
-          </div>
-        )}
-
-        {(portrait || wide) && (
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '5fr 8fr', gap: '14px', marginBottom: '14px' }}>
-            {portrait && <SpotlightCard post={portrait} height="300px" titleSize="18px" showExcerpt />}
-            {wide && <SpotlightCard post={wide} height="240px" titleSize="24px" showExcerpt wide />}
+        {beforeCta.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px', alignItems: 'stretch' }}>
+            {beforeCta.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
           </div>
         )}
 
         {/* Mid-page CTA banner (between 6th and 7th post cards) */}
-        {bottom.length > 0 && (
+        {afterCta.length > 0 && (
           <div style={{ background: '#141414', border: '0.5px solid #1F1F1F', borderRadius: '6px', padding: isMobile ? '32px 24px' : '48px 56px', margin: '14px 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -223,16 +222,43 @@ export default function BlogPage({ onGetStarted }) {
           </div>
         )}
 
-        {bottom.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '14px' }}>
-            {bottom.map(post => <SpotlightCard key={post.slug} post={post} height="170px" titleSize="13px" showExcerpt />)}
-          </div>
-        )}
+        {afterCta.length > 0 && (() => {
+          const remainder = afterCta.length % 3
+          const fullCount = remainder === 0 ? afterCta.length : afterCta.length - remainder
+          const fullRows = afterCta.slice(0, fullCount)
+          const orphans = afterCta.slice(fullCount)
+          // On desktop a 3-col grid cell with 14px gap = (100% - 28px) / 3
+          const cardWidth = 'calc((100% - 28px) / 3)'
+          return (
+            <>
+              {fullRows.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: orphans.length ? '14px' : 0, alignItems: 'stretch' }}>
+                  {fullRows.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
+                </div>
+              )}
+              {orphans.length > 0 && (
+                isMobile ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '14px' }}>
+                    {orphans.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', alignItems: 'stretch' }}>
+                    {orphans.map(post => (
+                      <div key={post.slug} style={{ width: cardWidth, display: 'flex' }}>
+                        <SpotlightCard post={post} height="200px" titleSize="16px" showExcerpt />
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </>
+          )
+        })()}
       </div>
 
       {/* Newsletter capture strip */}
       <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '60px 24px' : '80px 48px', background: '#0E0E0E', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(92,158,82,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>The Pitch · In your inbox</div>
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '40px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
