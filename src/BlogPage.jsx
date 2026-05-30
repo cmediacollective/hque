@@ -79,9 +79,14 @@ function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt
 
         {/* Content */}
         <div style={{ padding: wide ? '24px 28px' : '16px 18px', position: 'relative', zIndex: 4 }}>
-          <div style={{ fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: brightness > 0.3 ? '#5b7c99' : '#333', marginBottom: '8px', transition: 'color 0.12s ease' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.18em', textTransform: 'uppercase', color: brightness > 0.3 ? '#5b7c99' : '#333', marginBottom: '4px', transition: 'color 0.12s ease' }}>
             {post.category} · {post.readTime}
           </div>
+          {post.date && (
+            <div style={{ fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: brightness > 0.3 ? '#777' : '#2A2A2A', marginBottom: '8px', transition: 'color 0.12s ease' }}>
+              {post.date}
+            </div>
+          )}
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: titleSize, color: brightness > 0.2 ? (hovered ? '#fff' : '#F0ECE6') : '#2A2A2A', lineHeight: 1.25, transition: 'color 0.12s ease' }}>
             {post.title}
           </div>
@@ -168,7 +173,8 @@ function HeroSpotlight({ post }) {
         <div style={{ position: 'absolute', inset: 0, zIndex: 3, border: '1px solid rgba(91,124,153,' + (brightness * 0.4) + ')', borderRadius: '4px', pointerEvents: 'none', transition: 'border-color 0.08s ease' }} />
 
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: isMobile ? '28px' : '56px', zIndex: 4 }}>
-          <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '18px' }}>{post.category} · {post.readTime}</div>
+          <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px' }}>{post.category} · {post.readTime}</div>
+          {post.date && <div style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', marginBottom: '18px' }}>{post.date}</div>}
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '26px' : '42px', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px', maxWidth: '680px' }}>{post.title}</div>
           <div style={{ fontSize: '14px', color: '#888', maxWidth: '520px', lineHeight: 1.75 }}>{post.excerpt}</div>
           <div style={{ marginTop: '20px', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', opacity: hovered ? 1 : 0, transition: 'opacity 0.3s ease' }}>Read article →</div>
@@ -180,16 +186,38 @@ function HeroSpotlight({ post }) {
 
 export default function BlogPage({ onGetStarted }) {
   useSEO({
-    title: 'The Pitch — Strategy & Operations for Talent Agencies',
-    description: "Insights on talent management, brand partnerships, and agency operations for the agencies building what's next in the creator economy.",
+    title: 'The Pitch — Strategy, Operations & Playbooks for Agencies, Brands & Entrepreneurs',
+    description: "Playbooks, strategies, and operations for agencies, brand teams, and entrepreneurs who work with talent.",
     canonical: 'https://h-que.com/blog',
   })
   const isMobile = window.innerWidth < 768
-  const hero = POSTS[0]
-  const col1 = POSTS.slice(1, 4)
-  const portrait = POSTS[4]
-  const wide = POSTS[5]
-  const bottom = POSTS.slice(6)
+
+  const CATEGORIES = ['All', 'Agency Operations', 'Campaign Management', 'Talent Strategy', 'Brand Partnerships', 'Industry']
+  const [activeCategory, setActiveCategory] = useState('All')
+  const filteredPosts = activeCategory === 'All' ? POSTS : POSTS.filter(p => p.category === activeCategory)
+
+  const hero = filteredPosts[0]
+  const col1 = filteredPosts.slice(1, 4)
+  const portrait = filteredPosts[4]
+  const wide = filteredPosts[5]
+  const bottom = filteredPosts.slice(6)
+
+  const [newsletterEmail, setNewsletterEmail] = useState('')
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false)
+  const [newsletterError, setNewsletterError] = useState('')
+  const isValidEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e || '').trim())
+
+  function subscribeNewsletter() {
+    if (!isValidEmail(newsletterEmail)) { setNewsletterError('Please enter a valid email address'); return }
+    setNewsletterError('')
+    const trimmed = newsletterEmail.trim()
+    setNewsletterSubscribed(true)
+    fetch('https://script.google.com/macros/s/AKfycbyvyIlOEgMAP_UOT4O07lUzQpB6MPJ5pipONT7Fem1IynGiDolHRfTQMQxWDtfIDk7e/exec', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ email: trimmed, firstName: 'Blog Subscriber' })
+    }).catch(() => {})
+  }
 
   useEffect(() => {
     function onMove(e) { mouse.x = e.clientX; mouse.y = e.clientY }
@@ -206,31 +234,128 @@ export default function BlogPage({ onGetStarted }) {
           <div style={{ fontSize: '9px', letterSpacing: '0.36em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>The Pitch</div>
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '44px' : '72px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 0.95 }}>Every deal<br />starts somewhere.</div>
         </div>
-        <div style={{ fontSize: '13px', color: '#888', maxWidth: '220px', lineHeight: 1.9, paddingBottom: '10px' }}>Strategy and operations for agencies and brands building what's next.</div>
+        <div style={{ fontSize: '13px', color: '#888', maxWidth: '280px', lineHeight: 1.9, paddingBottom: '10px' }}>Playbooks, strategies, and operations for agencies, brand teams, and entrepreneurs who work with talent.</div>
+      </div>
+
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '0 24px 24px' : '0 48px 28px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {CATEGORIES.map(cat => {
+            const active = activeCategory === cat
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                style={{
+                  padding: '7px 14px',
+                  fontSize: '9px',
+                  letterSpacing: '0.22em',
+                  textTransform: 'uppercase',
+                  background: active ? '#5C9E52' : 'transparent',
+                  color: active ? '#fff' : '#aaa',
+                  border: `0.5px solid ${active ? '#5C9E52' : '#2A2A2A'}`,
+                  borderRadius: '3px',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+                }}
+              >
+                {cat}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '0 24px 80px' : '0 48px 100px' }}>
+        {filteredPosts.length === 0 && (
+          <div style={{ padding: '80px 0', textAlign: 'center', color: '#666', fontSize: '13px' }}>No posts in {activeCategory} yet. Try another category.</div>
+        )}
+
         {hero && <HeroSpotlight post={hero} />}
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px' }}>
-          {col1.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
-        </div>
+        {col1.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '14px', marginBottom: '14px' }}>
+            {col1.map(post => <SpotlightCard key={post.slug} post={post} height="200px" titleSize="16px" showExcerpt />)}
+          </div>
+        )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '5fr 8fr', gap: '14px', marginBottom: '14px' }}>
-          {portrait && <SpotlightCard post={portrait} height="300px" titleSize="18px" />}
-          {wide && <SpotlightCard post={wide} height="240px" titleSize="24px" showExcerpt wide />}
-        </div>
+        {(portrait || wide) && (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '5fr 8fr', gap: '14px', marginBottom: '14px' }}>
+            {portrait && <SpotlightCard post={portrait} height="300px" titleSize="18px" showExcerpt />}
+            {wide && <SpotlightCard post={wide} height="240px" titleSize="24px" showExcerpt wide />}
+          </div>
+        )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '14px' }}>
-          {bottom.map(post => <SpotlightCard key={post.slug} post={post} height="170px" titleSize="13px" />)}
+        {/* Mid-page CTA banner (between 6th and 7th post cards) */}
+        {bottom.length > 0 && (
+          <div style={{ background: '#141414', border: '0.5px solid #1F1F1F', borderRadius: '6px', padding: isMobile ? '32px 24px' : '48px 56px', margin: '14px 0', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>Ready to run it?</div>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '24px' : '32px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.25, maxWidth: '720px', marginLeft: 'auto', marginRight: 'auto', letterSpacing: '-0.01em' }}>
+                Everything in The Pitch works better when you have the right tool behind it.
+              </div>
+              <div style={{ fontSize: '14px', color: '#DCDCDC', lineHeight: 1.7, marginBottom: '24px', maxWidth: '560px', marginLeft: 'auto', marginRight: 'auto' }}>
+                HQue is the CRM and workspace built for agencies, brands, and entrepreneurs who work with talent.
+              </div>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px', alignItems: 'center', justifyContent: 'center' }}>
+                <a href="/signup" style={{ padding: '13px 32px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', color: '#fff', textDecoration: 'none', borderRadius: '2px' }}>Start Free Trial →</a>
+                <a href="/#pricing" style={{ padding: '13px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#aaa', textDecoration: 'none' }}>See Pricing</a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {bottom.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '14px' }}>
+            {bottom.map(post => <SpotlightCard key={post.slug} post={post} height="170px" titleSize="13px" showExcerpt />)}
+          </div>
+        )}
+      </div>
+
+      {/* Newsletter capture strip */}
+      <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '60px 24px' : '80px 48px', background: '#0E0E0E', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(92,158,82,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>The Pitch · In your inbox</div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '40px', color: '#F0ECE6', marginBottom: '14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+            No filler. <span style={{ fontStyle: 'italic', color: '#5b7c99' }}>Just playbooks.</span>
+          </div>
+          <div style={{ fontSize: '14px', color: '#DCDCDC', lineHeight: 1.7, marginBottom: '28px', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+            Get strategy, operations, and real talk for agencies, brands, and entrepreneurs who work with talent. Drop your email — we'll do the rest.
+          </div>
+          {newsletterSubscribed ? (
+            <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '18px', color: '#5C9E52', padding: '20px 0' }}>You're in. We'll be in touch.</div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '8px', maxWidth: '460px', margin: '0 auto' }}>
+                <input
+                  value={newsletterEmail}
+                  onChange={e => { setNewsletterEmail(e.target.value); if (newsletterError) setNewsletterError('') }}
+                  onKeyDown={e => e.key === 'Enter' && subscribeNewsletter()}
+                  placeholder='your@email.com'
+                  type='email'
+                  style={{ flex: 1, background: '#141414', border: `0.5px solid ${newsletterError ? '#c0392b' : '#2A2A2A'}`, borderRadius: '3px', padding: '12px 16px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                />
+                <button
+                  onClick={subscribeNewsletter}
+                  style={{ padding: '12px 24px', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '3px', whiteSpace: 'nowrap' }}
+                >
+                  Subscribe →
+                </button>
+              </div>
+              {newsletterError && <div style={{ fontSize: '11px', color: '#c0392b', marginTop: '10px' }}>{newsletterError}</div>}
+              <div style={{ fontSize: '10px', color: '#777', marginTop: '14px' }}>No spam. Unsubscribe anytime.</div>
+            </>
+          )}
         </div>
       </div>
 
       <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px' : '60px 48px 40px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? '32px' : '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
           <div>
-            <img src="/logo.svg" alt="HQue" style={{ width: '100px', opacity: 0.5, marginBottom: '16px', display: 'block' }} />
-            <div style={{ fontSize: '12px', color: '#777', lineHeight: 1.7, maxWidth: '240px' }}>The operating system for agencies and brands built on talent partnerships.</div>
+            <img src="/logo.svg" alt="HQue" style={{ width: '100px', marginBottom: '16px', display: 'block' }} />
+            <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
           </div>
           <div>
             <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
@@ -254,8 +379,8 @@ export default function BlogPage({ onGetStarted }) {
           </div>
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#666' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#555' }}>Made for agencies that move fast.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', whiteSpace: 'nowrap' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic', whiteSpace: 'nowrap', flexShrink: 0, marginRight: '60px' }}>Made for people who work with talent.</span>
         </div>
       </footer>
       <HQueChat />

@@ -199,7 +199,7 @@ They've also invested in the operational infrastructure to support their model. 
     category: 'Talent Strategy',
     readTime: '7 min read',
     date: 'March 30, 2026',
-    excerpt: "The roster is the product. Here's how smart agencies build one that actually converts.",
+    excerpt: "Whether you're starting from zero or starting over — here's the framework top agencies use to build a roster that actually books.",
     image: 'https://images.unsplash.com/photo-1624290002702-85f5db31e580?q=80&w=2070&auto=format&fit=crop',
     body: `The roster is the product. Everything else — the pitches, the campaigns, the brand relationships — runs downstream from who you represent.
 
@@ -300,7 +300,7 @@ The best talent management software feels like it was built by someone who ran a
     category: 'Industry',
     readTime: '8 min read',
     date: 'March 24, 2026',
-    excerpt: "The creator economy is maturing. The agencies that understand what's shifting will be the ones that lead.",
+    excerpt: "The landscape has shifted. Here's where the opportunity is, where the risk is, and what the best agencies are doing differently.",
     image: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=2532&auto=format&fit=crop',
     body: `The creator economy isn't new anymore. That's the most important thing to understand about where we are in 2026.
 

@@ -6,6 +6,15 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**The Pitch blog index — refreshed copy, category filters, CTA, newsletter.** A focused pass on /blog:
+- Updated browser tab + SEO title to "The Pitch — Strategy, Operations & Playbooks for Agencies, Brands & Entrepreneurs | HQue" and the subhead next to the page title to the new agency/brand/entrepreneur language.
+- Rewrote the excerpts on "How to Build a Creator Roster From Scratch" and "The State of Creator Marketing in 2026" and enabled excerpt display on the portrait card and the bottom-row cards so the new subheadlines actually show on the page.
+- Added a row of category filter pills (All, Agency Operations, Campaign Management, Talent Strategy, Brand Partnerships, Industry) just under the page hero. Active pill is filled green; inactive pills are outlined. Filtering is instant and client-side.
+- Added a publish date row under the category line on each card (and on the hero featured post), formatted as the existing data ("Month DD, YYYY").
+- Inserted a "READY TO RUN IT?" CTA banner between the portrait/wide row and the bottom row of small cards, with Start Free Trial → /signup and See Pricing → /#pricing.
+- Added a "THE PITCH · IN YOUR INBOX" newsletter capture strip above the footer. Submit POSTs the email + a "Blog Subscriber" first-name tag to the Google Sheets endpoint (text/plain, fire-and-forget). On submit the form replaces with "You're in. We'll be in touch."
+- Footer tagline updated to "The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.", bottom line changed to italic "Made for people who work with talent.", and the footer logo no longer has a 50% opacity wash.
+
 **Chat widget: first name added back to email capture.** The chatbot's email gate now asks for a first name in addition to the email. The first name is optional (only email is validated/required); both fields are submitted to the Google Sheet so future Klaviyo or other tooling has names to work with. First name is also saved locally for any future personalization needs.
 
 **Chat widget: emails now go to Google Sheets, and the gate is reliable.** Two fixes:
