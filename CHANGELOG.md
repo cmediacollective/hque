@@ -6,6 +6,13 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**The Pitch blog index — readability + simpler hover + green nav CTA.** Five focused changes:
+- Removed the "X min read" text from every post card (hero and small cards). Each card now shows just the category and the date.
+- Bumped the category label on all cards (hero, 3-col, 4-col) up to a more readable 11px so it's not microscopic. Letter-spacing and caps treatment unchanged. Dates nudged up slightly to stay in proportion.
+- Body/excerpt text on every post card switched from gray (#888) to #DCDCDC so the descriptions read cleanly against the dark cards. Headings, category labels, and date colors unchanged.
+- Replaced the cursor-tracking spotlight hover effect on the cards (image opacity changes, scale, glow, fade-in "Read article →") with a simple `translateY(-4px)` lift on hover. "Read article →" is now permanently visible on every card. Same treatment applied to the featured hero card.
+- "Start free" nav button across the marketing site (homepage, blog, etc.) is now green (#5C9E52) to match the active filter pill on the blog page.
+
 **The Pitch blog index — refreshed copy, category filters, CTA, newsletter.** A focused pass on /blog:
 - Updated browser tab + SEO title to "The Pitch — Strategy, Operations & Playbooks for Agencies, Brands & Entrepreneurs | HQue" and the subhead next to the page title to the new agency/brand/entrepreneur language.
 - Rewrote the excerpts on "How to Build a Creator Roster From Scratch" and "The State of Creator Marketing in 2026" and enabled excerpt display on the portrait card and the bottom-row cards so the new subheadlines actually show on the page.
