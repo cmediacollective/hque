@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Chat widget: first name added back to email capture.** The chatbot's email gate now asks for a first name in addition to the email. The first name is optional (only email is validated/required); both fields are submitted to the Google Sheet so future Klaviyo or other tooling has names to work with. First name is also saved locally for any future personalization needs.
+
 **Chat widget: emails now go to Google Sheets, and the gate is reliable.** Two fixes:
 - On submit, the email is POSTed to a Google Apps Script endpoint that appends to a Google Sheet (Content-Type: text/plain to avoid CORS preflight). It's fire-and-forget — the user immediately transitions to the topic list whether the request succeeds or fails. This replaces the previous Mailchimp call.
 - The "have they already submitted email?" check is now driven by a dedicated `hque_chat_email_submitted` localStorage flag, set only when the form is actually submitted. Stale data from older chat sessions (which used different keys) no longer accidentally lets visitors skip the gate.

@@ -131,6 +131,7 @@ export default function HQueChat() {
   const [open, setOpen] = useState(false)
   const hasSubmittedEmail = typeof window !== 'undefined' && localStorage.getItem('hque_chat_email_submitted') === 'true'
   const [step, setStep] = useState(hasSubmittedEmail ? 'topics' : 'email')
+  const [firstName, setFirstName] = useState('')
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -141,13 +142,17 @@ export default function HQueChat() {
     if (!isValidEmail(email)) { setEmailError('Please enter a valid email address'); return }
     setSubmitting(true); setEmailError('')
 
+    const trimmedEmail = email.trim()
+    const trimmedFirstName = firstName.trim()
+
     localStorage.setItem('hque_chat_email_submitted', 'true')
-    localStorage.setItem('hque_chat_email', email.trim())
+    localStorage.setItem('hque_chat_email', trimmedEmail)
+    if (trimmedFirstName) localStorage.setItem('hque_chat_first_name', trimmedFirstName)
 
     fetch(GOOGLE_SHEETS_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ email: email.trim(), firstName: '' })
+      body: JSON.stringify({ email: trimmedEmail, firstName: trimmedFirstName })
     }).catch(() => {})
 
     setSubmitting(false)
@@ -190,6 +195,13 @@ export default function HQueChat() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '24px', overflowY: 'auto' }}>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: '#F0ECE6', marginBottom: '8px' }}>Before we dive in —</div>
               <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.6, marginBottom: '20px' }}>Drop your email and we'll send you helpful resources, tips, and updates from HQue.</div>
+              <input
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && submitEmail()}
+                placeholder='First name'
+                style={{ width: '100%', background: '#111', border: '0.5px solid #2A2A2A', borderRadius: '4px', padding: '11px 14px', fontSize: '13px', color: '#F0ECE6', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+              />
               <input
                 value={email}
                 onChange={e => { setEmail(e.target.value); if (emailError) setEmailError('') }}
