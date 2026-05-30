@@ -321,7 +321,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                     onClick={e => { e.stopPropagation(); setSelected(c) }}
                     onMouseEnter={() => setHovering(c.id)}
                     onMouseLeave={() => setHovering(null)}
-                    style={{ padding: '10px 4px', borderTop: idx === 0 ? 'none' : `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}>
+                    style={{ padding: '10px 4px', borderTop: idx === 0 ? 'none' : `0.5px solid ${border}`, cursor: 'pointer' }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text, lineHeight: 1.3, textDecoration: c.archived ? 'line-through' : 'none', opacity: c.archived ? 0.6 : 1 }}>{c.name}</div>
