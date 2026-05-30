@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Closing CTA "READY?" eyebrow now visible.** The "READY?" label above the "Your team deserves a better tool." headline was getting hidden by the section's gradient overlay (an absolutely-positioned background that, per CSS paint order, was rendering on top of the eyebrow). The eyebrow, headline, and button now sit explicitly above the overlay so the eyebrow renders in the same small-caps blue style as every other section label on the page.
+
+**Footer bottom tagline no longer clips.** "Made for people who work with talent." in the bottom right of the footer was getting cut off at narrower desktop widths. It's now set to never wrap mid-line and never shrink — if there isn't room next to the copyright, it drops cleanly to the next line instead.
+
 **Marketing pricing cards now align.** The three pricing cards on the homepage now stretch to the same height and all three "Get started" buttons sit on the same baseline at the bottom — previously the Business tier sat lower because it has an extra feature. The features list keeps its natural position under the price; the extra space sits between the features and the button.
 
 **Marketing homepage: lighter body copy.** Bumped all paragraph and descriptive body text across the marketing homepage to #DCDCDC for better readability against the dark background. Hero subhead, persona descriptions, feature bodies, pricing tier descriptions and feature lists, FAQ answers, trust lines, and footer taglines are all included. Headings, eyebrow labels, buttons, nav links, and pill tags are unchanged.

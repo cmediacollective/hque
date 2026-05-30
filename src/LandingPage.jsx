@@ -701,11 +701,11 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       {/* CTA */}
       <section style={{ padding: mobile ? '60px 24px 80px' : '80px 48px 120px', textAlign: 'center', position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 50%, rgba(91,124,153,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div data-reveal style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
-        <div data-reveal style={{ fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '32px' : 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em', '--reveal-delay': '120ms' }}>
+        <div data-reveal style={{ position: 'relative', zIndex: 1, fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '24px' }}>Ready?</div>
+        <div data-reveal style={{ position: 'relative', zIndex: 1, fontFamily: "'Fraunces', Georgia, serif", fontVariationSettings: '"opsz" 144, "SOFT" 100', fontSize: mobile ? '32px' : 'clamp(32px, 5vw, 60px)', color: '#F0ECE6', marginBottom: '32px', fontWeight: 'normal', lineHeight: 1.2, letterSpacing: '-0.02em', '--reveal-delay': '120ms' }}>
           Your team deserves<br /><span style={{ fontStyle: 'italic', color: '#5b7c99' }}>a better tool.</span>
         </div>
-        <button onClick={onGetStarted} style={{ padding: '16px 48px', fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+        <button onClick={onGetStarted} style={{ position: 'relative', zIndex: 1, padding: '16px 48px', fontSize: '10px', letterSpacing: '0.24em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
           Start your free trial
         </button>
       </section>
@@ -751,8 +751,8 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
         </div>
         <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <span style={{ fontSize: '10px', color: '#DCDCDC' }}>© 2026 HQue. All rights reserved.</span>
-          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic' }}>Made for people who work with talent.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', whiteSpace: 'nowrap' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic', whiteSpace: 'nowrap', flexShrink: 0 }}>Made for people who work with talent.</span>
         </div>
       </footer>
     <HQueChat />
