@@ -125,27 +125,31 @@ function CtaRow({ ctas }) {
   )
 }
 
+const GOOGLE_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyvyIlOEgMAP_UOT4O07lUzQpB6MPJ5pipONT7Fem1IynGiDolHRfTQMQxWDtfIDk7e/exec'
+
 export default function HQueChat() {
   const [open, setOpen] = useState(false)
-  const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('hque_chat_email') : ''
-  const [step, setStep] = useState(savedEmail ? 'topics' : 'email')
+  const hasSubmittedEmail = typeof window !== 'undefined' && localStorage.getItem('hque_chat_email_submitted') === 'true'
+  const [step, setStep] = useState(hasSubmittedEmail ? 'topics' : 'email')
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [activeTopicId, setActiveTopicId] = useState(null)
 
-  async function submitEmail() {
+  function submitEmail() {
     if (submitting) return
     if (!isValidEmail(email)) { setEmailError('Please enter a valid email address'); return }
     setSubmitting(true); setEmailError('')
-    try {
-      await fetch('/.netlify/functions/subscribe-mailchimp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
-      })
-    } catch {}
+
+    localStorage.setItem('hque_chat_email_submitted', 'true')
     localStorage.setItem('hque_chat_email', email.trim())
+
+    fetch(GOOGLE_SHEETS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ email: email.trim(), firstName: '' })
+    }).catch(() => {})
+
     setSubmitting(false)
     setStep('topics')
   }

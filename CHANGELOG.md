@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Chat widget: emails now go to Google Sheets, and the gate is reliable.** Two fixes:
+- On submit, the email is POSTed to a Google Apps Script endpoint that appends to a Google Sheet (Content-Type: text/plain to avoid CORS preflight). It's fire-and-forget — the user immediately transitions to the topic list whether the request succeeds or fails. This replaces the previous Mailchimp call.
+- The "have they already submitted email?" check is now driven by a dedicated `hque_chat_email_submitted` localStorage flag, set only when the form is actually submitted. Stale data from older chat sessions (which used different keys) no longer accidentally lets visitors skip the gate.
+
 **Chat widget rebuilt as a topic-based flow.** The homepage chatbot no longer takes free-text input. Instead:
 - First open shows a required email capture ("Before we dive in —" / "Drop your email and we'll send you helpful resources, tips, and updates from HQue."). Email is validated for format and then submitted to Mailchimp via the existing function. "No spam. Unsubscribe anytime." sits under the button.
 - After submitting, the user sees a greeting and eight tappable topic buttons: What is HQue?, Who is it for?, How does pricing work?, Is there a free trial?, What types of talent can I manage?, How is this different from a spreadsheet or CRM?, Can my whole team use it?, Talk to support.
