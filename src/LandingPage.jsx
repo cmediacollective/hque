@@ -238,7 +238,6 @@ function MobileAppPreview() {
           </div>
         </div>
       </div>
-    <HQueChat />
     </div>
   )
 }
@@ -402,7 +401,6 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
           ))}
         </div>
       </div>
-    <HQueChat />
     </div>
   )
 }
