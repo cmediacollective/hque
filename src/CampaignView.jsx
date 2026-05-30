@@ -276,9 +276,10 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: isMobile ? '12px' : '16px', flex: 1, overflowY: 'auto', alignContent: 'start', padding: isMobile ? '14px 14px 100px' : '20px 20px 100px' }}>
           {brandGroups.map(group => (
             <div key={group.key}
+              onClick={() => setSelected(group.campaigns[0])}
               onMouseEnter={() => setHoveringCard(group.key)}
               onMouseLeave={() => setHoveringCard(null)}
-              style={{ background: cardBg, padding: isMobile ? '16px' : '20px', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hoveringCard === group.key ? cardShadowHover : cardShadow, transform: hoveringCard === group.key ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease' }}>
+              style={{ background: cardBg, padding: isMobile ? '16px' : '20px', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hoveringCard === group.key ? cardShadowHover : cardShadow, transform: hoveringCard === group.key ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease', cursor: 'pointer' }}>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                 {(() => {
@@ -302,9 +303,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                   }
                   return (
                     <>
-                      <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} style={{ display: 'flex', flexShrink: 0, textDecoration: 'none' }}>{logoEl}</a>
+                      <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} onClick={e => e.stopPropagation()} style={{ display: 'flex', flexShrink: 0, textDecoration: 'none' }}>{logoEl}</a>
                       <div style={{ minWidth: 0 }}>
-                        <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} style={{ textDecoration: 'none' }}>{nameEl}</a>
+                        <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} onClick={e => e.stopPropagation()} style={{ textDecoration: 'none' }}>{nameEl}</a>
                         <div style={{ fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: subtle, marginTop: '4px' }}>
                           {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()}` : ''}
                         </div>
@@ -317,7 +318,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               <div>
                 {group.campaigns.map((c, idx) => (
                   <div key={c.id}
-                    onClick={() => setSelected(c)}
+                    onClick={e => { e.stopPropagation(); setSelected(c) }}
                     onMouseEnter={() => setHovering(c.id)}
                     onMouseLeave={() => setHovering(null)}
                     style={{ padding: '10px 4px', borderTop: idx === 0 ? 'none' : `0.5px solid ${border}`, cursor: 'pointer', background: hovering === c.id ? cardHover : 'transparent' }}>

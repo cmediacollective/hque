@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-29
 
+**Bigger click target on Campaign cards.** Previously you had to click directly on a campaign row to open it, which was a small target. Now clicking anywhere on a brand card opens the first campaign inside it. The brand logo and name still link to the website, and individual campaign rows still open their own campaign — just the empty space around them is now active too.
+
 **You can now delete a campaign.** Open a campaign, click Edit, and scroll to the bottom — there's a new "Danger Zone" with a Delete Campaign button. Deleting is permanent and also removes any workspace tasks, talent assignments, and comments tied to that campaign, so you're asked to confirm first. If you might want it back later, Archive (in the campaign header) is still the safer choice.
 
 ---
