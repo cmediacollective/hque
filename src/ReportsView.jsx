@@ -149,9 +149,8 @@ export default function ReportsView({ dark = true, orgId }) {
   return (
     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: bg, padding: '28px' }}>
 
-      {/* Header + year/month pickers */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text }}>Reports</div>
+      {/* Year/month pickers */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
             <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Year</div>
