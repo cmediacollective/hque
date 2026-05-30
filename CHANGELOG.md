@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-05-29
+
+**You can now delete a campaign.** Open a campaign, click Edit, and scroll to the bottom — there's a new "Danger Zone" with a Delete Campaign button. Deleting is permanent and also removes any workspace tasks, talent assignments, and comments tied to that campaign, so you're asked to confirm first. If you might want it back later, Archive (in the campaign header) is still the safer choice.
+
+---
+
 ## 2026-05-27
 
 **Brand logo and name on the Campaigns cards link to the website again.** When the Campaigns view switched to one card per brand, the click-through to the brand's website got dropped. It's back: if a brand has a website on file, clicking its logo or name on the campaign card opens the site in a new tab.

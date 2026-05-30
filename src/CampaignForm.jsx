@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 
-export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }) {
+export default function CampaignForm({ orgId, existing, onClose, onSaved, onDeleted, dark }) {
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const cardBg = dark ? '#111' : '#fff'
@@ -46,6 +46,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
   const [talentSearch, setTalentSearch] = useState("")
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [editingBrandId, setEditingBrandId] = useState(null)
 
@@ -211,6 +212,23 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
     setBrands(bs => bs.map(b => b.id === form.brand_id ? { ...b, logo_url: null } : b))
     setForm(f => ({ ...f, brand_logo_url: '' }))
     setUploadingLogo(false)
+  }
+
+  async function handleDelete() {
+    if (!existing?.id) return
+    const ok = confirm(`Permanently delete "${existing.name}"?\n\nThis cannot be undone. All linked workspace tasks, talent assignments, and comments on this campaign will also be removed.\n\nIf you only want to hide it, use Archive instead.`)
+    if (!ok) return
+    setDeleting(true)
+    try {
+      await supabase.from('campaign_creators').delete().eq('campaign_id', existing.id)
+      await supabase.from('campaign_comments').delete().eq('campaign_id', existing.id)
+      await supabase.from('tasks').delete().eq('campaign_id', existing.id)
+    } catch (_) {}
+    const { error: delErr } = await supabase.from('campaigns').delete().eq('id', existing.id)
+    setDeleting(false)
+    if (delErr) { alert('Could not delete: ' + delErr.message); return }
+    if (onDeleted) onDeleted()
+    else { if (onSaved) onSaved(); if (onClose) onClose() }
   }
 
   async function handleSave() {
@@ -475,6 +493,18 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, dark }
           </button>
           <button onClick={onClose} style={{ padding: '11px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
         </div>
+
+        {existing && (
+          <div style={{ marginTop: '28px', paddingTop: '18px', borderTop: `0.5px solid ${border}` }}>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '8px' }}>Danger Zone</div>
+            <div style={{ fontSize: '11px', color: labelColor, marginBottom: '10px', lineHeight: 1.4 }}>
+              Deleting permanently removes this campaign, its linked workspace tasks, talent assignments, and comments. If you might want it back later, use Archive instead.
+            </div>
+            <button onClick={handleDelete} disabled={deleting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #c0392b', color: '#c0392b', cursor: 'pointer', borderRadius: '1px', opacity: deleting ? 0.7 : 1 }}>
+              {deleting ? 'Deleting...' : 'Delete Campaign'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

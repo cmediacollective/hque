@@ -297,6 +297,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
           dark={dark}
           onClose={() => setEditing(false)}
           onSaved={() => { setEditing(false); onSaved() }}
+          onDeleted={() => { setEditing(false); if (onSaved) onSaved(); if (onClose) onClose() }}
         />
       )}
 
