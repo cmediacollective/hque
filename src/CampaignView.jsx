@@ -183,11 +183,12 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   filtered.forEach(c => {
     const key = (c.brand || '').trim().toLowerCase()
     let g = brandGroups.find(x => x.key === key)
-    if (!g) { g = { key, name: c.brand || 'No brand / Internal', logo: null, campaigns: [], count: 0, budget: 0 }; brandGroups.push(g) }
+    if (!g) { g = { key, name: c.brand || 'No brand / Internal', logo: null, website: null, campaigns: [], count: 0, budget: 0 }; brandGroups.push(g) }
     g.campaigns.push(c)
     g.count++
     g.budget += Number(c.budget) || 0
     if (!g.logo && c.brand_logo_url) g.logo = c.brand_logo_url
+    if (!g.website && c.brand_website) g.website = c.brand_website
   })
 
   const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : '#888'
@@ -280,16 +281,37 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               style={{ background: cardBg, padding: isMobile ? '16px' : '20px', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hoveringCard === group.key ? cardShadowHover : cardShadow, transform: hoveringCard === group.key ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease' }}>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                {group.logo
-                  ? <img src={group.logo} alt={group.name} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '52px', height: '52px', borderRadius: '2px', background: brandColor(group.name), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(group.name)}</div>
-                }
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, lineHeight: 1.25 }}>{group.name}</div>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: subtle, marginTop: '4px' }}>
-                    {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()}` : ''}
-                  </div>
-                </div>
+                {(() => {
+                  const href = group.website ? (group.website.startsWith('http') ? group.website : 'https://' + group.website) : null
+                  const logoEl = group.logo
+                    ? <img src={group.logo} alt={group.name} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                    : <div style={{ width: '52px', height: '52px', borderRadius: '2px', background: brandColor(group.name), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(group.name)}</div>
+                  const nameEl = <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, lineHeight: 1.25 }}>{group.name}</div>
+                  if (!href) {
+                    return (
+                      <>
+                        {logoEl}
+                        <div style={{ minWidth: 0 }}>
+                          {nameEl}
+                          <div style={{ fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: subtle, marginTop: '4px' }}>
+                            {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()}` : ''}
+                          </div>
+                        </div>
+                      </>
+                    )
+                  }
+                  return (
+                    <>
+                      <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} style={{ display: 'flex', flexShrink: 0, textDecoration: 'none' }}>{logoEl}</a>
+                      <div style={{ minWidth: 0 }}>
+                        <a href={href} target='_blank' rel='noreferrer' title={`Visit ${group.name} website`} style={{ textDecoration: 'none' }}>{nameEl}</a>
+                        <div style={{ fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', color: subtle, marginTop: '4px' }}>
+                          {group.count} {group.count === 1 ? 'campaign' : 'campaigns'}{group.budget > 0 ? ` · $${group.budget.toLocaleString()}` : ''}
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
 
               <div>
