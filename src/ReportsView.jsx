@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from './supabase'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
@@ -8,6 +8,25 @@ const brandColor = (name) => {
   return BRAND_COLORS[Math.abs(hash) % BRAND_COLORS.length]
 }
 const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
+
+const STATUSES = ['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead']
+const STATUS_COLOR = {
+  'Pitch': '#9CA3AF',
+  'Contract Pending': '#A67C52',
+  'Active': '#5b7c99',
+  'Pending Payment': '#C4962E',
+  'Completed': '#5C9E52',
+  'Cancelled': '#B85A52',
+  'Dead': '#5A5A5A'
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+function campaignDate(c) {
+  const d = c.start_date || c.created_at
+  if (!d) return null
+  return String(d).includes('T') ? new Date(d) : new Date(d + 'T00:00:00')
+}
 
 export default function ReportsView({ dark = true, orgId }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -23,8 +42,9 @@ export default function ReportsView({ dark = true, orgId }) {
   const [creators, setCreators] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedCampaign, setSelectedCampaign] = useState(null)
+  const [year, setYear] = useState(new Date().getFullYear())
 
-  useEffect(() => { fetchAll() }, [])
+  useEffect(() => { fetchAll() }, [orgId])
 
   async function fetchAll() {
     setLoading(true)
@@ -39,40 +59,74 @@ export default function ReportsView({ dark = true, orgId }) {
     setLoading(false)
   }
 
-  const totalBudget = campaigns.reduce((sum, c) => sum + (Number(c.budget) || 0), 0)
-  const activeCampaigns = campaigns.filter(c => c.status === 'Active').length
-  const completedCampaigns = campaigns.filter(c => c.status === 'Completed').length
-  const pitchCampaigns = campaigns.filter(c => c.status === 'Pitch').length
-  const totalPaid = links.filter(l => l.payment_status === 'Paid').length
-  const totalPending = links.filter(l => l.payment_status !== 'Paid').length
-
-
-  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const monthlyBudget = MONTHS.map((month, i) => {
-    const total = campaigns.filter(camp => {
-      const date = camp.start_date || camp.created_at
-      if (!date) return false
-      const hasT = String(date).includes('T')
-      const d = hasT ? new Date(date) : new Date(date + 'T00:00:00')
-      return d.getFullYear() === 2026 && d.getMonth() === i
-    }).reduce((sum, camp) => sum + (Number(camp.budget) || 0), 0)
-    return { month, total }
-  })
-  const maxBudget = Math.max(...monthlyBudget.map(m => m.total), 1)
+  const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth()
+
+  const availableYears = useMemo(() => {
+    const ys = new Set([currentYear])
+    campaigns.forEach(c => {
+      const d = campaignDate(c)
+      if (d) ys.add(d.getFullYear())
+    })
+    return [...ys].sort((a, b) => b - a)
+  }, [campaigns])
+
+  const yearCampaigns = useMemo(() => {
+    return campaigns.filter(c => {
+      const d = campaignDate(c)
+      return d && d.getFullYear() === year
+    })
+  }, [campaigns, year])
+
+  const statusCounts = useMemo(() => {
+    const counts = {}
+    STATUSES.forEach(s => counts[s] = 0)
+    yearCampaigns.forEach(c => {
+      if (counts[c.status] != null) counts[c.status]++
+    })
+    return counts
+  }, [yearCampaigns])
+
+  const monthlyByStatus = useMemo(() => {
+    return MONTHS.map((m, i) => {
+      const inMonth = yearCampaigns.filter(c => {
+        const d = campaignDate(c)
+        return d && d.getMonth() === i
+      })
+      const byStatus = {}
+      STATUSES.forEach(s => byStatus[s] = 0)
+      inMonth.forEach(c => { if (byStatus[c.status] != null) byStatus[c.status]++ })
+      return { month: m, total: inMonth.length, byStatus }
+    })
+  }, [yearCampaigns])
+
+  const maxMonthlyCount = Math.max(...monthlyByStatus.map(m => m.total), 1)
+
+  const monthlyBudget = useMemo(() => {
+    return MONTHS.map((m, i) => {
+      const total = yearCampaigns
+        .filter(c => {
+          const d = campaignDate(c)
+          return d && d.getMonth() === i
+        })
+        .reduce((sum, c) => sum + (Number(c.budget) || 0), 0)
+      return { month: m, total }
+    })
+  }, [yearCampaigns])
+
+  const maxBudget = Math.max(...monthlyBudget.map(m => m.total), 1)
+  const totalBudgetYear = yearCampaigns.reduce((s, c) => s + (Number(c.budget) || 0), 0)
+
+  const yearLinks = useMemo(() => {
+    const ids = new Set(yearCampaigns.map(c => c.id))
+    return links.filter(l => ids.has(l.campaign_id))
+  }, [yearCampaigns, links])
+  const paidThisYear = yearLinks.filter(l => l.payment_status === 'Paid').length
+  const pendingThisYear = yearLinks.filter(l => l.payment_status !== 'Paid').length
 
   const campaignLinks = (campaignId) => links.filter(l => l.campaign_id === campaignId)
   const getCreator = (id) => creators.find(c => c.id === id)
-
-  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : '#888'
-
-  const stat = (label, value, sub) => (
-    <div style={{ flex: 1, padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: text, marginBottom: '4px' }}>{value}</div>
-      <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase' }}>{label}</div>
-      {sub && <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{sub}</div>}
-    </div>
-  )
+  const statusColor = (s) => STATUS_COLOR[s] || '#888'
 
   const section = (label) => (
     <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '12px', marginTop: '32px' }}>{label}</div>
@@ -85,46 +139,119 @@ export default function ReportsView({ dark = true, orgId }) {
   return (
     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', background: bg, padding: '28px' }}>
 
-      {/* Monthly Budget Chart */}
-      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px' }}>
-          <div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Budget by Month</div>
-            <div style={{ fontSize: '10px', color: muted }}>2026 — based on campaign start dates</div>
-          </div>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>${totalBudget.toLocaleString()}</div>
+      {/* Header + year picker */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text }}>Reports</div>
+        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', marginRight: '6px' }}>Year</div>
+          {availableYears.map(y => (
+            <button key={y} onClick={() => setYear(y)} style={{
+              padding: '5px 12px', fontSize: '10px', letterSpacing: '0.14em',
+              background: y === year ? '#5b7c99' : 'none',
+              color: y === year ? '#fff' : muted,
+              border: `0.5px solid ${y === year ? '#5b7c99' : border2}`,
+              borderRadius: '1px', cursor: 'pointer'
+            }}>{y}</button>
+          ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '140px' }}>
-          {monthlyBudget.map((m, i) => (
-            <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
-              {m.total > 0 && <div style={{ fontSize: '8px', color: '#5b7c99', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                {'$' + (m.total >= 1000 ? (m.total/1000).toFixed(0) + 'K' : m.total)}
-              </div>}
-              <div style={{ width: '100%', background: m.total > 0 ? (i === currentMonth ? '#5b7c99' : (dark ? '#2A3A4A' : '#C4D4E0')) : (dark ? '#1E1E1E' : '#E8E4DE'), borderRadius: '1px 1px 0 0', height: m.total > 0 ? Math.max((m.total / maxBudget) * 90, 6) + 'px' : '3px', transition: 'height 0.3s ease' }} />
-              <div style={{ fontSize: '8px', color: i === currentMonth ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: i === currentMonth ? 600 : 400 }}>{m.month}</div>
+      </div>
+
+      {/* Status totals — one chip per status */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+        {STATUSES.map(s => (
+          <div key={s} style={{ padding: '14px 14px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px', borderLeft: `3px solid ${STATUS_COLOR[s]}` }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{statusCounts[s]}</div>
+            <div style={{ fontSize: '8px', color: STATUS_COLOR[s], letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600 }}>{s}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Per-month stacked bar chart */}
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Campaign Activity by Month</div>
+            <div style={{ fontSize: '10px', color: muted }}>{year} — by start date, includes archived</div>
+          </div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>{yearCampaigns.length} <span style={{ fontSize: '11px', color: muted, letterSpacing: '0.18em', textTransform: 'uppercase', marginLeft: '6px' }}>campaigns</span></div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '180px' }}>
+          {monthlyByStatus.map((m, i) => {
+            const isCurrent = i === currentMonth && year === currentYear
+            return (
+              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
+                {m.total > 0 && (
+                  <div style={{ fontSize: '10px', color: text, fontWeight: 500 }}>{m.total}</div>
+                )}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column-reverse', height: m.total > 0 ? Math.max((m.total / maxMonthlyCount) * 130, 8) + 'px' : '3px', overflow: 'hidden', borderRadius: '2px 2px 0 0', background: m.total === 0 ? (dark ? '#1E1E1E' : '#E8E4DE') : 'transparent' }}>
+                  {STATUSES.map(s => {
+                    const count = m.byStatus[s]
+                    if (count === 0) return null
+                    return <div key={s} title={`${s}: ${count}`} style={{ height: ((count / m.total) * 100) + '%', background: STATUS_COLOR[s] }} />
+                  })}
+                </div>
+                <div style={{ fontSize: '9px', color: isCurrent ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: isCurrent ? 600 : 400 }}>{m.month}</div>
+              </div>
+            )
+          })}
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', marginTop: '20px', paddingTop: '16px', borderTop: `0.5px solid ${border}` }}>
+          {STATUSES.map(s => (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '10px', color: muted }}>
+              <div style={{ width: '10px', height: '10px', background: STATUS_COLOR[s], borderRadius: '1px' }} />
+              <span>{s}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        {stat('Total Budget', `$${totalBudget.toLocaleString()}`)}
-        {stat('Campaigns', campaigns.length, `${activeCampaigns} active · ${completedCampaigns} completed · ${pitchCampaigns} pitch`)}
-        {stat('Payments', `${totalPaid} paid`, `${totalPending} pending`)}
-        {stat('Total Talent', creators.length)}
+      {/* Monthly Budget Chart */}
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px', marginBottom: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '20px', flexWrap: 'wrap', gap: '8px' }}>
+          <div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '2px' }}>Budget by Month</div>
+            <div style={{ fontSize: '10px', color: muted }}>{year} — based on campaign start dates</div>
+          </div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text }}>${totalBudgetYear.toLocaleString()}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '140px' }}>
+          {monthlyBudget.map((m, i) => {
+            const isCurrent = i === currentMonth && year === currentYear
+            return (
+              <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', height: '100%', justifyContent: 'flex-end' }}>
+                {m.total > 0 && <div style={{ fontSize: '8px', color: '#5b7c99', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                  {'$' + (m.total >= 1000 ? (m.total / 1000).toFixed(0) + 'K' : m.total)}
+                </div>}
+                <div style={{ width: '100%', background: m.total > 0 ? (isCurrent ? '#5b7c99' : (dark ? '#2A3A4A' : '#C4D4E0')) : (dark ? '#1E1E1E' : '#E8E4DE'), borderRadius: '1px 1px 0 0', height: m.total > 0 ? Math.max((m.total / maxBudget) * 90, 6) + 'px' : '3px', transition: 'height 0.3s ease' }} />
+                <div style={{ fontSize: '8px', color: isCurrent ? '#5b7c99' : muted, letterSpacing: '0.06em', fontWeight: isCurrent ? 600 : 400 }}>{m.month}</div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
+      {/* Payments + Talent summary */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{paidThisYear} <span style={{ fontSize: '12px', color: muted }}>paid</span></div>
+          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Payments — {year}</div>
+          <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{pendingThisYear} pending</div>
+        </div>
+        <div style={{ padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text, marginBottom: '4px' }}>{creators.length}</div>
+          <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase' }}>Total Talent</div>
+        </div>
+      </div>
 
-      {section('Campaign Breakdown')}
+      {section(`Campaign Breakdown — ${year}`)}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
-        {campaigns.map(c => {
+        {yearCampaigns.map(c => {
           const campLinks = campaignLinks(c.id)
           const paid = campLinks.filter(l => l.payment_status === 'Paid').length
           const pending = campLinks.filter(l => l.payment_status !== 'Paid').length
           const hasPerformance = campLinks.some(l => l.views || l.likes || l.reach)
           const totalViews = campLinks.reduce((sum, l) => sum + (l.views || 0), 0)
-          const totalLikes = campLinks.reduce((sum, l) => sum + (l.likes || 0), 0)
           const totalReach = campLinks.reduce((sum, l) => sum + (l.reach || 0), 0)
 
           return (
@@ -141,7 +268,7 @@ export default function ReportsView({ dark = true, orgId }) {
                 }
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '3px' }}>{c.brand || 'No brand'}</div>
+                  <div style={{ fontSize: '8px', color: '#5b7c99', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '3px' }}>{c.brand || 'No brand'}{c.archived && <span style={{ marginLeft: '8px', color: subtle }}>· archived</span>}</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
                 </div>
 
@@ -210,10 +337,10 @@ export default function ReportsView({ dark = true, orgId }) {
         })}
       </div>
 
-      {campaigns.length === 0 && (
+      {yearCampaigns.length === 0 && (
         <div style={{ padding: '80px 0', textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No campaigns yet</div>
-          <div style={{ fontSize: '12px', color: muted }}>Create your first campaign to see reports here</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No campaigns in {year}</div>
+          <div style={{ fontSize: '12px', color: muted }}>Switch years above or create a new campaign</div>
         </div>
       )}
 

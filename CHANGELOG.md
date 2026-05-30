@@ -6,6 +6,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-29
 
+**Reports section revamped.** The Reports page is now organized around a year you pick at the top (defaults to this year, with a chip for every year you have campaigns in). What's new:
+- A row of cards across the top showing how many campaigns of each status — Pitch, Contract Pending, Active, Pending Payment, Completed, Cancelled, Dead — happened in the selected year. Each card is color-coded to match the status color used elsewhere.
+- A new **Campaign Activity by Month** chart: one stacked bar per month, height = number of campaigns that started that month, colored bands inside the bar showing how many landed in each status. A legend below makes it easy to read.
+- The existing **Budget by Month** chart and the campaign list now also respect the selected year. Archived campaigns are included throughout, so nothing drops out of the report just because it was hidden from the active list.
+- Payments and Total Talent moved into smaller cards below the main charts.
+
 **Two new campaign statuses: Contract Pending and Dead.** Contract Pending sits between Pitch and Active (use it for campaigns where you've agreed in principle but paperwork is still being signed). Dead lives at the bottom of the dropdown for campaigns that didn't pan out and aren't being pursued anymore. Both have their own status colors so they're easy to spot on the Campaigns view.
 
 **Bigger click target on Campaign cards.** Previously you had to click directly on a campaign row to open it, which was a small target. Now clicking anywhere on a brand card opens the first campaign inside it. The brand logo and name still link to the website, and individual campaign rows still open their own campaign — just the empty space around them is now active too.
