@@ -183,7 +183,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
   const assignedBuckets = bucketize(assignedTasks)
   const watchedBuckets = bucketize(watchedTasks)
-  const overdueCount = assignedTasks.filter(t => isOverdue(t.due_date)).length
+  const overdueTasks = assignedTasks.filter(t => isOverdue(t.due_date))
+  const overdueCount = overdueTasks.length
+  const overdueBrandCount = new Set(overdueTasks.map(t => (t.brand_name || '').trim()).filter(Boolean)).size
 
   const HOLIDAYS = {
     '1-1': { greeting: 'Happy New Year', note: "Did you know? The Babylonians made the first recorded New Year's resolutions — about 4,000 years ago." },
@@ -502,7 +504,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
         <div style={{ position: 'sticky', bottom: 0, marginTop: '32px', paddingTop: '14px', paddingBottom: '14px', background: bg, borderTop: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>
-            Pick a brand/client on the left for the full board
+            {overdueCount > 0
+              ? `You have ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}${overdueBrandCount > 0 ? ` across ${overdueBrandCount} ${overdueBrandCount === 1 ? 'brand' : 'brands'}` : ''}. Pick a brand on the left to see the full board.`
+              : 'All caught up — pick a brand on the left to dive in.'}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
