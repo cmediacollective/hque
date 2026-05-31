@@ -6,6 +6,15 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**FAQ page redesigned to match the rest of the marketing site.** The /faq page used to feel like a different site — left-aligned hero, a floating "support@h-que.com" callout in the top right, and a two-column accordion. It now mirrors the Pricing page exactly:
+- Hero is centered: "SUPPORT" eyebrow + "Frequently asked questions." headline + a short subline.
+- The two-column accordion is now a single centered column. The "+" expand icon stays on the right.
+- "Still have questions?" lives as a centered block under the accordion with a clear "Contact Support →" button instead of a floating callout in the header.
+- Added a full-width "Ready to get started?" CTA section above the footer (14-day free trial, "Start Free Trial →" button).
+- Replaced the bare one-line footer with the full site footer (logo + tagline, Product/Resources/Legal columns, italic "Made for people who work with talent." bottom line).
+- The nav now shows the "Sign in" link (wired to the same login flow used on the homepage). Same "Start free" button as everywhere else.
+- All eight FAQ questions and answers are unchanged — only the layout and structure changed.
+
 **Demo section: reordered slides, slide-specific eyebrows, and a caption.** Tweaks to the homepage product demo (id `how-it-works`):
 - Reordered the slides so Reports leads, then Talent Database, Campaigns, and Workspace last. Sidebar nav follows the new order.
 - Each slide now shows a small slide-specific eyebrow above the title — "Your business at a glance", "Your full roster, one place", "Every deal, every status", "The work, organized". Same eyebrow style as elsewhere on the page; the existing "Nova Talent Group" workspace name stays above it.

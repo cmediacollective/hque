@@ -326,7 +326,7 @@ function App() {
   if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
   if (!user && showLogin) return <Login onLogin={setUser} onShowSignUp={() => { setShowLogin(false); setShowSignUp(true) }} />
 
-  if (isFaqPage) return <FAQPage />
+  if (isFaqPage) return <FAQPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (isPricingPage) return <PricingPage onGetStarted={() => setShowSignUp(true)} />
   if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowSignUp(true)} />
   if (isBlogPage) return <BlogPage onGetStarted={() => setShowSignUp(true)} />

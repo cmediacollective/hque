@@ -13,7 +13,7 @@ const FAQS = [
   { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams. If you\'re a solo operator just getting started, reach out to support@h-que.com.' },
 ]
 
-export default function FAQPage() {
+export default function FAQPage({ onGetStarted, onSignIn }) {
   useSEO({
     title: 'FAQ — HQue',
     description: 'Answers to the most common questions about HQue, the agency OS built for talent and influencer agencies.',
@@ -21,73 +21,88 @@ export default function FAQPage() {
   })
   const [open, setOpen] = useState(null)
   const isMobile = window.innerWidth < 768
-  const left = FAQS.filter((_, i) => i % 2 === 0)
-  const right = FAQS.filter((_, i) => i % 2 !== 0)
 
   return (
-    <div style={{ background: '#111', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#111', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#F0ECE6' }}>
 
-      <MarketingNav onGetStarted={() => window.location.href = '/'} />
+      <MarketingNav onGetStarted={onGetStarted} onSignIn={onSignIn} />
 
-      {/* Hero */}
-      <div style={{ padding: isMobile ? '60px 24px 40px' : '80px 48px 60px', maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: '24px' }}>
-        <div>
-          <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>Support</div>
-          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '36px' : '56px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.05 }}>
-            Frequently<br />asked questions.
-          </div>
+      {/* Header */}
+      <div style={{ padding: isMobile ? '100px 24px 40px' : '120px 48px 60px', textAlign: 'center', maxWidth: '760px', margin: '0 auto' }}>
+        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '16px' }}>Support</div>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '36px' : '52px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px' }}>
+          Frequently asked questions.
         </div>
-        <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
-          <div style={{ fontSize: '12px', color: '#555', marginBottom: '8px' }}>Still have questions?</div>
-          <a href="mailto:support@h-que.com" style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com →</a>
+        <div style={{ fontSize: '14px', color: '#DCDCDC', lineHeight: 1.7 }}>
+          Everything you need to know about HQue, in one place.
         </div>
       </div>
 
-      {/* Divider */}
-      <div style={{ height: '0.5px', background: '#1A1A1A', maxWidth: '1100px', margin: '0 auto 60px' }} />
-
-      {/* Two column FAQ */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: isMobile ? '0 24px 80px' : '0 48px 100px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '0 60px' }}>
-        {(isMobile ? FAQS : left).map((faq, i) => {
-          const idx = isMobile ? i : i * 2
-          return (
-            <div key={idx} style={{ borderTop: '0.5px solid #1A1A1A', marginBottom: '0' }}>
-              <button onClick={() => setOpen(open === idx ? null : idx)} style={{ width: '100%', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ color: '#5b7c99', fontSize: '18px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === idx ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
+      {/* FAQ — single centered column */}
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {FAQS.map((faq, i) => (
+            <div key={i} style={{ borderTop: '0.5px solid #1A1A1A' }}>
+              <button onClick={() => setOpen(open === i ? null : i)} style={{ width: '100%', padding: '22px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px', fontFamily: 'inherit' }}>
+                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '17px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
+                <span style={{ color: '#5b7c99', fontSize: '20px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
               </button>
-              {open === idx && <div style={{ paddingBottom: '24px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
+              {open === i && <div style={{ paddingBottom: '22px', fontSize: '14px', color: '#DCDCDC', lineHeight: 1.85 }}>{faq.a}</div>}
             </div>
-          )
-        })}
-        {!isMobile && right.map((faq, i) => {
-          const idx = i * 2 + 1
-          return (
-            <div key={idx} style={{ borderTop: '0.5px solid #1A1A1A' }}>
-              <button onClick={() => setOpen(open === idx ? null : idx)} style={{ width: '100%', padding: '24px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '16px' }}>
-                <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '16px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
-                <span style={{ color: '#5b7c99', fontSize: '18px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === idx ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
-              </button>
-              {open === idx && <div style={{ paddingBottom: '24px', fontSize: '13px', color: '#666', lineHeight: 1.9 }}>{faq.a}</div>}
-            </div>
-          )
-        })}
+          ))}
+          <div style={{ borderTop: '0.5px solid #1A1A1A' }} />
+        </div>
       </div>
 
-      {/* CTA bar */}
-      <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px' : '48px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: '20px' }}>
-        <div>
-          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#F0ECE6', marginBottom: '6px' }}>Still have questions?</div>
-          <div style={{ fontSize: '13px', color: '#555' }}>Our team is happy to help. We usually respond within a few hours.</div>
+      {/* Still have questions? — centered block */}
+      <div style={{ maxWidth: '760px', margin: '0 auto', padding: isMobile ? '0 24px 80px' : '0 48px 100px', textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '26px' : '32px', color: '#F0ECE6', marginBottom: '12px', fontWeight: 'normal' }}>Still have questions?</div>
+        <div style={{ fontSize: '14px', color: '#DCDCDC', lineHeight: 1.7, marginBottom: '24px' }}>
+          Our team is happy to help. We usually respond within a few hours.
         </div>
-        <a href="mailto:support@h-que.com" style={{ display: 'inline-block', padding: '12px 28px', background: '#5b7c99', color: '#fff', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '1px', whiteSpace: 'nowrap' }}>Contact support</a>
+        <a href="mailto:support@h-que.com" style={{ display: 'inline-block', padding: '14px 36px', background: '#5b7c99', color: '#fff', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', textDecoration: 'none', borderRadius: '1px' }}>Contact Support →</a>
+      </div>
+
+      {/* Ready to get started? — full-width CTA */}
+      <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '48px 24px' : '64px 48px', textAlign: 'center' }}>
+        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '40px', color: '#F0ECE6', marginBottom: '16px', fontWeight: 'normal' }}>Ready to get started?</div>
+        <div style={{ fontSize: '13px', color: '#DCDCDC', marginBottom: '32px' }}>14-day free trial. No credit card required.</div>
+        <button onClick={onGetStarted} style={{ padding: '14px 40px', background: '#5b7c99', border: 'none', color: '#fff', fontSize: '10px', letterSpacing: '0.22em', textTransform: 'uppercase', cursor: 'pointer', borderRadius: '1px' }}>Start Free Trial →</button>
       </div>
 
       {/* Footer */}
-      <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '20px 24px' : '20px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', color: '#2A2A2A' }}>© 2026 HQue</span>
-        <a href="/" style={{ fontSize: '10px', color: '#333', textDecoration: 'none', letterSpacing: '0.1em' }}>← Back to home</a>
-      </div>
+      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px' : '60px 48px 40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? '32px' : '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
+          <div>
+            <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
+            <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
+            {[['Features', '/#features'], ['Pricing', '/pricing'], ['FAQ', '/faq']].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Resources</div>
+            {[['The Pitch', '/blog'], ['Help Center', null]].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}>
+                {h ? <a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a> : <span style={{ fontSize: '12px', color: '#555' }}>{l}</span>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
+            {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@h-que.com', 'mailto:support@h-que.com']].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
+            ))}
+          </div>
+        </div>
+        <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', whiteSpace: 'nowrap' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic', whiteSpace: 'nowrap', flexShrink: 0, marginRight: '60px' }}>Made for people who work with talent.</span>
+        </div>
+      </footer>
     </div>
   )
 }
