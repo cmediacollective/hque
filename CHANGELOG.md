@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Overdue badge gets a warm rust treatment; left border accent removed.** Walked back the terracotta left border on overdue task cards — it clashed with the otherwise calm aesthetic. The "OVERDUE" pill on the home dashboard's blue task cards now does the work on its own: warm sienna/rust background (#A0522D), white text, slightly bolder (font-weight 600), slightly more breathing room around the text. Still easy to spot at a glance, no harsh red.
+
 **Overdue tasks now stand out on the Workspace board.** Any task with a due date in the past — and not already in a Done column — gets a 3px muted-terracotta (#B85A52) accent on the left edge of the card. Cards in Done columns stay as-is even if their date is past (it shipped, it's not overdue anymore). The rest of the card styling is unchanged. Applies on both the kanban board view and the list view.
 
 **FAQ page redesigned to match the rest of the marketing site.** The /faq page used to feel like a different site — left-aligned hero, a floating "support@h-que.com" callout in the top right, and a two-column accordion. It now mirrors the Pricing page exactly:

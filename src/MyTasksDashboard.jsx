@@ -379,9 +379,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
     if (filled) {
       return (
-        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', paddingLeft: overdue ? '9px' : '12px', borderLeft: overdue ? '3px solid #B85A52' : 'none', borderRadius: '2px', position: 'relative', cursor: 'pointer', marginBottom: '6px' }}>
-          {overdue && <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '7px', letterSpacing: '0.14em', background: 'rgba(255,255,255,0.2)', padding: '1px 5px', borderRadius: '1px' }}>OVERDUE</div>}
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', marginBottom: '6px', paddingRight: overdue ? '48px' : '0', lineHeight: 1.3 }}>{t.title}</div>
+        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', borderRadius: '2px', position: 'relative', cursor: 'pointer', marginBottom: '6px' }}>
+          {overdue && <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '7px', letterSpacing: '0.16em', fontWeight: 600, color: '#fff', background: '#A0522D', padding: '2px 6px', borderRadius: '2px' }}>OVERDUE</div>}
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '13px', marginBottom: '6px', paddingRight: overdue ? '52px' : '0', lineHeight: 1.3 }}>{t.title}</div>
           <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: 0.85 }}>{brandLine}</div>
         </div>
       )

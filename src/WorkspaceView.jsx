@@ -382,9 +382,6 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     return list
   }
 
-  const todayStr = new Date().toISOString().slice(0, 10)
-  const isOverdue = (task) => !!task.due_date && task.due_date < todayStr && !doneColumnIds.has(task.column_id)
-
   const doneColumnIds = (() => {
     const ids = new Set()
     if (!columns || columns.length === 0) return ids
@@ -550,7 +547,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                           onMouseEnter={() => setHoveringTask(task.id)}
                           onMouseLeave={() => setHoveringTask(null)}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ background: card, border: `0.5px solid ${border}`, borderLeft: isOverdue(task) ? '3px solid #B85A52' : `0.5px solid ${border}`, borderRadius: '5px', padding: '12px', paddingLeft: isOverdue(task) ? '10px' : '12px', marginBottom: '8px', cursor: 'pointer', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '5px', padding: '12px', marginBottom: '8px', cursor: 'pointer', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
                           <div style={{ fontSize: '12px', color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: "10px", color: muted, lineHeight: 1.5, marginBottom: "6px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -588,7 +585,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         onClick={() => setEditingTask({ ...task })}
                         onMouseEnter={() => setHoveringTask(task.id)}
                         onMouseLeave={() => setHoveringTask(null)}
-                        style={{ background: card, border: `0.5px solid ${border}`, borderLeft: isOverdue(task) ? '3px solid #B85A52' : `0.5px solid ${border}`, borderRadius: '5px', padding: '12px 14px', paddingLeft: isOverdue(task) ? '12px' : '14px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
+                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '5px', padding: '12px 14px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
                         <div>
                           <div style={{ fontSize: '12px', color: text, marginBottom: '3px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: '10px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
