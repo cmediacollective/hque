@@ -503,9 +503,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
         )}
 
         <div style={{ position: 'sticky', bottom: 0, marginTop: '32px', paddingTop: '14px', paddingBottom: '14px', background: bg, borderTop: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: subtle }}>
+          <div style={{ fontSize: '12px', color: subtle }}>
             {overdueCount > 0
-              ? `You have ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}${overdueBrandCount > 0 ? ` across ${overdueBrandCount} ${overdueBrandCount === 1 ? 'brand' : 'brands'}` : ''}. Pick a brand on the left to see the full board.`
+              ? `You have ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}${overdueBrandCount > 0 ? ` across ${overdueBrandCount} ${overdueBrandCount === 1 ? 'brand' : 'brands'}` : ''} — pick a brand on the left to see the full board.`
               : 'All caught up — pick a brand on the left to dive in.'}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
