@@ -57,10 +57,10 @@ const FAKE_STATS = [
 ]
 
 const SCREENS = [
-  { label: 'Talent Database', key: 'talent' },
-  { label: 'Campaigns', key: 'campaigns' },
-  { label: 'Workspace', key: 'workspace' },
-  { label: 'Reports', key: 'reports' },
+  { label: 'Reports', key: 'reports', eyebrow: 'Your business at a glance', caption: 'See every campaign, payment, and talent relationship — all in one view.' },
+  { label: 'Talent Database', key: 'talent', eyebrow: 'Your full roster, one place', caption: 'Your full roster, filtered by type, with follower counts and engagement rates ready to go.' },
+  { label: 'Campaigns', key: 'campaigns', eyebrow: 'Every deal, every status', caption: 'Track every brand deal from pitch to payment, across all your clients.' },
+  { label: 'Workspace', key: 'workspace', eyebrow: 'The work, organized', caption: 'Keep the team aligned with tasks, priorities, and deadlines built around your talent work.' },
 ]
 
 const FEATURES = [
@@ -93,15 +93,7 @@ function StatusBadge({ status }) {
   return <span style={{ fontSize: '7px', letterSpacing: '0.12em', border: `0.5px solid ${color}`, color, padding: '3px 8px', borderRadius: '1px', whiteSpace: 'nowrap' }}>{status}</span>
 }
 
-function MobileAppPreview() {
-  const [activeScreen, setActiveScreen] = useState(0)
-  const intervalRef = useRef(null)
-
-  useEffect(() => {
-    intervalRef.current = setInterval(() => setActiveScreen(s => (s + 1) % SCREENS.length), 3000)
-    return () => clearInterval(intervalRef.current)
-  }, [])
-
+function MobileAppPreview({ activeScreen, setActiveScreen, stopRotation }) {
   return (
     <div style={{ width: '100%', maxWidth: '340px', margin: '0 auto' }}>
       {/* Phone frame */}
@@ -114,6 +106,7 @@ function MobileAppPreview() {
           </div>
           {/* Screen title */}
           <div style={{ padding: '16px 16px 8px' }}>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px' }}>{SCREENS[activeScreen].eyebrow}</div>
             <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '18px', color: '#1A1A1A', marginBottom: '12px' }}>{SCREENS[activeScreen].label}</div>
           </div>
           {/* Content */}
@@ -228,7 +221,7 @@ function MobileAppPreview() {
           {/* Bottom nav */}
           <div style={{ borderTop: '0.5px solid #DBD7D0', background: '#ECEAE6', display: 'flex', padding: '8px 0' }}>
             {SCREENS.map((s, i) => (
-              <button key={i} onClick={() => { setActiveScreen(i); clearInterval(intervalRef.current) }} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+              <button key={i} onClick={() => { setActiveScreen(i); stopRotation && stopRotation() }} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                 <span style={{ fontSize: '14px', opacity: i === activeScreen ? 1 : 0.4 }}>
                   {i === 0 ? '◉' : i === 1 ? '▦' : i === 2 ? '⊞' : '▮'}
                 </span>
@@ -262,6 +255,7 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
         </div>
         <div style={{ flex: 1, padding: '24px', overflow: 'hidden' }}>
           <div style={{ fontSize: '8px', letterSpacing: '0.28em', textTransform: 'uppercase', color: '#bbb', marginBottom: '6px' }}>Nova Talent Group</div>
+          <div style={{ fontSize: '9px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>{SCREENS[activeScreen].eyebrow}</div>
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '22px', color: '#1A1A1A', marginBottom: '20px' }}>{SCREENS[activeScreen].label}</div>
 
           {SCREENS[activeScreen].key === 'talent' && (
@@ -426,11 +420,16 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
   }, [])
 
   useEffect(() => {
-    if (!mobile) {
-      intervalRef.current = setInterval(() => setActiveScreen(s => (s + 1) % SCREENS.length), 3200)
-      return () => clearInterval(intervalRef.current)
-    }
+    intervalRef.current = setInterval(() => setActiveScreen(s => (s + 1) % SCREENS.length), mobile ? 3000 : 3200)
+    return () => clearInterval(intervalRef.current)
   }, [mobile])
+
+  function stopRotation() {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -464,6 +463,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         <style>{`
           @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
           @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+          @keyframes captionFade { from { opacity: 0; } to { opacity: 1; } }
           .vtile { filter: grayscale(100%); transition: filter 0.4s ease; }
           .vtile:hover { filter: grayscale(0%); }
           [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1); transition-delay: var(--reveal-delay, 0ms); }
@@ -565,9 +565,24 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
           </div>
         </div>
         {mobile
-          ? <MobileAppPreview />
+          ? <MobileAppPreview activeScreen={activeScreen} setActiveScreen={setActiveScreen} stopRotation={stopRotation} />
           : <DesktopAppPreview activeScreen={activeScreen} setActiveScreen={setActiveScreen} />
         }
+        <div
+          key={activeScreen}
+          style={{
+            marginTop: '20px',
+            maxWidth: '700px',
+            padding: mobile ? '0 24px' : '0 32px',
+            fontSize: '14px',
+            color: '#DCDCDC',
+            textAlign: 'center',
+            lineHeight: 1.6,
+            animation: 'captionFade 0.3s ease',
+          }}
+        >
+          {SCREENS[activeScreen].caption}
+        </div>
       </section>
 
       {/* Features */}

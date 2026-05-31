@@ -6,6 +6,11 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Demo section: reordered slides, slide-specific eyebrows, and a caption.** Tweaks to the homepage product demo (id `how-it-works`):
+- Reordered the slides so Reports leads, then Talent Database, Campaigns, and Workspace last. Sidebar nav follows the new order.
+- Each slide now shows a small slide-specific eyebrow above the title — "Your business at a glance", "Your full roster, one place", "Every deal, every status", "The work, organized". Same eyebrow style as elsewhere on the page; the existing "Nova Talent Group" workspace name stays above it.
+- Added a single body-copy caption *below* the browser frame that changes with the active slide and fades in (~0.3s) on each transition. Mobile slides now drive the same caption — moved the mobile slide state up to the parent so the caption stays in sync no matter which device.
+
 **Pricing page refresh.** Several updates to /pricing:
 - Renamed the top tier from "Agency" to **Business** everywhere on the page.
 - Rewrote all three tier descriptions to speak to entrepreneurs, agencies, and brand teams (matches the language used on the homepage).
