@@ -6,6 +6,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Pricing page refresh.** Several updates to /pricing:
+- Renamed the top tier from "Agency" to **Business** everywhere on the page.
+- Rewrote all three tier descriptions to speak to entrepreneurs, agencies, and brand teams (matches the language used on the homepage).
+- Bumped body copy on the pricing cards (tier descriptions + feature list items) to #DCDCDC so the text reads cleanly against the dark cards — same standard used on the homepage and blog.
+- Filled in the FAQ answers with full plain-English copy, and renamed "Do you offer discounts for smaller agencies?" to "Do you offer discounts?" with broader-audience wording.
+- Page title now reads "HQue Pricing — Plans for Agencies, Brands & Entrepreneurs".
+- Replaced the thin one-line footer ("© 2026 HQue ← Back to home") with the full footer used elsewhere on the site: logo + tagline ("The CRM and workspace for agencies, brands, and entrepreneurs who work with talent."), Product/Resources/Legal columns, and the italic "Made for people who work with talent." bottom line.
+
 **Green removed; blog grid now uniform 3 columns.** Two fixes:
 - Reverted the "Start free" nav button across the site back to the steel-blue #5b7c99 used by the homepage hero CTA. Replaced the active filter pill on the blog page's green fill with a clean white-on-dark inversion (cream fill #F0ECE6 with dark text #0E0E0E) so it reads as "selected" without introducing a new color.
 - Unified the post grid below the featured hero into a single 3-column layout — same gutter, same image height, same card height (cards stretch in their grid cells). The previous mixed layout (3-col row + asymmetric 5fr/8fr row + 4-col bottom row) is gone, and the orphan card that used to sit alone on the last row is now centered with a clean 1-up or 2-up flex row when the post count doesn't divide evenly into 3. The mid-page CTA banner stays where it was, between cards 6 and 7.

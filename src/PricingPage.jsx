@@ -7,7 +7,7 @@ const PLANS = [
     name: 'Starter',
     price: '$49',
     period: '/month',
-    description: 'Perfect for solo operators and small teams just getting started.',
+    description: 'For entrepreneurs and small teams who need a clean, simple way to manage talent and run campaigns.',
     features: [
       'Up to 50 talent',
       '2 team members',
@@ -22,7 +22,7 @@ const PLANS = [
     name: 'Pro',
     price: '$99',
     period: '/month',
-    description: 'For growing agencies that need more power and deeper insights.',
+    description: 'For agencies and brand teams scaling their campaigns and ready for deeper analytics and workflows.',
     highlight: true,
     features: [
       'Unlimited talent',
@@ -35,10 +35,10 @@ const PLANS = [
     ]
   },
   {
-    name: 'Agency',
+    name: 'Business',
     price: '$199',
     period: '/month',
-    description: 'For established agencies running multiple clients and campaigns.',
+    description: 'For established agencies and brands running high-volume talent operations across multiple campaigns and clients.',
     features: [
       'Unlimited everything',
       'Unlimited team members',
@@ -52,17 +52,17 @@ const PLANS = [
 ]
 
 const FAQS = [
-  { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. You get full access to all features during your trial.' },
-  { q: 'Can I switch plans later?', a: 'Yes. You can upgrade or downgrade at any time from your billing settings. Changes take effect at the start of your next billing cycle.' },
-  { q: 'What happens when my trial ends?', a: 'You\'ll be prompted to choose a plan. Your data is never deleted — reach out to support@h-que.com if you need more time.' },
-  { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel from your billing settings and you\'ll retain access until the end of your billing period.' },
-  { q: 'Do you offer discounts for smaller agencies?', a: 'The Starter plan at $49/month is built for smaller teams. If you have specific needs, reach out to support@h-que.com.' },
+  { q: 'Is there a free trial?', a: 'Yes — every plan includes a 14-day free trial. No credit card required. You get full access to all features during your trial period.' },
+  { q: 'Can I switch plans later?', a: 'Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.' },
+  { q: 'What happens when my trial ends?', a: 'Once your 14-day trial ends, you\'ll be prompted to choose a plan to continue. If you don\'t upgrade, your account will be paused — no charges, no surprises.' },
+  { q: 'Can I cancel anytime?', a: 'Yes. There are no long-term contracts. You can cancel your subscription at any time from your account settings, and you won\'t be charged again.' },
+  { q: 'Do you offer discounts?', a: 'The Starter plan at $49/month is built for smaller teams, solo entrepreneurs, and those just getting started. If you have specific needs or want to discuss volume pricing, reach out to support@h-que.com.' },
 ]
 
 export default function PricingPage({ onGetStarted }) {
   useSEO({
-    title: 'Pricing — HQue',
-    description: 'Simple, transparent pricing for talent and influencer agencies of every size. Start free, upgrade as you grow.',
+    title: 'HQue Pricing — Plans for Agencies, Brands & Entrepreneurs',
+    description: 'Simple, transparent pricing for agencies, brand teams, and entrepreneurs who work with talent. Start free, upgrade as you grow.',
     canonical: 'https://h-que.com/pricing',
   })
   const [openFaq, setOpenFaq] = useState(null)
@@ -113,14 +113,14 @@ export default function PricingPage({ onGetStarted }) {
                 <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '52px', color: '#F0ECE6', lineHeight: 1 }}>{plan.price}</span>
                 <span style={{ fontSize: '12px', color: '#666' }}>{plan.period}</span>
               </div>
-              <div style={{ fontSize: '13px', color: '#666', lineHeight: 1.65, marginBottom: '26px', minHeight: '44px' }}>{plan.description}</div>
+              <div style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.65, marginBottom: '26px', minHeight: '44px' }}>{plan.description}</div>
               <div style={{ borderTop: '0.5px solid #262626', paddingTop: '24px', marginBottom: '28px' }}>
                 {plan.features.map(f => {
                   const inherited = f.startsWith('Everything in')
                   return (
                     <div key={f} style={{ display: 'flex', gap: '11px', marginBottom: '13px', alignItems: 'flex-start' }}>
                       <span style={{ color: '#5b7c99', fontSize: '11px', flexShrink: 0, marginTop: '2px' }}>✓</span>
-                      <span style={{ fontSize: '13px', color: inherited ? '#9C978F' : '#888', fontWeight: inherited ? 500 : 400, lineHeight: 1.5 }}>{f}</span>
+                      <span style={{ fontSize: '13px', color: '#DCDCDC', fontWeight: inherited ? 500 : 400, lineHeight: 1.5 }}>{f}</span>
                     </div>
                   )
                 })}
@@ -177,10 +177,38 @@ export default function PricingPage({ onGetStarted }) {
       </div>
 
       {/* Footer */}
-      <div style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '20px 24px' : '20px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '10px', color: '#2A2A2A' }}>© 2026 HQue. All rights reserved.</span>
-        <a href="/" style={{ fontSize: '10px', color: '#333', textDecoration: 'none', letterSpacing: '0.1em' }}>← Back to home</a>
-      </div>
+      <footer style={{ borderTop: '0.5px solid #1A1A1A', padding: isMobile ? '40px 24px' : '60px 48px 40px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? '32px' : '48px', maxWidth: '1100px', margin: '0 auto 48px' }}>
+          <div>
+            <a href="/"><img src="/logo.svg" alt="HQue" style={{ width: '100px', marginBottom: '16px', display: 'block', cursor: 'pointer' }} /></a>
+            <div style={{ fontSize: '12px', color: '#DCDCDC', lineHeight: 1.7, maxWidth: '260px' }}>The CRM and workspace for agencies, brands, and entrepreneurs who work with talent.</div>
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Product</div>
+            {[['Features', '/#features'], ['Pricing', '/pricing'], ['FAQ', '/faq']].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Resources</div>
+            {[['The Pitch', '/blog'], ['Help Center', null]].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}>
+                {h ? <a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a> : <span style={{ fontSize: '12px', color: '#555' }}>{l}</span>}
+              </div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#999', marginBottom: '16px' }}>Legal</div>
+            {[['Privacy', '/privacy'], ['Terms', '/terms'], ['support@h-que.com', 'mailto:support@h-que.com']].map(([l, h]) => (
+              <div key={l} style={{ marginBottom: '10px' }}><a href={h} style={{ fontSize: '12px', color: '#aaa', textDecoration: 'none' }}>{l}</a></div>
+            ))}
+          </div>
+        </div>
+        <div style={{ borderTop: '0.5px solid #1A1A1A', paddingTop: '24px', maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', whiteSpace: 'nowrap' }}>© 2026 HQue. All rights reserved.</span>
+          <span style={{ fontSize: '10px', color: '#DCDCDC', fontStyle: 'italic', whiteSpace: 'nowrap', flexShrink: 0, marginRight: '60px' }}>Made for people who work with talent.</span>
+        </div>
+      </footer>
     </div>
   )
 }
