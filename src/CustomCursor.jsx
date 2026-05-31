@@ -74,6 +74,7 @@ export default function CustomCursor() {
           background: hover ? 'rgba(91,124,153,0.18)' : 'transparent',
           borderRadius: '50%', pointerEvents: 'none', zIndex: 9999,
           mixBlendMode: hover ? 'normal' : 'difference',
+          willChange: 'transform',
         }}
       >
         <svg
@@ -95,6 +96,8 @@ export default function CustomCursor() {
           position: 'fixed', top: 0, left: 0, width: '5px', height: '5px',
           background: '#5b7c99', borderRadius: '50%',
           pointerEvents: 'none', zIndex: 9999,
+          willChange: 'transform',
+          transition: 'none',
         }}
       />
     </>
