@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Overdue tasks now stand out on the Workspace board.** Any task with a due date in the past — and not already in a Done column — gets a 3px muted-terracotta (#B85A52) accent on the left edge of the card. Cards in Done columns stay as-is even if their date is past (it shipped, it's not overdue anymore). The rest of the card styling is unchanged. Applies on both the kanban board view and the list view.
+
 **FAQ page redesigned to match the rest of the marketing site.** The /faq page used to feel like a different site — left-aligned hero, a floating "support@h-que.com" callout in the top right, and a two-column accordion. It now mirrors the Pricing page exactly:
 - Hero is centered: "SUPPORT" eyebrow + "Frequently asked questions." headline + a short subline.
 - The two-column accordion is now a single centered column. The "+" expand icon stays on the right.
