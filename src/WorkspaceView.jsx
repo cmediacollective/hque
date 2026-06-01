@@ -178,6 +178,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [activeBoard, setActiveBoard] = useState(null)
   const [columns, setColumns] = useState([])
   const [hoveringTask, setHoveringTask] = useState(null)
+  const [hoveringAddTaskCol, setHoveringAddTaskCol] = useState(null)
   const [doneExpanded, setDoneExpanded] = useState(false)
   const [taskSort, setTaskSort] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('hque.taskSort')) || 'created')
   useEffect(() => { try { localStorage.setItem('hque.taskSort', taskSort) } catch (_) {} }, [taskSort])
@@ -564,7 +565,29 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                       {showNewTask === col.id ? (
                         <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', description: '', assignee_ids: [] }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                       ) : (
-                        <button onClick={() => setShowNewTask(col.id)} style={{ width: '100%', padding: '8px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border}`, color: subtle, cursor: 'pointer', borderRadius: '1px', marginBottom: '10px', textAlign: 'left' }}>+ Add task</button>
+                        <button
+                          onClick={() => setShowNewTask(col.id)}
+                          onMouseEnter={() => setHoveringAddTaskCol(col.id)}
+                          onMouseLeave={() => setHoveringAddTaskCol(null)}
+                          style={{
+                            width: '100%',
+                            padding: '6px 4px',
+                            marginBottom: '10px',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            fontFamily: "'Inter Tight', sans-serif",
+                            fontSize: '12px',
+                            fontWeight: 400,
+                            letterSpacing: 'normal',
+                            textTransform: 'none',
+                            color: text,
+                            opacity: hoveringAddTaskCol === col.id ? 1 : 0.5,
+                            textDecoration: hoveringAddTaskCol === col.id ? 'underline' : 'none',
+                            transition: 'opacity 0.15s ease',
+                          }}
+                        >+ Add task</button>
                       )}
                     </div>
                     </>
