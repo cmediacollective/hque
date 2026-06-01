@@ -20,6 +20,7 @@ export default function MiniCalendar({ dark = true, agencyTz }) {
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const subtle = dark ? '#777' : '#888'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const dividerSubtle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'
   const blue = '#5b7c99'
 
   // Track the displayed month as an offset from "this month" so the calendar
@@ -46,7 +47,7 @@ export default function MiniCalendar({ dark = true, agencyTz }) {
   const arrowBtn = { width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', background: 'none', border: 'none', color: subtle, cursor: 'pointer', padding: 0 }
 
   return (
-    <div style={{ padding: '16px 16px 4px', marginTop: '24px', borderTop: `0.5px solid ${border}` }}>
+    <div style={{ padding: '14px 16px 4px', marginTop: '12px', borderTop: `1px solid ${dividerSubtle}` }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
         <button onClick={() => setMonthOffset(o => o - 1)} style={arrowBtn} title='Previous month'>‹</button>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '12px', color: blue }}>{MONTHS[month]} {year}</div>
