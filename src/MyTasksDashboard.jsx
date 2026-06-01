@@ -442,8 +442,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
               const m = dailyVibe.note.match(/^(Did you know\?|Fun fact:|Tip:|Halloween joke:)\s*/i)
               const intro = m ? m[1] : 'Did you know?'
               const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
+              const dividerColor = dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'
               return (
-                <div style={{ padding: '2px 0', maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
+                <div style={{ paddingTop: '14px', borderTop: `1px solid ${dividerColor}`, maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
                   <div style={{ color: '#5b7c99', borderBottom: '3px solid #5b7c99', paddingBottom: '4px', marginBottom: '8px', display: 'inline-block' }}>{intro}</div>
                   <div>{body}</div>
                 </div>
