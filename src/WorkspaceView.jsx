@@ -512,7 +512,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         textTransform: 'uppercase',
                         background: active ? (dark ? '#F0ECE6' : '#3a3a3a') : 'transparent',
                         color: active ? (dark ? '#1A1A1A' : '#fff') : text,
-                        opacity: active ? 1 : 0.6,
+                        opacity: active ? 1 : 0.5,
                         fontWeight: active ? 500 : 400,
                         border: 'none',
                         cursor: 'pointer',
