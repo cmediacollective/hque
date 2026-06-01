@@ -8,7 +8,7 @@
 
   --font-display: "Fraunces", Georgia, serif;
   --font-display--font-feature-settings: "ss01";
-  --font-sans: "Plus Jakarta Sans", "Inter Tight", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter Tight", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   --text-display: clamp(64px, 12vw, 180px);

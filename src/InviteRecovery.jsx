@@ -28,7 +28,7 @@ export default function InviteRecovery({ onBackToSignIn }) {
   const inputStyle = { width: '100%', background: '#141414', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }
 
   return (
-    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ width: '400px', padding: '0 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <img src="/logo.svg" alt="HQue" onClick={() => window.location.href = '/'} style={{ width: '170px', height: 'auto', display: 'block', margin: '0 auto', cursor: 'pointer' }} />

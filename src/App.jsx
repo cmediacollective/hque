@@ -360,7 +360,7 @@ function App() {
   )
 
   return (
-    <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
+    <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
       {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />}
       {showWelcome && (

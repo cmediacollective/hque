@@ -381,17 +381,17 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
     if (filled) {
       return (
-        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', borderRadius: '2px', position: 'relative', cursor: 'pointer', marginBottom: '6px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', borderRadius: '2px', position: 'relative', cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
           {overdue && <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '7px', letterSpacing: '0.16em', fontWeight: 600, color: '#c0392b', background: '#fff', border: '1px solid #c0392b', padding: '1px 6px', borderRadius: '2px' }}>OVERDUE</div>}
-          <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, fontSize: '14px', marginBottom: '6px', paddingRight: overdue ? '52px' : '0', lineHeight: 1.3 }}>{t.title}</div>
-          <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontSize: '11px', opacity: 0.6 }}>{brandLine}</div>
+          <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: '13px', marginBottom: '6px', paddingRight: overdue ? '52px' : '0', lineHeight: 1.3 }}>{t.title}</div>
+          <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: '11px', opacity: 0.6 }}>{brandLine}</div>
         </div>
       )
     }
     return (
-      <div onClick={() => handleTaskClick(t)} style={{ background: 'transparent', color: text, padding: '10px 12px', borderRadius: '2px', border: `0.5px solid ${outlinedBorder}`, cursor: 'pointer', marginBottom: '6px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-        <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600, fontSize: '14px', marginBottom: '6px', lineHeight: 1.3 }}>{t.title}</div>
-        <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 400, fontSize: '11px', color: muted, opacity: 0.6 }}>{brandLine}</div>
+      <div onClick={() => handleTaskClick(t)} style={{ background: 'transparent', color: text, padding: '10px 12px', borderRadius: '2px', border: `0.5px solid ${outlinedBorder}`, cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
+        <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: '13px', marginBottom: '6px', lineHeight: 1.3 }}>{t.title}</div>
+        <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: '11px', color: muted, opacity: 0.6 }}>{brandLine}</div>
       </div>
     )
   }

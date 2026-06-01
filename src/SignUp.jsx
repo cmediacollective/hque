@@ -48,7 +48,7 @@ export default function SignUp({ onSignUp }) {
   const btnSecondary = { width: '100%', padding: '11px', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #2A2A2A', color: '#777', cursor: 'pointer', borderRadius: '1px', marginBottom: '10px' }
 
   return (
-    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ width: '380px', padding: '0 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <img src="/logo.svg" alt="HQue" onClick={() => window.location.href='/'} style={{ cursor: 'pointer' }} style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
