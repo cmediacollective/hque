@@ -498,9 +498,29 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 <option value='due'>Sort: Due date</option>
                 <option value='priority'>Sort: Priority</option>
               </select>
-              <div style={{ display: 'flex', gap: '0', border: `1px solid ${border2}`, borderRadius: '4px', flexShrink: 0, overflow: 'hidden', boxShadow: taskShadow }}>
-                <button onClick={() => setViewMode('kanban')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'kanban' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'kanban' ? '#fff' : muted, cursor: 'pointer', fontWeight: viewMode === 'kanban' ? 500 : 400 }}>Kanban</button>
-                <button onClick={() => setViewMode('list')} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: viewMode === 'list' ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', color: viewMode === 'list' ? '#fff' : muted, cursor: 'pointer', borderLeft: `0.5px solid ${border2}`, fontWeight: viewMode === 'list' ? 500 : 400 }}>List</button>
+              <div style={{ display: 'flex', gap: '0', border: `1px solid ${border2}`, borderRadius: '4px', flexShrink: 0, overflow: 'hidden' }}>
+                {[['kanban', 'Kanban'], ['list', 'List']].map(([mode, label]) => {
+                  const active = viewMode === mode
+                  return (
+                    <button
+                      key={mode}
+                      onClick={() => setViewMode(mode)}
+                      style={{
+                        padding: '6px 14px',
+                        fontSize: '9px',
+                        letterSpacing: '0.16em',
+                        textTransform: 'uppercase',
+                        background: active ? (dark ? '#F0ECE6' : '#1A1A1A') : 'transparent',
+                        color: active ? (dark ? '#1A1A1A' : '#fff') : text,
+                        opacity: active ? 1 : 0.5,
+                        fontWeight: active ? 500 : 400,
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'opacity 0.15s ease',
+                      }}
+                    >{label}</button>
+                  )
+                })}
               </div>
             </div>
 
