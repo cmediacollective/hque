@@ -468,7 +468,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
         {selectedBrand && (
           <>
             <div style={{ padding: '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
-              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: '0.5px solid #5b7c99', color: '#fff', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 500 }}>
                 <span style={{ fontSize: '12px', lineHeight: 1 }}>←</span>
                 <span>My Tasks</span>
               </button>
@@ -487,13 +487,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 </div>
               </div>
               {selectedBrand.id !== '__internal' && (
-                <button onClick={() => { setShowNotes(true); setNotesNew(false) }} title={notesNew ? 'New activity since your last visit' : 'Open notes'} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '1px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
+                <button onClick={() => { setShowNotes(true); setNotesNew(false) }} title={notesNew ? 'New activity since your last visit' : 'Open notes'} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, cursor: 'pointer', borderRadius: '4px', flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
                   <span style={{ fontSize: '11px', lineHeight: 1 }}>✎</span>
                   <span>Notes</span>
-                  {notesNew && <span style={{ marginLeft: '2px', fontSize: '7px', letterSpacing: '0.2em', padding: '1px 5px', background: '#5b7c99', color: '#fff', borderRadius: '8px', fontWeight: 600 }}>NEW</span>}
+                  {notesNew && <span style={{ marginLeft: '2px', fontSize: '7px', letterSpacing: '0.2em', padding: '1px 5px', background: '#5C9E52', color: '#fff', borderRadius: '8px', fontWeight: 600 }}>NEW</span>}
                 </button>
               )}
-              <select value={taskSort} onChange={e => setTaskSort(e.target.value)} title='Sort tasks within each column' style={{ padding: '6px 26px 6px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: `1px solid ${border2}`, color: muted, borderRadius: '4px', cursor: 'pointer', flexShrink: 0, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', boxShadow: taskShadow, fontFamily: 'inherit' }}>
+              <select value={taskSort} onChange={e => setTaskSort(e.target.value)} title='Sort tasks within each column' style={{ padding: '6px 26px 6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, borderRadius: '4px', cursor: 'pointer', flexShrink: 0, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center', fontFamily: 'inherit', fontWeight: 500 }}>
                 <option value='created'>Sort: Default</option>
                 <option value='due'>Sort: Due date</option>
                 <option value='priority'>Sort: Priority</option>
@@ -510,7 +510,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         fontSize: '9px',
                         letterSpacing: '0.16em',
                         textTransform: 'uppercase',
-                        background: active ? (dark ? '#F0ECE6' : '#1A1A1A') : 'transparent',
+                        background: active ? (dark ? '#F0ECE6' : '#2d2d2d') : 'transparent',
                         color: active ? (dark ? '#1A1A1A' : '#fff') : text,
                         opacity: active ? 1 : 0.5,
                         fontWeight: active ? 500 : 400,
