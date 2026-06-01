@@ -51,7 +51,7 @@ export default function UpgradeWall({ orgId, user, onLogout }) {
   }
 
   return (
-    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '40px' }} />
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#F0ECE6', marginBottom: '8px', textAlign: 'center' }}>Your trial has ended</div>
       <div style={{ fontSize: '14px', color: '#777', marginBottom: '40px', textAlign: 'center', lineHeight: 1.7, maxWidth: '400px' }}>

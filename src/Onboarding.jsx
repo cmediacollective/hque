@@ -48,7 +48,7 @@ export default function Onboarding({ user, onComplete }) {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: '#1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ width: '420px', padding: '0 20px' }}>
         <div style={{ marginBottom: '40px' }}>
           <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '32px', display: 'block' }} />

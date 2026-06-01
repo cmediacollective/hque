@@ -140,7 +140,7 @@ export default function TalentInquiry() {
   )
 
   if (!org) return (
-    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center' }}>
         <img src="/logo.svg" alt="HQue" style={{ width: '140px', marginBottom: '32px', display: 'block', margin: '0 auto 32px', filter: 'invert(1)' }} />
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#1A1A1A', marginBottom: '10px' }}>Agency not found</div>
@@ -151,7 +151,7 @@ export default function TalentInquiry() {
   )
 
   if (submitted) return (
-    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ textAlign: 'center', maxWidth: '400px', padding: '0 20px' }}>
         {org?.isAgencyTier && org.logoUrl ? (
           <img src={org.logoUrl} alt={org.displayName} style={{ maxWidth: '140px', maxHeight: '60px', objectFit: 'contain', marginBottom: '40px', display: 'block', margin: '0 auto 40px' }} onError={e => { e.target.style.display = 'none' }} />
@@ -171,7 +171,7 @@ export default function TalentInquiry() {
   )
 
   return (
-    <div style={{ background: '#F8F7F3', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#1A1A1A' }}>
+    <div style={{ background: '#F8F7F3', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#1A1A1A' }}>
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px' }}>
 
         <div style={{ marginBottom: '40px' }}>

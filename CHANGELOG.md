@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-05-30
 
+**Platform typography switched to Plus Jakarta Sans + Workspace task cards refreshed.** Two cohesive design updates:
+- **Typography:** Loaded Plus Jakarta Sans from Google Fonts (weights 300–700) and pushed it to the front of the font stack across the in-app UI — App shell, Login/SignUp, Onboarding, Inquiries, Talent Inquiry form, and the auth/upgrade gates. The marketing site (landing, blog, pricing, FAQ) is unchanged; it keeps its existing Helvetica + Fraunces pairing. Headings that already use the Georgia/Fraunces serif (greeting "Good afternoon, Cherie", page titles, etc.) stay as-is.
+- **Workspace task cards:** Cards now feel more elevated. Padding bumped from 12px to 16px (kanban) and 12/14px to 16/18px (list view). Title is explicit `font-weight: 500` and slightly larger; description and due date sit at `font-weight: 400` with ~70% opacity so the hierarchy is unambiguous when scanning. Shadow simplified to `0 2px 6px rgba(0,0,0,0.07)` (light) — softer, not dramatic — and dark-mode card surface lightened a touch to `#2A2A2A` so it lifts off the surrounding panel.
+
 **Overdue badge gets a warm rust treatment; left border accent removed.** Walked back the terracotta left border on overdue task cards — it clashed with the otherwise calm aesthetic. The "OVERDUE" pill on the home dashboard's blue task cards now does the work on its own: warm sienna/rust background (#A0522D), white text, slightly bolder (font-weight 600), slightly more breathing room around the text. Still easy to spot at a glance, no harsh red.
 
 **Overdue tasks now stand out on the Workspace board.** Any task with a due date in the past — and not already in a Done column — gets a 3px muted-terracotta (#B85A52) accent on the left edge of the card. Cards in Done columns stay as-is even if their date is past (it shipped, it's not overdue anymore). The rest of the card styling is unchanged. Applies on both the kanban board view and the list view.

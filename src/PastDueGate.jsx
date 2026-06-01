@@ -31,7 +31,7 @@ export default function PastDueGate({ stripeCustomerId, pastDueSince, onLogout }
     : null
 
   return (
-    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+    <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '40px' }} />
 
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#F0ECE6', marginBottom: '12px', textAlign: 'center' }}>
