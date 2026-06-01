@@ -547,13 +547,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                           onMouseEnter={() => setHoveringTask(task.id)}
                           onMouseLeave={() => setHoveringTask(null)}
                           onClick={() => setEditingTask({ ...task })}
-                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px', marginBottom: '8px', cursor: 'pointer', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
-                          <div style={{ fontSize: '13px', fontWeight: 500, color: text, lineHeight: 1.45, marginBottom: '8px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
-                          {task.description && <div style={{ fontSize: "11px", fontWeight: 400, color: muted, opacity: 0.75, lineHeight: 1.5, marginBottom: "8px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
+                          style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px', marginBottom: '8px', cursor: 'pointer', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: text, lineHeight: 1.4, marginBottom: '8px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
+                          {task.description && <div style={{ fontSize: "12px", fontWeight: 400, color: muted, opacity: 0.6, lineHeight: 1.5, marginBottom: "8px", whiteSpace: "pre-wrap", display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{task.description}</div>}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                              {task.due_date && <span style={{ fontSize: '10px', fontWeight: 400, color: muted, opacity: 0.7 }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                              {task.due_date && <span style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.6 }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                               {renderAvatars(task)}
                             </div>
                             <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
@@ -585,13 +585,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         onClick={() => setEditingTask({ ...task })}
                         onMouseEnter={() => setHoveringTask(task.id)}
                         onMouseLeave={() => setHoveringTask(null)}
-                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease' }}>
+                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: '1fr 80px 90px auto 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease', fontFamily: "'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: 500, color: text, marginBottom: '3px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
-                          {task.description && <div style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.75, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: text, marginBottom: '3px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none' }}>{task.title}</div>
+                          {task.description && <div style={{ fontSize: '12px', fontWeight: 400, color: muted, opacity: 0.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
                         </div>
                         <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px', textAlign: 'center', borderRadius: '1px' }}>{task.priority}</span>
-                        <div style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.7 }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 400, color: muted, opacity: 0.6 }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
                         <div>{renderAvatars(task)}</div>
                         <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
                       </div>
