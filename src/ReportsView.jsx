@@ -28,7 +28,7 @@ function campaignDate(c) {
   return String(d).includes('T') ? new Date(d) : new Date(d + 'T00:00:00')
 }
 
-export default function ReportsView({ dark = true, orgId }) {
+export default function ReportsView({ dark = true, orgId, focusVersion = 0 }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -46,6 +46,8 @@ export default function ReportsView({ dark = true, orgId }) {
   const [month, setMonth] = useState('all') // 'all' or 0..11
 
   useEffect(() => { fetchAll() }, [orgId])
+  // Refresh after the tab regains focus from a long absence.
+  useEffect(() => { if (focusVersion > 0) fetchAll() }, [focusVersion])
 
   async function fetchAll() {
     setLoading(true)

@@ -6,6 +6,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-02
 
+**App refreshes its data automatically when you return to the tab.** With sections now staying in memory across navigation (see below), they were previously also keeping stale data after you'd been away from the tab. Now, when you come back to the tab after being away 30 seconds or more, the app quietly refreshes the data behind each section — campaigns, talent, reports, inquiries, and the workspace board you had open. No spinner; it just updates in place.
+
+**Lighter background polling.** The unread notification count used to poll every 10 seconds, even with the tab in the background. It now polls every 60 seconds, pauses when the tab is hidden, and refreshes immediately when you come back to the tab. The query itself is also smaller — it asks the server for just the count instead of the rows themselves. Less network chatter, same prompt badge.
+
 **Switching sections in the app is now instant.** Previously, navigating between Workspace, Talent, Campaigns, Reports, and Settings fully unloaded the section you were leaving and re-fetched everything from scratch when you came back. Now each section stays in memory once you've opened it — the second (and every subsequent) visit shows what's already loaded with no spinner, no re-fetch. Same for the Roster / Archived / Inquiries tabs inside Talent. First visit to a section still loads as before; the benefit kicks in on every visit after that.
 
 ---

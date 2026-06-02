@@ -122,7 +122,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0 }) {
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
   const [campaigns, setCampaigns] = useState([])
@@ -225,6 +225,16 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   useEffect(() => {
     if (activeBoard) { fetchColumns(); fetchTasks() }
   }, [activeBoard?.id])
+
+  // Refresh after the tab regains focus from a long absence — re-pull the
+  // small reference lists at the top, plus the active board's tasks/columns.
+  useEffect(() => {
+    if (focusVersion === 0 || !orgId) return
+    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
+    supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
+    if (activeBoard) { fetchColumns(); fetchTasks() }
+  }, [focusVersion])
 
   async function openTaskById(id) {
     if (!id) return

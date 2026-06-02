@@ -20,7 +20,7 @@ const BOARD_COLUMNS = [
   { key: '__archived', label: 'Archived' }
 ]
 
-export default function CampaignView({ dark = true, orgId, campaignView = 'grid', openCampaignId, onOpenCampaignHandled }) {
+export default function CampaignView({ dark = true, orgId, campaignView = 'grid', openCampaignId, onOpenCampaignHandled, focusVersion = 0 }) {
   const isMobile = window.innerWidth < 768;
   const view = campaignView
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -53,6 +53,8 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [hoveringCard, setHoveringCard] = useState(null)
 
   useEffect(() => { fetchCampaigns() }, [orgId, view])
+  // Refresh after the tab regains focus from a long absence.
+  useEffect(() => { if (focusVersion > 0) fetchCampaigns() }, [focusVersion])
 
   useEffect(() => {
     if (!orgId) return

@@ -20,7 +20,7 @@ function totalFollowers(creator) {
   if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
   return total.toLocaleString()
 }
-export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid' }) {
+export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0 }) {
   const [creators, setCreators] = useState([])
   const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
@@ -47,6 +47,8 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const cardShadowHover = dark ? '0 8px 22px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.07), 0 12px 26px rgba(0,0,0,0.11)'
 
   useEffect(() => { fetchCreators() }, [showArchived])
+  // Refresh after the tab regains focus from a long absence.
+  useEffect(() => { if (focusVersion > 0) fetchCreators() }, [focusVersion])
 
   async function fetchCreators() {
     setLoading(true)

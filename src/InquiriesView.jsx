@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
-export default function InquiriesView({ orgId, dark = true }) {
+export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#1E1E1E' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -20,6 +20,8 @@ export default function InquiriesView({ orgId, dark = true }) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => { fetchInquiries(); fetchOrg() }, [filter])
+  // Refresh after the tab regains focus from a long absence.
+  useEffect(() => { if (focusVersion > 0) fetchInquiries() }, [focusVersion])
 
   async function fetchInquiries() {
     setLoading(true)

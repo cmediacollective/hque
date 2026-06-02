@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { supabase } from './supabase'
 import Login from './Login'
 import SignUp from './SignUp'
@@ -58,6 +58,25 @@ function App() {
   useEffect(() => {
     setVisitedTalentTabs(prev => prev.has(talentTab) ? prev : new Set([...prev, talentTab]))
   }, [talentTab])
+
+  // Refetch-on-focus: bumped whenever the tab regains visibility after being
+  // hidden for at least 30 seconds. Views watch this prop and refetch when it
+  // changes — keeps cached data fresh after you come back to the tab.
+  const [focusVersion, setFocusVersion] = useState(0)
+  const hiddenAtRef = useRef(null)
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAtRef.current = Date.now()
+      } else if (document.visibilityState === 'visible') {
+        const wasHiddenFor = hiddenAtRef.current ? Date.now() - hiddenAtRef.current : 0
+        if (wasHiddenFor > 30000) setFocusVersion(v => v + 1)
+        hiddenAtRef.current = null
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
   const [showArchived, setShowArchived] = useState(false)
   const [talentView, setTalentView] = useState('grid')
   const [campaignView, setCampaignView] = useState('grid')
@@ -203,14 +222,22 @@ function App() {
 
   useEffect(() => {
     if (!user) return
+    // Use head + count to skip the row payload — we only need the number.
     const fetchUnread = async () => {
-      const { data } = await supabase.from('notifications').select('id').eq('user_id', user.id).eq('read', false)
-      setUnreadCount((data || []).length)
+      if (document.visibilityState === 'hidden') return
+      const { count } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false)
+      setUnreadCount(count || 0)
     }
     fetchUnread()
-    const interval = setInterval(fetchUnread, 10000)
+    // 60s instead of 10s — combined with the focus-return refresh below it
+    // still feels prompt without hammering the network in the background.
+    const interval = setInterval(fetchUnread, 60000)
     return () => clearInterval(interval)
-  }, [user])
+  }, [user, focusVersion])
 
   async function fetchProfile() {
     setProfileLoading(true)
@@ -516,36 +543,36 @@ function App() {
                   fetch effects every time the user switches sections. */}
               {visited.has('workspace') && (
                 <div style={{ display: view === 'workspace' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />
+                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} focusVersion={focusVersion} />
                 </div>
               )}
               {visited.has('talent') && (
                 <div style={{ display: view === 'talent' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   {visitedTalentTabs.has('roster') && (
                     <div style={{ display: talentTab === 'roster' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />
+                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} focusVersion={focusVersion} />
                     </div>
                   )}
                   {visitedTalentTabs.has('archived') && (
                     <div style={{ display: talentTab === 'archived' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />
+                      <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} focusVersion={focusVersion} />
                     </div>
                   )}
                   {visitedTalentTabs.has('inquiries') && (
                     <div style={{ display: talentTab === 'inquiries' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <InquiriesView dark={dark} orgId={orgId} />
+                      <InquiriesView dark={dark} orgId={orgId} focusVersion={focusVersion} />
                     </div>
                   )}
                 </div>
               )}
               {visited.has('campaigns') && (
                 <div style={{ display: view === 'campaigns' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />
+                  <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} focusVersion={focusVersion} />
                 </div>
               )}
               {visited.has('reports') && (
                 <div style={{ display: view === 'reports' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <ReportsView dark={dark} orgId={orgId} />
+                  <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} />
                 </div>
               )}
               {visited.has('settings') && (
