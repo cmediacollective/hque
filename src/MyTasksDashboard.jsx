@@ -119,11 +119,20 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
     const openTasks = (tasksRes.data || []).filter(t => !doneColumnIds.has(t.column_id))
 
-    const brandIds = [...new Set(openTasks.map(t => boardBrandMap[t.board_id]).filter(Boolean))]
-    let brandMap = {}
-    if (brandIds.length > 0) {
-      const { data: bs } = await supabase.from('brands').select('id, name, logo_url').in('id', brandIds)
-      ;(bs || []).forEach(b => { brandMap[b.id] = b })
+    // The parent (WorkspaceView) already passes us the org's brand list, so
+    // we can build the lookup locally instead of paying for another network
+    // round-trip just to fetch a subset of what we already have. We only fall
+    // back to a query if the prop hasn't arrived yet — rare but possible on a
+    // cold mount where this fetch wins the race against the parent's.
+    const brandMap = {}
+    if (brands && brands.length > 0) {
+      brands.forEach(b => { brandMap[b.id] = b })
+    } else {
+      const brandIds = [...new Set(openTasks.map(t => boardBrandMap[t.board_id]).filter(Boolean))]
+      if (brandIds.length > 0) {
+        const { data: bs } = await supabase.from('brands').select('id, name, logo_url').in('id', brandIds)
+        ;(bs || []).forEach(b => { brandMap[b.id] = b })
+      }
     }
 
     const enrich = t => {

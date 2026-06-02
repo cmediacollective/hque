@@ -137,7 +137,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   useEffect(() => {
     if (!orgId || cleanedUpRef.current) return
     cleanedUpRef.current = true
-    ;(async () => {
+    // Defer this one-time maintenance sweep so it doesn't compete with the
+    // first-paint critical path. The scan reads every task with a campaign_id
+    // in the org and can take a moment on larger orgs.
+    const run = async () => {
       const { data: linked } = await supabase
         .from('tasks')
         .select('id, title, description, campaign_id')
@@ -154,7 +157,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       if (orphanIds.length === 0) return
       await supabase.from('tasks').delete().in('id', orphanIds)
       setTasks(ts => ts.filter(t => !orphanIds.includes(t.id)))
-    })()
+    }
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(() => run(), { timeout: 5000 })
+    } else {
+      setTimeout(run, 1500)
+    }
   }, [orgId])
 
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
