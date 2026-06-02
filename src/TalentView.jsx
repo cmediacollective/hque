@@ -4,7 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 
-const TYPES = ['All Types', 'Influencer', 'UGC', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
+const TYPES = ['All Types', 'Influencer', 'UGC', 'Model', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 // Keep this list identical to NICHES in AddCreatorForm.jsx — the filter chips
 // must match the categories a creator can actually be tagged with.
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books', 'Specialty']
@@ -165,7 +165,15 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
             ? { display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }
             : { display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }
           }>
-            {TYPES.map(t => chip(t, typeFilter === t, () => setTypeFilter(t)))}
+            {TYPES.map(t => {
+              // "All Types" is the "no filter" state — it should only look active
+              // when no niche or specific type is applied, and clicking it clears both.
+              if (t === 'All Types') {
+                const allActive = typeFilter === 'All Types' && !nicheFilter
+                return chip(t, allActive, () => { setTypeFilter('All Types'); setNicheFilter(null) })
+              }
+              return chip(t, typeFilter === t, () => setTypeFilter(typeFilter === t ? 'All Types' : t))
+            })}
             <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 2px', flexShrink: 0 }} />
             {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
             {!isMobile && (
