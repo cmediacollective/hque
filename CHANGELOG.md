@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-02
+
+**Switching sections in the app is now instant.** Previously, navigating between Workspace, Talent, Campaigns, Reports, and Settings fully unloaded the section you were leaving and re-fetched everything from scratch when you came back. Now each section stays in memory once you've opened it — the second (and every subsequent) visit shows what's already loaded with no spinner, no re-fetch. Same for the Roster / Archived / Inquiries tabs inside Talent. First visit to a section still loads as before; the benefit kicks in on every visit after that.
+
+---
+
 ## 2026-06-01
 
 **Cleaned up the "Did you know?" widget on the home dashboard.** Removed the thin horizontal divider that sat above the fact, and restyled the "Did you know?" label to use Inter Tight at the same weight as the task titles (600). The fact body stays in its italic serif. Quieter, more cohesive with the rest of the dashboard.

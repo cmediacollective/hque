@@ -44,7 +44,20 @@ const initialAuthError = (() => {
 
 function App() {
   const [view, setView] = useState('workspace')
+  // Track which top-level views the user has actually opened in this session.
+  // Once visited, a view stays mounted (display: none when inactive) so coming
+  // back to it doesn't pay the refetch cost. We seed with 'workspace' since
+  // that's the default landing.
+  const [visited, setVisited] = useState(() => new Set(['workspace']))
+  useEffect(() => {
+    setVisited(prev => prev.has(view) ? prev : new Set([...prev, view]))
+  }, [view])
   const [talentTab, setTalentTab] = useState('roster')
+  // Same idea, scoped to the Talent view's sub-tabs.
+  const [visitedTalentTabs, setVisitedTalentTabs] = useState(() => new Set(['roster']))
+  useEffect(() => {
+    setVisitedTalentTabs(prev => prev.has(talentTab) ? prev : new Set([...prev, talentTab]))
+  }, [talentTab])
   const [showArchived, setShowArchived] = useState(false)
   const [talentView, setTalentView] = useState('grid')
   const [campaignView, setCampaignView] = useState('grid')
@@ -498,13 +511,48 @@ function App() {
 
           <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
             <Suspense fallback={viewLoader}>
-              {view === 'talent' && talentTab === 'roster' && <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />}
-              {view === 'talent' && talentTab === 'archived' && <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />}
-              {view === 'talent' && talentTab === 'inquiries' && <InquiriesView dark={dark} orgId={orgId} />}
-              {view === 'workspace' && <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />}
-              {view === 'campaigns' && <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />}
-              {view === 'reports' && <ReportsView dark={dark} orgId={orgId} />}
-              {view === 'settings' && <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />}
+              {/* Views stay mounted after first visit. The wrapper toggles
+                  display so React preserves component state and avoids re-running
+                  fetch effects every time the user switches sections. */}
+              {visited.has('workspace') && (
+                <div style={{ display: view === 'workspace' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} />
+                </div>
+              )}
+              {visited.has('talent') && (
+                <div style={{ display: view === 'talent' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  {visitedTalentTabs.has('roster') && (
+                    <div style={{ display: talentTab === 'roster' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} />
+                    </div>
+                  )}
+                  {visitedTalentTabs.has('archived') && (
+                    <div style={{ display: talentTab === 'archived' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                      <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} />
+                    </div>
+                  )}
+                  {visitedTalentTabs.has('inquiries') && (
+                    <div style={{ display: talentTab === 'inquiries' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                      <InquiriesView dark={dark} orgId={orgId} />
+                    </div>
+                  )}
+                </div>
+              )}
+              {visited.has('campaigns') && (
+                <div style={{ display: view === 'campaigns' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} />
+                </div>
+              )}
+              {visited.has('reports') && (
+                <div style={{ display: view === 'reports' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <ReportsView dark={dark} orgId={orgId} />
+                </div>
+              )}
+              {visited.has('settings') && (
+                <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />
+                </div>
+              )}
             </Suspense>
           </div>
         </main>
