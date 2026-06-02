@@ -30,13 +30,19 @@ export default function TalentInquiry() {
   }, [])
 
   async function fetchOrg(slug) {
-    const { data: org } = await supabase.from('organizations').select('id, name, stripe_plan').eq('slug', slug).single()
+    // Use the get_inquiry_org RPC instead of querying organizations / org_settings
+    // directly. The RPC runs as SECURITY DEFINER so the public inquiry page keeps
+    // working after RLS is enabled on the organizations table, and it only returns
+    // the four fields this page actually needs (no stripe / billing data).
+    const { data: rows } = await supabase.rpc('get_inquiry_org', { p_slug: slug })
+    const org = rows && rows[0]
     if (org) {
-      const { data: settings } = await supabase.from('org_settings').select('agency_name, agency_logo_url').eq('org_id', org.id).single()
       setOrg({
-        ...org,
-        displayName: settings?.agency_name || org.name,
-        logoUrl: settings?.agency_logo_url,
+        id: org.id,
+        name: org.name,
+        stripe_plan: org.stripe_plan,
+        displayName: org.agency_name || org.name,
+        logoUrl: org.agency_logo_url,
         isAgencyTier: org.stripe_plan === 'agency'
       })
     } else {

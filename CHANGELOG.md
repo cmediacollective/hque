@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-02
 
+**Security: locked down the `organizations` table.** Supabase flagged that the `organizations` table was publicly accessible (Row-Level Security was off). The public talent-inquiry page (`/inquire/<slug>`) needed to read agency name + logo without being logged in, which is why RLS hadn't been turned on. Fixed it by routing the inquiry page through a small server-side function (`get_inquiry_org`) that returns ONLY the four fields the inquiry page needs — no Stripe info, no trial dates, no subscription status. RLS can now be enabled on the table safely; the inquiry page keeps working.
+
 **App refreshes its data automatically when you return to the tab.** With sections now staying in memory across navigation (see below), they were previously also keeping stale data after you'd been away from the tab. Now, when you come back to the tab after being away 30 seconds or more, the app quietly refreshes the data behind each section — campaigns, talent, reports, inquiries, and the workspace board you had open. No spinner; it just updates in place.
 
 **Workspace first-load is leaner.** Two small consolidations on the home dashboard:
