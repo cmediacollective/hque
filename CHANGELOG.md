@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-01
 
+**Cleaned up the "Did you know?" widget on the home dashboard.** Removed the thin horizontal divider that sat above the fact, and restyled the "Did you know?" label to use Inter Tight at the same weight as the task titles (600). The fact body stays in its italic serif. Quieter, more cohesive with the rest of the dashboard.
+
 **Talent filters: added Model + fixed "All Types" stickiness.** Two small but useful changes on the Talent view:
 - **New type — Model.** "Model" is now an option in the type filter chips and in the Add/Edit creator form, sitting between UGC and Actor in both places.
 - **No more sticky "All Types."** Previously, clicking "All Types" and then a niche (e.g. Fashion) left both pills highlighted, which was confusing. Now "All Types" is treated as the "no filter" state — it only shows as active when no specific type *and* no niche is selected. Click any other type or niche and "All Types" dims automatically. Clicking "All Types" itself clears both filters in one move. Clicking the currently-active type chip a second time also resets to "All Types."
