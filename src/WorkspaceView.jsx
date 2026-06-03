@@ -22,8 +22,10 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   const subtle = dark ? '#666' : '#888'
   const cardBg = dark ? '#222' : '#FFFFFF'
 
+  const hasAssignee = (form.assignee_ids || []).length > 0
+  const canSave = !!form.title?.trim() && hasAssignee
   const doSave = async () => {
-    if (saving || !form.title?.trim()) return
+    if (saving || !canSave) return
     setSaving(true)
     try { await onSave(form) } finally { setSaving(false) }
   }
@@ -78,7 +80,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
       </div>
       <div style={{ marginBottom: '8px', position: 'relative' }}>
         <div onClick={() => setAssigneeMenuOpen(o => !o)} style={{ minHeight: '28px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-          {selectedAssignees.length === 0 && <span style={{ fontSize: '10px', color: subtle }}>Assign team members</span>}
+          {selectedAssignees.length === 0 && <span style={{ fontSize: '10px', color: subtle }}>Assign team members <span style={{ color: '#c97a6f' }}>(required)</span></span>}
           {selectedAssignees.map(m => (
             <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: dark ? '#2A2A2A' : '#E8E4DE', padding: '2px 6px 2px 2px', borderRadius: '10px', fontSize: '10px', color: text }}>
               {m.avatar_url ? (
@@ -115,7 +117,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
         )}
       </div>
       <div style={{ display: 'flex', gap: '6px' }}>
-        <button onClick={doSave} disabled={saving} style={{ padding: '5px 12px', fontSize: '9px', background: saving ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving ? 'default' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
+        <button onClick={doSave} disabled={saving || !canSave} title={!canSave ? 'A title and at least one assignee are required' : ''} style={{ padding: '5px 12px', fontSize: '9px', background: saving || !canSave ? '#3f5668' : '#5b7c99', border: 'none', color: '#fff', cursor: saving || !canSave ? 'not-allowed' : 'pointer', borderRadius: '1px', letterSpacing: '0.14em', textTransform: 'uppercase', opacity: saving || !canSave ? 0.5 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
         <button onClick={onCancel} style={{ padding: '5px 12px', fontSize: '9px', background: 'none', border: `0.5px solid ${border}`, color: dark ? '#777' : '#888', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
       </div>
     </div>
@@ -357,7 +359,8 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     if (inserted) {
       if (form.assignee_ids?.length) await syncAssignees(inserted.id, form.assignee_ids, form.title)
       const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, inserted.id)
-      await addTaskWatchers(inserted.id, [...(form.assignee_ids || []), ...mentioned])
+      const creatorWatcher = userId ? [userId] : []
+      await addTaskWatchers(inserted.id, [...creatorWatcher, ...(form.assignee_ids || []), ...mentioned])
     }
     fetchTasks()
   }

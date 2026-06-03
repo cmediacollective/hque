@@ -6,6 +6,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-02
 
+**Tasks now require an assignee, and creators are auto-added as watchers.** Two small but meaningful changes to how tasks are created on the workspace board:
+- **Assignee is now required.** New tasks can't be saved until at least one team member is assigned. The "Assign team members" placeholder shows a small rust-colored `(required)` hint, and the Save button stays disabled (with a tooltip explaining why) until both a title and an assignee are filled in. Editing an existing task is unchanged.
+- **Whoever creates the task is automatically a watcher.** This means the creator gets notified on every comment, status change, and mention thereafter — no need to remember to add yourself. Assignees and `@`-mentioned people continue to be auto-watched as well.
+
+**Cleaned up test rows in the database.** Deleted 9 leftover test/duplicate organizations and all of their related data (brands, campaigns, tasks, creators, profiles, settings, etc.) in one atomic transaction. The real `C Media Collective` org is untouched. No user-visible change — just a tidier production database.
+
 **Security: locked down the `organizations` table.** Supabase flagged that the `organizations` table was publicly accessible (Row-Level Security was off). The public talent-inquiry page (`/inquire/<slug>`) needed to read agency name + logo without being logged in, which is why RLS hadn't been turned on. Fixed it by routing the inquiry page through a small server-side function (`get_inquiry_org`) that returns ONLY the four fields the inquiry page needs — no Stripe info, no trial dates, no subscription status. RLS can now be enabled on the table safely; the inquiry page keeps working.
 
 **App refreshes its data automatically when you return to the tab.** With sections now staying in memory across navigation (see below), they were previously also keeping stale data after you'd been away from the tab. Now, when you come back to the tab after being away 30 seconds or more, the app quietly refreshes the data behind each section — campaigns, talent, reports, inquiries, and the workspace board you had open. No spinner; it just updates in place.
