@@ -89,15 +89,19 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
       fetchComments()
 
       const toNotify = new Set([...(form.watcher_ids || []), ...(form.assignee_ids || [])])
+      toNotify.delete(user.id) // never email the commenter about their own comment
       const commenterName = members.find(m => m.id === user.id)?.full_name || members.find(m => m.id === user.id)?.email || 'Someone'
+      const snippet = commentBody.length > 300 ? commentBody.slice(0, 300) + '…' : commentBody
+      const commentMessage = `${commenterName} commented on "${task.title}":\n\n"${snippet}"`
       for (const uid of toNotify) {
         const member = members.find(m => m.id === uid)
         if (member && createNotification) {
-          await createNotification(orgId, member.full_name || member.email, 'comment', `${commenterName} commented on: ${task.title}`, members, task.id)
+          await createNotification(orgId, member.full_name || member.email, 'comment', commentMessage, members, task.id)
         }
       }
       if (parseMentions) {
-        const mentioned = await parseMentions(commentBody, orgId, `You were mentioned in a comment on: ${task.title}`, members, task.id)
+        const mentionMessage = `${commenterName} mentioned you in a comment on "${task.title}":\n\n"${snippet}"`
+        const mentioned = await parseMentions(commentBody, orgId, mentionMessage, members, task.id)
         if (mentioned && mentioned.length) {
           await addTaskWatchers(task.id, mentioned)
           setForm(f => ({ ...f, watcher_ids: [...new Set([...(f.watcher_ids || []), ...mentioned])] }))

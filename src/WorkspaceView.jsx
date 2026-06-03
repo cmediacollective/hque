@@ -365,18 +365,72 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     fetchTasks()
   }
 
+  // Send one notification per watcher (excluding the user who made the change)
+  // describing what changed on a task. Used for due-date / priority / status
+  // updates so watchers can see the actual update in the email.
+  async function notifyTaskWatchers(taskId, message) {
+    const { data: watcherRows } = await supabase.from('task_watchers').select('user_id').eq('task_id', taskId)
+    const recipients = (watcherRows || []).map(r => r.user_id).filter(id => id && id !== userId)
+    for (const uid of recipients) {
+      const m = members.find(p => p.id === uid)
+      if (m) await createNotification(orgId, m.full_name || m.email, 'update', message, members, taskId)
+    }
+  }
+
+  function currentUserName() {
+    const me = members.find(m => m.id === userId)
+    return me?.full_name || me?.email || 'Someone'
+  }
+
+  function formatDueDate(d) {
+    if (!d) return 'no date'
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
   async function updateTask(form) {
+    const old = tasks.find(t => t.id === form.id)
     await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
     await addTaskWatchers(form.id, [...(form.assignee_ids || []), ...mentioned])
+
+    // Diff key fields and notify watchers (one combined email) if anything changed.
+    if (old) {
+      const lines = []
+      if ((old.priority || 'Medium') !== (form.priority || 'Medium')) {
+        lines.push(`• Priority: ${old.priority || 'Medium'} → ${form.priority || 'Medium'}`)
+      }
+      if ((old.due_date || null) !== (form.due_date || null)) {
+        lines.push(`• Due date: ${formatDueDate(old.due_date)} → ${formatDueDate(form.due_date)}`)
+      }
+      if (old.column_id !== form.column_id) {
+        const oldCol = columns.find(c => c.id === old.column_id)?.name || 'a column'
+        const newCol = columns.find(c => c.id === form.column_id)?.name || 'a column'
+        lines.push(`• Status: ${oldCol} → ${newCol}`)
+      }
+      if (lines.length) {
+        const msg = `${currentUserName()} updated "${form.title}":\n${lines.join('\n')}`
+        await notifyTaskWatchers(form.id, msg)
+      }
+    }
+
     fetchTasks()
   }
 
   async function moveTask(taskId, newColumnId) {
+    const task = tasks.find(t => t.id === taskId)
+    const oldColumnId = task?.column_id
+    if (oldColumnId === newColumnId) return
     await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
     setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
+
+    if (task) {
+      const oldCol = columns.find(c => c.id === oldColumnId)?.name || 'a column'
+      const newCol = columns.find(c => c.id === newColumnId)?.name || 'a column'
+      const msg = `${currentUserName()} moved "${task.title}" from ${oldCol} to ${newCol}`
+      notifyTaskWatchers(taskId, msg).catch(() => {})
+    }
   }
 
   async function deleteTask(taskId) {

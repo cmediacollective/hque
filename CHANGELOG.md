@@ -6,6 +6,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-02
 
+**Email and in-app notifications now show what actually changed.** Previously, notification emails said vague things like "Jane commented on: Schedule Q3 shoot" with no further detail. Now you can see the update right in the email — no need to open the app to find out what happened:
+- **Comments are quoted.** Comment and `@`-mention emails now include the comment body (truncated at 300 characters) under the headline. Same for the in-app notification panel.
+- **Field changes trigger their own emails.** When someone changes a task's **due date**, **priority**, or **status (column)**, every watcher on the task now gets an email showing exactly what changed — e.g. `Cherie updated "Schedule Q3 shoot": • Status: To Do → In Progress • Due date: Jun 5 → Jun 12`. Multiple field changes in one save are combined into a single email. Drag-and-drop column moves also fire this email.
+- **Who made the change is named.** Each email leads with the person responsible — "Cherie updated…", "Brennan moved…", etc.
+- **You won't get notified about your own actions.** Whoever made the change is excluded from the watcher email blast for that change. Same goes for posting a comment.
+
+The email template was also hardened along the way — user-supplied text (comment bodies, task titles, names) is now HTML-escaped before being injected into the email body.
+
 **Tasks now require an assignee, and creators are auto-added as watchers.** Two small but meaningful changes to how tasks are created on the workspace board:
 - **Assignee is now required.** New tasks can't be saved until at least one team member is assigned. The "Assign team members" placeholder shows a small rust-colored `(required)` hint, and the Save button stays disabled (with a tooltip explaining why) until both a title and an assignee are filled in. Editing an existing task is unchanged.
 - **Whoever creates the task is automatically a watcher.** This means the creator gets notified on every comment, status change, and mention thereafter — no need to remember to add yourself. Assignees and `@`-mentioned people continue to be auto-watched as well.

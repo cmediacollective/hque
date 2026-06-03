@@ -74,7 +74,7 @@ export default function NotificationsPanel({ user, dark, onClose, onOpenTask, on
               onMouseLeave={e => e.currentTarget.style.background = n.read ? 'transparent' : (dark ? 'rgba(91,124,153,0.06)' : 'rgba(91,124,153,0.04)')}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: n.read ? 'transparent' : '#5b7c99', flexShrink: 0, marginTop: '5px' }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '12px', color: text, lineHeight: 1.5, marginBottom: '4px' }}>{n.message}</div>
+                <div style={{ fontSize: '12px', color: text, lineHeight: 1.5, marginBottom: '4px', whiteSpace: 'pre-wrap' }}>{n.message}</div>
                 <div style={{ fontSize: '10px', color: subtle, display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <span>{timeAgo(n.created_at)}</span>
                   {n.task_id
