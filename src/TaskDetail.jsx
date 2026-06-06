@@ -351,7 +351,15 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
             </div>
             <div>
               {sectionLabel('Due Date')}
-              <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+              {form.is_ongoing ? (
+                <div style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: subtle, boxSizing: 'border-box' }}>No due date</div>
+              ) : (
+                <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+              )}
+              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: text, cursor: 'pointer', marginTop: '6px' }}>
+                <input type='checkbox' checked={!!form.is_ongoing} onChange={e => setForm(f => ({ ...f, is_ongoing: e.target.checked, due_date: e.target.checked ? '' : f.due_date }))} />
+                Ongoing (no due date)
+              </label>
             </div>
           </div>
 

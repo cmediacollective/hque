@@ -4,6 +4,13 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-06
+
+**Tasks can now be marked "Ongoing" instead of having a due date.** Some work doesn't have a deadline — it just runs continuously. You can now flip a task to **Ongoing** instead of picking a date:
+- **An "Ongoing" checkbox** sits next to the due-date field in both the quick "+ Add task" form and the full task detail panel. Tick it and the date picker is replaced with "No due date."
+- **Ongoing tasks show a green "Ongoing" tag** on the board card (and "Ongoing" in the list view) where the date would normally appear.
+- **They never show as overdue,** since they have no date to be past, and they sort to the bottom when sorting by due date — keeping real deadlines front and center.
+
 ## 2026-06-02
 
 **Email and in-app notifications now show what actually changed.** Previously, notification emails said vague things like "Jane commented on: Schedule Q3 shoot" with no further detail. Now you can see the update right in the email — no need to open the app to find out what happened:

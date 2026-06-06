@@ -72,11 +72,19 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
           ))}
         </div>
       )}
-      <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', gap: '6px', marginBottom: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
         <select value={form.priority} onChange={e => setForm(f => ({ ...f, priority: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }}>
           {PRIORITIES.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
-        <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
+        {form.is_ongoing ? (
+          <span style={{ fontSize: '11px', color: subtle, padding: '5px 8px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>No due date</span>
+        ) : (
+          <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }} />
+        )}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: text, cursor: 'pointer' }}>
+          <input type='checkbox' checked={!!form.is_ongoing} onChange={e => setForm(f => ({ ...f, is_ongoing: e.target.checked, due_date: e.target.checked ? '' : f.due_date }))} />
+          Ongoing
+        </label>
       </div>
       <div style={{ marginBottom: '8px', position: 'relative' }}>
         <div onClick={() => setAssigneeMenuOpen(o => !o)} style={{ minHeight: '28px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '4px 6px', cursor: 'pointer', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
@@ -351,7 +359,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     if (!form.title?.trim()) return
     const { data: inserted } = await supabase.from('tasks').insert([{
       title: form.title, description: form.description || null, priority: form.priority || 'Medium',
-      due_date: form.due_date || null,
+      due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing,
       column_id: columnId, board_id: activeBoard.id, org_id: orgId,
       position: tasks.filter(t => t.column_id === columnId).length
     }]).select().single()
@@ -389,7 +397,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
   async function updateTask(form) {
     const old = tasks.find(t => t.id === form.id)
-    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.due_date || null, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
+    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
@@ -649,7 +657,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
-                              {task.due_date && <span style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.6 }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                              {task.is_ongoing ? <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7A9B8E', border: '0.5px solid #7A9B8E', padding: '2px 6px' }}>Ongoing</span> : task.due_date && <span style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.6 }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
                               {renderAvatars(task)}
                             </div>
                             <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
@@ -658,7 +666,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                       ))}
 
                       {showNewTask === col.id ? (
-                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', description: '', assignee_ids: [] }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                        <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', is_ongoing: false, description: '', assignee_ids: [] }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
                       ) : (
                         <button
                           onClick={() => setShowNewTask(col.id)}
@@ -709,7 +717,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                           {task.description && <div style={{ fontSize: '12px', fontWeight: 400, color: muted, opacity: 0.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
                         </div>
                         <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px', textAlign: 'center', borderRadius: '1px' }}>{task.priority}</span>
-                        <div style={{ fontSize: '12px', fontWeight: 400, color: muted, opacity: 0.6 }}>{task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 400, color: task.is_ongoing ? '#7A9B8E' : muted, opacity: task.is_ongoing ? 1 : 0.6 }}>{task.is_ongoing ? 'Ongoing' : (task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—')}</div>
                         <div>{renderAvatars(task)}</div>
                         <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
                       </div>
