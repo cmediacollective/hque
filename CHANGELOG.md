@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-06
 
+**The dashboard greeting box can now have custom labels (not just "Did you know?").** That blue label used to default to "Did you know?" on almost every day. Now any special day can set its own label and message while keeping your normal "Good morning" greeting. First one added: **June 8, 2026 → "NBA Game 3 — Spurs vs. Knicks. Who you got?"** More can be dropped in the same way for any date.
+
 **Tasks can now be marked "Ongoing" instead of having a due date.** Some work doesn't have a deadline — it just runs continuously. You can now flip a task to **Ongoing** instead of picking a date:
 - **An "Ongoing" checkbox** sits next to the due-date field in both the quick "+ Add task" form and the full task detail panel. Tick it and the date picker is replaced with "No due date."
 - **Ongoing tasks show a green "Ongoing" tag** on the board card (and "Ongoing" in the list view) where the date would normally appear.

@@ -255,6 +255,15 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     }
   }
 
+  // One-off custom notes for specific days. Unlike holidays, these KEEP the normal
+  // time-of-day greeting ("Good morning, Cherie") and only change the blue box.
+  // `intro` is the blue label; `note` is the line underneath. Keyed by year, then 'month-day'.
+  const CUSTOM_NOTES = {
+    2026: {
+      '6-8': { intro: 'NBA Game 3', note: 'Spurs vs. Knicks. Who you got?' }
+    }
+  }
+
   // Nth weekday of month (1-indexed day), month 0-indexed, weekday 0=Sun
   function nthDowOfMonth(year, monthZero, weekday, n) {
     const first = new Date(year, monthZero, 1)
@@ -366,8 +375,10 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     const h = HOLIDAYS[key]
     if (h) return h
 
-    // 4. Default: time-of-day greeting + rotating fun fact
+    // 4. Default: time-of-day greeting + (custom note for today, else rotating fun fact)
     const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
+    const custom = CUSTOM_NOTES[year]?.[key]
+    if (custom) return { greeting: g, intro: custom.intro, note: custom.note }
     const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0))
     const dayOfYear = Math.floor((now - start) / 86400000)
     return { greeting: g, note: FUN_NOTES[dayOfYear % FUN_NOTES.length] }
@@ -449,8 +460,8 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
             {dailyVibe.note && (() => {
               const m = dailyVibe.note.match(/^(Did you know\?|Fun fact:|Tip:|Halloween joke:)\s*/i)
-              const intro = m ? m[1] : 'Did you know?'
-              const body = m ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
+              const intro = dailyVibe.intro || (m ? m[1] : 'Did you know?')
+              const body = (!dailyVibe.intro && m) ? dailyVibe.note.slice(m[0].length) : dailyVibe.note
               return (
                 <div style={{ paddingTop: '14px', maxWidth: '520px', fontFamily: 'Georgia, serif', fontSize: '14px', fontStyle: 'italic', lineHeight: 1.5, color: text }}>
                   <div style={{ color: '#5b7c99', borderBottom: '3px solid #5b7c99', paddingBottom: '4px', marginBottom: '8px', display: 'inline-block', fontFamily: "'Inter Tight', sans-serif", fontStyle: 'normal', fontWeight: 600 }}>{intro}</div>
