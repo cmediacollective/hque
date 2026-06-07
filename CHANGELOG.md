@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-07
+
+**AppSumo lifetime deal is private pricing — intentionally not on the billing page.** Noting this for the record: the $159 one-time "AppSumo Lifetime" plan was deliberately removed from the public billing page and is kept private. It is not a bug or an oversight — the deal is meant to be shared only with people you send the checkout link to directly. The backend still fully supports it: the `$159` AppSumo checkout and webhook handling remain live in the Netlify functions (`create-checkout.js`, `stripe-webhook.js`), so anyone given the private link can still purchase and is treated as a Pro subscriber. No code change — just documenting the intent so it isn't "re-added" by mistake later.
+
 ## 2026-06-06
 
 **The dashboard greeting box can now have custom labels (not just "Did you know?").** That blue label used to default to "Did you know?" on almost every day. Now any special day can set its own label and message while keeping your normal "Good morning" greeting. First one added: **June 8, 2026 → "NBA Game 3 — Spurs vs. Knicks. Who you got?"** More can be dropped in the same way for any date.
