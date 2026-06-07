@@ -11,40 +11,20 @@ export default function Onboarding({ user, onComplete }) {
     setSaving(true)
     setError('')
 
-    const slug = agencyName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20) + '-' + Date.now().toString().slice(-4)
-
-    const { data: org, error: orgErr } = await supabase
-      .from('organizations')
-      .insert([{ name: agencyName, slug }])
-      .select()
-      .single()
+    // Create the workspace via a SECURITY DEFINER RPC. It performs all three
+    // writes (organizations, org_settings, profile link) server-side in one
+    // step, which is required because organizations has RLS enabled and the
+    // browser key can't insert directly. The slug is generated inside the RPC.
+    const { data: newOrgId, error: orgErr } = await supabase
+      .rpc('create_organization', { p_name: agencyName.trim() })
 
     if (orgErr) {
       setSaving(false)
       return setError('Org error: ' + orgErr.message)
     }
 
-    const { error: settingsErr } = await supabase
-      .from('org_settings')
-      .insert([{ org_id: org.id, agency_name: agencyName }])
-
-    if (settingsErr) {
-      setSaving(false)
-      return setError('Settings error: ' + settingsErr.message)
-    }
-
-    const { error: profileErr } = await supabase
-      .from('profiles')
-      .update({ org_id: org.id, role: 'owner' })
-      .eq('id', user.id)
-
-    if (profileErr) {
-      setSaving(false)
-      return setError('Profile error: ' + profileErr.message)
-    }
-
     setSaving(false)
-    onComplete(org.id, agencyName)
+    onComplete(newOrgId, agencyName)
   }
 
   return (

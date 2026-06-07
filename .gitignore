@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated AppSumo redemption codes — never commit live codes
+appsumo-codes-*.csv
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

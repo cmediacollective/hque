@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-07
 
+**Fixed: brand-new signups couldn't create their workspace.** Since the organizations table was locked down with Row-Level Security (June 2), a freshly signed-up user hit "new row violates row-level security policy" when naming their agency — the very first step of onboarding was blocked. Workspace creation now goes through a single secure server-side function (`create_organization`) that creates the organization, its settings, and links the new user as owner — all in one atomic step. Because it runs server-side, it also can't be abused to self-assign a paid or lifetime plan: every billing field stays at its safe default. (This was a pre-existing issue surfaced by testing the new AppSumo signup flow, not caused by it.)
+
 **AppSumo code redemption is now live — buyers redeem a code for lifetime Pro, no card.** Built the real AppSumo flow. Unlike the old private $159 Stripe link (which charges a card), AppSumo buyers already paid AppSumo and just enter a one-time code on our site to unlock lifetime Pro:
 - **A redemption page at `/redeem`** — single code field, HQue dark styling, support email shown. No upsells, no card, no extra opt-ins (AppSumo requires this).
 - **One code = one redemption, forever.** Codes live in a locked-down `appsumo_codes` table. Redeeming claims the code atomically, so the same code can never be used twice. Invalid and already-used codes show clear messages.
