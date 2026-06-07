@@ -10,10 +10,10 @@
 // SUPABASE_SERVICE_KEY must be the service-role key (Supabase → Settings → API).
 // Run the migration (supabase/migrations/20260607_appsumo_redemption.sql) first.
 
-const crypto = require('crypto')
-const fs = require('fs')
-const path = require('path')
-const { createClient } = require('@supabase/supabase-js')
+import crypto from 'crypto'
+import fs from 'fs'
+import path from 'path'
+import { createClient } from '@supabase/supabase-js'
 
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
