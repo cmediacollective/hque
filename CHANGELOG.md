@@ -6,6 +6,13 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-07
 
+**AppSumo code redemption is now live — buyers redeem a code for lifetime Pro, no card.** Built the real AppSumo flow. Unlike the old private $159 Stripe link (which charges a card), AppSumo buyers already paid AppSumo and just enter a one-time code on our site to unlock lifetime Pro:
+- **A redemption page at `/redeem`** — single code field, HQue dark styling, support email shown. No upsells, no card, no extra opt-ins (AppSumo requires this).
+- **One code = one redemption, forever.** Codes live in a locked-down `appsumo_codes` table. Redeeming claims the code atomically, so the same code can never be used twice. Invalid and already-used codes show clear messages.
+- **Lifetime buyers are flagged `is_lifetime`** so Stripe billing never marks them past-due, canceled, or downgrades them — they have no subscription.
+- **A generator script** makes a batch of unique codes and exports a CSV to hand to AppSumo.
+- The old private $159 Stripe link stays as a separate off-AppSumo option, and an env-var name mismatch in the checkout function was fixed along the way.
+
 **AppSumo lifetime deal is private pricing — intentionally not on the billing page.** Noting this for the record: the $159 one-time "AppSumo Lifetime" plan was deliberately removed from the public billing page and is kept private. It is not a bug or an oversight — the deal is meant to be shared only with people you send the checkout link to directly. The backend still fully supports it: the `$159` AppSumo checkout and webhook handling remain live in the Netlify functions (`create-checkout.js`, `stripe-webhook.js`), so anyone given the private link can still purchase and is treated as a Pro subscriber. No code change — just documenting the intent so it isn't "re-added" by mistake later.
 
 ## 2026-06-06

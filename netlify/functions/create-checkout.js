@@ -7,7 +7,9 @@ exports.handler = async (event) => {
   const { priceId, orgId, email } = JSON.parse(event.body)
 
   try {
-    const isOneTime = priceId === process.env.VITE_STRIPE_PRICE_APPSUMO
+    // Use the same env var name the webhook reads (STRIPE_PRICE_APPSUMO) so the
+    // direct $159 one-time link and the webhook agree on which price is one-off.
+    const isOneTime = priceId === process.env.STRIPE_PRICE_APPSUMO
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: isOneTime ? 'payment' : 'subscription',

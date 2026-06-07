@@ -41,8 +41,9 @@ exports.handler = async (event) => {
     const customerId = invoice.customer
     console.log('Payment failed for customer:', customerId)
     if (customerId) {
-      const { data: org } = await supabase.from('organizations').select('id, past_due_since').eq('stripe_customer_id', customerId).maybeSingle()
-      if (org) {
+      // Skip lifetime (AppSumo) orgs — they have no subscription to fall past due.
+      const { data: org } = await supabase.from('organizations').select('id, past_due_since, is_lifetime').eq('stripe_customer_id', customerId).maybeSingle()
+      if (org && !org.is_lifetime) {
         const update = { subscription_status: 'past_due' }
         if (!org.past_due_since) update.past_due_since = new Date().toISOString()
         const { error } = await supabase.from('organizations').update(update).eq('id', org.id)
@@ -68,7 +69,8 @@ exports.handler = async (event) => {
     const customerId = sub.customer
     console.log('Subscription deleted for customer:', customerId)
     if (customerId) {
-      const { error } = await supabase.from('organizations').update({ subscription_status: 'canceled' }).eq('stripe_customer_id', customerId)
+      // Never cancel a lifetime (AppSumo) org — their access is permanent.
+      const { error } = await supabase.from('organizations').update({ subscription_status: 'canceled' }).eq('stripe_customer_id', customerId).neq('is_lifetime', true)
       if (error) console.error('Supabase cancel update error:', error)
     }
     return { statusCode: 200, body: 'OK' }

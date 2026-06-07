@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { supabase } from './supabase'
 import Login from './Login'
 import SignUp from './SignUp'
+import RedeemPage from './RedeemPage'
 import InviteRecovery from './InviteRecovery'
 import TrialBanner from './TrialBanner'
 import AddCreatorForm from './AddCreatorForm'
@@ -189,6 +190,7 @@ function App() {
 
   const isSandboxPage = window.location.pathname === '/sandbox'
   const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
+  const isRedeemPage = window.location.pathname === '/redeem'
   const isPrivacyPage = window.location.pathname === '/privacy'
   const isTermsPage = window.location.pathname === '/terms'
   const isFaqPage = window.location.pathname === '/faq'
@@ -376,6 +378,9 @@ function App() {
       <div style={{ fontSize: '9px', color: '#555', letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading...</div>
     </div>
   )
+  // AppSumo redemption — must sit BEFORE the paywall gates below so a buyer
+  // whose free trial already lapsed can still reach the page and redeem.
+  if (isRedeemPage) return <RedeemPage user={user} orgId={orgId} onSignIn={() => setShowLogin(true)} onSignUp={() => setShowSignUp(true)} />
   if (!user && authError) return <InviteRecovery onBackToSignIn={() => { setAuthError(false); setShowLogin(true) }} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
