@@ -6,6 +6,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-07
 
+**✅ Verified live, end-to-end: AppSumo redemption + onboarding fix work on the production site.** Tested the full path on h-que.com: a brand-new person signs up → creates their agency workspace → redeems an AppSumo code → lands on lifetime Pro. Reusing an already-redeemed code is correctly rejected. Getting here also required relaxing a database trigger (`prevent_owner_role_changes`) that was blocking the workspace creator from becoming the first owner of their own new org — it now allows the first owner while still blocking anyone from usurping or demoting an existing owner. AppSumo redemption is functionally ready.
+
+> **PICK UP HERE NEXT — open items (none are blockers to the flow working, but needed before launch):**
+> 1. **GitHub → Netlify auto-deploy stopped firing.** Pushing to `main` no longer triggers a build on its own. Deploying manually for now via Netlify → Deploys → **"Clear cache and deploy site."** Needs fixing — check Netlify auto-publish setting and the GitHub repo's webhook (Settings → Webhooks → Recent Deliveries).
+> 2. **Generate the real AppSumo code batch + export the CSV** to hand to AppSumo. The earlier test code is spent. Run `node scripts/generate-appsumo-codes.js <count>` with the Supabase env vars (CSV is git-ignored).
+> 3. **Finish the AppSumo deal-page copy** (with the $159 value).
+> 4. **AppSumo submission** itself.
+
 **Fixed: brand-new signups couldn't create their workspace.** Since the organizations table was locked down with Row-Level Security (June 2), a freshly signed-up user hit "new row violates row-level security policy" when naming their agency — the very first step of onboarding was blocked. Workspace creation now goes through a single secure server-side function (`create_organization`) that creates the organization, its settings, and links the new user as owner — all in one atomic step. Because it runs server-side, it also can't be abused to self-assign a paid or lifetime plan: every billing field stays at its safe default. (This was a pre-existing issue surfaced by testing the new AppSumo signup flow, not caused by it.)
 
 **AppSumo code redemption is now live — buyers redeem a code for lifetime Pro, no card.** Built the real AppSumo flow. Unlike the old private $159 Stripe link (which charges a card), AppSumo buyers already paid AppSumo and just enter a one-time code on our site to unlock lifetime Pro:
