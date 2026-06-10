@@ -635,8 +635,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                   else { setShowCommentMentions(false); setCommentMentionQuery('') }
                 }}
                 onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) postComment() }}
-                placeholder='Add a comment... (use @ to mention, Cmd+Enter to post)'
-                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+                onDragOver={e => { e.preventDefault(); setCommentDragOver(true) }}
+                onDragLeave={() => setCommentDragOver(false)}
+                onDrop={e => { e.preventDefault(); setCommentDragOver(false); handleCommentFiles(e.dataTransfer.files) }}
+                placeholder='Add a comment... (drag files in to attach, @ to mention, Cmd+Enter to post)'
+                style={{ width: '100%', background: commentDragOver ? (dark ? 'rgba(91,124,153,0.10)' : 'rgba(91,124,153,0.06)') : inputBg, border: `0.5px solid ${commentDragOver ? '#5b7c99' : border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
               />
               {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
                 <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, background: panelBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
@@ -673,14 +676,6 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                   ))}
                 </div>
               )}
-              <label
-                onDragOver={e => { e.preventDefault(); setCommentDragOver(true) }}
-                onDragLeave={() => setCommentDragOver(false)}
-                onDrop={e => { e.preventDefault(); setCommentDragOver(false); handleCommentFiles(e.dataTransfer.files) }}
-                style={{ display: 'block', padding: '10px', border: `1px dashed ${commentDragOver ? '#5b7c99' : border2}`, background: commentDragOver ? (dark ? 'rgba(91,124,153,0.08)' : 'rgba(91,124,153,0.04)') : 'transparent', borderRadius: '2px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s', marginBottom: '8px' }}>
-                <input type='file' multiple onChange={e => { handleCommentFiles(e.target.files); e.target.value = '' }} style={{ display: 'none' }} />
-                <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.06em' }}>Drag files here, or click to attach · 5 MB max each</div>
-              </label>
               {commentAttachError && (
                 <div style={{ fontSize: '11px', color: '#c0392b', marginBottom: '8px', lineHeight: 1.5 }}>{commentAttachError}</div>
               )}
@@ -690,6 +685,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                   {postingComment ? 'Posting...' : 'Comment'}
                 </button>
                 ) })()}
+                <label title='Attach files (5 MB max each)' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 12px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
+                  <input type='file' multiple onChange={e => { handleCommentFiles(e.target.files); e.target.value = '' }} style={{ display: 'none' }} />
+                  <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48'/></svg>
+                  Attach
+                </label>
                 {recentlySaved && (
                   <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5C9E52' }}>✓ Saved</span>
                 )}
