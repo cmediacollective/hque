@@ -51,6 +51,8 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   const [commentFiles, setCommentFiles] = useState([])
   const [commentDragOver, setCommentDragOver] = useState(false)
   const [commentAttachError, setCommentAttachError] = useState('')
+  // Expand the comment box for writing/reviewing longer comments.
+  const [commentExpanded, setCommentExpanded] = useState(false)
 
   useEffect(() => { fetchComments(); fetchCurrentUser(); fetchAttachments() }, [task.id])
 
@@ -625,6 +627,13 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
             </div>
 
             <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '14px', position: 'relative' }}>
+              <button onClick={() => setCommentExpanded(v => !v)} title={commentExpanded ? 'Shrink comment box' : 'Expand comment box'} style={{ position: 'absolute', top: '22px', right: '10px', zIndex: 2, background: dark ? 'rgba(20,20,20,0.7)' : 'rgba(255,255,255,0.75)', border: `0.5px solid ${border}`, borderRadius: '3px', color: muted, cursor: 'pointer', padding: '3px 4px', lineHeight: 0, display: 'flex' }}>
+                {commentExpanded ? (
+                  <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='4 14 10 14 10 20'/><polyline points='20 10 14 10 14 4'/><line x1='14' y1='10' x2='21' y2='3'/><line x1='3' y1='21' x2='10' y2='14'/></svg>
+                ) : (
+                  <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><polyline points='15 3 21 3 21 9'/><polyline points='9 21 3 21 3 15'/><line x1='21' y1='3' x2='14' y2='10'/><line x1='3' y1='21' x2='10' y2='14'/></svg>
+                )}
+              </button>
               <textarea
                 value={newComment}
                 onChange={e => {
@@ -639,7 +648,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                 onDragLeave={() => setCommentDragOver(false)}
                 onDrop={e => { e.preventDefault(); setCommentDragOver(false); handleCommentFiles(e.dataTransfer.files) }}
                 placeholder='Add a comment... (drag files in to attach, @ to mention, Cmd+Enter to post)'
-                style={{ width: '100%', background: commentDragOver ? (dark ? 'rgba(91,124,153,0.10)' : 'rgba(91,124,153,0.06)') : inputBg, border: `0.5px solid ${commentDragOver ? '#5b7c99' : border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+                style={{ width: '100%', background: commentDragOver ? (dark ? 'rgba(91,124,153,0.10)' : 'rgba(91,124,153,0.06)') : inputBg, border: `0.5px solid ${commentDragOver ? '#5b7c99' : border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: commentExpanded ? '260px' : '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px', transition: 'min-height 0.15s' }}
               />
               {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
                 <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, background: panelBg, border: `0.5px solid ${border}`, borderRadius: '1px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>

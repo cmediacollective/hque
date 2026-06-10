@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-10
+
+**The task comment box can now expand for longer comments.** A small expand icon in the top corner of the comment box grows it to a roomy height so you can write and review detailed feedback comfortably before posting — click again to shrink it back. You can still drag the bottom edge to fine-tune the size. (Requested feedback: the compact field felt limited for longer comments.)
+
 ## 2026-06-09
 
 **You can now attach files to individual task comments.** In a task's comment box you can **drag files in (or click to attach)** and they post together with your comment, shown right beneath it — so files stay linked to the exact thing being discussed. Click any attached file to open it (secure, expiring link); you can remove your own. You can also post a comment that's just files, with no text. Limit: **5 MB per file, any file type** — anything larger is politely refused with a message explaining why. Reuses the same secure storage the task-level "Files" section already uses.
