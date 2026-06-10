@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-09
+
+**You can now attach files to individual task comments.** In a task's comment box you can **drag files in (or click to attach)** and they post together with your comment, shown right beneath it — so files stay linked to the exact thing being discussed. Click any attached file to open it (secure, expiring link); you can remove your own. You can also post a comment that's just files, with no text. Limit: **5 MB per file, any file type** — anything larger is politely refused with a message explaining why. Reuses the same secure storage the task-level "Files" section already uses.
+
 ## 2026-06-07
 
 **✅ Verified live, end-to-end: AppSumo redemption + onboarding fix work on the production site.** Tested the full path on h-que.com: a brand-new person signs up → creates their agency workspace → redeems an AppSumo code → lands on lifetime Pro. Reusing an already-redeemed code is correctly rejected. Getting here also required relaxing a database trigger (`prevent_owner_role_changes`) that was blocking the workspace creator from becoming the first owner of their own new org — it now allows the first owner while still blocking anyone from usurping or demoting an existing owner. AppSumo redemption is functionally ready.

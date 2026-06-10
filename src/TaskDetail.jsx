@@ -4,6 +4,7 @@ import { addTaskWatchers } from './notify'
 import Linkify from './Linkify'
 
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
+const MAX_COMMENT_FILE_BYTES = 5 * 1024 * 1024 // 5 MB per attached file
 
 export default function TaskDetail({ task, dark, members = [], brands = [], campaigns = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
@@ -46,6 +47,10 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   const [attachments, setAttachments] = useState([])
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  // Files staged to attach to the comment currently being written.
+  const [commentFiles, setCommentFiles] = useState([])
+  const [commentDragOver, setCommentDragOver] = useState(false)
+  const [commentAttachError, setCommentAttachError] = useState('')
 
   useEffect(() => { fetchComments(); fetchCurrentUser(); fetchAttachments() }, [task.id])
 
@@ -66,7 +71,8 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   }
 
   async function postComment() {
-    if (!newComment.trim()) return
+    // A comment may be text, attachments, or both.
+    if (!newComment.trim() && commentFiles.length === 0) return
     setPostingComment(true)
     if (onSave) {
       try {
@@ -77,21 +83,48 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
     }
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setPostingComment(false); return }
-    const { error } = await supabase.from('task_comments').insert([{
+    const { data: inserted, error } = await supabase.from('task_comments').insert([{
       task_id: task.id,
       user_id: user.id,
       body: newComment.trim()
-    }])
-    setPostingComment(false)
-    if (!error) {
+    }]).select().single()
+    if (error || !inserted) { setPostingComment(false); return }
+
+    // Upload any staged files and link them to this comment.
+    const fileCount = commentFiles.length
+    if (fileCount) {
+      for (const file of commentFiles) {
+        const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+        const path = `${task.id}/comments/${inserted.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safe}`
+        const { error: upErr } = await supabase.storage.from('task-attachments').upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+        if (upErr) { console.error('comment attachment upload failed', upErr); continue }
+        await supabase.from('task_attachments').insert([{
+          task_id: task.id,
+          org_id: orgId,
+          user_id: user.id,
+          comment_id: inserted.id,
+          filename: file.name,
+          storage_path: path,
+          size_bytes: file.size,
+          mime_type: file.type || null
+        }])
+      }
+      setCommentFiles([])
+      fetchAttachments()
+    }
+
+    {
       const commentBody = newComment.trim()
       setNewComment('')
+      setCommentAttachError('')
+      setPostingComment(false)
       fetchComments()
 
       const toNotify = new Set([...(form.watcher_ids || []), ...(form.assignee_ids || [])])
       toNotify.delete(user.id) // never email the commenter about their own comment
       const commenterName = members.find(m => m.id === user.id)?.full_name || members.find(m => m.id === user.id)?.email || 'Someone'
-      const snippet = commentBody.length > 300 ? commentBody.slice(0, 300) + '…' : commentBody
+      const baseSnippet = commentBody || (fileCount ? `(${fileCount} file${fileCount > 1 ? 's' : ''} attached)` : '')
+      const snippet = baseSnippet.length > 300 ? baseSnippet.slice(0, 300) + '…' : baseSnippet
       const commentMessage = `${commenterName} commented on "${task.title}":\n\n"${snippet}"`
       for (const uid of toNotify) {
         const member = members.find(m => m.id === uid)
@@ -120,8 +153,27 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
 
   async function deleteComment(id) {
     if (!confirm('Delete this comment?')) return
+    // Remove this comment's attached files from storage (the metadata rows are
+    // removed automatically by the comment_id ON DELETE CASCADE).
+    const atts = attachments.filter(a => a.comment_id === id)
+    if (atts.length) await supabase.storage.from('task-attachments').remove(atts.map(a => a.storage_path))
     await supabase.from('task_comments').delete().eq('id', id)
     fetchComments()
+    fetchAttachments()
+  }
+
+  function handleCommentFiles(fileList) {
+    const files = Array.from(fileList || [])
+    if (!files.length) return
+    const tooBig = files.filter(f => f.size > MAX_COMMENT_FILE_BYTES)
+    const ok = files.filter(f => f.size <= MAX_COMMENT_FILE_BYTES)
+    if (ok.length) setCommentFiles(prev => [...prev, ...ok])
+    if (tooBig.length) {
+      const names = tooBig.map(f => `"${f.name}" (${humanSize(f.size)})`).join(', ')
+      setCommentAttachError(`${names} ${tooBig.length > 1 ? 'are' : 'is'} over the 5 MB limit, so ${tooBig.length > 1 ? 'they were' : 'it was'} not attached. Please keep each file to 5 MB or less.`)
+    } else {
+      setCommentAttachError('')
+    }
   }
 
   async function fetchAttachments() {
@@ -173,6 +225,23 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
     if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
     return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB'
   }
+
+  // One attachment row, shared by the task-level Files list and per-comment lists.
+  function attachmentRow(a) {
+    return (
+      <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+        <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round' strokeLinejoin='round' style={{ color: muted, flexShrink: 0 }}><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>
+        <button onClick={() => openAttachment(a)} title='Open in a new tab' style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '12px', textAlign: 'left', padding: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.filename}</button>
+        <span style={{ fontSize: '10px', color: subtle, flexShrink: 0 }}>{humanSize(a.size_bytes)}</span>
+        {a.user_id === currentUserId && (
+          <button onClick={() => deleteAttachment(a)} title='Delete' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
+        )}
+      </div>
+    )
+  }
+
+  // Task-level attachments are those NOT tied to a specific comment.
+  const taskAttachments = attachments.filter(a => !a.comment_id)
 
   const toggleAssignee = (id) => setForm(f => ({
     ...f,
@@ -471,20 +540,11 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
           )}
 
           <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '24px', marginTop: '8px', marginBottom: '8px' }}>
-            {sectionLabel(`Files${attachments.length > 0 ? ` (${attachments.length})` : ''}`)}
+            {sectionLabel(`Files${taskAttachments.length > 0 ? ` (${taskAttachments.length})` : ''}`)}
 
-            {attachments.length > 0 && (
+            {taskAttachments.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
-                {attachments.map(a => (
-                  <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: cardBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
-                    <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round' strokeLinejoin='round' style={{ color: muted, flexShrink: 0 }}><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>
-                    <button onClick={() => openAttachment(a)} title='Open in a new tab' style={{ flex: 1, minWidth: 0, background: 'none', border: 'none', color: text, cursor: 'pointer', fontSize: '12px', textAlign: 'left', padding: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.filename}</button>
-                    <span style={{ fontSize: '10px', color: subtle, flexShrink: 0 }}>{humanSize(a.size_bytes)}</span>
-                    {a.user_id === currentUserId && (
-                      <button onClick={() => deleteAttachment(a)} title='Delete' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
-                    )}
-                  </div>
-                ))}
+                {taskAttachments.map(a => attachmentRow(a))}
               </div>
             )}
 
@@ -549,6 +609,15 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                       ) : (
                         <div style={{ fontSize: '12px', color: text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} /></div>
                       )}
+                      {(() => {
+                        const atts = attachments.filter(a => a.comment_id === c.id)
+                        if (!atts.length) return null
+                        return (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                            {atts.map(a => attachmentRow(a))}
+                          </div>
+                        )
+                      })()}
                     </div>
                   </div>
                 )
@@ -593,10 +662,34 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                   ))}
                 </div>
               )}
+              {commentFiles.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                  {commentFiles.map((f, i) => (
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: cardBg, border: `0.5px solid ${border}`, borderRadius: '12px', padding: '3px 6px 3px 10px', fontSize: '11px', color: text }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>{f.name}</span>
+                      <span style={{ fontSize: '9px', color: subtle }}>{humanSize(f.size)}</span>
+                      <button onClick={() => setCommentFiles(prev => prev.filter((_, idx) => idx !== i))} title='Remove' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '13px', lineHeight: 1, padding: '0 2px' }}>×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <label
+                onDragOver={e => { e.preventDefault(); setCommentDragOver(true) }}
+                onDragLeave={() => setCommentDragOver(false)}
+                onDrop={e => { e.preventDefault(); setCommentDragOver(false); handleCommentFiles(e.dataTransfer.files) }}
+                style={{ display: 'block', padding: '10px', border: `1px dashed ${commentDragOver ? '#5b7c99' : border2}`, background: commentDragOver ? (dark ? 'rgba(91,124,153,0.08)' : 'rgba(91,124,153,0.04)') : 'transparent', borderRadius: '2px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.15s', marginBottom: '8px' }}>
+                <input type='file' multiple onChange={e => { handleCommentFiles(e.target.files); e.target.value = '' }} style={{ display: 'none' }} />
+                <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.06em' }}>Drag files here, or click to attach · 5 MB max each</div>
+              </label>
+              {commentAttachError && (
+                <div style={{ fontSize: '11px', color: '#c0392b', marginBottom: '8px', lineHeight: 1.5 }}>{commentAttachError}</div>
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : `0.5px solid ${border2}`, color: newComment.trim() ? '#fff' : subtle, cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
+                {(() => { const canPost = newComment.trim() || commentFiles.length > 0; return (
+                <button onClick={postComment} disabled={postingComment || !canPost} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: canPost ? '#5b7c99' : 'transparent', border: canPost ? 'none' : `0.5px solid ${border2}`, color: canPost ? '#fff' : subtle, cursor: canPost ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
                   {postingComment ? 'Posting...' : 'Comment'}
                 </button>
+                ) })()}
                 {recentlySaved && (
                   <span style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5C9E52' }}>✓ Saved</span>
                 )}
