@@ -4,6 +4,10 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-15
+
+**Highlights are now easy to see in dark mode.** Two fixes: (1) when you **select/highlight text** anywhere in the app, the selection now shows in the brand blue with white text instead of a near-black highlight that was invisible against the dark background. (2) **@mention pills** in comments and notes (e.g. `@Piper`) now use a brighter blue and a stronger background in dark mode, so it's obvious who's been tagged. (Requested feedback: highlights and tags were too faint to read in dark mode.)
+
 ## 2026-06-10
 
 **The task comment box can now expand for longer comments.** A small expand icon in the top corner of the comment box grows it to a roomy height so you can write and review detailed feedback comfortably before posting — click again to shrink it back. You can still drag the bottom edge to fine-tune the size. (Requested feedback: the compact field felt limited for longer comments.)

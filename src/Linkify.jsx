@@ -2,7 +2,7 @@ import React from 'react'
 
 const TOKEN_REGEX = /(https?:\/\/[^\s<>"]+|www\.[^\s<>"]+|[\w.-]+@[\w-]+\.[\w.-]+|@[\w.]+)/gi
 
-export default function Linkify({ text, linkColor = '#5b7c99' }) {
+export default function Linkify({ text, linkColor = '#5b7c99', dark = false }) {
   if (!text) return null
 
   const segments = []
@@ -43,11 +43,11 @@ export default function Linkify({ text, linkColor = '#5b7c99' }) {
           key: i,
           title: seg.value,
           style: {
-            color: linkColor,
-            background: 'rgba(91, 124, 153, 0.15)',
+            color: dark ? '#9DC3E6' : linkColor,
+            background: dark ? 'rgba(91, 124, 153, 0.32)' : 'rgba(91, 124, 153, 0.15)',
             padding: '1px 6px',
             borderRadius: '3px',
-            fontWeight: 500,
+            fontWeight: 600,
             whiteSpace: 'nowrap'
           }
         }, seg.value)

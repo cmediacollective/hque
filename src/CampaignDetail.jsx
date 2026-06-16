@@ -470,7 +470,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
             {campaign.notes && (
               <>
                 {section('Notes')}
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={campaign.notes} /></div>
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={campaign.notes} dark={dark} /></div>
               </>
             )}
 
@@ -499,7 +499,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                             </div>
                           )}
                           {link.performance_notes && (
-                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}><Linkify text={link.performance_notes} /></div>
+                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}><Linkify text={link.performance_notes} dark={dark} /></div>
                           )}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
@@ -569,7 +569,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                             </div>
                           </div>
                         ) : (
-                          <div style={{ fontSize: '12px', color: '#F0ECE6', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} /></div>
+                          <div style={{ fontSize: '12px', color: '#F0ECE6', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} dark={dark} /></div>
                         )}
                       </div>
                     </div>

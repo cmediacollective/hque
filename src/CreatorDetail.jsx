@@ -329,7 +329,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             {creator.notes && (
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Internal Notes</div>
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: panelCard, borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={creator.notes} /></div>
+                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: panelCard, borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={creator.notes} dark={dark} /></div>
               </div>
             )}
 
@@ -372,7 +372,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                           )}
                         </div>
                       </div>
-                      {log.notes && <div style={{ fontSize: '11px', color: panelMuted, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}><Linkify text={log.notes} /></div>}
+                      {log.notes && <div style={{ fontSize: '11px', color: panelMuted, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}><Linkify text={log.notes} dark={dark} /></div>}
                     </div>
                   ))}
                 </div>

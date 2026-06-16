@@ -357,7 +357,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
             <div onClick={() => setEditingDescription(true)}
               title='Click to edit'
               style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', color: text, fontSize: '13px', lineHeight: 1.6, padding: '10px 12px', boxSizing: 'border-box', minHeight: '100px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', cursor: 'text', marginBottom: '4px' }}>
-              <Linkify text={form.description} />
+              <Linkify text={form.description} dark={dark} />
             </div>
           )}
           {showMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(mentionQuery.toLowerCase())).length > 0 && (
@@ -609,7 +609,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                           </div>
                         </div>
                       ) : (
-                        <div style={{ fontSize: '12px', color: text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} /></div>
+                        <div style={{ fontSize: '12px', color: text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} dark={dark} /></div>
                       )}
                       {(() => {
                         const atts = attachments.filter(a => a.comment_id === c.id)
