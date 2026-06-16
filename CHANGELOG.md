@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-15
 
+**Every talent can now have its own shareable public profile page.** Open a talent and use the new **Public Profile** box to **Publish public link** — that creates a clean, login-free page at a friendly web address like `h-que.com/talent/piper-jones` (built from their name; duplicates get a number). Anyone with the link can view it; no HQue account needed. Hit **Copy** to grab the link, **View** to preview it, or **Unpublish** to take it down anytime (the same link comes back if you re-publish). Profiles are **private by default** — nothing goes public until you publish it. The public page shows only **photo, name, type, niches, and bio** — rates, contacts, manager details, and internal notes always stay private. There's a new **Public Bio** box in the talent edit form to write what brands see. *(Setup: a one-time database snippet must be run in Supabase before this works — see notes.)*
+
 **Highlights are now easy to see in dark mode.** Two fixes: (1) when you **select/highlight text** anywhere in the app, the selection now shows in the brand blue with white text instead of a near-black highlight that was invisible against the dark background. (2) **@mention pills** in comments and notes (e.g. `@Piper`) now use a brighter blue and a stronger background in dark mode, so it's obvious who's been tagged. (Requested feedback: highlights and tags were too faint to read in dark mode.)
 
 ## 2026-06-10

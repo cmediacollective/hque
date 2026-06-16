@@ -148,6 +148,57 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   const [outreachLogs, setOutreachLogs] = useState([])
   const [showOutreachForm, setShowOutreachForm] = useState(false)
   const [hoveredLog, setHoveredLog] = useState(null)
+  const [publicProfile, setPublicProfile] = useState({ enabled: !!creator.public_enabled, slug: creator.slug || null })
+  const [publishing, setPublishing] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [publishError, setPublishError] = useState('')
+
+  const publicUrl = publicProfile.slug ? `${window.location.origin}/talent/${publicProfile.slug}` : ''
+
+  function slugify(name) {
+    return ((name || 'talent')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60)) || 'talent'
+  }
+
+  async function publishProfile() {
+    setPublishing(true)
+    setPublishError('')
+    // Already has a slug from a prior publish — just switch it back on so the
+    // shareable link stays the same.
+    if (publicProfile.slug) {
+      const { error } = await supabase.from('creators').update({ public_enabled: true }).eq('id', creator.id)
+      setPublishing(false)
+      if (error) return setPublishError(error.message)
+      return setPublicProfile(p => ({ ...p, enabled: true }))
+    }
+    // First publish: claim a name-based slug, letting the database's uniqueness
+    // rule reject collisions (code 23505) so we bump to -2, -3… until one sticks.
+    const base = slugify(creator.name)
+    for (let i = 0; i < 50; i++) {
+      const candidate = i === 0 ? base : `${base}-${i + 1}`
+      const { error } = await supabase.from('creators').update({ slug: candidate, public_enabled: true }).eq('id', creator.id)
+      if (!error) { setPublishing(false); return setPublicProfile({ enabled: true, slug: candidate }) }
+      if (error.code !== '23505') { setPublishing(false); return setPublishError(error.message) }
+    }
+    setPublishing(false)
+    setPublishError('Could not generate a unique link. Try renaming the talent slightly.')
+  }
+
+  async function unpublishProfile() {
+    const { error } = await supabase.from('creators').update({ public_enabled: false }).eq('id', creator.id)
+    if (error) return setPublishError(error.message)
+    setPublicProfile(p => ({ ...p, enabled: false }))
+  }
+
+  function copyPublicLink() {
+    if (!publicUrl) return
+    navigator.clipboard?.writeText(publicUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1800)
+  }
 
 
   useEffect(() => { fetchCampaigns(); fetchAllCampaigns(); fetchOutreach() }, [creator.id])
@@ -284,6 +335,49 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               {stat('YouTube', 'Subscribers', creator.yt_subscribers?.toLocaleString())}
               {stat('Engagement', 'Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
             </div>
+
+            <div style={{ marginBottom: '28px', padding: '16px', background: panelCard, border: `0.5px solid ${panelBorder}`, borderRadius: '2px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted }}>Public Profile</div>
+                <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: publicProfile.enabled ? '#5C9E52' : panelMuted, display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: publicProfile.enabled ? '#5C9E52' : '#888', display: 'inline-block' }} />
+                  {publicProfile.enabled ? 'Live' : 'Private'}
+                </span>
+              </div>
+
+              {!publicProfile.enabled ? (
+                <>
+                  <div style={{ fontSize: '12px', color: panelMuted, lineHeight: 1.6, marginBottom: '12px' }}>
+                    Publish a shareable page anyone can open — no login. It shows only photo, name, type, niches and bio.
+                  </div>
+                  <button onClick={publishProfile} disabled={publishing} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: publishing ? 0.7 : 1 }}>
+                    {publishing ? 'Publishing…' : 'Publish public link'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '10px' }}>
+                    <input readOnly value={publicUrl} onFocus={e => e.target.select()} style={{ flex: 1, background: panelBg, border: `0.5px solid ${panelBorder}`, borderRadius: '1px', padding: '8px 10px', fontSize: '11px', color: panelText, outline: 'none', fontFamily: 'monospace' }} />
+                    <button onClick={copyPublicLink} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: copied ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>{copied ? 'Copied' : 'Copy'}</button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                    <a href={publicUrl} target='_blank' rel='noreferrer' style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>View ↗</a>
+                    <button onClick={unpublishProfile} style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: 'none', color: panelMuted, cursor: 'pointer', padding: 0 }}>Unpublish</button>
+                  </div>
+                  {!creator.bio && (
+                    <div style={{ fontSize: '11px', color: '#c9a14a', marginTop: '10px', lineHeight: 1.5 }}>This talent has no bio yet — click Edit to add one so the page isn&rsquo;t bare.</div>
+                  )}
+                </>
+              )}
+              {publishError && <div style={{ fontSize: '11px', color: '#e74c3c', marginTop: '10px' }}>{publishError}</div>}
+            </div>
+
+            {creator.bio && (
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Bio</div>
+                <div style={{ fontSize: '13px', color: panelText, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{creator.bio}</div>
+              </div>
+            )}
 
             {Array.isArray(creator.niches) && creator.niches.length > 0 && (
               <div style={{ marginBottom: '28px' }}>

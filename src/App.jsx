@@ -27,6 +27,7 @@ const PricingPage = lazy(() => import('./PricingPage'))
 const BlogPage = lazy(() => import('./BlogPage'))
 const BlogPostPage = lazy(() => import('./BlogPostPage'))
 const TalentInquiry = lazy(() => import('./TalentInquiry'))
+const PublicTalentProfile = lazy(() => import('./PublicTalentProfile'))
 const Sandbox = lazy(() => import('./Sandbox'))
 
 // Captured at module load — before anything can clear the URL — so a broken
@@ -197,6 +198,9 @@ function App() {
   const isPricingPage = window.location.pathname === '/pricing'
   const isBlogPage = window.location.pathname === '/blog'
   const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
+  const talentProfileSlug = window.location.pathname.startsWith('/talent/')
+    ? decodeURIComponent(window.location.pathname.replace('/talent/', '').replace(/\/$/, ''))
+    : null
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
@@ -361,6 +365,7 @@ function App() {
 
   if (isSandboxPage) return <Sandbox />
   if (isInquiryPage) return <TalentInquiry />
+  if (talentProfileSlug) return <PublicTalentProfile slug={talentProfileSlug} />
   if (isPrivacyPage) return <LegalPage type='privacy' />
   if (isTermsPage) return <LegalPage type='terms' />
 

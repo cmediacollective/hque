@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
+import ExpandableTextarea from './ExpandableTextarea'
 
 const TYPES = ['Influencer', 'UGC', 'Model', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books', 'Specialty']
@@ -26,7 +27,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     name: '', types: [], tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
-    location: '', notes: '', photo_url: '', media_kit_url: '',
+    location: '', notes: '', bio: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
     rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' }
   })
@@ -195,6 +196,13 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
                 }}>{n}</button>
               ))}
             </div>
+          )}
+
+          {field('Public Bio',
+            <>
+              <textarea value={form.bio || ''} onChange={e => set('bio', e.target.value)} placeholder='A short, brand-facing description shown on this talent’s public profile page.' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '90px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+              <div style={{ fontSize: '9px', color: label, marginTop: '5px' }}>Shown publicly when you publish this talent&rsquo;s shareable link. Leave the rest private.</div>
+            </>
           )}
 
           {sectionLabel('Handles')}
