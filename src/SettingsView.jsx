@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import BillingView from './BillingView'
+import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
 export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -42,8 +43,14 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [teamMembers, setTeamMembers] = useState([])
   const [pendingInvites, setPendingInvites] = useState([])
   const [currentUserRole, setCurrentUserRole] = useState('member')
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
 
-  useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar() }, [])
+  useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar(); checkPlatformAdmin() }, [])
+
+  async function checkPlatformAdmin() {
+    const { data } = await supabase.rpc('is_platform_admin')
+    setIsPlatformAdmin(data === true)
+  }
 
   // Auto-save profile form with 800ms debounce
   useEffect(() => {
@@ -244,7 +251,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
-    ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : [])
+    ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : []),
+    ...(isPlatformAdmin ? [{ key: 'updates', label: 'Product Updates' }] : [])
   ]
 
   return (
@@ -508,6 +516,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
         {activeTab === 'billing' && currentUserRole === 'owner' && (
           <BillingView dark={dark} orgId={orgId} user={user} />
+        )}
+
+        {activeTab === 'updates' && isPlatformAdmin && (
+          <ProductUpdatesAdmin dark={dark} />
         )}
 
       </div>
