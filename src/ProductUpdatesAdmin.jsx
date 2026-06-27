@@ -99,7 +99,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
     if (!draft.title.trim()) return
     await patchItem(editing, {
       title: draft.title.trim(),
-      description: draft.description.trim() || null,
+      description: (draft.description || '').trim() || null,
       category: draft.category,
       shipped_at: draft.status === 'shipped' ? (draft.shipped_at || today()) : draft.shipped_at || null,
     })
