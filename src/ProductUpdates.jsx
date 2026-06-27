@@ -10,6 +10,18 @@ export default function ProductUpdates() {
   const [items, setItems] = useState([])
   const [filter, setFilter] = useState('all')   // all | in_progress | planned | shipped
   const [expanded, setExpanded] = useState({})  // per-section "show all" toggles
+  const [showSubmit, setShowSubmit] = useState(false)
+  const [sForm, setSForm] = useState({ title: '', description: '', name: '', email: '' })
+  const [sState, setSState] = useState('idle')  // idle | saving | done | error
+
+  async function submitRequest() {
+    if (sState === 'saving' || !sForm.title.trim()) return
+    setSState('saving')
+    const { error } = await supabase.rpc('submit_feature_request', {
+      p_title: sForm.title, p_description: sForm.description, p_name: sForm.name, p_email: sForm.email,
+    })
+    setSState(error ? 'error' : 'done')
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -74,8 +86,37 @@ export default function ProductUpdates() {
   }
   const filterTabs = [{ key: 'all', label: 'All' }, ...sections.map(s => ({ key: s.key, label: s.label }))]
 
+  const sInput = { width: '100%', background: '#fff', border: `0.5px solid ${border}`, borderRadius: '4px', padding: '10px 12px', fontSize: '13px', color: ink, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '10px' }
+
   return page(
     <div>
+      <div style={{ marginBottom: '28px' }}>
+        {sState === 'done' ? (
+          <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '8px', padding: '20px 22px' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, marginBottom: '5px' }}>Thanks — we got it! 🙌</div>
+            <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6 }}>We read every request. If it's approved, you'll see it appear on this page.</div>
+          </div>
+        ) : !showSubmit ? (
+          <button onClick={() => setShowSubmit(true)} style={{ padding: '11px 20px', fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', fontWeight: 600 }}>+ Submit a request</button>
+        ) : (
+          <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '8px', padding: '20px 22px' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, marginBottom: '4px' }}>Have an idea?</div>
+            <div style={{ fontSize: '12px', color: muted, marginBottom: '16px', lineHeight: 1.6 }}>Tell us what would make HQue better. We review every submission.</div>
+            <input value={sForm.title} onChange={e => setSForm({ ...sForm, title: e.target.value })} placeholder='Your idea, in a sentence *' style={sInput} autoFocus />
+            <textarea value={sForm.description} onChange={e => setSForm({ ...sForm, description: e.target.value })} placeholder='Any extra detail (optional)' rows={3} style={{ ...sInput, resize: 'vertical' }} />
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <input value={sForm.name} onChange={e => setSForm({ ...sForm, name: e.target.value })} placeholder='Your name (optional)' style={{ ...sInput, flex: 1, minWidth: '160px' }} />
+              <input value={sForm.email} onChange={e => setSForm({ ...sForm, email: e.target.value })} placeholder='Email (optional)' style={{ ...sInput, flex: 1, minWidth: '160px' }} />
+            </div>
+            {sState === 'error' && <div style={{ fontSize: '12px', color: '#C0392B', marginBottom: '10px' }}>Something went wrong. Please add a bit more detail and try again.</div>}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+              <button onClick={submitRequest} disabled={sState === 'saving' || !sForm.title.trim()} style={{ padding: '10px 18px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', fontWeight: 600, opacity: sState === 'saving' || !sForm.title.trim() ? 0.5 : 1 }}>{sState === 'saving' ? 'Sending…' : 'Send request'}</button>
+              <button onClick={() => setShowSubmit(false)} style={{ padding: '10px 18px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div style={{ position: 'sticky', top: 0, background: bg, zIndex: 5, display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '8px 0 14px', marginBottom: '14px', borderBottom: `0.5px solid ${border}` }}>
         {filterTabs.map(t => {
           const active = filter === t.key
