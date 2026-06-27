@@ -49,6 +49,19 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
     setLoading(false)
   }
 
+  // Ping the marketing Slack the first time an item becomes public.
+  async function maybeAnnounce(item) {
+    if (!item || item.announced_at) return
+    if (!['planned', 'in_progress', 'shipped'].includes(item.status)) return
+    try {
+      await fetch('/.netlify/functions/slack-new-update', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: item.title, description: item.description || '' }),
+      })
+    } catch (_) { /* best-effort */ }
+    await supabase.from('product_updates').update({ announced_at: new Date().toISOString() }).eq('id', item.id)
+  }
+
   async function createItem() {
     if (!newItem.title.trim() || saving) return
     setSaving(true)
@@ -61,9 +74,12 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
       shipped_at: newItem.status === 'shipped' ? (newItem.shipped_at || today()) : null,
       created_by: u?.user?.id || null,
     }
-    const { error } = await supabase.from('product_updates').insert([payload])
+    const { data: inserted, error } = await supabase.from('product_updates').insert([payload]).select().single()
     setSaving(false)
-    if (!error) { setNewItem(blankNew); setAdding(false); fetchAll() }
+    if (!error) {
+      if (inserted) await maybeAnnounce(inserted)
+      setNewItem(blankNew); setAdding(false); fetchAll()
+    }
   }
 
   async function patchItem(id, patch) {
@@ -76,6 +92,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
     if (status === 'shipped' && !item.shipped_at) patch.shipped_at = today()
     if (status !== 'shipped') patch.shipped_at = null
     await patchItem(item.id, patch)
+    await maybeAnnounce({ ...item, ...patch })
   }
 
   async function saveEdit() {

@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-27
 
+**Slack "new update" heads-up (internal).** When a roadmap item first goes public, a short internal message posts to the marketing Slack (#h-que-int-feedback): "New update: <one sentence>" + a link to h-que.com/updates — so the marketing team knows there's something new to promote. Fires once per item, master-controlled, internal only (needs a SLACK_WEBHOOK_URL env var). Replaces the earlier idea of posting customer submissions to Slack.
+
 **Roadmap upvoting (Phase 3a).** Visitors can now **upvote** Planned and In-Progress items on the public **/updates** page — one tap to vote, tap again to remove (one vote per browser). The most-wanted items automatically rise to the top of their section, and the **vote counts show in the master-admin view** so you can see what to prioritize. Voting can never affect private/under-review items.
 
 **Master Admin role + roadmap visible to everyone.** Introduced a **Master Admin** (HQue's creator) who is the only one who sees and controls incoming feature requests. The **Product Updates** tab in Settings is now visible to **everyone** — but as a **read-only roadmap** (In Progress / Planned / Shipped) for owners, admins, members, and customers; only the Master Admin sees the Under Review queue and the add/approve/edit controls. The Master Admin's own account is a **master account** — exempt from all trial/billing paywalls (it's the creator's own product). Also: the **Billing** tab in Settings is now visible to **Admins as well as Owners** (was owner-only).
