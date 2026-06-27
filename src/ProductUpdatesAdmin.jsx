@@ -120,7 +120,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
           if (rows.length === 0) return null
           return (
             <div key={sec.key} style={{ marginBottom: '22px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: accent, marginBottom: '10px' }}>{sec.label}</div>
+              <div style={{ fontSize: '14px', letterSpacing: '0.16em', textTransform: 'uppercase', color: text, fontWeight: 800, marginBottom: '12px' }}>{sec.label}</div>
               {rows.map(item => (
                 <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '12px 14px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: item.description ? '4px' : 0, flexWrap: 'wrap' }}>
@@ -193,7 +193,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
           if (rows.length === 0) return null
           return (
             <div key={sec.key} style={{ marginBottom: '22px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: accent, marginBottom: '2px' }}>{sec.label} <span style={{ color: subtle }}>· {rows.length}</span></div>
+              <div style={{ fontSize: '14px', letterSpacing: '0.16em', textTransform: 'uppercase', color: text, fontWeight: 800, marginBottom: '2px' }}>{sec.label} <span style={{ color: subtle, fontWeight: 400, fontSize: '10px' }}>· {rows.length}</span></div>
               <div style={{ fontSize: '10px', color: subtle, marginBottom: '10px' }}>{sec.note}</div>
               {rows.map(item => (
                 <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '12px 14px', marginBottom: '8px' }}>
