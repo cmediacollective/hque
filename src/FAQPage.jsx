@@ -10,7 +10,7 @@ const FAQS = [
   { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. You\'ll have full access to all features during your trial.' },
   { q: 'What happens after my trial ends?', a: 'You\'ll be prompted to choose a plan to continue. Your data is never deleted — if you need more time, reach out to us at support@h-que.com.' },
   { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel anytime from your billing settings and you\'ll retain access until the end of your billing period.' },
-  { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams. If you\'re a solo operator just getting started, reach out to support@h-que.com.' },
+  { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams.' },
   { q: "Where can I see what's new, what's been fixed, and what's coming next?", a: (
     <>We keep a live product updates page at <a href="https://h-que.com/updates" style={{ color: '#5b7c99', textDecoration: 'underline' }}>h-que.com/updates</a>. It shows everything that's been shipped (new features, improvements, and bug fixes), what we're currently building, and what's planned. You can also submit your own feature requests or report an issue directly from that page.</>
   ) },
