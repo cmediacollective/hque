@@ -404,6 +404,17 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
     title: 'HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs',
     description: 'Whether you run an agency, manage talent campaigns in-house, or are building something on your own — HQue is how you manage your talent, track every campaign, and close deals without the chaos.',
     canonical: 'https://h-que.com',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'HQue',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: 'https://h-que.com',
+      description: 'HQue is the operating system for talent and influencer agencies — manage your roster, track campaigns, handle payments, and run your team in one place. Built for agencies, brands managing talent in-house, and solo talent managers.',
+      offers: { '@type': 'Offer', category: 'SaaS' },
+      publisher: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
+    },
   })
   const [activeScreen, setActiveScreen] = useState(0)
   const [scrolled, setScrolled] = useState(false)

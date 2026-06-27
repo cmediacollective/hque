@@ -2,22 +2,56 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://h-que.com/</loc>
-    <priority>1.0</priority>
-    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://h-que.com/pricing</loc>
   </url>
   <url>
     <loc>https://h-que.com/faq</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/updates</loc>
   </url>
   <url>
     <loc>https://h-que.com/privacy</loc>
-    <priority>0.3</priority>
-    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://h-que.com/terms</loc>
-    <priority>0.3</priority>
-    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/why-agencies-ditching-spreadsheets-2026</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/what-is-an-agency-os</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/influencer-campaign-tracking-complete-guide</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/talent-management-vs-influencer-marketing</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/how-to-build-creator-roster-from-scratch</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/what-to-look-for-talent-management-software</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/state-of-creator-marketing-2026</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/dms-to-deals-brand-partnerships</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/best-talent-agencies-run-like-media-companies</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/what-brands-want-from-talent-agencies</loc>
+  </url>
+  <url>
+    <loc>https://h-que.com/blog/future-of-talent-representation-creator-economy</loc>
   </url>
 </urlset>

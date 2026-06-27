@@ -7,12 +7,26 @@ export default function BlogPostPage({ slug, onGetStarted }) {
   const post = POSTS.find(p => p.slug === slug)
   const isMobile = window.innerWidth < 768
 
+  let publishedISO
+  try { publishedISO = post && post.date ? new Date(post.date).toISOString().slice(0, 10) : undefined } catch { publishedISO = undefined }
+
   useSEO({
     title: post ? post.title : 'Article Not Found',
     description: post ? post.excerpt : '',
     image: post ? post.image : undefined,
     canonical: post ? 'https://h-que.com/blog/' + post.slug : undefined,
     type: 'article',
+    jsonLd: post ? {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.excerpt,
+      image: post.image,
+      ...(publishedISO ? { datePublished: publishedISO } : {}),
+      author: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com' },
+      publisher: { '@type': 'Organization', name: 'HQue', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://h-que.com/blog/' + post.slug },
+    } : undefined,
   })
 
   if (!post) return (

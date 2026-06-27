@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 const BASE = 'https://h-que.com'
 const DEFAULT_IMAGE = BASE + '/og-image.png'
 
-export default function useSEO({ title, description, image, canonical, type = 'website' }) {
+export default function useSEO({ title, description, image, canonical, type = 'website', jsonLd }) {
   useEffect(() => {
     const fullTitle = title ? title + ' | HQue' : 'HQue — Agency OS for Talent & Influencer Agencies'
     const desc = description || 'HQue is the operating system for talent and influencer agencies. Manage your roster, campaigns, payments, and team — all in one place.'
@@ -48,5 +48,20 @@ export default function useSEO({ title, description, image, canonical, type = 'w
       document.head.appendChild(link)
     }
     link.setAttribute('href', url)
-  }, [title, description, image, canonical, type])
+
+    // JSON-LD structured data (helps Google rich results + gives AI engines
+    // a clear, machine-readable description of the page).
+    let ld = document.getElementById('seo-jsonld')
+    if (jsonLd) {
+      if (!ld) {
+        ld = document.createElement('script')
+        ld.id = 'seo-jsonld'
+        ld.type = 'application/ld+json'
+        document.head.appendChild(ld)
+      }
+      ld.textContent = JSON.stringify(jsonLd)
+    } else if (ld) {
+      ld.remove()
+    }
+  }, [title, description, image, canonical, type, JSON.stringify(jsonLd || null)])
 }
