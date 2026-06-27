@@ -169,8 +169,8 @@ export default function ProductUpdates() {
               </div>
             </div>
 
-            <input value={sForm.title} onChange={e => setSForm({ ...sForm, title: e.target.value })} placeholder={sForm.category === 'Fix' ? 'What went wrong, in a sentence *' : 'Your idea, in a sentence *'} style={sInput} autoFocus />
-            <textarea value={sForm.description} onChange={e => setSForm({ ...sForm, description: e.target.value })} placeholder={sForm.category === 'Fix' ? 'What happened, and what did you expect? Steps to reproduce help a lot.' : 'Any extra detail (optional)'} rows={3} style={{ ...sInput, resize: 'vertical' }} />
+            <input value={sForm.title} onChange={e => setSForm({ ...sForm, title: e.target.value })} placeholder="What's your request?" style={sInput} autoFocus />
+            <textarea value={sForm.description} onChange={e => setSForm({ ...sForm, description: e.target.value })} placeholder='Add any details' rows={3} style={{ ...sInput, resize: 'vertical' }} />
 
             <div style={{ marginBottom: '10px' }}>
               <div style={sLabel}>Screenshot {sForm.category === 'Fix' ? '(really helps us)' : '(optional)'}</div>
