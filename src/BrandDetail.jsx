@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import ExpandableTextarea from './ExpandableTextarea'
 
 export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) {
   const bg = dark ? '#1A1A1A' : '#FFFFFF'
@@ -168,7 +169,7 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
       </div>
       <input placeholder='Email' type='email' value={contactDraft.email} onChange={e => setContactDraft(d => ({ ...d, email: e.target.value }))} style={{ ...miniInput, marginBottom: '8px' }} />
       <input placeholder='Phone' value={contactDraft.phone} onChange={e => setContactDraft(d => ({ ...d, phone: e.target.value }))} style={{ ...miniInput, marginBottom: '8px' }} />
-      <textarea placeholder='Notes (optional)' value={contactDraft.notes || ''} onChange={e => setContactDraft(d => ({ ...d, notes: e.target.value }))} style={{ ...miniInput, marginBottom: '8px', minHeight: '54px', resize: 'vertical', fontFamily: 'inherit' }} />
+      <ExpandableTextarea dark={dark} placeholder='Notes (optional)' value={contactDraft.notes || ''} onChange={e => setContactDraft(d => ({ ...d, notes: e.target.value }))} style={{ ...miniInput, marginBottom: '8px', minHeight: '54px', resize: 'vertical', fontFamily: 'inherit' }} />
       {contactError && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '8px' }}>{contactError}</div>}
       <div style={{ display: 'flex', gap: '6px' }}>
         <button onClick={saveContact} disabled={savingContact} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: savingContact ? 0.6 : 1 }}>{savingContact ? 'Saving...' : 'Save contact'}</button>

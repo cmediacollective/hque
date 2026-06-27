@@ -3,12 +3,20 @@ import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, onDeleted, dark }) {
-  const border = dark ? '#2A2A2A' : '#DBD7D0'
-  const bg = dark ? '#1A1A1A' : '#F8F7F3'
-  const cardBg = dark ? '#111' : '#fff'
-  const text = dark ? '#F2EEE8' : '#1A1A1A'
-  const labelColor = dark ? '#888' : '#666'
-  const inputBg = dark ? '#141414' : '#fff'
+  const cardBg = dark ? '#1A1A1A' : '#FFFFFF'
+  const text = dark ? '#EDEAE4' : '#1A1A1A'
+  const muted = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)'
+  const labelColor = muted
+  const fieldBg = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'
+  const fieldBorder = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'
+  const fieldBorderStrong = dark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.28)'
+  const border = fieldBorder
+  const inputBg = fieldBg
+  const accent = '#5b7c99'
+  const danger = dark ? '#d98b85' : '#c0392b'
+  const fieldFocus = (e) => { e.target.style.borderColor = fieldBorderStrong }
+  const fieldBlur = (e) => { e.target.style.borderColor = fieldBorder }
+  const inputStyle = { width: '100%', background: fieldBg, border: `1px solid ${fieldBorder}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease' }
 
   const [form, setForm] = useState(existing ? {
     name: existing.name || '',
@@ -19,6 +27,9 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
     contact_id: existing.contact_id || '',
     campaign_type: existing.campaign_type || 'Paid',
     status: existing.status || 'Pitch',
+    pitched_by: existing.pitched_by || '',
+    campaign_manager: existing.campaign_manager || '',
+    closed_by: existing.closed_by || '',
     budget: existing.budget || '',
     start_date: existing.start_date || '',
     end_date: existing.end_date || '',
@@ -30,13 +41,16 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
     notes: existing.notes || '',
     talent_ids: existing.campaign_creators?.map(ct => ct.creator_id) || [],
   } : {
-    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', contact_id: '', campaign_type: 'Paid', status: 'Pitch', budget: '',
+    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', contact_id: '', campaign_type: 'Paid', status: 'Pitch',
+    pitched_by: '', campaign_manager: '', closed_by: '', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
     timeline: '', brief_url: '', contract_url: '', notes: '', talent_ids: []
   })
 
   const [creators, setCreators] = useState([])
   const [brands, setBrands] = useState([])
+  const [teamMembers, setTeamMembers] = useState([])
+  const [currentUserId, setCurrentUserId] = useState(null)
   const [brandContacts, setBrandContacts] = useState([])
   const [showNewBrand, setShowNewBrand] = useState(false)
   const [newBrandName, setNewBrandName] = useState('')
@@ -59,8 +73,14 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
       const { data } = await supabase.from('brands').select('*').eq('org_id', orgId).neq('status', 'archived').order('name', { ascending: true })
       setBrands(data || [])
     }
+    const fetchTeam = async () => {
+      const { data } = await supabase.from('profiles').select('id, full_name, email').eq('org_id', orgId).order('full_name', { ascending: true })
+      if (data) setTeamMembers(data)
+    }
     fetchCreators()
     fetchBrands()
+    fetchTeam()
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data?.user?.id || null))
   }, [orgId])
 
   // When editing an existing campaign, fetch its linked talent
@@ -233,8 +253,13 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
 
   async function handleSave() {
     if (!form.name.trim()) return setError('Campaign name is required')
+    if (!form.brand_id) return setError('Brand is required')
     setSaving(true)
     setError('')
+    // Auto-capture who closed the deal the first time a campaign goes Active,
+    // unless Closed By was already set (manually or on a prior Active).
+    let closedBy = form.closed_by || null
+    if (form.status === 'Active' && !closedBy && currentUserId) closedBy = currentUserId
     const linkedBrand = form.brand_id ? brands.find(b => b.id === form.brand_id) : null
     const resolvedBrandText = (form.brand && form.brand.trim()) || linkedBrand?.name || null
     const resolvedBrandLogo = form.brand_logo_url || linkedBrand?.logo_url || null
@@ -248,6 +273,9 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
       contact_id: form.contact_id || null,
       campaign_type: form.campaign_type,
       status: form.status,
+      pitched_by: form.pitched_by || null,
+      campaign_manager: form.campaign_manager || null,
+      closed_by: closedBy,
       budget: form.budget ? parseFloat(form.budget) : null,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
@@ -292,18 +320,52 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
   }
 
   const inp = (props) => (
-    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+    <input {...props} onFocus={fieldFocus} onBlur={fieldBlur} style={{ ...inputStyle, ...(props.style || {}) }} />
   )
 
-  const field = (lbl, children) => (
-    <div style={{ marginBottom: '18px' }}>
-      <label style={{ display: 'block', fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '6px' }}>{lbl}</label>
-      {children}
+  const txt = (props, minHeight = '80px') => (
+    <textarea {...props} onFocus={fieldFocus} onBlur={fieldBlur} style={{ ...inputStyle, minHeight, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }} />
+  )
+
+  // Label is sentence-case, medium weight, muted; a required field gets a coral asterisk.
+  const field = (lbl, children) => {
+    const required = lbl.endsWith(' *')
+    const label = required ? lbl.slice(0, -2) : lbl
+    return (
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', fontSize: '11px', fontWeight: 500, color: muted, marginBottom: '5px' }}>{label}{required && <span style={{ color: danger, marginLeft: '3px' }}>*</span>}</label>
+        {children}
+      </div>
+    )
+  }
+
+  const selectStyle = { ...inputStyle, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', paddingRight: '30px', cursor: 'pointer' }
+
+  // Native select with a custom low-opacity chevron — no browser-default arrow.
+  const selectEl = (value, onChange, children, wrap = {}) => (
+    <div style={{ position: 'relative', ...wrap }}>
+      <select value={value} onChange={onChange} onFocus={fieldFocus} onBlur={fieldBlur} style={selectStyle}>{children}</select>
+      <span style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '10px', color: muted }}>▾</span>
     </div>
   )
 
+  // Quiet section divider: a hairline rule + a short plain-language label. No numbers, no caps.
+  const sectionHeader = (title) => (
+    <div style={{ marginTop: '36px', marginBottom: '12px', paddingTop: '14px', borderTop: `1px solid ${fieldBorder}` }}>
+      <div style={{ fontSize: '11px', letterSpacing: '0.07em', color: text, opacity: 0.4, fontWeight: 400 }}>{title}</div>
+    </div>
+  )
+
+  // Dropdown of team members (profiles) for the ownership fields.
+  const userSelect = (k) => selectEl(form[k] || '', e => set(k, e.target.value), (
+    <>
+      <option value=''>Unassigned</option>
+      {teamMembers.map(m => <option key={m.id} value={m.id}>{m.full_name || m.email || 'Unnamed'}</option>)}
+    </>
+  ))
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, background: dark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       {editingBrandId && (
         <BrandDetail
           brandId={editingBrandId}
@@ -314,78 +376,68 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
           }}
         />
       )}
-      <div style={{ width: '480px', height: '100vh', background: cardBg, borderLeft: `0.5px solid ${border}`, overflowY: 'auto', padding: '32px 28px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>{existing ? 'Edit Campaign' : 'New Campaign'}</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: labelColor, fontSize: '20px', cursor: 'pointer', lineHeight: 1 }}>×</button>
+      <div className='cf-scroll' style={{ width: '580px', maxWidth: '94vw', maxHeight: '88vh', background: cardBg, border: `1px solid ${fieldBorder}`, borderRadius: '12px', overflowY: 'auto', padding: '28px 28px 36px' }}>
+        <style>{`
+          .cf-scroll::-webkit-scrollbar { width: 8px; }
+          .cf-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+          .cf-scroll:hover::-webkit-scrollbar-thumb { background: ${dark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.16)'}; }
+          .cf-date::-webkit-calendar-picker-indicator { filter: invert(${dark ? '0.7' : '0.35'}); opacity: 0.55; cursor: pointer; }
+        `}</style>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+          <div style={{ fontSize: '18px', fontWeight: 500, color: text, letterSpacing: '-0.01em', paddingTop: '2px' }}>{existing ? 'Edit Campaign' : 'New Campaign'}</div>
+          <button onClick={onClose} title='Close' style={{ background: 'none', border: 'none', color: muted, fontSize: '22px', cursor: 'pointer', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
         </div>
 
+        {sectionHeader('Basics')}
         {field('Campaign Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Summer Wellness Campaign' }))}
-        {field('Brand',
+        {field('Brand *',
           <div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <select
-                value={form.brand_id || ''}
-                onChange={e => selectBrand(e.target.value)}
-                style={{ flex: 1, background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-                <option value=''>No brand (internal)</option>
-                {brands.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              {selectEl(form.brand_id || '', e => selectBrand(e.target.value), (
+                <>
+                  <option value=''>Select a brand…</option>
+                  {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </>
+              ), { flex: 1 })}
               <button
                 type='button'
                 onClick={() => setShowNewBrand(s => !s)}
-                style={{ padding: '9px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', whiteSpace: 'nowrap' }}>
+                style={{ padding: '0 4px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 {showNewBrand ? 'Cancel' : '+ New'}
               </button>
             </div>
             {form.brand_id && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', padding: '8px 12px', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', padding: '8px 10px', background: fieldBg, border: `1px solid ${fieldBorder}`, borderRadius: '6px' }}>
                 {form.brand_logo_url
-                  ? <img src={form.brand_logo_url} alt={form.brand} style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '2px', background: '#fff', padding: '2px', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '32px', height: '32px', borderRadius: '2px', background: '#5b7c99', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '14px', flexShrink: 0 }}>{(form.brand || '?').charAt(0).toUpperCase()}</div>
+                  ? <img src={form.brand_logo_url} alt={form.brand} style={{ width: '32px', height: '32px', objectFit: 'contain', borderRadius: '6px', background: '#fff', padding: '2px', border: `1px solid ${fieldBorder}` }} onError={e => e.target.style.display = 'none'} />
+                  : <div style={{ width: '32px', height: '32px', borderRadius: '6px', background: accent, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '14px', flexShrink: 0 }}>{(form.brand || '?').charAt(0).toUpperCase()}</div>
                 }
                 <span style={{ fontSize: '12px', color: text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{form.brand}</span>
-                {form.brand_website && <a href={form.brand_website.startsWith('http') ? form.brand_website : 'https://' + form.brand_website} target='_blank' rel='noreferrer' style={{ fontSize: '10px', color: '#5b7c99', textDecoration: 'none' }}>{form.brand_website.replace(/^https?:\/\//, '').slice(0, 24)} ↗</a>}
-                <label title='Upload or change the logo for this brand' style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: uploadingLogo ? 'wait' : 'pointer', borderRadius: '1px', flexShrink: 0, opacity: uploadingLogo ? 0.6 : 1 }}>
-                  {uploadingLogo ? '...' : (form.brand_logo_url ? 'Change logo' : 'Add logo')}
-                  <input type='file' accept='image/*' onChange={e => { handleBrandLogoUpload(e.target.files?.[0]); e.target.value = '' }} style={{ display: 'none' }} disabled={uploadingLogo} />
-                </label>
-                {form.brand_logo_url && (
-                  <button type='button' onClick={handleBrandLogoRemove} disabled={uploadingLogo} title="Remove this brand's logo" style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: uploadingLogo ? 'wait' : 'pointer', borderRadius: '1px', flexShrink: 0, opacity: uploadingLogo ? 0.6 : 1 }}>
-                    Remove
-                  </button>
-                )}
-                <button type='button' onClick={() => setEditingBrandId(form.brand_id)} title='View or edit brand contact' style={{ padding: '4px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: '#5b7c99', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
-                  Contact
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '9px', flexShrink: 0 }}>
+                  <label title='Upload or change the logo for this brand' style={{ fontSize: '11px', color: muted, cursor: uploadingLogo ? 'wait' : 'pointer', opacity: uploadingLogo ? 0.6 : 1 }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                    {uploadingLogo ? '…' : (form.brand_logo_url ? 'Change logo' : 'Add logo')}
+                    <input type='file' accept='image/*' onChange={e => { handleBrandLogoUpload(e.target.files?.[0]); e.target.value = '' }} style={{ display: 'none' }} disabled={uploadingLogo} />
+                  </label>
+                  {form.brand_logo_url && (<>
+                    <span style={{ color: muted, opacity: 0.4 }}>·</span>
+                    <button type='button' onClick={handleBrandLogoRemove} disabled={uploadingLogo} title="Remove this brand's logo" style={{ fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: uploadingLogo ? 'wait' : 'pointer', padding: 0, opacity: uploadingLogo ? 0.6 : 1 }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>Remove</button>
+                  </>)}
+                  <span style={{ color: muted, opacity: 0.4 }}>·</span>
+                  <button type='button' onClick={() => setEditingBrandId(form.brand_id)} title='View or edit brand contact' style={{ fontSize: '11px', background: 'none', border: 'none', color: accent, cursor: 'pointer', padding: 0 }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>Contact</button>
+                </div>
               </div>
             )}
             {showNewBrand && (
-              <div style={{ marginTop: '10px', padding: '12px', border: `0.5px dashed ${border}`, borderRadius: '1px' }}>
-                <input
-                  value={newBrandName}
-                  onChange={e => setNewBrandName(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') createBrandInline() }}
-                  placeholder='New brand name'
-                  autoFocus
-                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
-                />
-                <input
-                  value={newBrandWebsite}
-                  onChange={e => setNewBrandWebsite(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') createBrandInline() }}
-                  placeholder='Website (optional, e.g. example.com)'
-                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}
-                />
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <label style={{ padding: '6px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px', flex: 1 }}>
-                    {newBrandLogoFile ? newBrandLogoFile.name.slice(0, 20) : 'Upload logo (optional)'}
+              <div style={{ marginTop: '10px', padding: '12px', border: `1px dashed ${fieldBorder}`, borderRadius: '6px' }}>
+                {inp({ value: newBrandName, onChange: e => setNewBrandName(e.target.value), onKeyDown: e => { if (e.key === 'Enter') createBrandInline() }, placeholder: 'New brand name', autoFocus: true, style: { marginBottom: '8px' } })}
+                {inp({ value: newBrandWebsite, onChange: e => setNewBrandWebsite(e.target.value), onKeyDown: e => { if (e.key === 'Enter') createBrandInline() }, placeholder: 'Website (optional, e.g. example.com)', style: { marginBottom: '10px' } })}
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <label style={{ fontSize: '11px', color: muted, cursor: 'pointer', flex: 1 }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
+                    {newBrandLogoFile ? newBrandLogoFile.name.slice(0, 24) : '↑ Upload logo (optional)'}
                     <input type='file' accept='image/*' onChange={e => setNewBrandLogoFile(e.target.files?.[0] || null)} style={{ display: 'none' }} />
                   </label>
-                  <button onClick={createBrandInline} disabled={creatingBrand || !newBrandName.trim()} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: creatingBrand || !newBrandName.trim() ? 0.5 : 1 }}>
-                    {creatingBrand ? 'Adding...' : 'Add brand'}
+                  <button onClick={createBrandInline} disabled={creatingBrand || !newBrandName.trim()} style={{ padding: '7px 14px', fontSize: '12px', fontWeight: 500, background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', opacity: creatingBrand || !newBrandName.trim() ? 0.5 : 1 }}>
+                    {creatingBrand ? 'Adding…' : 'Add brand'}
                   </button>
                 </div>
               </div>
@@ -398,65 +450,81 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
 
         {form.brand_id && field('Campaign Contact',
           <div>
-            <select value={form.contact_id || ''} onChange={e => set('contact_id', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-              <option value=''>— No contact —</option>
-              {brandContacts.map(c => (
-                <option key={c.id} value={c.id}>{(c.name || c.email || 'Unnamed') + (c.title ? ` · ${c.title}` : '') + (c.is_primary ? ' (primary)' : '')}</option>
-              ))}
-            </select>
+            {selectEl(form.contact_id || '', e => set('contact_id', e.target.value), (
+              <>
+                <option value=''>No contact</option>
+                {brandContacts.map(c => (
+                  <option key={c.id} value={c.id}>{(c.name || c.email || 'Unnamed') + (c.title ? ` · ${c.title}` : '') + (c.is_primary ? ' (primary)' : '')}</option>
+                ))}
+              </>
+            ))}
             {brandContacts.length === 0 && (
-              <div style={{ fontSize: '10px', color: labelColor, marginTop: '6px' }}>No contacts for this brand yet — use the “Contact” button above to add people.</div>
+              <div style={{ fontSize: '11px', color: muted, marginTop: '6px', opacity: 0.8 }}>No contacts for this brand yet — use “Contact” above to add people.</div>
             )}
           </div>
         )}
 
-        {field('Campaign Type',
-          <select value={form.campaign_type || 'Paid'} onChange={e => set('campaign_type', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-            {['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
+        {field('Campaign Type *',
+          selectEl(form.campaign_type || 'Paid', e => set('campaign_type', e.target.value),
+            ['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(ty => <option key={ty} value={ty}>{ty}</option>)
+          )
         )}
 
-        {field('Status',
-          <select value={form.status || 'Pitch'} onChange={e => set('status', e.target.value)} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-            {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+        {field('Status *',
+          selectEl(form.status || 'Pitch', e => set('status', e.target.value),
+            ['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)
+          )
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          {field('Budget (USD)', inp({ value: form.budget, onChange: e => set('budget', e.target.value), placeholder: '0', type: 'number' }))}
-          {field('Start Date', inp({ value: form.start_date, onChange: e => set('start_date', e.target.value), type: 'date' }))}
-          {field('End Date', inp({ value: form.end_date, onChange: e => set('end_date', e.target.value), type: 'date' }))}
+        {sectionHeader('Ownership')}
+        {field('Pitched By', userSelect('pitched_by'))}
+        {field('Deal Closed By', userSelect('closed_by'))}
+        {field('Campaign Manager', userSelect('campaign_manager'))}
+
+        {sectionHeader('Timeline & Budget')}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+          {field('Start Date', inp({ value: form.start_date, onChange: e => set('start_date', e.target.value), type: 'date', className: 'cf-date' }))}
+          {field('End Date', inp({ value: form.end_date, onChange: e => set('end_date', e.target.value), type: 'date', className: 'cf-date' }))}
         </div>
+        {field('Budget', (
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: muted, pointerEvents: 'none' }}>$</span>
+            {inp({ value: form.budget, onChange: e => set('budget', e.target.value), placeholder: '0', type: 'number', style: { paddingLeft: '24px' } })}
+          </div>
+        ))}
 
+        {sectionHeader('Deliverables')}
         {field('Deliverables',
-          <textarea value={form.deliverables} onChange={e => set('deliverables', e.target.value)} placeholder='e.g. 1 Reel, 3 Stories' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', fontFamily: 'inherit' }} />
+          txt({ value: form.deliverables, onChange: e => set('deliverables', e.target.value), placeholder: 'e.g. 1 Reel, 3 Stories' })
         )}
         {field('Deliverables Link', inp({ value: form.deliverables_link, onChange: e => set('deliverables_link', e.target.value), placeholder: 'https://drive.google.com/...' }))}
 
-        {field('Timeline',
-          <textarea value={form.timeline} onChange={e => set('timeline', e.target.value)} placeholder='e.g. Content due Apr 15, go live Apr 20' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', minHeight: '60px', resize: 'vertical', fontFamily: 'inherit' }} />
-        )}
-
+        {sectionHeader('Documents')}
         {field('Brief URL', inp({ value: form.brief_url, onChange: e => set('brief_url', e.target.value), placeholder: 'https://drive.google.com/file/d/...' }))}
         {field('Contract URL', inp({ value: form.contract_url, onChange: e => set('contract_url', e.target.value), placeholder: 'https://drive.google.com/file/d/...' }))}
 
+        {sectionHeader('Notes')}
+        {field('Key Milestones',
+          txt({ value: form.timeline, onChange: e => set('timeline', e.target.value), placeholder: 'e.g. Content due Apr 15, go live Apr 20' }, '60px')
+        )}
         {field('Internal Notes',
-          <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='Any internal notes...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', minHeight: '80px', resize: 'vertical', fontFamily: 'inherit' }} />
+          txt({ value: form.notes, onChange: e => set('notes', e.target.value), placeholder: 'Any internal notes…' })
         )}
 
-        {field('Talent',
+        {sectionHeader('Talent')}
+        {field('Add Talent',
           <div>
-            <input value={talentSearch} onChange={e => setTalentSearch(e.target.value)} placeholder='Search by name or handle...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', marginBottom: '6px' }} />
+            {inp({ value: talentSearch, onChange: e => setTalentSearch(e.target.value), placeholder: 'Search by name or handle…', style: { marginBottom: '6px' } })}
             {talentSearch.trim() && (
-              <div style={{ border: `0.5px solid ${border}`, borderRadius: '1px', maxHeight: '180px', overflowY: 'auto' }}>
-                {creators.filter(cr => cr.name?.toLowerCase().includes(talentSearch.toLowerCase()) || cr.handles?.instagram?.toLowerCase().includes(talentSearch.toLowerCase())).map(cr => (
-                  <div key={cr.id} onClick={() => { toggleTalent(cr.id); setTalentSearch('') }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', cursor: 'pointer', background: form.talent_ids.includes(cr.id) ? (dark ? '#1a2530' : '#EEF3F7') : inputBg, borderBottom: `0.5px solid ${border}` }}>
-                    {cr.photo_url ? <img src={cr.photo_url} alt={cr.name} style={{ width: '28px', height: '28px', borderRadius: '2px', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} /> : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>{cr.name?.charAt(0)}</div>}
+              <div style={{ border: `1px solid ${fieldBorder}`, borderRadius: '6px', maxHeight: '180px', overflowY: 'auto', overflow: 'hidden' }}>
+                {creators.filter(cr => cr.name?.toLowerCase().includes(talentSearch.toLowerCase()) || cr.handles?.instagram?.toLowerCase().includes(talentSearch.toLowerCase())).map((cr, i) => (
+                  <div key={cr.id} onClick={() => { toggleTalent(cr.id); setTalentSearch('') }} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', cursor: 'pointer', background: form.talent_ids.includes(cr.id) ? (dark ? 'rgba(91,124,153,0.15)' : 'rgba(91,124,153,0.10)') : 'transparent', borderTop: i === 0 ? 'none' : `1px solid ${fieldBorder}` }}>
+                    {cr.photo_url ? <img src={cr.photo_url} alt={cr.name} style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} /> : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>{cr.name?.charAt(0)}</div>}
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '12px', color: text }}>{cr.name}</div>
-                      {cr.handles?.instagram && <a href={`https://instagram.com/${cr.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '10px', color: labelColor, textDecoration: 'none' }}>@{cr.handles.instagram}</a>}
+                      {cr.handles?.instagram && <a href={`https://instagram.com/${cr.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: muted, textDecoration: 'none' }}>@{cr.handles.instagram}</a>}
                     </div>
-                    {form.talent_ids.includes(cr.id) && <span style={{ fontSize: '10px', color: '#5b7c99' }}>✓ Added</span>}
+                    {form.talent_ids.includes(cr.id) && <span style={{ fontSize: '11px', color: accent }}>✓ Added</span>}
                   </div>
                 ))}
               </div>
@@ -465,19 +533,14 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
         )}
 
         {form.talent_ids.length > 0 && (
-          <div style={{ marginBottom: '18px' }}>
-            <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: labelColor, marginBottom: '8px' }}>Selected Talent</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
               {form.talent_ids.map(id => {
                 const cr = creators.find(x => x.id === id)
                 return cr ? (
-                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px', background: dark ? '#1a2530' : '#EEF3F7', borderRadius: '1px', border: '0.5px solid #5b7c99' }}>
-                    {cr.photo_url
-                      ? <img src={cr.photo_url} alt={cr.name} style={{ width: '28px', height: '28px', borderRadius: '2px', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                      : <div style={{ width: '28px', height: '28px', borderRadius: '2px', background: '#5b7c99', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>{cr.name?.charAt(0)}</div>
-                    }
-                    <span style={{ fontSize: '11px', color: text }}>{cr.name}</span>
-                    <button onClick={(e) => { e.stopPropagation(); toggleTalent(id) }} style={{ background: 'none', border: 'none', color: labelColor, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: '0 2px' }}>×</button>
+                  <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '4px 6px 4px 10px', borderRadius: '20px', border: `1px solid ${dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}` }}>
+                    <span style={{ fontSize: '12px', color: text }}>{cr.name}</span>
+                    <button onClick={(e) => { e.stopPropagation(); toggleTalent(id) }} title='Remove' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '14px', lineHeight: 1, padding: 0, opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
                   </div>
                 ) : null
               })}
@@ -485,23 +548,20 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
           </div>
         )}
 
-        {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '12px' }}>{error}</div>}
+        {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '20px' }}>{error}</div>}
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={handleSave} disabled={saving} style={{ flex: 1, padding: '11px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
-            {saving ? 'Saving...' : existing ? 'Save Changes' : 'Create Campaign'}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginTop: '32px' }}>
+          <button onClick={handleSave} disabled={saving} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, letterSpacing: '0.02em', background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px', opacity: saving ? 0.6 : 1 }}>
+            {saving ? 'Saving…' : existing ? 'Save changes' : 'Create campaign'}
           </button>
-          <button onClick={onClose} style={{ padding: '11px 20px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: labelColor, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
         </div>
 
         {existing && (
-          <div style={{ marginTop: '28px', paddingTop: '18px', borderTop: `0.5px solid ${border}` }}>
-            <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: labelColor, marginBottom: '8px' }}>Danger Zone</div>
-            <div style={{ fontSize: '11px', color: labelColor, marginBottom: '10px', lineHeight: 1.4 }}>
-              Deleting permanently removes this campaign, its linked workspace tasks, talent assignments, and comments. If you might want it back later, use Archive instead.
-            </div>
-            <button onClick={handleDelete} disabled={deleting} style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #c0392b', color: '#c0392b', cursor: 'pointer', borderRadius: '1px', opacity: deleting ? 0.7 : 1 }}>
-              {deleting ? 'Deleting...' : 'Delete Campaign'}
+          <div style={{ marginTop: '40px', paddingTop: '18px', borderTop: `1px solid ${fieldBorder}` }}>
+            <div style={{ fontSize: '11px', color: muted, fontStyle: 'italic', opacity: 0.5, marginBottom: '8px', lineHeight: 1.5 }}>Deleting this campaign is permanent and cannot be undone — its tasks, talent assignments, and comments go with it. To hide it instead, use Archive.</div>
+            <button onClick={handleDelete} disabled={deleting} style={{ background: 'none', border: 'none', color: danger, fontSize: '12px', cursor: 'pointer', padding: 0, opacity: deleting ? 0.6 : 0.85 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.85'}>
+              {deleting ? 'Deleting…' : 'Delete campaign'}
             </button>
           </div>
         )}

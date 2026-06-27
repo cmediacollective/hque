@@ -1,4 +1,13 @@
 import { useState, useEffect } from 'react'
+
+// Turn a campaign name into a clean URL slug, e.g. "Summer Wellness!" → "summer-wellness".
+function slugifyCampaign(name) {
+  return ((name || 'campaign')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)) || 'campaign'
+}
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import BrandDetail from './BrandDetail'
@@ -122,6 +131,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
   const [brandContact, setBrandContact] = useState(null)
 
   const [linkCopied, setLinkCopied] = useState(false)
+  const [hoveredLink, setHoveredLink] = useState(null)
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
   const [newComment, setNewComment] = useState('')
@@ -279,13 +289,44 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
     fetchCreators()
   }
 
-  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : s === 'Contract Pending' ? '#A67C52' : s === 'Dead' ? '#5A5A5A' : '#888'
-  const paymentColor = (s) => s === 'Paid' ? '#5C9E52' : '#888'
+  const statusColor = (s) => s === 'Active' ? '#5b7c99' : s === 'Completed' ? '#5C9E52' : s === 'Pending Payment' ? '#C4962E' : s === 'Contract Pending' ? '#C4962E' : s === 'Dead' ? '#5A5A5A' : '#9a8f7e'
+  const paymentColor = (s) => s === 'Paid' ? '#5C9E52' : '#C4962E'
   const formatDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
   const formatPaymentDate = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null
 
+  // Theme — follows the feed's mode. All panel colors come from here so light and
+  // dark both read as intentional, not auto-generated.
+  const t = dark ? {
+    panel: '#1A1A1A', overlay: 'rgba(0,0,0,0.5)', border: 'rgba(255,255,255,0.10)', borderStrong: 'rgba(255,255,255,0.26)',
+    text: '#EDEAE4', textMuted: 'rgba(255,255,255,0.56)', textFaint: 'rgba(255,255,255,0.38)', hover: 'rgba(255,255,255,0.045)'
+  } : {
+    panel: '#FFFFFF', overlay: 'rgba(0,0,0,0.32)', border: 'rgba(0,0,0,0.09)', borderStrong: 'rgba(0,0,0,0.28)',
+    text: '#1A1A1A', textMuted: 'rgba(0,0,0,0.56)', textFaint: 'rgba(0,0,0,0.42)', hover: 'rgba(0,0,0,0.03)'
+  }
+  const accent = '#5b7c99'
+  const ghostBtn = { padding: '5px 12px', fontSize: '11px', background: 'none', border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer', borderRadius: '3px', whiteSpace: 'nowrap' }
+
+  // A fine rule with a small, low-opacity label — replaces the old shouty all-caps headers.
   const section = (label) => (
-    <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '10px', marginTop: '28px' }}>{label}</div>
+    <div style={{ marginTop: '32px', marginBottom: '14px', borderTop: `1px solid ${t.border}`, paddingTop: '15px' }}>
+      {label && <div style={{ fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: t.text, opacity: 0.4, fontWeight: 400 }}>{label}</div>}
+    </div>
+  )
+
+  // Status as a 6px colored dot + plain text — no box, no border, no fill.
+  const dotBadge = (color, label) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '11px', color: t.textMuted, fontWeight: 400 }}>
+      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+      {label}
+    </span>
+  )
+
+  // A breathing stat: big value, small muted label beneath. No box.
+  const stat = (label, value) => (
+    <div>
+      <div style={{ fontSize: '19px', fontWeight: 500, color: t.text, letterSpacing: '-0.01em', lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize: '10px', color: t.textFaint, marginTop: '4px', letterSpacing: '0.04em' }}>{label}</div>
+    </div>
   )
 
   return (
@@ -312,157 +353,149 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
         />
       )}
 
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
-        <div style={{ width: '580px', background: '#1A1A1A', height: '100vh', overflowY: 'auto', borderLeft: '0.5px solid #2A2A2A', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'fixed', inset: 0, background: t.overlay, zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
+        <div style={{ width: '580px', maxWidth: '92vw', background: t.panel, height: '100vh', overflowY: 'auto', borderLeft: `1px solid ${t.border}`, display: 'flex', flexDirection: 'column' }}>
 
-          <div style={{ padding: '24px 28px', borderBottom: '0.5px solid #2A2A2A', position: 'sticky', top: 0, background: '#1A1A1A', zIndex: 1 }}>
+          <div style={{ padding: '32px 28px 22px', borderBottom: `1px solid ${t.border}`, position: 'sticky', top: 0, background: t.panel, zIndex: 1 }}>
             {onBack && (
-              <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0 0 12px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <button onClick={onBack} style={{ background: 'none', border: 'none', color: accent, cursor: 'pointer', fontSize: '12px', padding: '0 0 14px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 ← Back{backToLabel ? ` to ${backToLabel}` : ''}
               </button>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {campaign.brand_logo_url
-                  ? <img src={campaign.brand_logo_url} alt={campaign.brand} style={{ width: '56px', height: '56px', objectFit: 'contain', borderRadius: '2px', border: '0.5px solid #3A3A3A', background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                  : <div style={{ width: '56px', height: '56px', borderRadius: '2px', background: brandColor(campaign.brand || campaign.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(campaign.brand || campaign.name || '?')}</div>
+            {/* Action toolbar on its own row so a long campaign name keeps full width */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginBottom: '22px' }}>
+              <button onClick={async () => {
+                const isArchived = !!campaign.archived
+                const ok = confirm(isArchived ? `Restore "${campaign.name}" to active campaigns?` : `Archive "${campaign.name}"? You can restore it anytime. Any workspace tasks linked to this campaign will be removed.`)
+                if (!ok) return
+                const { error } = await supabase.from('campaigns').update({ archived: !isArchived }).eq('id', campaign.id)
+                if (error) { alert('Could not update: ' + error.message); return }
+                if (!isArchived) {
+                  try { await supabase.from('tasks').delete().eq('campaign_id', campaign.id) } catch (_) {}
                 }
-                <div>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{campaign.brand || 'Campaign'}{campaign.brand_website && (<a href={campaign.brand_website.startsWith('http') ? campaign.brand_website : 'https://' + campaign.brand_website} target='_blank' rel='noreferrer' style={{ marginLeft: '8px', fontSize: '8px', letterSpacing: '0.14em', color: '#fff', background: '#5b7c99', padding: '3px 8px', borderRadius: '1px', textDecoration: 'none', textTransform: 'uppercase' }}>↗ Website</a>)}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F0ECE6', marginBottom: '10px', textDecoration: campaign.archived ? 'line-through' : 'none', opacity: campaign.archived ? 0.7 : 1 }}>{campaign.name}</div>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(campaign.status)}`, color: statusColor(campaign.status), borderRadius: '1px' }}>{campaign.status}</span>
-                    {campaign.campaign_type && (
-                      <span style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: '0.5px solid #5b7c99', color: '#5b7c99', borderRadius: '1px' }}>{campaign.campaign_type}</span>
-                    )}
-                  </div>
+                if (onSaved) onSaved()
+                if (onClose) onClose()
+              }} style={{ padding: '6px 10px', fontSize: '12px', background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer' }}>
+                {campaign.archived ? 'Restore' : 'Archive'}
+              </button>
+              <button onClick={async () => {
+                // Claim a clean name-based slug the first time this campaign is shared,
+                // bumping -2, -3… on collisions. Fall back to the id link if it can't.
+                let slug = campaign.slug
+                if (!slug) {
+                  const base = slugifyCampaign(campaign.name)
+                  for (let i = 0; i < 50; i++) {
+                    const candidate = i === 0 ? base : `${base}-${i + 1}`
+                    const { error } = await supabase.from('campaigns').update({ slug: candidate }).eq('id', campaign.id)
+                    if (!error) { slug = candidate; setCampaign(c => ({ ...c, slug: candidate })); break }
+                    if (error.code !== '23505') break
+                  }
+                }
+                const url = slug
+                  ? `${window.location.origin}/campaign/${slug}`
+                  : `${window.location.origin}${window.location.pathname}?campaign=${campaign.id}`
+                try {
+                  await navigator.clipboard.writeText(url)
+                } catch (_) {
+                  const ta = document.createElement('textarea')
+                  ta.value = url; document.body.appendChild(ta); ta.select()
+                  try { document.execCommand('copy') } catch (_) {}
+                  document.body.removeChild(ta)
+                }
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 1500)
+              }} title="Copy shareable link" style={{ padding: '6px 10px', fontSize: '12px', background: 'none', border: 'none', color: linkCopied ? '#7A9B8E' : t.textMuted, cursor: 'pointer' }}>
+                {linkCopied ? '✓ Copied' : 'Copy URL'}
+              </button>
+              <button onClick={() => setEditing(true)} style={{ padding: '6px 16px', fontSize: '12px', fontWeight: 500, background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '3px', marginLeft: '8px' }}>Edit</button>
+              <button onClick={onClose} title="Close" style={{ background: 'none', border: 'none', color: t.textFaint, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '0 0 0 10px' }}>×</button>
+            </div>
+
+            {/* Brand breadcrumb + title */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+              {campaign.brand_logo_url
+                ? <img src={campaign.brand_logo_url} alt={campaign.brand} style={{ width: '52px', height: '52px', objectFit: 'contain', borderRadius: '6px', border: `1px solid ${t.border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                : <div style={{ width: '52px', height: '52px', borderRadius: '6px', background: brandColor(campaign.brand || campaign.name || '?'), color: '#fff', fontFamily: 'Georgia, serif', fontSize: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{brandInitial(campaign.brand || campaign.name || '?')}</div>
+              }
+              <div style={{ minWidth: 0, flex: 1, paddingTop: '1px' }}>
+                <div style={{ fontSize: '11px', color: t.text, opacity: 0.5, marginBottom: '7px' }}>
+                  {campaign.brand || 'Campaign'}
+                  {campaign.brand_website && (<a href={campaign.brand_website.startsWith('http') ? campaign.brand_website : 'https://' + campaign.brand_website} target='_blank' rel='noreferrer' style={{ marginLeft: '10px', fontSize: '11px', color: t.textMuted, textDecoration: 'none', borderBottom: '1px solid transparent' }} onMouseEnter={e => e.currentTarget.style.borderBottomColor = t.borderStrong} onMouseLeave={e => e.currentTarget.style.borderBottomColor = 'transparent'}>↗ website</a>)}
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-                <button onClick={async () => {
-                  const isArchived = !!campaign.archived
-                  const ok = confirm(isArchived ? `Restore "${campaign.name}" to active campaigns?` : `Archive "${campaign.name}"? You can restore it anytime. Any workspace tasks linked to this campaign will be removed.`)
-                  if (!ok) return
-                  const { error } = await supabase.from('campaigns').update({ archived: !isArchived }).eq('id', campaign.id)
-                  if (error) { alert('Could not update: ' + error.message); return }
-                  if (!isArchived) {
-                    try { await supabase.from('tasks').delete().eq('campaign_id', campaign.id) } catch (_) {}
-                  }
-                  if (onSaved) onSaved()
-                  if (onClose) onClose()
-                }} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#999', cursor: 'pointer', borderRadius: '1px' }}>
-                  {campaign.archived ? 'Restore' : 'Archive'}
-                </button>
-                <button onClick={async () => {
-                  const url = `${window.location.origin}${window.location.pathname}?campaign=${campaign.id}`
-                  try {
-                    await navigator.clipboard.writeText(url)
-                  } catch (_) {
-                    const ta = document.createElement('textarea')
-                    ta.value = url; document.body.appendChild(ta); ta.select()
-                    try { document.execCommand('copy') } catch (_) {}
-                    document.body.removeChild(ta)
-                  }
-                  setLinkCopied(true)
-                  setTimeout(() => setLinkCopied(false), 1500)
-                }} title="Copy shareable link" style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: linkCopied ? '#7A9B8E' : '#999', cursor: 'pointer', borderRadius: '1px' }}>
-                  {linkCopied ? '✓ Copied' : '↗ Copy Link'}
-                </button>
-                <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
-                <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#777', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>×</button>
+                <div style={{ fontSize: '23px', fontWeight: 600, letterSpacing: '-0.015em', lineHeight: 1.2, color: t.text, marginBottom: '13px', textDecoration: campaign.archived ? 'line-through' : 'none', opacity: campaign.archived ? 0.6 : 1 }}>{campaign.name}</div>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {dotBadge(statusColor(campaign.status), campaign.status)}
+                  {campaign.campaign_type && dotBadge(accent, campaign.campaign_type)}
+                </div>
               </div>
             </div>
           </div>
 
-          <div style={{ padding: '28px', flex: 1 }}>
+          <div style={{ padding: '24px 28px 32px', flex: 1 }}>
 
-            {campaign.brand_id && (
-              <div onClick={() => setEditingBrandId(campaign.brand_id)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: '#222', borderRadius: '1px', marginBottom: '16px', cursor: 'pointer', border: '0.5px solid transparent' }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = '#3A3A3A'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'transparent'}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '6px' }}>Campaign Contact</div>
-                  {brandContact && (brandContact.name || brandContact.email || brandContact.phone) ? (
-                    <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      {brandContact.name && (
-                        <div>
-                          <div style={{ fontSize: '13px', color: '#F0ECE6' }}>{brandContact.name}</div>
-                          {brandContact.title && <div style={{ fontSize: '10px', color: '#888', marginTop: '2px' }}>{brandContact.title}</div>}
-                        </div>
-                      )}
-                      {brandContact.email && (
-                        <a href={`mailto:${brandContact.email}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none' }}>{brandContact.email}</a>
-                      )}
-                      {brandContact.phone && (
-                        <a href={`tel:${brandContact.phone}`} onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: '#aaa', textDecoration: 'none' }}>{brandContact.phone}</a>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: '11px', color: '#666', fontStyle: 'italic' }}>No contact set for this campaign — edit the campaign to choose one.</div>
-                  )}
-                </div>
-                <span style={{ fontSize: '16px', color: '#666', flexShrink: 0, marginLeft: '12px' }}>›</span>
+            {/* Stats — a loose row, no boxes; empty values are omitted entirely */}
+            {(campaign.budget || campaign.start_date || campaign.end_date) && (
+              <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap', marginTop: '4px' }}>
+                {campaign.budget ? stat('Budget', `$${Number(campaign.budget).toLocaleString()}`) : null}
+                {campaign.start_date ? stat('Start', formatDate(campaign.start_date)) : null}
+                {campaign.end_date ? stat('End', formatDate(campaign.end_date)) : null}
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {[
-                ['Budget', campaign.budget ? `$${Number(campaign.budget).toLocaleString()}` : null],
-                ['Start', formatDate(campaign.start_date)],
-                ['End', formatDate(campaign.end_date)]
-              ].map(([lbl, val]) => (
-                <div key={lbl} style={{ flex: 1, padding: '14px', background: '#222', borderRadius: '1px' }}>
-                  <div style={{ fontSize: '15px', color: '#F0ECE6', fontWeight: 500, marginBottom: '4px' }}>{val || '—'}</div>
-                  <div style={{ fontSize: '8px', color: '#777', letterSpacing: '0.18em', textTransform: 'uppercase' }}>{lbl}</div>
-                </div>
-              ))}
-            </div>
+            {/* Contact — no card; clean text when present, a single muted line when not */}
+            {campaign.brand_id && (
+              <>
+                {section('Contact')}
+                {brandContact && (brandContact.name || brandContact.email || brandContact.phone) ? (
+                  <div onClick={() => setEditingBrandId(campaign.brand_id)} style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap', cursor: 'pointer', margin: '0 -8px', padding: '8px', borderRadius: '4px' }}
+                    onMouseEnter={e => e.currentTarget.style.background = t.hover}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    {brandContact.name && (
+                      <div>
+                        <div style={{ fontSize: '14px', color: t.text }}>{brandContact.name}</div>
+                        {brandContact.title && <div style={{ fontSize: '11px', color: t.textFaint, marginTop: '2px' }}>{brandContact.title}</div>}
+                      </div>
+                    )}
+                    {brandContact.email && <a href={`mailto:${brandContact.email}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '12px', color: accent, textDecoration: 'none' }}>{brandContact.email}</a>}
+                    {brandContact.phone && <a href={`tel:${brandContact.phone}`} onClick={e => e.stopPropagation()} style={{ fontSize: '12px', color: t.textMuted, textDecoration: 'none' }}>{brandContact.phone}</a>}
+                  </div>
+                ) : (
+                  <div onClick={() => setEditingBrandId(campaign.brand_id)} style={{ fontSize: '12px', color: t.textFaint, fontStyle: 'italic', cursor: 'pointer' }}>No contact set — click to choose one.</div>
+                )}
+              </>
+            )}
 
             {campaign.deliverables && (
               <>
                 {section('Deliverables')}
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{campaign.deliverables}</div>
+                <div style={{ fontSize: '13px', color: t.textMuted, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{campaign.deliverables}</div>
               </>
             )}
 
             {campaign.deliverables_link && (
               <>
                 {section('Deliverables Link')}
-                <a href={campaign.deliverables_link} target='_blank' rel='noreferrer' style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px', fontSize: '12px', color: '#5b7c99', textDecoration: 'none' }}>
-                  <span>🔗</span> View Deliverables Folder
-                </a>
+                <a href={campaign.deliverables_link} target='_blank' rel='noreferrer' style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '12px', color: accent, textDecoration: 'none' }}>↗ View deliverables folder</a>
               </>
             )}
 
             {campaign.timeline && (
               <>
-                {section('Timeline')}
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px' }}>{campaign.timeline}</div>
+                {section('Key Milestones')}
+                <div style={{ fontSize: '13px', color: t.textMuted, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{campaign.timeline}</div>
               </>
             )}
 
             {(campaign.brief_url || campaign.contract_url) && (
               <>
                 {section('Documents')}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {campaign.brief_url && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '18px' }}>📄</span>
-                        <span style={{ fontSize: '12px', color: '#CCC9C3' }}>Campaign Brief</span>
-                      </div>
-                      <button onClick={() => setPreview({ url: campaign.brief_url, label: 'Campaign Brief' })} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Preview</button>
+                <div>
+                  {[['Campaign Brief', campaign.brief_url], ['Contract', campaign.contract_url]].filter(([, url]) => url).map(([label, url], i) => (
+                    <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 0', borderTop: i === 0 ? 'none' : `1px solid ${t.border}` }}>
+                      <span style={{ fontSize: '13px', color: t.text }}>{label}</span>
+                      <button onClick={() => setPreview({ url, label })} style={ghostBtn}>Preview</button>
                     </div>
-                  )}
-                  {campaign.contract_url && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '1px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '18px' }}>📋</span>
-                        <span style={{ fontSize: '12px', color: '#CCC9C3' }}>Contract</span>
-                      </div>
-                      <button onClick={() => setPreview({ url: campaign.contract_url, label: 'Contract' })} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Preview</button>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </>
             )}
@@ -470,49 +503,46 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
             {campaign.notes && (
               <>
                 {section('Notes')}
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: '#222', borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={campaign.notes} dark={dark} /></div>
+                <div style={{ fontSize: '13px', color: t.textMuted, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}><Linkify text={campaign.notes} dark={dark} /></div>
               </>
             )}
 
             {creatorLinks.length > 0 && (
               <>
-                {section(`Assigned Talent (${creatorLinks.length})`)}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: '#2A2A2A', borderRadius: '1px', overflow: 'hidden' }}>
-                  {creatorLinks.map(link => (
+                {section(`Assigned Talent · ${creatorLinks.length}`)}
+                <div>
+                  {creatorLinks.map((link, i) => (
                     <div key={link.id}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: '#1A1A1A' }}>
+                      <div onMouseEnter={() => setHoveredLink(link.id)} onMouseLeave={() => setHoveredLink(null)} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 0', borderTop: i === 0 ? 'none' : `1px solid ${t.border}` }}>
                         {link.creator.photo_url
-                          ? <img src={link.creator.photo_url} alt={link.creator.name} style={{ width: '36px', height: '36px', borderRadius: '2px', objectFit: 'cover', border: '0.5px solid #3A3A3A', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                          : <div style={{ width: '36px', height: '36px', borderRadius: '2px', background: '#2A2A2A', border: '0.5px solid #3A3A3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '12px', color: '#F2EEE8', flexShrink: 0 }}>{link.creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>
+                          ? <img src={link.creator.photo_url} alt={link.creator.name} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                          : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: t.hover, border: `1px solid ${t.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '13px', color: t.text, flexShrink: 0 }}>{link.creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>
                         }
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: '13px', color: '#F0ECE6' }}>{link.creator.name}</div>
-                          <div style={{ display: 'flex', gap: '8px', marginTop: '3px', flexWrap: 'wrap' }}>
-                            {link.creator.handles?.instagram && <a href={`https://instagram.com/${link.creator.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '10px', color: '#777', textDecoration: 'none' }}>@{link.creator.handles.instagram}</a>}
-                            {link.role && <span style={{ fontSize: '9px', color: '#5b7c99', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{link.role}</span>}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '14px', fontWeight: 500, color: t.text }}>{link.creator.name}</div>
+                          <div style={{ display: 'flex', gap: '10px', marginTop: '3px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            {link.creator.handles?.instagram && <a href={`https://instagram.com/${link.creator.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ fontSize: '12px', color: t.textMuted, textDecoration: 'none' }}>@{link.creator.handles.instagram}</a>}
+                            {link.role && <span style={{ fontSize: '11px', color: accent }}>{link.role}</span>}
                           </div>
                           {(link.views || link.likes || link.reach) && (
-                            <div style={{ display: 'flex', gap: '12px', marginTop: '5px' }}>
-                              {link.views && <span style={{ fontSize: '10px', color: '#777' }}>{link.views.toLocaleString()} views</span>}
-                              {link.likes && <span style={{ fontSize: '10px', color: '#777' }}>{link.likes.toLocaleString()} likes</span>}
-                              {link.reach && <span style={{ fontSize: '10px', color: '#777' }}>{link.reach.toLocaleString()} reach</span>}
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
+                              {link.views && <span style={{ fontSize: '11px', color: t.textFaint }}>{link.views.toLocaleString()} views</span>}
+                              {link.likes && <span style={{ fontSize: '11px', color: t.textFaint }}>{link.likes.toLocaleString()} likes</span>}
+                              {link.reach && <span style={{ fontSize: '11px', color: t.textFaint }}>{link.reach.toLocaleString()} reach</span>}
                             </div>
                           )}
                           {link.performance_notes && (
-                            <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}><Linkify text={link.performance_notes} dark={dark} /></div>
+                            <div style={{ fontSize: '11px', color: t.textFaint, marginTop: '5px', fontStyle: 'italic', whiteSpace: 'pre-wrap' }}><Linkify text={link.performance_notes} dark={dark} /></div>
                           )}
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
                           {link.payment_status === 'Paid' && link.payment_date && (
-                            <span style={{ fontSize: '9px', color: '#777' }}>{formatPaymentDate(link.payment_date)}</span>
+                            <span style={{ fontSize: '11px', color: t.textFaint }}>{formatPaymentDate(link.payment_date)}</span>
                           )}
-                          {link.payment_status === 'Paid' && link.payment_method && (
-                            <span style={{ fontSize: '9px', color: '#777' }}>{link.payment_method}</span>
-                          )}
-                          <span style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${paymentColor(link.payment_status)}`, color: paymentColor(link.payment_status), borderRadius: '1px' }}>{link.payment_status || 'Pending'}</span>
+                          {dotBadge(paymentColor(link.payment_status), link.payment_status || 'Pending')}
                           <button
                             onClick={() => setEditingLink(editingLink === link.id ? null : link.id)}
-                            style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#666', cursor: 'pointer', borderRadius: '1px' }}>
+                            style={{ ...ghostBtn, padding: '4px 10px', opacity: (hoveredLink === link.id || editingLink === link.id) ? 1 : 0, transition: 'opacity 0.15s ease' }}>
                             {editingLink === link.id ? 'Cancel' : 'Edit'}
                           </button>
                         </div>
@@ -530,11 +560,10 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
               </>
             )}
 
-            <div style={{ borderTop: '0.5px solid #2A2A2A', marginTop: '36px', paddingTop: '24px' }}>
-              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#666', marginBottom: '14px' }}>Comments{comments.length > 0 ? ` (${comments.length})` : ''}</div>
+            <div style={{ borderTop: `1px solid ${t.border}`, marginTop: '36px', paddingTop: '20px' }}>
+              <div style={{ fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: t.text, opacity: 0.4, fontWeight: 400, marginBottom: '18px' }}>Comments{comments.length > 0 ? ` · ${comments.length}` : ''}</div>
 
-              {loadingComments && <div style={{ fontSize: '11px', color: '#666', padding: '6px 0' }}>Loading...</div>}
-              {!loadingComments && comments.length === 0 && <div style={{ fontSize: '11px', color: '#666', padding: '6px 0', marginBottom: '8px' }}>No comments yet. Be the first.</div>}
+              {loadingComments && <div style={{ fontSize: '12px', color: t.textFaint, padding: '6px 0' }}>Loading…</div>}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '16px' }}>
                 {comments.map(c => {
@@ -551,25 +580,25 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-                          <span style={{ fontSize: '12px', color: '#F0ECE6', fontWeight: 500 }}>{authorName}</span>
-                          <span title={fullTime(c.created_at)} style={{ fontSize: '10px', color: '#666' }}>{timeAgo(c.created_at)}{c.edited_at ? ' · edited' : ''}</span>
+                          <span style={{ fontSize: '13px', color: t.text, fontWeight: 500 }}>{authorName}</span>
+                          <span title={fullTime(c.created_at)} style={{ fontSize: '11px', color: t.textFaint }}>{timeAgo(c.created_at)}{c.edited_at ? ' · edited' : ''}</span>
                           {isMine && !isEditing && (
-                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                              <button onClick={() => { setEditingCommentId(c.id); setEditingBody(c.body) }} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Edit</button>
-                              <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>
+                            <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
+                              <button onClick={() => { setEditingCommentId(c.id); setEditingBody(c.body) }} style={{ background: 'none', border: 'none', color: t.textFaint, cursor: 'pointer', fontSize: '11px', padding: 0 }}>Edit</button>
+                              <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: t.textFaint, cursor: 'pointer', fontSize: '11px', padding: 0 }}>Delete</button>
                             </div>
                           )}
                         </div>
                         {isEditing ? (
                           <div>
-                            <textarea value={editingBody} onChange={e => setEditingBody(e.target.value)} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: '#F0ECE6', outline: 'none', resize: 'vertical', minHeight: '60px', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                            <textarea value={editingBody} onChange={e => setEditingBody(e.target.value)} style={{ width: '100%', background: 'transparent', border: `1px solid ${t.border}`, borderRadius: '4px', padding: '8px 10px', fontSize: '13px', color: t.text, outline: 'none', resize: 'vertical', minHeight: '60px', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                             <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
-                              <button onClick={() => saveCommentEdit(c.id)} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Save</button>
-                              <button onClick={() => { setEditingCommentId(null); setEditingBody('') }} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #2A2A2A', color: '#666', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+                              <button onClick={() => saveCommentEdit(c.id)} style={{ padding: '5px 14px', fontSize: '12px', fontWeight: 500, background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '3px' }}>Save</button>
+                              <button onClick={() => { setEditingCommentId(null); setEditingBody('') }} style={{ padding: '5px 14px', fontSize: '12px', background: 'none', border: `1px solid ${t.border}`, color: t.textMuted, cursor: 'pointer', borderRadius: '3px' }}>Cancel</button>
                             </div>
                           </div>
                         ) : (
-                          <div style={{ fontSize: '12px', color: '#F0ECE6', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} dark={dark} /></div>
+                          <div style={{ fontSize: '13px', color: t.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}><Linkify text={c.body} dark={dark} /></div>
                         )}
                       </div>
                     </div>
@@ -577,7 +606,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                 })}
               </div>
 
-              <div style={{ borderTop: '0.5px solid #2A2A2A', paddingTop: '14px', position: 'relative' }}>
+              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: '16px', position: 'relative' }}>
                 <textarea
                   value={newComment}
                   onChange={e => {
@@ -588,11 +617,13 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                     else { setShowCommentMentions(false); setCommentMentionQuery('') }
                   }}
                   onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) postComment() }}
-                  placeholder='Add a comment... (use @ to mention, Cmd+Enter to post)'
-                  style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: '#F0ECE6', outline: 'none', resize: 'vertical', minHeight: '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px' }}
+                  onFocus={e => e.target.style.borderColor = t.borderStrong}
+                  onBlur={e => e.target.style.borderColor = t.border}
+                  placeholder='Add a comment… (use @ to mention, ⌘+Enter to post)'
+                  style={{ width: '100%', background: 'transparent', border: `1px solid ${t.border}`, borderRadius: '6px', padding: '11px 13px', fontSize: '13px', color: t.text, outline: 'none', resize: 'vertical', minHeight: '72px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '10px', transition: 'border-color 0.15s ease' }}
                 />
                 {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
-                  <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, background: '#141414', border: '0.5px solid #2A2A2A', borderRadius: '1px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                  <div style={{ position: 'absolute', bottom: '54px', left: 0, right: 0, background: t.panel, border: `1px solid ${t.border}`, borderRadius: '6px', zIndex: 30, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.28)' }}>
                     {members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).map(m => (
                       <div key={m.id}
                         onClick={() => {
@@ -603,23 +634,23 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                           setCommentMentionQuery('')
                         }}
                         style={{ padding: '9px 12px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#1a1a1a'}
+                        onMouseEnter={e => e.currentTarget.style.background = t.hover}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                         {m.avatar_url ? (
                           <img src={m.avatar_url} alt='' style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />
                         ) : (
                           <span style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#7A9B8E', color: '#fff', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 500 }}>{initialFromName(m.full_name || m.email)}</span>
                         )}
-                        <span style={{ fontSize: '12px', color: '#F0ECE6' }}>{m.full_name || m.email}</span>
+                        <span style={{ fontSize: '13px', color: t.text }}>{m.full_name || m.email}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: newComment.trim() ? '#5b7c99' : 'transparent', border: newComment.trim() ? 'none' : '0.5px solid #2A2A2A', color: newComment.trim() ? '#fff' : '#666', cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '1px', opacity: postingComment ? 0.6 : 1 }}>
-                  {postingComment ? 'Posting...' : 'Comment'}
+                <button onClick={postComment} disabled={postingComment || !newComment.trim()} style={{ padding: '8px 18px', fontSize: '12px', fontWeight: 500, background: newComment.trim() ? accent : 'transparent', border: newComment.trim() ? 'none' : `1px solid ${t.border}`, color: newComment.trim() ? '#fff' : t.textMuted, cursor: newComment.trim() ? 'pointer' : 'default', borderRadius: '3px', opacity: postingComment ? 0.6 : 1 }}>
+                  {postingComment ? 'Posting…' : 'Comment'}
                 </button>
                 {commentError && (
-                  <div style={{ marginTop: '10px', fontSize: '11px', color: '#e74c3c', lineHeight: 1.5, padding: '8px 10px', background: 'rgba(231, 76, 60, 0.08)', border: '0.5px solid rgba(231, 76, 60, 0.3)', borderRadius: '1px' }}>{commentError}</div>
+                  <div style={{ marginTop: '10px', fontSize: '11px', color: '#e74c3c', lineHeight: 1.5, padding: '8px 10px', background: 'rgba(231, 76, 60, 0.08)', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '4px' }}>{commentError}</div>
                 )}
               </div>
             </div>

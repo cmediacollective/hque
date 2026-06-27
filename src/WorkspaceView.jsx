@@ -280,6 +280,17 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     })()
   }, [openTaskId, orgId])
 
+  // Keep the address bar in sync with the open task (h-que.com/task/<id>), so the
+  // URL is shareable. Clears back to / when the task panel closes.
+  useEffect(() => {
+    if (editingTask?.id) {
+      const path = `/task/${editingTask.id}`
+      if (window.location.pathname !== path) window.history.replaceState({}, '', path)
+    } else if (window.location.pathname.startsWith('/task/')) {
+      window.history.replaceState({}, '', '/')
+    }
+  }, [editingTask?.id])
+
   // Deep link: open a brand's notes panel directly via ?brand_notes=<id>
   useEffect(() => {
     if (!openBrandNotesId || !orgId) return

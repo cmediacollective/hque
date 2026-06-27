@@ -10,12 +10,21 @@ const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
 export default function AddCreatorForm({ onClose, onSaved, existing, dark = true, orgId }) {
-  const bg = dark ? '#0D0D0D' : '#FFFFFF'
-  const border = dark ? '#2A2A2A' : '#DBD7D0'
-  const inputBg = dark ? '#141414' : '#F8F7F3'
-  const text = dark ? '#F2EEE8' : '#1A1A1A'
-  const label = dark ? '#666' : '#888'
-  const overlay = dark ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0.4)'
+  const bg = dark ? '#1A1A1A' : '#FFFFFF'
+  const text = dark ? '#EDEAE4' : '#1A1A1A'
+  const muted = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)'
+  const label = muted
+  const fieldBg = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.025)'
+  const fieldBorder = dark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)'
+  const fieldBorderStrong = dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.28)'
+  const border = fieldBorder
+  const inputBg = fieldBg
+  const accent = '#5b7c99'
+  const danger = dark ? '#d98b85' : '#c0392b'
+  const overlay = dark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.4)'
+  const fieldFocus = (e) => { e.target.style.borderColor = fieldBorderStrong }
+  const fieldBlur = (e) => { e.target.style.borderColor = fieldBorder }
+  const inputStyle = { width: '100%', background: fieldBg, border: `1px solid ${fieldBorder}`, borderRadius: '6px', padding: '9px 11px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.15s ease' }
 
   const [form, setForm] = useState(existing ? {
     ...existing,
@@ -42,26 +51,60 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const toggleType = (t) => setForm(f => ({ ...f, types: toggleChip(f.types, t) }))
   const toggleNiche = (n) => setForm(f => ({ ...f, niches: toggleChip(f.niches, n) }))
 
-  const field = (lbl, children) => (
-    <div style={{ marginBottom: '16px' }}>
-      <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: label, marginBottom: '6px' }}>{lbl}</div>
-      {children}
+  const field = (lbl, children) => {
+    const required = lbl.endsWith(' *')
+    const base = required ? lbl.slice(0, -2) : lbl
+    return (
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 500, color: muted, marginBottom: '5px' }}>{base}{required && <span style={{ color: danger, marginLeft: '3px' }}>*</span>}</div>
+        {children}
+      </div>
+    )
+  }
+
+  const inp = (props) => (
+    <input {...props} onFocus={fieldFocus} onBlur={fieldBlur} style={{ ...inputStyle, ...(props.style || {}) }} />
+  )
+
+  const txt = (props, height = '90px') => (
+    <textarea {...props} onFocus={fieldFocus} onBlur={fieldBlur} style={{ ...inputStyle, height, resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.6 }} />
+  )
+
+  // $-prefixed numeric input for rate fields.
+  const money = (props) => (
+    <div style={{ position: 'relative' }}>
+      <span style={{ position: 'absolute', left: '11px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: muted, pointerEvents: 'none' }}>$</span>
+      {inp({ ...props, type: 'number', style: { paddingLeft: '22px' } })}
     </div>
   )
 
-  const inp = (props) => (
-    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-  )
-
+  // Native select with a custom low-opacity chevron — no browser-default arrow.
+  const selectStyle = { ...inputStyle, appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', paddingRight: '28px', cursor: 'pointer' }
   const sel = (props, options) => (
-    <select {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none' }}>
-      <option value=''>Select...</option>
-      {options.map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
+    <div style={{ position: 'relative' }}>
+      <select {...props} onFocus={fieldFocus} onBlur={fieldBlur} style={selectStyle}>
+        <option value=''>Select…</option>
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <span style={{ position: 'absolute', right: '11px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '10px', color: muted }}>▾</span>
+    </div>
   )
 
-  const sectionLabel = (t) => (
-    <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '20px 0 16px' }}>{t}</div>
+  // Sentence-case pill chip for Type / Niche toggles.
+  const chip = (lbl, selected, onClick) => (
+    <button key={lbl} onClick={onClick} style={{
+      padding: '4px 12px', fontSize: '11px', fontWeight: 400, borderRadius: '20px', cursor: 'pointer',
+      border: `1px solid ${selected ? (dark ? 'rgba(255,255,255,0.30)' : 'rgba(0,0,0,0.30)') : (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)')}`,
+      background: selected ? (dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.07)') : 'transparent',
+      color: selected ? text : muted, whiteSpace: 'nowrap', transition: 'background 0.15s, border-color 0.15s, color 0.15s'
+    }}>{lbl}</button>
+  )
+
+  // Quiet section divider: a hairline rule + a small plain label. No caps, no numbers.
+  const sectionLabel = (t, first = false) => (
+    <div style={{ marginTop: first ? '6px' : '36px', marginBottom: '12px', paddingTop: first ? '0' : '14px', borderTop: first ? 'none' : `1px solid ${fieldBorder}` }}>
+      <div style={{ fontSize: '10px', letterSpacing: '0.07em', color: text, opacity: 0.4, fontWeight: 400 }}>{t}</div>
+    </div>
   )
 
   async function handleKitUpload(file) {
@@ -134,28 +177,30 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: overlay, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: bg, border: `0.5px solid ${border}`, width: '580px', maxHeight: '88vh', overflowY: 'auto', borderRadius: '2px' }}>
+      <div className='atf-modal atf-scroll' style={{ background: bg, border: `1px solid ${fieldBorder}`, width: '580px', maxWidth: '94vw', maxHeight: '88vh', overflowY: 'auto', borderRadius: '12px' }}>
+        <style>{`
+          .atf-scroll::-webkit-scrollbar { width: 8px; }
+          .atf-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 4px; }
+          .atf-scroll:hover::-webkit-scrollbar-thumb { background: ${dark ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.16)'}; }
+          .atf-modal input::placeholder, .atf-modal textarea::placeholder { color: ${text}; opacity: 0.3; }
+        `}</style>
 
-        <div style={{ padding: '20px 24px', borderBottom: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text }}>{existing ? 'Edit Talent' : 'Add Talent'}</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: label, cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>x</button>
+        <div style={{ padding: '24px 28px 4px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
+          <div style={{ fontSize: '18px', fontWeight: 500, color: text, letterSpacing: '-0.01em', paddingTop: '2px' }}>{existing ? 'Edit Talent' : 'Add Talent'}</div>
+          <button onClick={onClose} title='Close' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
         </div>
 
-        <div style={{ padding: '24px' }}>
-          {sectionLabel('Basic Info')}
+        <div style={{ padding: '8px 28px 28px' }}>
+          {sectionLabel('Basic info', true)}
           {field('Full Name *', inp({ value: form.name, onChange: e => set('name', e.target.value), placeholder: 'e.g. Michelle Young' }))}
 
-          {field('Type * (select all that apply)',
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {TYPES.map(t => (
-                <button key={t} onClick={() => toggleType(t)} style={{
-                  padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                  border: `0.5px solid ${form.types.includes(t) ? '#5b7c99' : border}`,
-                  color: form.types.includes(t) ? '#5b7c99' : label,
-                  background: 'none', cursor: 'pointer', borderRadius: '1px'
-                }}>{t}</button>
-              ))}
-            </div>
+          {field('Type *',
+            <>
+              <div style={{ fontSize: '11px', color: muted, opacity: 0.7, marginTop: '-1px', marginBottom: '8px' }}>Select all that apply</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {TYPES.map(t => chip(t, form.types.includes(t), () => toggleType(t)))}
+              </div>
+            </>
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -165,43 +210,30 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
           {field('Location', inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
           {field('Photo',
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            {form.photo_url && (
-              <img src={form.photo_url} alt='preview' style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '2px', border: `0.5px solid ${border}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-            )}
-            <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
-              {uploadingPhoto ? 'Uploading...' : form.photo_url ? 'Change Photo' : 'Upload Photo'}
-              <input type='file' accept='image/*' onChange={e => handlePhotoUpload(e.target.files[0])} style={{ display: 'none' }} />
-            </label>
-            {form.photo_url && (
-              <button onClick={() => set('photo_url', '')} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
-            )}
-          </div>
-        )}
-
-          {form.photo_url && (
-            <div style={{ marginTop: '-8px', marginBottom: '16px' }}>
-              <img src={form.photo_url} alt='preview' style={{ width: '56px', height: '56px', borderRadius: '2px', objectFit: 'cover', border: `0.5px solid ${border}` }} onError={e => e.target.style.display = 'none'} />
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {form.photo_url && (
+                <img src={form.photo_url} alt='preview' style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px', border: `1px solid ${fieldBorder}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+              )}
+              <label style={{ padding: '6px 14px', fontSize: '12px', border: `1px solid ${fieldBorder}`, color: muted, cursor: 'pointer', borderRadius: '6px', display: 'inline-block' }}>
+                {uploadingPhoto ? 'Uploading…' : form.photo_url ? 'Change photo' : 'Upload photo'}
+                <input type='file' accept='image/*' onChange={e => handlePhotoUpload(e.target.files[0])} style={{ display: 'none' }} />
+              </label>
+              {form.photo_url && (
+                <button onClick={() => set('photo_url', '')} style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+              )}
             </div>
           )}
 
           {field('Niches',
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {NICHES.map(n => (
-                <button key={n} onClick={() => toggleNiche(n)} style={{
-                  padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase',
-                  border: `0.5px solid ${form.niches.includes(n) ? '#5b7c99' : border}`,
-                  color: form.niches.includes(n) ? '#5b7c99' : label,
-                  background: 'none', cursor: 'pointer', borderRadius: '1px'
-                }}>{n}</button>
-              ))}
+              {NICHES.map(n => chip(n, form.niches.includes(n), () => toggleNiche(n)))}
             </div>
           )}
 
           {field('Public Bio',
             <>
-              <textarea value={form.bio || ''} onChange={e => set('bio', e.target.value)} placeholder='A short, brand-facing description shown on this talent’s public profile page.' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '90px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
-              <div style={{ fontSize: '9px', color: label, marginTop: '5px' }}>Shown publicly when you publish this talent&rsquo;s shareable link. Leave the rest private.</div>
+              {txt({ value: form.bio || '', onChange: e => set('bio', e.target.value), placeholder: 'A short, brand-facing description shown on this talent’s public profile page.' })}
+              <div style={{ fontSize: '11px', color: muted, opacity: 0.8, marginTop: '6px' }}>Shown publicly when you publish this talent&rsquo;s shareable link. Leave the rest private.</div>
             </>
           )}
 
@@ -220,14 +252,14 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
             {field('Eng Rate %', inp({ value: form.engagement_rate, onChange: e => set('engagement_rate', e.target.value), placeholder: '0.0', type: 'number' }))}
           </div>
 
-          {sectionLabel('Rates (USD)')}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            {field('IG Feed', inp({ value: form.rates.feed, onChange: e => setRate('feed', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('IG Story', inp({ value: form.rates.story, onChange: e => setRate('story', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('IG Reel', inp({ value: form.rates.reel, onChange: e => setRate('reel', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('TikTok', inp({ value: form.rates.tiktok, onChange: e => setRate('tiktok', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('YouTube', inp({ value: form.rates.youtube, onChange: e => setRate('youtube', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('Other', inp({ value: form.rates.misc, onChange: e => setRate('misc', e.target.value), placeholder: '0', type: 'number' }))}
+          {sectionLabel('Rates')}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+            {field('IG Feed', money({ value: form.rates.feed, onChange: e => setRate('feed', e.target.value), placeholder: '0' }))}
+            {field('IG Story', money({ value: form.rates.story, onChange: e => setRate('story', e.target.value), placeholder: '0' }))}
+            {field('IG Reel', money({ value: form.rates.reel, onChange: e => setRate('reel', e.target.value), placeholder: '0' }))}
+            {field('TikTok', money({ value: form.rates.tiktok, onChange: e => setRate('tiktok', e.target.value), placeholder: '0' }))}
+            {field('YouTube', money({ value: form.rates.youtube, onChange: e => setRate('youtube', e.target.value), placeholder: '0' }))}
+            {field('Other', money({ value: form.rates.misc, onChange: e => setRate('misc', e.target.value), placeholder: '0' }))}
           </div>
 
           {sectionLabel('Contact')}
@@ -238,30 +270,30 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           {field('Manager Email', inp({ value: form.manager_email, onChange: e => set('manager_email', e.target.value), placeholder: 'manager@example.com' }))}
 
           {field('Media Kit',
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               {form.media_kit_url && (
-                <a href={form.media_kit_url} target='_blank' rel='noreferrer' style={{ fontSize: '11px', color: '#5b7c99', textDecoration: 'none', letterSpacing: '0.1em' }}>View File ↗</a>
+                <a href={form.media_kit_url} target='_blank' rel='noreferrer' style={{ fontSize: '12px', color: accent, textDecoration: 'none' }}>View file ↗</a>
               )}
-              <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
-                {uploadingKit ? 'Uploading...' : form.media_kit_url ? 'Replace File' : 'Upload Media Kit'}
+              <label style={{ padding: '6px 14px', fontSize: '12px', border: `1px solid ${fieldBorder}`, color: muted, cursor: 'pointer', borderRadius: '6px', display: 'inline-block' }}>
+                {uploadingKit ? 'Uploading…' : form.media_kit_url ? 'Replace file' : 'Upload media kit'}
                 <input type='file' accept='application/pdf,image/jpeg,image/png' onChange={e => { if (e.target.files[0]) handleKitUpload(e.target.files[0]); e.target.value = '' }} style={{ display: 'none' }} />
               </label>
               {form.media_kit_url && (
-                <button onClick={() => set('media_kit_url', '')} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+                <button onClick={() => set('media_kit_url', '')} style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
               )}
             </div>
           )}
 
           {field('Internal Notes',
-            <textarea value={form.notes} onChange={e => set('notes', e.target.value)} placeholder='Any notes...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', height: '80px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+            txt({ value: form.notes, onChange: e => set('notes', e.target.value), placeholder: 'Any notes…' }, '80px')
           )}
 
-          {error && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '12px' }}>{error}</div>}
+          {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '18px' }}>{error}</div>}
 
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '8px' }}>
-            <button onClick={onClose} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: label, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Saving...' : existing ? 'Save Changes' : 'Save Talent'}
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'flex-end', marginTop: '28px' }}>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
+            <button onClick={save} disabled={saving} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px', opacity: saving ? 0.6 : 1 }}>
+              {saving ? 'Saving…' : existing ? 'Save changes' : 'Save talent'}
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
+import { ensureSlug } from './slugUtil'
 
 const TYPES = ['All Types', 'Influencer', 'UGC', 'Model', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
 // Keep this list identical to NICHES in AddCreatorForm.jsx — the filter chips
@@ -20,7 +21,7 @@ function totalFollowers(creator) {
   if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
   return total.toLocaleString()
 }
-export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0 }) {
+export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0, openCreatorId, onOpenCreatorHandled }) {
   const [creators, setCreators] = useState([])
   const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
@@ -49,6 +50,36 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   useEffect(() => { fetchCreators() }, [showArchived])
   // Refresh after the tab regains focus from a long absence.
   useEffect(() => { if (focusVersion > 0) fetchCreators() }, [focusVersion])
+
+  // Open a talent passed in via deep link (/roster/<slug>). Roster view only.
+  useEffect(() => {
+    if (!openCreatorId || showArchived) return
+    let cancelled = false
+    supabase.from('creators').select('*').eq('id', openCreatorId).maybeSingle().then(({ data }) => {
+      if (cancelled) return
+      if (data) setSelected(data)
+      onOpenCreatorHandled && onOpenCreatorHandled()
+    })
+    return () => { cancelled = true }
+  }, [openCreatorId])
+
+  // Keep the address bar in sync with the open talent (h-que.com/roster/<slug>),
+  // creating the name-based slug automatically on first open. Roster view only so
+  // the two mounted instances (roster + archived) don't fight over the URL.
+  useEffect(() => {
+    if (showArchived) return
+    if (selected) {
+      let cancelled = false
+      ensureSlug('creators', selected, 'talent').then(slug => {
+        if (cancelled) return
+        if (slug && selected.slug !== slug) setSelected(s => (s && s.id === selected.id) ? { ...s, slug } : s)
+        const path = `/roster/${slug || selected.id}`
+        if (window.location.pathname !== path) window.history.replaceState({}, '', path)
+      })
+      return () => { cancelled = true }
+    }
+    if (window.location.pathname.startsWith('/roster/')) window.history.replaceState({}, '', '/')
+  }, [selected?.id])
 
   async function fetchCreators() {
     setLoading(true)

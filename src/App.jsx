@@ -44,6 +44,50 @@ const initialAuthError = (() => {
   return false
 })()
 
+// Captured at module load — the campaign slug from a /campaign/<slug> share link.
+// Resolved to the actual campaign (and opened) once the user is logged in.
+const initialCampaignSlug = (() => {
+  try {
+    const m = (window.location.pathname || '').match(/^\/campaign\/(.+?)\/?$/)
+    if (m) return decodeURIComponent(m[1])
+  } catch (e) {}
+  return null
+})()
+
+// Same, for an internal /roster/<slug> talent link (login required — distinct from
+// the public /talent/<slug> profile pages).
+const initialRosterSlug = (() => {
+  try {
+    const m = (window.location.pathname || '').match(/^\/roster\/(.+?)\/?$/)
+    if (m) return decodeURIComponent(m[1])
+  } catch (e) {}
+  return null
+})()
+
+// And for a /task/<id> link — opens that task in the Workspace.
+const initialTaskId = (() => {
+  try {
+    const m = (window.location.pathname || '').match(/^\/task\/(.+?)\/?$/)
+    if (m) return decodeURIComponent(m[1])
+  } catch (e) {}
+  return null
+})()
+
+// Reports route: /reports (admin only) or a month snapshot /reports/<month>-<year>.
+const MONTH_SLUGS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+const initialReports = (() => {
+  try {
+    const p = window.location.pathname || ''
+    if (p === '/reports' || p === '/reports/') return { month: 'all', year: null }
+    const m = p.match(/^\/reports\/([a-z]+)-(\d{4})\/?$/i)
+    if (m) {
+      const idx = MONTH_SLUGS.indexOf(m[1].slice(0, 3).toLowerCase())
+      if (idx >= 0) return { month: idx, year: parseInt(m[2], 10) }
+    }
+  } catch (e) {}
+  return null
+})()
+
 function App() {
   const [view, setView] = useState('workspace')
   // Track which top-level views the user has actually opened in this session.
@@ -94,6 +138,8 @@ function App() {
   const [agencyTz, setAgencyTz] = useState('America/Los_Angeles')
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
+  const [userRole, setUserRole] = useState(null)
+  const [pendingReports, setPendingReports] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [showLogin, setShowLogin] = useState(false)
@@ -101,6 +147,7 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [pendingTaskId, setPendingTaskId] = useState(null)
   const [pendingCampaignId, setPendingCampaignId] = useState(null)
+  const [pendingCreatorId, setPendingCreatorId] = useState(null)
   const [pendingBrandNotesId, setPendingBrandNotesId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
@@ -155,6 +202,58 @@ function App() {
     const cleanUrl = window.location.pathname + (remaining ? '?' + remaining : '')
     window.history.replaceState({}, '', cleanUrl)
   }, [])
+
+  // Deep link: /campaign/<slug> (pretty share link) → resolve to the campaign and
+  // open it. Waits for the user session because campaign reads are row-level secured.
+  useEffect(() => {
+    if (!user || !initialCampaignSlug) return
+    let cancelled = false
+    supabase.from('campaigns').select('id').eq('slug', initialCampaignSlug).maybeSingle().then(({ data }) => {
+      if (cancelled || !data) return
+      setView('campaigns')
+      setPendingCampaignId(data.id)
+    })
+    window.history.replaceState({}, '', '/')
+    return () => { cancelled = true }
+  }, [user])
+
+  // Deep link: /roster/<slug> (internal talent link) → resolve to the talent and open it.
+  useEffect(() => {
+    if (!user || !initialRosterSlug) return
+    let cancelled = false
+    supabase.from('creators').select('id').eq('slug', initialRosterSlug).maybeSingle().then(({ data }) => {
+      if (cancelled || !data) return
+      setView('talent')
+      setTalentTab('roster')
+      setPendingCreatorId(data.id)
+    })
+    window.history.replaceState({}, '', '/')
+    return () => { cancelled = true }
+  }, [user])
+
+  // Deep link: /task/<id> → open that task in the Workspace.
+  useEffect(() => {
+    if (!user || !initialTaskId) return
+    setView('workspace')
+    setPendingTaskId(initialTaskId)
+    window.history.replaceState({}, '', '/')
+  }, [user])
+
+  const isAdmin = userRole === 'owner' || userRole === 'admin'
+
+  // Reports is admin-only: kick non-admins off the route, and only honor a /reports
+  // deep link for admins (no redirect loop when already authenticated as admin).
+  useEffect(() => {
+    if (!userRole) return // wait until the role is known
+    if (!isAdmin && view === 'reports') setView('workspace')
+  }, [userRole, view])
+
+  useEffect(() => {
+    if (!user || !userRole || !initialReports) return
+    if (!isAdmin) { window.history.replaceState({}, '', '/'); return }
+    setView('reports')
+    setPendingReports(initialReports)
+  }, [user, userRole])
 
   // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
   useEffect(() => {
@@ -247,7 +346,8 @@ function App() {
 
   async function fetchProfile() {
     setProfileLoading(true)
-    const { data } = await supabase.from('profiles').select('org_id, avatar_url').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('org_id, avatar_url, role').eq('id', user.id).single()
+    setUserRole(data?.role || null)
 
     if (data?.org_id) {
       setOrgId(data.org_id)
@@ -397,7 +497,7 @@ function App() {
     { key: 'workspace', label: 'Workspace', pageLabel: 'Workspace' },
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
-    { key: 'reports', label: 'Reports', pageLabel: 'Reports' },
+    { key: 'reports', label: 'Reports', pageLabel: 'Campaign Report' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
 
@@ -434,7 +534,7 @@ function App() {
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
               <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['reports', 'Reports']].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin ? [['reports', 'Reports']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -560,7 +660,7 @@ function App() {
                 <div style={{ display: view === 'talent' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   {visitedTalentTabs.has('roster') && (
                     <div style={{ display: talentTab === 'roster' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} focusVersion={focusVersion} />
+                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} focusVersion={focusVersion} openCreatorId={pendingCreatorId} onOpenCreatorHandled={() => setPendingCreatorId(null)} />
                     </div>
                   )}
                   {visitedTalentTabs.has('archived') && (
@@ -582,7 +682,7 @@ function App() {
               )}
               {visited.has('reports') && (
                 <div style={{ display: view === 'reports' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} />
+                  <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} active={view === 'reports'} initialMonth={pendingReports?.month} initialYear={pendingReports?.year} />
                 </div>
               )}
               {visited.has('settings') && (
@@ -597,7 +697,7 @@ function App() {
 
       {isMobile && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
-          {navItems.map(item => (
+          {navItems.filter(item => item.key !== 'reports' || isAdmin).map(item => (
             <button key={item.key} onClick={() => setView(item.key)} style={{
               flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'

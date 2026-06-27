@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
+import { ensureSlug } from './slugUtil'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -72,6 +73,22 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     })
     return () => { cancelled = true }
   }, [openCampaignId, orgId])
+
+  // Keep the address bar in sync with the open campaign (h-que.com/campaign/<slug>),
+  // creating the name-based slug automatically on first open. Clears back to / on close.
+  useEffect(() => {
+    if (selected) {
+      let cancelled = false
+      ensureSlug('campaigns', selected, 'campaign').then(slug => {
+        if (cancelled) return
+        if (slug && selected.slug !== slug) setSelected(s => (s && s.id === selected.id) ? { ...s, slug } : s)
+        const path = `/campaign/${slug || selected.id}`
+        if (window.location.pathname !== path) window.history.replaceState({}, '', path)
+      })
+      return () => { cancelled = true }
+    }
+    if (window.location.pathname.startsWith('/campaign/')) window.history.replaceState({}, '', '/')
+  }, [selected?.id])
 
   async function fetchCampaigns() {
     setLoading(true)
