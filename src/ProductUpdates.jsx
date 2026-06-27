@@ -31,14 +31,25 @@ export default function ProductUpdates() {
     setShot({ url: publicUrl, name: file.name, uploading: false, error: '' })
   }
 
+  const emailValid = (v) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || '').trim())
+
   async function submitRequest() {
-    if (sState === 'saving' || shot.uploading || !sForm.title.trim()) return
+    if (sState === 'saving' || shot.uploading || !sForm.title.trim() || !emailValid(sForm.email)) return
     setSState('saving')
     const { error } = await supabase.rpc('submit_feature_request', {
       p_title: sForm.title, p_description: sForm.description, p_name: sForm.name, p_email: sForm.email,
       p_category: sForm.category, p_area: sForm.area, p_screenshot_url: shot.url || null,
     })
-    setSState(error ? 'error' : 'done')
+    if (error) { setSState('error'); return }
+    // Best-effort: add the submitter to Klaviyo. The request is already saved,
+    // so a Klaviyo failure must never block the success state.
+    try {
+      await fetch('/.netlify/functions/klaviyo-subscribe', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sForm.email.trim(), name: sForm.name.trim() }),
+      })
+    } catch (_) { /* ignore */ }
+    setSState('done')
   }
 
   useEffect(() => {
@@ -159,13 +170,16 @@ export default function ProductUpdates() {
               {shot.error && <div style={{ fontSize: '11px', color: '#C0392B', marginTop: '6px' }}>{shot.error}</div>}
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <input value={sForm.name} onChange={e => setSForm({ ...sForm, name: e.target.value })} placeholder='Your name (optional)' style={{ ...sInput, flex: 1, minWidth: '160px' }} />
-              <input value={sForm.email} onChange={e => setSForm({ ...sForm, email: e.target.value })} placeholder='Email (optional)' style={{ ...sInput, flex: 1, minWidth: '160px' }} />
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '4px' }}>
+              <input value={sForm.name} onChange={e => setSForm({ ...sForm, name: e.target.value })} placeholder='Your name (optional)' style={{ ...sInput, flex: 1, minWidth: '160px', marginBottom: 0 }} />
+              <input type='email' value={sForm.email} onChange={e => setSForm({ ...sForm, email: e.target.value })} placeholder='Email *' style={{ ...sInput, flex: 1, minWidth: '160px', marginBottom: 0, borderColor: sForm.email && !emailValid(sForm.email) ? '#C0392B' : border }} />
             </div>
+            <div style={{ fontSize: '11px', color: muted, margin: '8px 0 14px', lineHeight: 1.5 }}>Your email is required — we'll follow up on your request and send you product updates.</div>
             {sState === 'error' && <div style={{ fontSize: '12px', color: '#C0392B', marginBottom: '10px' }}>Something went wrong. Please add a bit more detail and try again.</div>}
             <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
-              <button onClick={submitRequest} disabled={sState === 'saving' || !sForm.title.trim()} style={{ padding: '10px 18px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', fontWeight: 600, opacity: sState === 'saving' || !sForm.title.trim() ? 0.5 : 1 }}>{sState === 'saving' ? 'Sending…' : 'Send request'}</button>
+              {(() => { const canSend = !!sForm.title.trim() && emailValid(sForm.email) && sState !== 'saving' && !shot.uploading; return (
+              <button onClick={submitRequest} disabled={!canSend} style={{ padding: '10px 18px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: canSend ? 'pointer' : 'not-allowed', borderRadius: '4px', fontWeight: 600, opacity: canSend ? 1 : 0.5 }}>{sState === 'saving' ? 'Sending…' : 'Send request'}</button>
+              ) })()}
               <button onClick={() => setShowSubmit(false)} style={{ padding: '10px 18px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
             </div>
           </div>
