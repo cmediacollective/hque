@@ -178,6 +178,13 @@ export default function ProductUpdatesAdmin({ dark = true }) {
                         {item.status === 'shipped' && item.shipped_at && <span style={{ fontSize: '10px', color: subtle, marginLeft: 'auto' }}>{item.shipped_at}</span>}
                       </div>
                       {item.description && <div style={{ fontSize: '12px', color: muted, lineHeight: 1.5, marginBottom: '8px' }}>{item.description}</div>}
+                      {(item.area || item.screenshot_url || item.submitter_email) && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '8px', fontSize: '10px', color: subtle }}>
+                          {item.area && <span>Area: <span style={{ color: muted }}>{item.area}</span></span>}
+                          {item.screenshot_url && <a href={item.screenshot_url} target='_blank' rel='noreferrer' style={{ color: accent }}>View screenshot ↗</a>}
+                          {item.submitter_email && <span>{item.submitter_name ? item.submitter_name + ' · ' : ''}{item.submitter_email}</span>}
+                        </div>
+                      )}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         <select value={item.status} onChange={e => changeStatus(item, e.target.value)} style={selectStyle}>
                           {STATUSES.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
