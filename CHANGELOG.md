@@ -6,7 +6,9 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-27
 
-**Slack "new update" heads-up (internal).** When a roadmap item first goes public, a short internal message posts to the marketing Slack (#h-que-int-feedback): "New update: <one sentence>" + a link to h-que.com/updates — so the marketing team knows there's something new to promote. Fires once per item, master-controlled, internal only (needs a SLACK_WEBHOOK_URL env var). Replaces the earlier idea of posting customer submissions to Slack.
+**Team can submit feedback from inside the app.** Added a **+ Submit a request** button to the in-app **Settings → Product Updates** tab, so logged-in team members can open the submission form straight from the app — not just from the public h-que.com/updates page.
+
+**Slack "new update" heads-up (internal).** When a roadmap item first goes public, a short internal message posts to the marketing team's Slack (**#p_hque**): "New update: <one sentence>" + a link to h-que.com/updates — so the marketing team knows there's something new to promote. Fires once per item, master-controlled, internal only (needs a SLACK_WEBHOOK_URL env var). Replaces the earlier idea of posting customer submissions to Slack.
 
 **Roadmap upvoting (Phase 3a).** Visitors can now **upvote** Planned and In-Progress items on the public **/updates** page — one tap to vote, tap again to remove (one vote per browser). The most-wanted items automatically rise to the top of their section, and the **vote counts show in the master-admin view** so you can see what to prioritize. Voting can never affect private/under-review items.
 
@@ -17,6 +19,10 @@ A plain-English log of everything shipped. Newest at the top.
 **Public Product Updates & Roadmap page (Phase 1).** New public page at **h-que.com/updates** (no login needed) showing what's **In Progress**, **Planned**, and **Shipped** (with dates) — so customers can see their feedback is being acted on. It's one shared, company-wide roadmap visible to every account. Managed from **Settings → Product Updates** (visible only to C Media platform admins), where you add items, set their status, and set shipped dates. Visibility is controlled by status: Planned / In Progress / Shipped are public; Under Review and Declined stay private. Seeded with recent shipped features. (Phase 2 will let customers submit requests; Phase 3 adds Slack auto-tickets and upvoting.)
 
 **Create tasks directly in the List view — with room to write.** Every section in the Workspace List view (To Do, In Progress, Review, Hold, Done) now has its own **+ New Task** button right in the section header. Clicking it opens the full task form inline, using the full width of the list — so there's real space to write the title, description, and paste links, instead of being bounced into the cramped narrow column on the Kanban board. (Kanban is unchanged — still great for dragging cards and seeing status at a glance.) Removed the old bottom "+ Add task" button that used to kick you back to Kanban to type.
+
+**Workspace List view rows tidied up.** Long pasted links no longer run off the edge of a task card — the title and description now cut off cleanly with "…", and the **priority tag, due date, and assignee avatars line up in neat columns** across every row (a row with more avatars used to knock them out of alignment).
+
+**Shareable links + campaign ownership.** Campaigns, talent, tasks, and monthly reports now have clean, readable links (e.g. `h-que.com/campaign/<name>`) that open straight to that item — copy and share them, and the address bar stays in sync as you navigate. Campaigns also gained **ownership fields** — *Pitched By, Closed By, Campaign Manager* — which feed the Reports Team view; "Closed By" auto-fills when a deal goes Active.
 
 **Free Trial status is now always visible.** The Free Trial banner across the top of the app used to stay hidden until the final 7 days of the trial — so a brand-new free account saw no indication they were on a trial at all. It now shows for the **entire** trial, from day one, so free accounts are always clearly marked. It still ramps up as time runs out (calm teal → blue in the last 3 days → red once expired) and disappears automatically the moment someone redeems a code or upgrades to a paid plan.
 
