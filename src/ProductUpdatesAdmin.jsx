@@ -219,6 +219,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: item.description ? '4px' : '8px', flexWrap: 'wrap' }}>
                         <span style={{ fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border2}`, padding: '2px 5px', borderRadius: '2px' }}>{item.category}</span>
                         <span style={{ fontSize: '13px', fontWeight: 600, color: text }}>{item.title}</span>
+                        {(item.vote_count || 0) > 0 && <span style={{ fontSize: '10px', color: accent, fontWeight: 600 }}>▲ {item.vote_count}</span>}
                         {item.source === 'customer' && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C77B5B' }}>· from customer</span>}
                         {item.status === 'shipped' && item.shipped_at && <span style={{ fontSize: '10px', color: subtle, marginLeft: 'auto' }}>{item.shipped_at}</span>}
                       </div>

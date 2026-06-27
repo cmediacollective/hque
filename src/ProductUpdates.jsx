@@ -16,6 +16,21 @@ export default function ProductUpdates() {
   const [items, setItems] = useState([])
   const [filter, setFilter] = useState('all')   // all | in_progress | planned | shipped
   const [expanded, setExpanded] = useState({})  // per-section "show all" toggles
+  const [voted, setVoted] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('hque_roadmap_votes') || '[]')) } catch { return new Set() }
+  })
+
+  async function handleVote(item) {
+    const has = voted.has(item.id)
+    const delta = has ? -1 : 1
+    const next = new Set(voted)
+    if (has) next.delete(item.id); else next.add(item.id)
+    setVoted(next)
+    try { localStorage.setItem('hque_roadmap_votes', JSON.stringify([...next])) } catch (_) { /* ignore */ }
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, vote_count: Math.max(0, (i.vote_count || 0) + delta) } : i))
+    try { await supabase.rpc('vote_for_update', { p_id: item.id, p_delta: delta }) } catch (_) { /* best-effort */ }
+  }
+
   const [showSubmit, setShowSubmit] = useState(false)
   const [sForm, setSForm] = useState({ title: '', description: '', name: '', email: '', category: 'Feature', area: '' })
   const [shot, setShot] = useState({ url: '', name: '', uploading: false, error: '' })
@@ -214,18 +229,30 @@ export default function ProductUpdates() {
               <span style={{ fontSize: '11px', color: '#A8A39B' }}>{sec.blurb}</span>
             </div>
             <div style={{ marginTop: '14px' }}>
-              {visible.map(item => (
-                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: item.description ? '6px' : 0, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: catColor(item.category), border: `0.5px solid ${catColor(item.category)}`, padding: '2px 6px', borderRadius: '2px' }}>{item.category}</span>
-                    <span style={{ fontSize: '15px', fontWeight: 600 }}>{item.title}</span>
-                    {sec.key === 'shipped' && item.shipped_at && (
-                      <span style={{ fontSize: '11px', color: '#A8A39B', marginLeft: 'auto' }}>{fmtDate(item.shipped_at)}</span>
-                    )}
+              {visible.map(item => {
+                const canVote = item.status !== 'shipped'
+                const hasVoted = voted.has(item.id)
+                return (
+                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '10px', display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                  {canVote && (
+                    <button onClick={() => handleVote(item)} title={hasVoted ? 'Remove your vote' : 'Vote for this'} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px', minWidth: '46px', padding: '8px 6px', border: `1px solid ${hasVoted ? accent : border}`, background: hasVoted ? accent : '#fff', color: hasVoted ? '#fff' : ink, borderRadius: '6px', cursor: 'pointer' }}>
+                      <span style={{ fontSize: '11px', lineHeight: 1 }}>▲</span>
+                      <span style={{ fontSize: '14px', fontWeight: 700, lineHeight: 1.1 }}>{item.vote_count || 0}</span>
+                    </button>
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: item.description ? '6px' : 0, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: catColor(item.category), border: `0.5px solid ${catColor(item.category)}`, padding: '2px 6px', borderRadius: '2px' }}>{item.category}</span>
+                      <span style={{ fontSize: '15px', fontWeight: 600 }}>{item.title}</span>
+                      {sec.key === 'shipped' && item.shipped_at && (
+                        <span style={{ fontSize: '11px', color: '#A8A39B', marginLeft: 'auto' }}>{fmtDate(item.shipped_at)}</span>
+                      )}
+                    </div>
+                    {item.description && <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6 }}>{item.description}</div>}
                   </div>
-                  {item.description && <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6 }}>{item.description}</div>}
                 </div>
-              ))}
+                )
+              })}
             </div>
             {filter === 'all' && rows.length > CAP && (
               <button onClick={() => setExpanded(e => ({ ...e, [sec.key]: !showAll }))} style={{ background: 'none', border: 'none', color: accent, cursor: 'pointer', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 0' }}>
