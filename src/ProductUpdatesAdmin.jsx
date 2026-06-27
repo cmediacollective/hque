@@ -127,7 +127,8 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
     return (
       <div>
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '6px' }}>Product Updates</div>
-        <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '20px' }}>What we're building and what's recently shipped. <a href='/updates' target='_blank' rel='noreferrer' style={{ color: accent }}>Open the full page ↗</a></div>
+        <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '14px' }}>What we're building and what's recently shipped. Have an idea or found a bug? Send it our way.</div>
+        <a href='/updates' target='_blank' rel='noreferrer' style={{ display: 'inline-block', padding: '9px 16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', background: accent, color: '#fff', borderRadius: '4px', textDecoration: 'none', fontWeight: 600, marginBottom: '24px' }}>+ Submit a request</a>
         {loading ? (
           <div style={{ fontSize: '11px', color: subtle }}>Loading…</div>
         ) : items.length === 0 ? (
