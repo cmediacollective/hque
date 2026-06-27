@@ -152,7 +152,7 @@ export default function HQueChat() {
     fetch(GOOGLE_SHEETS_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ email: trimmedEmail, firstName: trimmedFirstName })
+      body: JSON.stringify({ email: trimmedEmail, firstName: trimmedFirstName, list: 'marketing' })
     }).catch(() => {})
 
     setSubmitting(false)

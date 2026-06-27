@@ -144,7 +144,7 @@ export default function BlogPage({ onGetStarted }) {
     fetch('https://script.google.com/macros/s/AKfycbyvyIlOEgMAP_UOT4O07lUzQpB6MPJ5pipONT7Fem1IynGiDolHRfTQMQxWDtfIDk7e/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ email: trimmed, firstName: 'Blog Subscriber' })
+      body: JSON.stringify({ email: trimmed, firstName: 'Blog Subscriber', list: 'marketing' })
     }).catch(() => {})
   }
 

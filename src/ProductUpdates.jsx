@@ -3,6 +3,9 @@ import { supabase } from './supabase'
 
 const TYPES = [['Feature', 'New feature'], ['Improvement', 'Improve something existing'], ['Fix', 'Report an issue']]
 const AREAS = ['Workspace', 'Campaigns', 'Talent', 'Reports', 'Account & Settings', 'Other']
+// Same Google Apps Script web app the chat/blog email capture uses; the `list`
+// field lets the sheet separate captures into different lists/tabs.
+const GOOGLE_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyvyIlOEgMAP_UOT4O07lUzQpB6MPJ5pipONT7Fem1IynGiDolHRfTQMQxWDtfIDk7e/exec'
 
 // Public, read-only "Product Updates & Roadmap" page, reachable at /updates
 // with no login. It pulls ONLY the curated subset (planned / in progress /
@@ -41,12 +44,12 @@ export default function ProductUpdates() {
       p_category: sForm.category, p_area: sForm.area, p_screenshot_url: shot.url || null,
     })
     if (error) { setSState('error'); return }
-    // Best-effort: add the submitter to Klaviyo. The request is already saved,
-    // so a Klaviyo failure must never block the success state.
+    // Best-effort: capture the email to our Google Sheet under the "feedback"
+    // list. The request is already saved, so a capture failure is non-fatal.
     try {
-      await fetch('/.netlify/functions/klaviyo-subscribe', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: sForm.email.trim(), name: sForm.name.trim() }),
+      await fetch(GOOGLE_SHEETS_ENDPOINT, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ email: sForm.email.trim(), firstName: sForm.name.trim(), list: 'feedback', note: sForm.title.trim() }),
       })
     } catch (_) { /* ignore */ }
     setSState('done')
