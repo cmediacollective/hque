@@ -152,6 +152,7 @@ function App() {
   const [pendingBrandNotesId, setPendingBrandNotesId] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
+  const [isMasterAdmin, setIsMasterAdmin] = useState(false)
   const [pastDueSince, setPastDueSince] = useState(null)
   const [stripeCustomerId, setStripeCustomerId] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -376,7 +377,11 @@ function App() {
     if (data?.agency_name) setAgencyName(data.agency_name)
     if (data?.agency_logo_url) setAgencyLogoUrl(data.agency_logo_url)
     if (data?.timezone) setAgencyTz(data.timezone)
-    const { data: org } = await supabase.from('organizations').select('trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id').eq('id', oid).single()
+    const [{ data: org }, { data: master }] = await Promise.all([
+      supabase.from('organizations').select('trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id').eq('id', oid).single(),
+      supabase.rpc('is_platform_admin'),
+    ])
+    setIsMasterAdmin(master === true)  // master account (HQue creator) — never gated by billing
     if (org?.trial_ends_at) setTrialEndsAt(org.trial_ends_at)
     if (org?.stripe_plan) setStripePlan(org.stripe_plan)
     setSubscriptionStatus(org?.subscription_status || null)
@@ -492,9 +497,9 @@ function App() {
   if (!user && authError) return <InviteRecovery onBackToSignIn={() => { setAuthError(false); setShowLogin(true) }} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
-  if (trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
-  if (subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} />
-  if (subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
+  if (!isMasterAdmin && trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
+  if (!isMasterAdmin && subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} />
+  if (!isMasterAdmin && subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
 
   const navItems = [
     { key: 'workspace', label: 'Workspace', pageLabel: 'Workspace' },

@@ -12,7 +12,7 @@ const STATUSES = [
 ]
 const CATEGORIES = ['Feature', 'Improvement', 'Fix']
 
-export default function ProductUpdatesAdmin({ dark = true }) {
+export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
@@ -37,8 +37,15 @@ export default function ProductUpdatesAdmin({ dark = true }) {
 
   async function fetchAll() {
     setLoading(true)
-    const { data } = await supabase.from('product_updates').select('*').order('created_at', { ascending: false })
-    setItems(data || [])
+    if (isMaster) {
+      // Master admin sees everything, including the Under Review queue.
+      const { data } = await supabase.from('product_updates').select('*').order('created_at', { ascending: false })
+      setItems(data || [])
+    } else {
+      // Everyone else sees the curated public roadmap only (read-only).
+      const { data } = await supabase.rpc('get_public_updates')
+      setItems(data || [])
+    }
     setLoading(false)
   }
 
@@ -92,6 +99,44 @@ export default function ProductUpdatesAdmin({ dark = true }) {
   const selectStyle = { background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }
   const labelStyle = { fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }
   const btn = (bg) => ({ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: bg, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' })
+
+  // Non-master users (owners, admins, members, customers) get a read-only roadmap.
+  if (!isMaster) {
+    const PUBLIC_SECTIONS = [
+      { key: 'in_progress', label: 'In Progress' },
+      { key: 'planned', label: 'Planned' },
+      { key: 'shipped', label: 'Shipped' },
+    ]
+    return (
+      <div>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '6px' }}>Product Updates</div>
+        <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '20px' }}>What we're building and what's recently shipped. <a href='/updates' target='_blank' rel='noreferrer' style={{ color: accent }}>Open the full page ↗</a></div>
+        {loading ? (
+          <div style={{ fontSize: '11px', color: subtle }}>Loading…</div>
+        ) : items.length === 0 ? (
+          <div style={{ fontSize: '12px', color: muted }}>No updates to show yet — check back soon.</div>
+        ) : PUBLIC_SECTIONS.map(sec => {
+          const rows = items.filter(i => i.status === sec.key)
+          if (rows.length === 0) return null
+          return (
+            <div key={sec.key} style={{ marginBottom: '22px' }}>
+              <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: accent, marginBottom: '10px' }}>{sec.label}</div>
+              {rows.map(item => (
+                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '12px 14px', marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: item.description ? '4px' : 0, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border2}`, padding: '2px 5px', borderRadius: '2px' }}>{item.category}</span>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: text }}>{item.title}</span>
+                    {item.status === 'shipped' && item.shipped_at && <span style={{ fontSize: '10px', color: subtle, marginLeft: 'auto' }}>{item.shipped_at}</span>}
+                  </div>
+                  {item.description && <div style={{ fontSize: '12px', color: muted, lineHeight: 1.5 }}>{item.description}</div>}
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <div>

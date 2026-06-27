@@ -251,8 +251,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
-    ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : []),
-    ...(isPlatformAdmin ? [{ key: 'updates', label: 'Product Updates' }] : [])
+    ...(currentUserRole === 'owner' || currentUserRole === 'admin' ? [{ key: 'billing', label: 'Billing' }] : []),
+    { key: 'updates', label: 'Product Updates' }
   ]
 
   return (
@@ -514,12 +514,12 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           </div>
         )}
 
-        {activeTab === 'billing' && currentUserRole === 'owner' && (
+        {activeTab === 'billing' && (currentUserRole === 'owner' || currentUserRole === 'admin') && (
           <BillingView dark={dark} orgId={orgId} user={user} />
         )}
 
-        {activeTab === 'updates' && isPlatformAdmin && (
-          <ProductUpdatesAdmin dark={dark} />
+        {activeTab === 'updates' && (
+          <ProductUpdatesAdmin dark={dark} isMaster={isPlatformAdmin} />
         )}
 
       </div>
