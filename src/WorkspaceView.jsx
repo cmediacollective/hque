@@ -716,7 +716,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px' }}>
                 {columns.map(col => (
                   <div key={col.id} style={{ marginBottom: '24px' }}>
-                    <div style={{ fontSize: '9px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted, marginBottom: '8px', paddingBottom: '6px', borderBottom: `0.5px solid ${border}` }}>{col.name} ({tasks.filter(t => t.column_id === col.id).length})</div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', paddingBottom: '6px', borderBottom: `0.5px solid ${border}` }}>
+                      <div style={{ fontSize: '9px', letterSpacing: '0.26em', textTransform: 'uppercase', color: muted }}>{col.name} ({tasks.filter(t => t.column_id === col.id).length})</div>
+                      <button onClick={() => setShowNewTask(showNewTask === col.id ? null : col.id)} style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', padding: '2px 4px' }}>{showNewTask === col.id ? 'Cancel' : '+ New Task'}</button>
+                    </div>
+                    {showNewTask === col.id && (
+                      <TaskForm initial={{ title: '', priority: 'Medium', due_date: '', is_ongoing: false, description: '', assignee_ids: [] }} onSave={(form) => createTask(col.id, form)} onCancel={() => setShowNewTask(null)} dark={dark} members={members} />
+                    )}
                     {tasks.filter(t => t.column_id === col.id).map(task => (
                       <div key={task.id}
                         onClick={() => setEditingTask({ ...task })}
@@ -738,9 +744,6 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                     )}
                   </div>
                 ))}
-                <div style={{ marginTop: '12px' }}>
-                  <button onClick={() => { setViewMode('kanban'); setShowNewTask(columns[0]?.id) }} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>+ Add task</button>
-                </div>
               </div>
             )}
           </>

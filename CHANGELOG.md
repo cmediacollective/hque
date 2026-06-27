@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-27
 
+**Create tasks directly in the List view — with room to write.** Every section in the Workspace List view (To Do, In Progress, Review, Hold, Done) now has its own **+ New Task** button right in the section header. Clicking it opens the full task form inline, using the full width of the list — so there's real space to write the title, description, and paste links, instead of being bounced into the cramped narrow column on the Kanban board. (Kanban is unchanged — still great for dragging cards and seeing status at a glance.) Removed the old bottom "+ Add task" button that used to kick you back to Kanban to type.
+
 **Free Trial status is now always visible.** The Free Trial banner across the top of the app used to stay hidden until the final 7 days of the trial — so a brand-new free account saw no indication they were on a trial at all. It now shows for the **entire** trial, from day one, so free accounts are always clearly marked. It still ramps up as time runs out (calm teal → blue in the last 3 days → red once expired) and disappears automatically the moment someone redeems a code or upgrades to a paid plan.
 
 ---
