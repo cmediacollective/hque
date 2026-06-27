@@ -243,11 +243,11 @@ export default function ProductUpdates() {
                     </button>
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: item.description ? '6px' : 0, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: catColor(item.category), border: `0.5px solid ${catColor(item.category)}`, padding: '2px 6px', borderRadius: '2px' }}>{item.category}</span>
-                      <span style={{ fontSize: '15px', fontWeight: 600 }}>{item.title}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: item.description ? '6px' : 0 }}>
+                      <span style={{ fontSize: '15px', fontWeight: 600, flex: 1, minWidth: 0 }}>{item.title}</span>
+                      <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: catColor(item.category), border: `0.5px solid ${catColor(item.category)}`, padding: '2px 6px', borderRadius: '2px', flexShrink: 0, whiteSpace: 'nowrap' }}>{item.category}</span>
                       {sec.key === 'shipped' && item.shipped_at && (
-                        <span style={{ fontSize: '11px', color: '#A8A39B', marginLeft: 'auto' }}>{fmtDate(item.shipped_at)}</span>
+                        <span style={{ fontSize: '11px', color: '#A8A39B', flexShrink: 0, whiteSpace: 'nowrap' }}>{fmtDate(item.shipped_at)}</span>
                       )}
                     </div>
                     {item.description && <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6 }}>{item.description}</div>}
