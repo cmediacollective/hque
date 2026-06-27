@@ -43,7 +43,7 @@ export default function ProductUpdates() {
     <div style={{ minHeight: '100vh', background: bg, color: ink, fontFamily: '"Inter Tight", system-ui, -apple-system, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <div style={{ flex: 1, width: '100%', maxWidth: '760px', margin: '0 auto', padding: '56px 24px 40px', boxSizing: 'border-box' }}>
         <div style={{ marginBottom: '40px' }}>
-          <a href='https://h-que.com' style={{ display: 'inline-block' }}><img src='/logo-dark.svg' alt='HQue' style={{ height: '32px', display: 'block' }} /></a>
+          <a href='https://h-que.com' style={{ display: 'inline-block' }}><img src='/logo-dark.svg' alt='HQue' style={{ width: '140px', height: 'auto', display: 'block' }} /></a>
           <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '34px', fontWeight: 'normal', margin: '14px 0 10px' }}>Product Updates</h1>
           <p style={{ fontSize: '14px', color: muted, lineHeight: 1.6, margin: 0, maxWidth: '540px' }}>
             What we're building, what's coming next, and what just shipped. Your feedback shapes this list.
