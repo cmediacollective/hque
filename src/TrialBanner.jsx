@@ -12,11 +12,9 @@ export default function TrialBanner({ trialEndsAt, onUpgrade }) {
     </div>
   )
 
-  if (daysLeft > 7) return null
-
   const urgent = daysLeft <= 3
-  const bg = urgent ? '#8B4513' : '#2A3A2A'
-  const accent = urgent ? '#e67e22' : '#5C9E52'
+  const bg = urgent ? '#1E3048' : '#1E3A3A'
+  const accent = urgent ? '#4F8FD6' : '#4FA6A6'
 
   return (
     <div style={{ background: bg, padding: '8px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, borderBottom: `0.5px solid ${accent}` }}>

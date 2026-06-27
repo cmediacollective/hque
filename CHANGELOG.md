@@ -4,6 +4,86 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-27
+
+**Free Trial status is now always visible.** The Free Trial banner across the top of the app used to stay hidden until the final 7 days of the trial — so a brand-new free account saw no indication they were on a trial at all. It now shows for the **entire** trial, from day one, so free accounts are always clearly marked. It still ramps up as time runs out (calm teal → blue in the last 3 days → red once expired) and disappears automatically the moment someone redeems a code or upgrades to a paid plan.
+
+---
+
+## 2026-06-20
+
+**Team cards now use bar graphs, with a Managing workload read.** On both the Team tab and the Overview team-snapshot strip, each person's Pitches / Active / Closed are now shown as a small horizontal **bar graph** (sized against their total campaigns, using the same pipeline colors — Closed is the boldest, strongest bar) with the counts kept as labels. A distinct fourth **Managing** bar (violet) shows how many campaigns that person runs as Campaign Manager, and a plain line reads **"Managing X campaigns."** Everything stays driven by the year/month filter, which now consistently scopes every section on the page and persists when switching between Overview and Team.
+
+**Added a team snapshot strip to the Reports Overview.** Between the Budget-by-month chart and the Highlights strip, the Overview now shows a compact row of team-member cards — avatar, name, and **Pitches · Active · Closed** (Closed is the prominent number) — so you can see how everyone's doing without leaving the Overview. Clicking a card jumps to the **Team** tab and highlights that person. It respects the year/month filter, shows everyone with any assignment (including all-zeroes), and hides entirely if no one has ownership assigned yet.
+
+**Reports is now two views: Overview and Team.** Added first-class **Overview / Team** tabs at the top (the month/year filter applies to both):
+- **Team view** is its own page: one card per team member, with **Pitches / Active / Closed** as the centerpiece — **Closed is the biggest, boldest number** (green), and anyone with **0** closed shows a clear high-contrast 0, never a dash. Cards are sorted by deals closed, the top closer is highlighted, and each card lists that person's campaigns (name · brand · status) with a "See all" to expand.
+- **Overview** keeps the hero stats, pipeline, and budget charts, but the long campaign table is **replaced by a short highlights strip** — top 3 closed deals and the 3 longest-sitting campaigns — so nothing requires endless scrolling.
+- Attribution still uses each campaign's Pitched By / Campaign Manager / Deal Closed By, counting a campaign for every team member on it.
+
+**Added a Team Performance leaderboard to Reports.** A new section above the campaign breakdown shows each team member's results for the selected period — campaigns pitched, deals closed, deals still open, and their personal pitch-to-close rate. Sorted by deals closed (ties broken alphabetically); the top closer is visually elevated (larger avatar, subtle highlight, "Top closer" tag). Anyone with **0 closed** shows a clear, contrasting **0** — it doesn't blend in. It filters with the month selector, and **clicking a person filters the campaign table below to just their campaigns** (click again to clear). The breakdown table also gained a **team** column showing the assigned member avatars. Attribution uses the campaign's **Pitched By / Campaign Manager / Deal Closed By** people — and a campaign counts for *every* team member on it, so a closed deal is a win for everyone involved.
+
+**Made the Reports page more visual and accountability-focused.** Building on the redesign:
+- **Editorial-scale headline:** the top stats are now large and bold, led by a **pitch-to-close performance ring** (a circular progress dial) so your close rate reads as a performance indicator at a glance.
+- **Zero doesn't hide:** if nothing closed in the period, "Deals closed" shows a bold **0** in a contrasting tone, and the closed deal list explicitly says **"Nothing closed this month."**
+- **Pipeline with intent:** in the Pitched → Active → Closed chart, **Closed is now the loudest, most saturated bar** while Pitched/Active sit back, so the story reads before the labels. Months with campaigns but zero closed get a visible muted bar instead of blank space.
+- **Closed vs. still open:** a new section between the chart and the table splits **Closed** deals from **Still open** ones (Active / Contract Pending) — brand, campaign, talent count, value, and current stage — so a team lead can see in seconds what landed and what's sitting. Filters with the selected month.
+- **Time in stage:** each row in the campaign breakdown now shows how long it's been where it is (e.g. **"In pitch for 47 days"**), quietly surfacing stalled deals.
+- Everything responds to dark/light mode via the existing theme tokens.
+
+**Redesigned the Reports page around plain-English results, and made it admin-only.** A full rework of the Reports tab:
+- **Admin-only:** the Reports link now only appears for owners/admins, and non-admins are redirected away if they try to open it directly. No other page's permissions changed.
+- **Headline numbers:** the top now shows four clear metrics for the selected period — **Pitches sent**, **Deals closed**, **People involved**, and **Pitch-to-close rate** (e.g. "8 of 23 → 34%"), with smaller **active** and **stalled** stats beneath. No internal status jargon ("Contract Pending", "Dead", etc.) as labels.
+- **Pipeline by month:** replaced the stacked bars with a **Pitched → Active → Closed** progression per month, so it's obvious where deals drop off — readable at a glance. The Budget-by-month chart stays below it.
+- **Monthly snapshot:** pick a month and you get a focused **"How we did in [Month]"** card — pitched, closed, talent involved, budget for closed deals, and any stalled campaigns. Each month has its own shareable link (e.g. `h-que.com/reports/may-2026`) that opens straight to that snapshot for admins.
+- **Campaign breakdown:** the bottom table gained a **Talent count** column and a plain **Stage** label (Pitched / Active / Closed / Stalled) instead of raw status names, and filters to the selected month.
+- Everything uses the existing design system and responds to dark/light mode.
+
+**Tasks now show a shareable URL in the address bar too.** Opening a task in the Workspace updates the browser address bar to `h-que.com/task/<id>` (and clears back when you close it) — matching how campaigns and talent already work. Paste that link to a teammate and it opens straight to that task (login required). Used the task's id rather than a name, so it works for every existing task immediately with no setup. (For the record: this is safe across multiple agencies — task links only resolve for people in the owning agency, enforced by login + database row-level security.)
+
+**Editing a campaign now opens centered, matching the talent editor.** Previously, editing/creating a campaign slid in from the right while editing talent popped up in the middle of the screen — inconsistent. The campaign form now opens as a centered modal (same width and rounded-card style as the Add/Edit Talent modal), so both editing experiences look and feel the same. No fields or behavior changed — only how it's presented.
+
+**Redesigned the Add/Edit Talent modal to match the campaign form.** The dialog that opens from **+ Talent** now shares the same restrained, editorial look:
+- **Quiet section dividers** ("Basic info", "Handles", "Audience", "Rates", "Contact") replace the old ALL-CAPS headers; field labels are sentence-case with a coral asterisk on required fields.
+- **Type and Niche buttons are now sentence-case pill chips** instead of ALL-CAPS outlined boxes, with a clean selected state.
+- **Inputs, dropdowns and text areas** got the soft filled background with rounded corners that brighten on focus; dropdowns use a custom chevron, and the rate fields show a `$` inside.
+- **Upload buttons** ("Upload photo", "Upload media kit") are now light ghost buttons, and **Save** is a tidy high-contrast button paired with a plain "Cancel" link, bottom-right.
+- Consistent 28px padding and a thin auto-hiding scrollbar. All styling is scoped to the modal only — the roster grid is untouched.
+
+**Redesigned the Edit/New Campaign form to match the new panel.** The form that slides in when you add or edit a campaign got the same editorial treatment as the detail view:
+- **Killed the "SECTION 1 —", "SECTION 2 —" headers** — they read like auto-generated scaffolding. They're now quiet hairline dividers with plain labels: Basics, Ownership, Timeline & Budget, Deliverables, Documents, Notes, Talent.
+- **Field labels** are sentence-case and softer (no more shouty ALL-CAPS), with required fields marked by a small coral asterisk.
+- **Inputs and dropdowns** have a subtle filled background with rounded corners that brighten on focus; dropdowns use a custom chevron instead of the browser default, date fields a calmer calendar icon, and Budget shows a `$` inside the field.
+- **The Save button** is no longer a full-width flat-blue bar — it's a tidy high-contrast button paired with a plain "Cancel" text link.
+- **"Danger Zone" is gone** — deleting is now a single quiet line of text with a muted "Delete campaign" link instead of an alarming red box.
+- Logo actions and selected-talent chips were slimmed down (ghost links, pill-shaped chips). The whole form is theme-aware for light and dark.
+
+**Redesigned the campaign slide-in panel to feel premium and considered.** A top-to-bottom restyle of the dark sidebar that opens when you click a campaign, moving it away from a generic "component library" look toward something editorial and intentional (think Linear / Vercel):
+- **Status is now a colored dot + plain text** (amber = pending, green = paid) instead of boxy outlined badges — the single biggest change.
+- **Budget / Start / End** sit in a loose, airy row with no boxes; empty dates simply don't show.
+- **No more "box-in-box" cards** — Deliverables, Documents, Notes, Contact and Talent are separated by fine hairline rules instead of grey panels.
+- **Section headers** are now whisper-quiet hairline dividers with a tiny low-opacity label, not loud ALL-CAPS text.
+- **Assigned Talent** rows got the most love: round avatars, cleaner type, a subtle dot for payment status, and an Edit button that only appears when you hover the row.
+- **Comments** box is cleaner — a transparent field that lifts its border on focus, a proper filled Comment button, and the filler "No comments yet" line removed.
+- The brand name is now a quiet breadcrumb and the campaign title reads as a refined heading. The panel is fully theme-aware, so it holds up in both light and dark mode.
+
+**Cleaned up the campaign header.** The top of an open campaign was cramped — the Archive / Copy URL / Edit buttons sat next to the title and squeezed long campaign names into a narrow column that wrapped onto several lines. The action buttons now sit on their own row above, so the campaign name uses the full width and reads on one or two lines. Archive and Copy URL are lighter/borderless so Edit stands out as the main action, and the brand "Website" tag is now a subtle link instead of a bright blue pill.
+
+**The address bar now shows a custom web address for whatever you're viewing.** Open a campaign and the browser's address bar automatically becomes `h-que.com/campaign/<name>`; open a talent and it becomes `h-que.com/roster/<name>`. No button to press and nothing to "generate" — the clean name-based address appears on its own the moment you open something, so you can copy it straight from the address bar (or bookmark it). Close the panel and the address returns to normal. Opening one of these links drops you right onto that campaign or talent (you must be logged in). The talent address (`/roster/...`) is an **internal team link** and is separate from the public talent profile pages (`/talent/...`), which stay their own thing. The "Copy" button on campaigns is still there, now labeled **Campaign URL**.
+
+**Campaign share links now use a clean, name-based web address.** The "↗ Copy Link" button at the top of any campaign now copies a tidy link like `h-que.com/campaign/summer-wellness` instead of the old long `?campaign=<id>` address. The clean name is created automatically the first time you copy a campaign's link (if two campaigns share a name, the second becomes `…-2`, `…-3`, etc.). Opening the link drops you straight onto that campaign (you still need to be logged in). Existing campaigns are unaffected until you share them. *(Setup: a one-time database snippet must be run in Supabase before this works — see notes.)*
+
+**The campaign form is now organized into clear, labeled sections.** Creating or editing a campaign now walks top-to-bottom through six titled sections — **1) The Basics** (Campaign Name, Brand, Campaign Type, Status — all required now, marked with *), **2) Ownership & Accountability** (new), **3) Timeline & Budget**, **4) Deliverables**, **5) Documents** (Brief/Contract URLs), and **6) Notes**. Each section has a small-caps header with a light divider line. Talent stays at the very bottom, on its own, since it's added after the campaign exists.
+
+- **New ownership fields:** **Pitched By**, **Deal Closed By**, and **Campaign Manager** — each a dropdown of your team members. *Deal Closed By* fills in automatically the first time a campaign's status is set to **Active**, capturing whoever made that change — unless you've already picked someone manually.
+- **Brand is now required** — you must choose a brand to create a campaign (the old "No brand (internal)" option is gone).
+- **"Timeline" was renamed to "Key Milestones"** in the Notes section (same field, clearer name).
+- *(Setup: a one-time database snippet must be run in Supabase before this works — see notes.)*
+
+## 2026-06-19
+
+**Simplified the marketing-site cursor to a single dot.** The custom cursor on the marketing pages (homepage, pricing, FAQ, blog) used to be a small dot with a separate trailing ring that grew and showed an arrow over links. It's now just one clean dot — bigger (14px, up from a tiny 5px) and in the brand steel-blue, with a subtle grow when you hover over links and buttons. No more trailing ring or arrow. (Requested feedback: the old cursor felt busy.)
+
 ## 2026-06-15
 
 **Every talent can now have its own shareable public profile page.** Open a talent and use the new **Public Profile** box to **Publish public link** — that creates a clean, login-free page at a friendly web address like `h-que.com/talent/piper-jones` (built from their name; duplicates get a number). Anyone with the link can view it; no HQue account needed. Hit **Copy** to grab the link, **View** to preview it, or **Unpublish** to take it down anytime (the same link comes back if you re-publish). Profiles are **private by default** — nothing goes public until you publish it. The public page shows only **photo, name, type, niches, and bio** — rates, contacts, manager details, and internal notes always stay private. There's a new **Public Bio** box in the talent edit form to write what brands see. *(Setup: a one-time database snippet must be run in Supabase before this works — see notes.)*
