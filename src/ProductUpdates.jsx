@@ -8,6 +8,8 @@ import { supabase } from './supabase'
 export default function ProductUpdates() {
   const [state, setState] = useState('loading') // loading | ready | error
   const [items, setItems] = useState([])
+  const [filter, setFilter] = useState('all')   // all | in_progress | planned | shipped
+  const [expanded, setExpanded] = useState({})  // per-section "show all" toggles
 
   useEffect(() => {
     let cancelled = false
@@ -64,11 +66,34 @@ export default function ProductUpdates() {
     return page(<div style={{ fontSize: '13px', color: muted }}>We couldn't load updates right now. Please try again shortly.</div>)
   }
 
+  const CAP = 6
+  const counts = {
+    in_progress: items.filter(i => i.status === 'in_progress').length,
+    planned: items.filter(i => i.status === 'planned').length,
+    shipped: items.filter(i => i.status === 'shipped').length,
+  }
+  const filterTabs = [{ key: 'all', label: 'All' }, ...sections.map(s => ({ key: s.key, label: s.label }))]
+
   return page(
     <div>
+      <div style={{ position: 'sticky', top: 0, background: bg, zIndex: 5, display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '8px 0 14px', marginBottom: '14px', borderBottom: `0.5px solid ${border}` }}>
+        {filterTabs.map(t => {
+          const active = filter === t.key
+          const count = t.key === 'all' ? items.length : counts[t.key]
+          return (
+            <button key={t.key} onClick={() => setFilter(t.key)} style={{ padding: '6px 13px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', borderRadius: '20px', cursor: 'pointer', border: `0.5px solid ${active ? ink : border}`, background: active ? ink : 'transparent', color: active ? '#fff' : muted, fontWeight: active ? 700 : 500 }}>
+              {t.label}{count > 0 && <span style={{ opacity: 0.55, marginLeft: '5px' }}>{count}</span>}
+            </button>
+          )
+        })}
+      </div>
+
       {sections.map(sec => {
+        if (filter !== 'all' && filter !== sec.key) return null
         const rows = items.filter(i => i.status === sec.key)
         if (rows.length === 0) return null
+        const showAll = filter === sec.key || expanded[sec.key]
+        const visible = showAll ? rows : rows.slice(0, CAP)
         return (
           <div key={sec.key} style={{ marginBottom: '36px' }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '4px' }}>
@@ -76,7 +101,7 @@ export default function ProductUpdates() {
               <span style={{ fontSize: '11px', color: '#A8A39B' }}>{sec.blurb}</span>
             </div>
             <div style={{ marginTop: '14px' }}>
-              {rows.map(item => (
+              {visible.map(item => (
                 <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: item.description ? '6px' : 0, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: catColor(item.category), border: `0.5px solid ${catColor(item.category)}`, padding: '2px 6px', borderRadius: '2px' }}>{item.category}</span>
@@ -89,6 +114,11 @@ export default function ProductUpdates() {
                 </div>
               ))}
             </div>
+            {filter === 'all' && rows.length > CAP && (
+              <button onClick={() => setExpanded(e => ({ ...e, [sec.key]: !showAll }))} style={{ background: 'none', border: 'none', color: accent, cursor: 'pointer', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 0' }}>
+                {showAll ? 'Show less' : `Show all ${rows.length}`}
+              </button>
+            )}
           </div>
         )
       })}
