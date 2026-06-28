@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-27
 
+**Fixed dead "Start free" / plan buttons on the pricing page (and FAQ/blog) for logged-in users.** The buttons on h-que.com/pricing only ever opened the signup form — and the signup form is hidden from anyone already signed in, so for a logged-in person every "Start free" and plan button did nothing. Now, if you're already logged in, clicking those CTAs takes you straight into the app's **Settings → Billing** page to subscribe; logged-out visitors still get the signup form as before. Same fix applies to the shared "Start free" button on the FAQ and blog pages.
+
 **SEO & AI-search foundations.** Made the site more discoverable by Google *and* AI assistants (ChatGPT, Claude, Perplexity): a complete **sitemap** that now includes every blog post and key page — and **auto-regenerates on each build**, so future posts are always included with no manual step. Added a proper **robots.txt** that explicitly **welcomes AI crawlers** (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, etc.) and points to the sitemap. Added **JSON-LD structured data** — Article schema on every blog post (auto-filled from the post's data) and SoftwareApplication schema on the homepage — so search engines and AI get a clear, machine-readable description of each page. (Per-page titles/descriptions/Open Graph were already handled by the existing useSEO hook.)
 
 **Team can submit feedback from inside the app.** Added a **+ Submit a request** button to the in-app **Settings → Product Updates** tab, so logged-in team members can open the submission form straight from the app — not just from the public h-que.com/updates page.

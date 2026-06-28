@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
-export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange }) {
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -13,7 +13,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
 
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState(initialTab || 'profile')
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', timezone: 'America/Los_Angeles' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })

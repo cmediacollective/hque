@@ -89,8 +89,19 @@ const initialReports = (() => {
   return null
 })()
 
+// A logged-in visitor who clicks a marketing "Start free" / plan CTA is sent to
+// /?view=billing so they land straight on Settings → Billing (where the real
+// subscribe / Stripe checkout lives) instead of the signup form, which is hidden
+// from anyone already signed in.
+const initialBilling = (() => {
+  try {
+    return new URLSearchParams(window.location.search || '').get('view') === 'billing'
+  } catch (e) {}
+  return false
+})()
+
 function App() {
-  const [view, setView] = useState('workspace')
+  const [view, setView] = useState(initialBilling ? 'settings' : 'workspace')
   // Track which top-level views the user has actually opened in this session.
   // Once visited, a view stays mounted (display: none when inactive) so coming
   // back to it doesn't pay the refetch cost. We seed with 'workspace' since
@@ -470,6 +481,14 @@ function App() {
     setExporting(false)
   }
 
+  // Marketing-page CTAs ("Start free", plan buttons). Logged-out visitors get the
+  // signup form; people already signed in are sent to in-app Billing to subscribe —
+  // otherwise the buttons appear dead because the signup screen is gated behind !user.
+  const handleGetStarted = () => {
+    if (user) window.location.href = '/?view=billing'
+    else setShowSignUp(true)
+  }
+
   if (isSandboxPage) return <Sandbox />
   if (isInquiryPage) return <TalentInquiry />
   if (talentProfileSlug) return <PublicTalentProfile slug={talentProfileSlug} />
@@ -481,10 +500,10 @@ function App() {
   if (!user && showSignUp) return <SignUp onSignUp={(u) => { setUser(u); setShowSignUp(false) }} />
   if (!user && showLogin) return <Login onLogin={setUser} onShowSignUp={() => { setShowLogin(false); setShowSignUp(true) }} />
 
-  if (isFaqPage) return <FAQPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
-  if (isPricingPage) return <PricingPage onGetStarted={() => setShowSignUp(true)} />
-  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={() => setShowSignUp(true)} />
-  if (isBlogPage) return <BlogPage onGetStarted={() => setShowSignUp(true)} />
+  if (isFaqPage) return <FAQPage onGetStarted={handleGetStarted} onSignIn={() => setShowLogin(true)} />
+  if (isPricingPage) return <PricingPage onGetStarted={handleGetStarted} />
+  if (blogPostSlug) return <BlogPostPage slug={blogPostSlug} onGetStarted={handleGetStarted} />
+  if (isBlogPage) return <BlogPage onGetStarted={handleGetStarted} />
 
   if (authLoading || profileLoading) return (
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -695,7 +714,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} />
                 </div>
               )}
             </Suspense>
