@@ -1,55 +1,7 @@
 import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
-
-const PLANS = [
-  {
-    name: 'Starter',
-    price: '$49',
-    period: '/month',
-    description: 'For entrepreneurs and small teams who need a clean, simple way to manage talent and run campaigns.',
-    features: [
-      'Up to 50 talent',
-      '2 team members',
-      'Talent roster management',
-      'Campaign tracking',
-      'Talent inquiry form',
-      'Basic reporting',
-      'Email support',
-    ]
-  },
-  {
-    name: 'Pro',
-    price: '$99',
-    period: '/month',
-    description: 'For agencies and brand teams scaling their campaigns and ready for deeper analytics and workflows.',
-    highlight: true,
-    features: [
-      'Unlimited talent',
-      '5 team members',
-      'Everything in Starter',
-      'Advanced reports & analytics',
-      'Payment tracking',
-      'Workspace & task management',
-      'Priority support',
-    ]
-  },
-  {
-    name: 'Business',
-    price: '$199',
-    period: '/month',
-    description: 'For established agencies and brands running high-volume talent operations across multiple campaigns and clients.',
-    features: [
-      'Unlimited everything',
-      'Unlimited team members',
-      'Everything in Pro',
-      'Custom onboarding',
-      'Dedicated account support',
-      'Custom branding on PDFs & talent inquiries',
-      'Early access to new features',
-    ]
-  },
-]
+import { PLANS, COMPARE } from './plans'
 
 const FAQS = [
   { q: 'Is there a free trial?', a: 'Yes — every plan includes a 14-day free trial. No credit card required. You get full access to all features during your trial period.' },
@@ -68,6 +20,12 @@ export default function PricingPage({ onGetStarted }) {
   const [openFaq, setOpenFaq] = useState(null)
   const [hoveredPlan, setHoveredPlan] = useState(null)
   const isMobile = window.innerWidth < 768
+
+  const cmpCell = (v) => {
+    if (v === true) return <span style={{ color: '#5b7c99', fontSize: '14px' }}>✓</span>
+    if (v === false || v == null) return <span style={{ color: '#3A3A3A', fontSize: '14px' }}>—</span>
+    return <span style={{ color: '#DCDCDC', fontSize: '12px' }}>{v}</span>
+  }
 
   return (
     <div style={{ background: '#111', minHeight: '100vh', fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", color: '#F0ECE6' }}>
@@ -95,17 +53,17 @@ export default function PricingPage({ onGetStarted }) {
               onMouseEnter={() => setHoveredPlan(plan.name)}
               onMouseLeave={() => setHoveredPlan(null)}
               style={{
-                background: plan.highlight ? '#1A2024' : '#141414',
-                border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#333' : '#222')}`,
+                background: plan.recommended ? '#1A2024' : '#141414',
+                border: `0.5px solid ${plan.recommended ? '#5b7c99' : (isHovered ? '#333' : '#222')}`,
                 borderRadius: '3px',
                 padding: isMobile ? '32px 26px' : '38px 30px',
                 position: 'relative',
                 transform: !isMobile && isHovered ? 'translateY(-4px)' : 'translateY(0)',
-                boxShadow: plan.highlight ? '0 1px 44px rgba(91,124,153,0.10)' : 'none',
+                boxShadow: plan.recommended ? '0 1px 44px rgba(91,124,153,0.10)' : 'none',
                 transition: 'transform 0.2s ease, border-color 0.2s ease',
               }}
             >
-              {plan.highlight && (
+              {plan.recommended && (
                 <div style={{ position: 'absolute', top: '-9px', left: '30px', background: '#5b7c99', color: '#fff', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', padding: '4px 11px', borderRadius: '2px' }}>Most Popular</div>
               )}
               <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>{plan.name}</div>
@@ -131,9 +89,9 @@ export default function PricingPage({ onGetStarted }) {
                   width: '100%', padding: '13px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                   fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase',
-                  background: plan.highlight ? '#5b7c99' : 'none',
-                  border: `0.5px solid ${plan.highlight ? '#5b7c99' : (isHovered ? '#3A3A3A' : '#2A2A2A')}`,
-                  color: plan.highlight ? '#fff' : (isHovered ? '#F0ECE6' : '#999'),
+                  background: plan.recommended ? '#5b7c99' : 'none',
+                  border: `0.5px solid ${plan.recommended ? '#5b7c99' : (isHovered ? '#3A3A3A' : '#2A2A2A')}`,
+                  color: plan.recommended ? '#fff' : (isHovered ? '#F0ECE6' : '#999'),
                   cursor: 'pointer', borderRadius: '2px',
                   transition: 'color 0.2s ease, border-color 0.2s ease',
                 }}
@@ -144,6 +102,36 @@ export default function PricingPage({ onGetStarted }) {
             </div>
           )
         })}
+      </div>
+
+      {/* Full comparison */}
+      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: isMobile ? '0 16px 24px' : '0 48px 24px' }}>
+        <div style={{ fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '20px', textAlign: 'center' }}>Compare all features</div>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: isMobile ? '520px' : 'auto', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={{ textAlign: 'left', padding: '12px 14px', fontSize: '11px', color: '#888', fontWeight: 400, borderBottom: '0.5px solid #262626' }}></th>
+                {PLANS.map(p => (
+                  <th key={p.key} style={{ textAlign: 'center', padding: '12px 14px', borderBottom: '0.5px solid #262626', background: p.recommended ? 'rgba(91,124,153,0.08)' : 'none' }}>
+                    <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: p.recommended ? '#5b7c99' : '#DCDCDC' }}>{p.name}</div>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '3px' }}>{p.price}{p.period}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARE.map((row, i) => (
+                <tr key={row.label}>
+                  <td style={{ textAlign: 'left', padding: '11px 14px', fontSize: '12px', color: '#DCDCDC', borderBottom: '0.5px solid #1A1A1A' }}>{row.label}</td>
+                  <td style={{ textAlign: 'center', padding: '11px 14px', borderBottom: '0.5px solid #1A1A1A' }}>{cmpCell(row.starter)}</td>
+                  <td style={{ textAlign: 'center', padding: '11px 14px', borderBottom: '0.5px solid #1A1A1A', background: 'rgba(91,124,153,0.05)' }}>{cmpCell(row.pro)}</td>
+                  <td style={{ textAlign: 'center', padding: '11px 14px', borderBottom: '0.5px solid #1A1A1A' }}>{cmpCell(row.agency)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Compare note */}

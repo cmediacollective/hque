@@ -72,7 +72,7 @@ const FEATURES = [
 const PLANS = [
   { name: 'Starter', slug: 'starter', price: '$49', description: 'For entrepreneurs and small teams just getting started.', features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form'] },
   { name: 'Pro', slug: 'pro', price: '$99', description: 'For growing agencies and brand teams that need more power.', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'], highlight: true },
-  { name: 'Business', slug: 'business', price: '$199', description: 'For established agencies and teams running multiple campaigns and clients.', features: ['Unlimited everything', 'Unlimited team members', 'Custom onboarding', 'Dedicated support', 'Custom branding on PDFs & talent inquiries'] },
+  { name: 'Business', slug: 'business', price: '$199', description: 'For established agencies and teams running multiple campaigns and clients.', features: ['Unlimited everything', 'Unlimited team members', 'Full white-label branding', 'Custom onboarding', 'Dedicated support'] },
 ]
 
 function BrandLogo({ color, initial, size = 44, logo }) {

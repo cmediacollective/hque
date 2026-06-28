@@ -1,33 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
-
-const PLANS = [
-  {
-    key: 'starter',
-    name: 'Starter',
-    price: '$49',
-    period: '/month',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_STARTER,
-    features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form']
-  },
-  {
-    key: 'pro',
-    name: 'Pro',
-    price: '$99',
-    period: '/month',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_PRO,
-    features: ['Unlimited talent', '5 team members', 'Everything in Starter', 'Reports & analytics', 'Priority support'],
-    recommended: true
-  },
-  {
-    key: 'agency',
-    name: 'Business',
-    price: '$199',
-    period: '/month',
-    priceId: import.meta.env.VITE_STRIPE_PRICE_AGENCY,
-    features: ['Unlimited talent', 'Unlimited team members', 'Everything in Pro', 'Custom onboarding', 'Dedicated support', 'Full white-label branding']
-  }
-]
+import { PLANS } from './plans'
 
 export default function BillingView({ dark = true, orgId, user }) {
   const card = dark ? '#222' : '#FFFFFF'
