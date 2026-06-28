@@ -314,6 +314,17 @@ function App() {
   const talentProfileSlug = window.location.pathname.startsWith('/talent/')
     ? decodeURIComponent(window.location.pathname.replace('/talent/', '').replace(/\/$/, ''))
     : null
+  // Branded login: a single-segment path like /acme (the agency's workspace slug)
+  // shows a login screen with that agency's logo. Excludes all known top-level routes.
+  const RESERVED_PATHS = new Set(['sandbox', 'apply', 'redeem', 'privacy', 'terms', 'updates', 'faq', 'pricing', 'blog', 'talent', 'campaign', 'roster', 'task', 'reports', 'login', 'signup', 'app', 'admin', 'onboarding', 'settings'])
+  const brandedLoginSlug = (() => {
+    try {
+      const m = (window.location.pathname || '').match(/^\/([^/]+)\/?$/)
+      if (!m) return null
+      const seg = decodeURIComponent(m[1]).toLowerCase()
+      return RESERVED_PATHS.has(seg) ? null : seg
+    } catch (e) { return null }
+  })()
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
@@ -514,6 +525,7 @@ function App() {
   // whose free trial already lapsed can still reach the page and redeem.
   if (isRedeemPage) return <RedeemPage user={user} orgId={orgId} onSignIn={() => setShowLogin(true)} onSignUp={() => setShowSignUp(true)} />
   if (!user && authError) return <InviteRecovery onBackToSignIn={() => { setAuthError(false); setShowLogin(true) }} />
+  if (!user && brandedLoginSlug) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} agencySlug={brandedLoginSlug} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
   if (!isMasterAdmin && trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />

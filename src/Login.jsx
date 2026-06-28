@@ -1,13 +1,26 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
-export default function Login({ onLogin, onShowSignUp }) {
+export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [magicSent, setMagicSent] = useState(false)
   const [useMagic, setUseMagic] = useState(false)
+  const [brand, setBrand] = useState(null)
+
+  // Branded login: if the URL is /<agency-slug>, look up that agency's logo and
+  // name via the public get_inquiry_org RPC (same one the talent inquiry page uses).
+  useEffect(() => {
+    if (!agencySlug) return
+    supabase.rpc('get_inquiry_org', { p_slug: agencySlug }).then(({ data }) => {
+      const org = data && data[0]
+      if (org && org.agency_logo_url) {
+        setBrand({ logoUrl: org.agency_logo_url, name: org.agency_name || org.name })
+      }
+    })
+  }, [agencySlug])
 
   async function handleLogin() {
     if (!email || !password) return setError('Please enter your email and password')
@@ -44,11 +57,17 @@ export default function Login({ onLogin, onShowSignUp }) {
     <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
       <div style={{ width: '380px', padding: '0 20px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <img src="/logo.svg" alt="HQue" onClick={() => window.location.href='/'} style={{ cursor: 'pointer' }} style={{ width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
+          {brand ? (
+            <div style={{ display: 'inline-block', background: '#fff', borderRadius: '6px', padding: '14px 20px' }}>
+              <img src={brand.logoUrl} alt={brand.name} onError={e => { e.target.style.display = 'none' }} style={{ maxWidth: '200px', maxHeight: '64px', height: 'auto', display: 'block', objectFit: 'contain' }} />
+            </div>
+          ) : (
+            <img src="/logo.svg" alt="HQue" onClick={() => window.location.href='/'} style={{ cursor: 'pointer', width: '180px', height: 'auto', display: 'block', margin: '0 auto' }} />
+          )}
         </div>
 
         <div style={{ background: '#222', border: '0.5px solid #2A2A2A', borderRadius: '2px', padding: '32px' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F2EEE8', marginBottom: '24px' }}>Sign in</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#F2EEE8', marginBottom: '24px' }}>{brand ? `Sign in to ${brand.name}` : 'Sign in'}</div>
 
           {magicSent ? (
             <div style={{ textAlign: 'center', padding: '10px 0' }}>
@@ -97,12 +116,16 @@ export default function Login({ onLogin, onShowSignUp }) {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#444' }}>
-          Don't have an account? <button onClick={onShowSignUp} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '11px', padding: 0 }}>Start free trial</button>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: '#333' }}>
-          Questions? <a href='mailto:support@h-que.com' style={{ color: '#444', textDecoration: 'none' }}>support@h-que.com</a>
-        </div>
+        {!brand && (
+          <>
+            <div style={{ textAlign: 'center', marginTop: '16px', fontSize: '11px', color: '#444' }}>
+              Don't have an account? <button onClick={onShowSignUp} style={{ background: 'none', border: 'none', color: '#5b7c99', cursor: 'pointer', fontSize: '11px', padding: 0 }}>Start free trial</button>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: '#333' }}>
+              Questions? <a href='mailto:support@h-que.com' style={{ color: '#444', textDecoration: 'none' }}>support@h-que.com</a>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-28
 
+**Branded login page for every agency.** Each agency now has its own sign-in URL — **h-que.com/your-workspace-slug** (the same slug used in your talent-inquiry link). Visiting it shows a login screen with **the agency's own logo** and a personalized "Sign in to [Agency]" heading, instead of the HQue logo. Any agency that has uploaded a logo gets this automatically; if a slug doesn't match an agency (or has no logo), it gracefully falls back to the standard HQue login. Unknown/typo URLs still behave as before. (This is Step 2 of the white-label rollout — full in-app white-labeling for the Business tier comes next.)
+
 **A logo is now required to subscribe — and the top plan is renamed "Business."** Foundation for the upcoming white-label / branded-login feature. (1) When anyone clicks **Get Started** on a paid plan — whether from **Settings → Billing** or the trial-ended **upgrade screen** — they're now asked to **upload their agency logo first**. One tap uploads it and continues straight to Stripe checkout; free trials are unaffected. This guarantees every paying agency has a logo, which is what powers their branded login page and white-label workspace. (2) Renamed the **$199 tier from "Agency" to "Business"** everywhere inside the app (Billing, the trial-ended screen, FAQ) so it matches the pricing page, which already said "Business." Nothing changes about the plan itself.
 
 ---
