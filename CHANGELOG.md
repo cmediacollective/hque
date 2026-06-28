@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-28
 
+**Even pricing cards.** The three pricing cards are now equal height with their "Start free trial" buttons aligned along the bottom, regardless of how many features each lists.
+
 **Plan limits are now enforced (Part 2).** The tiers now actually do what the pricing page says: Starter is capped at **50 talent** and **2 team members**, Pro at **5 team members** (Business = unlimited both). Hitting a cap shows a friendly "upgrade to add more" prompt instead of silently allowing it. **Reports is now a Pro-and-above feature** — Starter accounts no longer see the Reports tab. Trials keep full access. (Note: these are enforced in the app; a future hardening can also enforce them in the database, like we did for Agency Info.)
 
 **Clearer, consistent pricing.** The pricing page now has a full **"Compare all features"** table (every feature × Starter / Pro / Business) below the plan cards, so prospects can see exactly what each tier includes. Behind the scenes, all the plan lists — pricing page, in-app Billing, the trial-ended screen, and the landing page — now read from **one shared source of truth**, so they can never drift out of sync again. Feature lists were also corrected to match what the app actually does (e.g. workspace/task management and payment tracking are shown on every tier since all tiers get them; Reports is shown as Pro-and-above). (Part 1 of 2 — the actual plan *limits* get enforced next.)

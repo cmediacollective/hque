@@ -44,7 +44,7 @@ export default function PricingPage({ onGetStarted }) {
       </div>
 
       {/* Plans */}
-      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '20px', alignItems: 'start' }}>
+      <div style={{ maxWidth: '1040px', margin: '0 auto', padding: isMobile ? '0 24px 60px' : '0 48px 80px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: isMobile ? '16px' : '20px', alignItems: 'stretch' }}>
         {PLANS.map(plan => {
           const isHovered = hoveredPlan === plan.name
           return (
@@ -58,6 +58,7 @@ export default function PricingPage({ onGetStarted }) {
                 borderRadius: '3px',
                 padding: isMobile ? '32px 26px' : '38px 30px',
                 position: 'relative',
+                display: 'flex', flexDirection: 'column',
                 transform: !isMobile && isHovered ? 'translateY(-4px)' : 'translateY(0)',
                 boxShadow: plan.recommended ? '0 1px 44px rgba(91,124,153,0.10)' : 'none',
                 transition: 'transform 0.2s ease, border-color 0.2s ease',
@@ -72,7 +73,7 @@ export default function PricingPage({ onGetStarted }) {
                 <span style={{ fontSize: '12px', color: '#666' }}>{plan.period}</span>
               </div>
               <div style={{ fontSize: '13px', color: '#DCDCDC', lineHeight: 1.65, marginBottom: '26px', minHeight: '44px' }}>{plan.description}</div>
-              <div style={{ borderTop: '0.5px solid #262626', paddingTop: '24px', marginBottom: '28px' }}>
+              <div style={{ borderTop: '0.5px solid #262626', paddingTop: '24px', marginBottom: '28px', flex: 1 }}>
                 {plan.features.map(f => {
                   const inherited = f.startsWith('Everything in')
                   return (
