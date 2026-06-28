@@ -293,7 +293,19 @@ function App() {
 
 
   useEffect(() => {
-    if (!user) return
+    // Tear down the Crisp support widget whenever there's no logged-in user, so
+    // it never lingers on top of the marketing chat (HQueChat) on logged-out
+    // pages — e.g. when a session ends without an explicit Sign Out click.
+    function removeCrisp() {
+      try {
+        document.querySelector('script[src="https://client.crisp.chat/l.js"]')?.remove()
+        document.getElementById('crisp-chatbox')?.remove()
+        document.getElementById('crisp-client')?.remove()
+        window.$crisp = undefined
+        window.CRISP_WEBSITE_ID = undefined
+      } catch (e) {}
+    }
+    if (!user) { removeCrisp(); return }
     window.$crisp = []
     window.CRISP_WEBSITE_ID = '0144cb69-1552-4c18-a032-153183d9030f'
     const s = document.createElement('script')
@@ -302,6 +314,7 @@ function App() {
     document.head.appendChild(s)
     // Identify the user in Crisp
     window.$crisp.push(['set', 'user:email', [user.email]])
+    return removeCrisp
   }, [user])
 
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
