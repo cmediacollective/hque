@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Branded login page for your agency",
+    "description": "Your agency now has its own sign-in page at h-que.com/your-workspace — showing your own logo instead of HQue. Find and copy your link in Settings → Agency Info.",
+    "category": "Feature",
+    "shipped_at": "2026-06-28"
+  },
+  {
+    "title": "White-label your workspace (Business plan)",
+    "description": "On the Business plan, your own logo replaces HQue across your workspace once you're signed in. Upload your logo in Settings → Agency Info.",
+    "category": "Feature",
+    "shipped_at": "2026-06-28"
+  },
+  {
+    "title": "Add your logo when you subscribe",
+    "description": "When you start a paid plan, you're prompted to upload your agency logo so your branding is ready from day one.",
+    "category": "Improvement",
+    "shipped_at": "2026-06-28"
+  }
+]

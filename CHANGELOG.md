@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-28
 
+**Product Updates now auto-post on deploy (internal).** Shipped features are listed in a single file (`roadmap-updates.json`); a build step posts any new ones to the public Product Updates roadmap automatically on each deploy. No more adding them by hand in Settings. It only ever *adds* new items (matched by title) — it never edits or deletes, so anything changed in the admin UI is left untouched.
+
 **See your login page URL in Settings.** Settings → Agency Info now shows a **Login Page** line with your branded sign-in URL (`h-que.com/your-slug`), a **Copy** button, and a click-through to open it — so you never have to dig up the link.
 
 **Logo preview toggle for white-label accounts.** Business-tier accounts that have uploaded a logo now get a **"My logo / HQue" switch** in **Settings → Agency Info** (right under the logo upload). It instantly flips the logo shown in your workspace between your own logo and the HQue logo — handy for the HQue team to preview both. It's a **per-browser preview only**: it doesn't change what your team or clients see, and isn't saved to the account.

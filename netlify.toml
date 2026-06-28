@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build && cd netlify/functions && npm install"
+  command = "npm run build && node scripts/sync-roadmap.mjs && cd netlify/functions && npm install"
   publish = "dist"
   functions = "netlify/functions"
 
