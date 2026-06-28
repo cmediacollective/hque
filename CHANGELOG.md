@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-28
 
+**Logo preview toggle for white-label accounts.** Business-tier accounts that have uploaded a logo now get a **"My logo / HQue" switch** in **Settings → Agency Info** (right under the logo upload). It instantly flips the logo shown in your workspace between your own logo and the HQue logo — handy for the HQue team to preview both. It's a **per-browser preview only**: it doesn't change what your team or clients see, and isn't saved to the account.
+
 **Full white-label workspace for Business tier.** When a **Business**-plan agency is logged in, the **HQue logo in the top-left of the app** is now replaced with **their own logo** — so their whole workspace reads as their brand, not HQue's. Starter and Pro still see the HQue logo inside the app (they get the branded *login page* only; full in-app white-label is a Business perk). Safe fallback: if an agency logo ever fails to load, it reverts to the HQue logo. (The bottom-right support chat stays on for all plans, by design.)
 
 **Branded login page for every agency.** Each agency now has its own sign-in URL — **h-que.com/your-workspace-slug** (the same slug used in your talent-inquiry link). Visiting it shows a login screen with **the agency's own logo** and a personalized "Sign in to [Agency]" heading, instead of the HQue logo. Any agency that has uploaded a logo gets this automatically; if a slug doesn't match an agency (or has no logo), it gracefully falls back to the standard HQue login. Unknown/typo URLs still behave as before. (This is Step 2 of the white-label rollout — full in-app white-labeling for the Business tier comes next.)

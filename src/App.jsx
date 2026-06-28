@@ -170,6 +170,15 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
   const [stripePlan, setStripePlan] = useState(null)
+  // Branding preview toggle (this browser only): 'agency' shows the uploaded logo,
+  // 'hque' forces the HQue logo. Lets a white-label account flip its own view.
+  const [brandingView, setBrandingView] = useState(() => {
+    try { return localStorage.getItem('hque_branding_view') || 'agency' } catch (e) { return 'agency' }
+  })
+  function changeBrandingView(v) {
+    setBrandingView(v)
+    try { localStorage.setItem('hque_branding_view', v) } catch (e) {}
+  }
   const [authError, setAuthError] = useState(initialAuthError)
 
   // A broken magic / invite link leaves an error in the URL — clear it so a
@@ -571,7 +580,7 @@ function App() {
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-              {stripePlan === 'agency' && agencyLogoUrl ? (
+              {stripePlan === 'agency' && agencyLogoUrl && brandingView === 'agency' ? (
                 <img src={agencyLogoUrl} alt={agencyName || 'Agency'} onError={e => { e.target.onerror = null; e.target.src = '/logo.svg' }} style={{ maxWidth: '140px', maxHeight: '48px', height: 'auto', display: 'block', objectFit: 'contain' }} />
               ) : (
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
@@ -730,7 +739,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} brandingView={brandingView} onBrandingViewChange={changeBrandingView} onAgencyLogoChange={setAgencyLogoUrl} />
                 </div>
               )}
             </Suspense>
