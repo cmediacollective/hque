@@ -12,6 +12,12 @@
 
 alter table public.org_settings enable row level security;
 
+-- Remove older permissive policies that let any member write:
+--   "Users can insert org settings" (INSERT, with check = true) — anyone could insert
+--   "org_settings_policy"           (ALL for any org member)    — members could edit/delete
+drop policy if exists "Users can insert org settings" on public.org_settings;
+drop policy if exists "org_settings_policy" on public.org_settings;
+
 -- READ: any authenticated user in the same org
 drop policy if exists "org members read org_settings" on public.org_settings;
 create policy "org members read org_settings"
