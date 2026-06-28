@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
-export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, brandingView, onBrandingViewChange, onAgencyLogoChange }) {
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, onAgencyLogoChange }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -370,20 +370,6 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 {agencyForm.agency_logo_url && (
                   <button onClick={() => { setAgencyForm(f => ({ ...f, agency_logo_url: '' })); onAgencyLogoChange?.('') }} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
                 )}
-              </div>
-            )}
-
-            {stripePlan === 'agency' && agencyForm.agency_logo_url && field('Workspace Logo',
-              <div>
-                <div style={{ display: 'inline-flex', border: `0.5px solid ${border}`, borderRadius: '2px', overflow: 'hidden' }}>
-                  {[['agency', 'My logo'], ['hque', 'HQue']].map(([val, label]) => {
-                    const active = (brandingView || 'agency') === val
-                    return (
-                      <button key={val} onClick={() => onBrandingViewChange?.(val)} style={{ padding: '8px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: 'none', cursor: 'pointer', background: active ? '#5b7c99' : 'transparent', color: active ? '#fff' : '#888' }}>{label}</button>
-                    )
-                  })}
-                </div>
-                <div style={{ fontSize: '11px', color: subtle, marginTop: '8px', lineHeight: 1.6 }}>Switches the logo shown in your workspace. This is a preview for this browser only — it doesn't change what your team or clients see.</div>
               </div>
             )}
 

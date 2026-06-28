@@ -170,14 +170,15 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
   const [stripePlan, setStripePlan] = useState(null)
-  // Branding preview toggle (this browser only): 'agency' shows the uploaded logo,
-  // 'hque' forces the HQue logo. Lets a white-label account flip its own view.
-  const [brandingView, setBrandingView] = useState(() => {
-    try { return localStorage.getItem('hque_branding_view') || 'agency' } catch (e) { return 'agency' }
+  // Demo tier preview (platform admins only, this browser only): lets the HQue
+  // team show a prospect how the app looks on each plan. 'business' shows the
+  // uploaded logo (white-label); 'starter'/'pro' show the HQue logo.
+  const [demoTier, setDemoTier] = useState(() => {
+    try { return localStorage.getItem('hque_demo_tier') || 'business' } catch (e) { return 'business' }
   })
-  function changeBrandingView(v) {
-    setBrandingView(v)
-    try { localStorage.setItem('hque_branding_view', v) } catch (e) {}
+  function changeDemoTier(v) {
+    setDemoTier(v)
+    try { localStorage.setItem('hque_demo_tier', v) } catch (e) {}
   }
   const [authError, setAuthError] = useState(initialAuthError)
 
@@ -580,7 +581,7 @@ function App() {
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-              {stripePlan === 'agency' && agencyLogoUrl && brandingView === 'agency' ? (
+              {agencyLogoUrl && (isMasterAdmin ? demoTier === 'business' : stripePlan === 'agency') ? (
                 <img src={agencyLogoUrl} alt={agencyName || 'Agency'} onError={e => { e.target.onerror = null; e.target.src = '/logo.svg' }} style={{ maxWidth: '140px', maxHeight: '48px', height: 'auto', display: 'block', objectFit: 'contain' }} />
               ) : (
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
@@ -613,6 +614,19 @@ function App() {
                     {['grid', 'list', 'board'].map((v, i) => (
                       <button key={v} onClick={() => setCampaignView(v)} style={{ flex: 1, padding: '6px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: campaignView === v ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: campaignView === v ? '#fff' : muted, cursor: 'pointer', fontWeight: campaignView === v ? 500 : 400 }}>{v.charAt(0).toUpperCase() + v.slice(1)}</button>
                     ))}
+                  </div>
+                </div>
+              )}
+              {isMasterAdmin && (
+                <div style={{ padding: '8px 16px 12px', margin: '4px 0', borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
+                  <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>Demo — view as</div>
+                  <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '4px', overflow: 'hidden' }}>
+                    {[['starter', 'Starter'], ['pro', 'Pro'], ['business', 'Business']].map(([key, label], i) => (
+                      <button key={key} onClick={() => changeDemoTier(key)} style={{ flex: 1, padding: '6px 4px', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: demoTier === key ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: demoTier === key ? '#fff' : muted, cursor: 'pointer', fontWeight: demoTier === key ? 500 : 400 }}>{label}</button>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: '8px', color: subtle, marginTop: '6px', lineHeight: 1.5 }}>
+                    {demoTier === 'starter' ? 'Up to 50 talent · 2 seats' : demoTier === 'pro' ? 'Unlimited talent · 5 seats' : 'Unlimited · full white-label'}
                   </div>
                 </div>
               )}
@@ -739,7 +753,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} brandingView={brandingView} onBrandingViewChange={changeBrandingView} onAgencyLogoChange={setAgencyLogoUrl} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} onAgencyLogoChange={setAgencyLogoUrl} />
                 </div>
               )}
             </Suspense>
