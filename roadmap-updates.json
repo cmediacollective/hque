@@ -1,5 +1,11 @@
 [
   {
+    "title": "Compare plans at a glance",
+    "description": "The pricing page now has a full feature-by-feature comparison table across Starter, Pro, and Business, so you can see exactly what each plan includes before you choose.",
+    "category": "Improvement",
+    "shipped_at": "2026-06-28"
+  },
+  {
     "title": "Branded login page for your agency",
     "description": "Your agency now has its own sign-in page at h-que.com/your-workspace — showing your own logo instead of HQue. Find and copy your link in Settings → Agency Info.",
     "category": "Feature",

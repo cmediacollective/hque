@@ -6,6 +6,7 @@ import RedeemPage from './RedeemPage'
 import InviteRecovery from './InviteRecovery'
 import TrialBanner from './TrialBanner'
 import AddCreatorForm from './AddCreatorForm'
+import { planLimits } from './plans'
 import NotificationsPanel from './NotificationsPanel'
 import MiniCalendar from './MiniCalendar'
 
@@ -140,6 +141,8 @@ function App() {
   const [campaignView, setCampaignView] = useState('grid')
   const [previousCampaignView, setPreviousCampaignView] = useState('grid')
   const [showForm, setShowForm] = useState(false)
+  const [talentCount, setTalentCount] = useState(0)
+  const [showLimitModal, setShowLimitModal] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
@@ -180,6 +183,13 @@ function App() {
     setDemoTier(v)
     try { localStorage.setItem('hque_demo_tier', v) } catch (e) {}
   }
+
+  // Count active talent to enforce the plan's talent limit. RLS scopes to the org.
+  useEffect(() => {
+    if (!orgId) return
+    supabase.from('creators').select('id', { count: 'exact', head: true }).eq('status', 'active')
+      .then(({ count }) => { if (typeof count === 'number') setTalentCount(count) })
+  }, [orgId, refresh])
   const [authError, setAuthError] = useState(initialAuthError)
 
   // A broken magic / invite link leaves an error in the URL — clear it so a
@@ -264,19 +274,26 @@ function App() {
 
   const isAdmin = userRole === 'owner' || userRole === 'admin'
 
-  // Reports is admin-only: kick non-admins off the route, and only honor a /reports
-  // deep link for admins (no redirect loop when already authenticated as admin).
+  // Plan limits. Talent/seat caps follow the real plan (so they never block the
+  // HQue team's own account). Reports is a Pro+ feature; for platform admins it
+  // follows the demo-tier preview so a Starter demo correctly hides Reports.
+  const talentLimit = planLimits(stripePlan).talent
+  const demoPlan = isMasterAdmin ? (demoTier === 'business' ? 'agency' : demoTier) : stripePlan
+  const reportsAllowed = planLimits(demoPlan).reports
+
+  // Reports is admin-only AND Pro+: kick ineligible users off the route, and only
+  // honor a /reports deep link when allowed (no redirect loop for valid admins).
   useEffect(() => {
     if (!userRole) return // wait until the role is known
-    if (!isAdmin && view === 'reports') setView('workspace')
-  }, [userRole, view])
+    if ((!isAdmin || !reportsAllowed) && view === 'reports') setView('workspace')
+  }, [userRole, view, reportsAllowed])
 
   useEffect(() => {
     if (!user || !userRole || !initialReports) return
-    if (!isAdmin) { window.history.replaceState({}, '', '/'); return }
+    if (!isAdmin || !reportsAllowed) { window.history.replaceState({}, '', '/'); return }
     setView('reports')
     setPendingReports(initialReports)
-  }, [user, userRole])
+  }, [user, userRole, reportsAllowed])
 
   // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
   useEffect(() => {
@@ -574,6 +591,20 @@ function App() {
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
       {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
+      {showLimitModal && (
+        <div onClick={() => setShowLimitModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, borderRadius: '3px', padding: '32px', width: '100%', maxWidth: '380px', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text, marginBottom: '10px' }}>You've reached your talent limit</div>
+            <div style={{ fontSize: '13px', color: muted, lineHeight: 1.7, marginBottom: '24px' }}>
+              Your plan includes up to {talentLimit} talent. Upgrade your plan to add more — head to Settings → Billing.
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button onClick={() => setShowLimitModal(false)} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Not now</button>
+              <button onClick={() => { setShowLimitModal(false); setView('settings') }} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Go to Settings</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />}
       {showWelcome && (
         <div onClick={() => setShowWelcome(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
@@ -600,7 +631,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin ? [['reports', 'Reports']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -702,7 +733,7 @@ function App() {
                 </div>
               )}
               {view === 'talent' && talentTab === 'roster' && (
-                <button onClick={() => setShowForm(true)} style={{ padding: isMobile ? '7px 14px' : '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', boxShadow: '0 2px 8px rgba(91,124,153,0.45)' }}>+ Talent</button>
+                <button onClick={() => talentCount >= talentLimit ? setShowLimitModal(true) : setShowForm(true)} style={{ padding: isMobile ? '7px 14px' : '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', boxShadow: '0 2px 8px rgba(91,124,153,0.45)' }}>+ Talent</button>
               )}
               {isMobile && (
                 <button onClick={handleLogout} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>Sign out</button>
@@ -776,7 +807,7 @@ function App() {
 
       {isMobile && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
-          {navItems.filter(item => item.key !== 'reports' || isAdmin).map(item => (
+          {navItems.filter(item => item.key !== 'reports' || (isAdmin && reportsAllowed)).map(item => (
             <button key={item.key} onClick={() => setView(item.key)} style={{
               flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'

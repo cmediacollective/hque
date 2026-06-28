@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
+import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
@@ -175,6 +176,14 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     setInviteMsg('')
 
     const email = inviteEmail.trim().toLowerCase()
+
+    // Enforce the plan's team-seat limit (current members + outstanding invites).
+    const seatLimit = planLimits(stripePlan).seats
+    const seatsUsed = teamMembers.length + visiblePending.length
+    if (seatsUsed >= seatLimit) {
+      setInviting(false)
+      return setInviteMsg(`Your plan includes ${seatLimit} team member${seatLimit === 1 ? '' : 's'}. Upgrade your plan to add more.`)
+    }
 
     // Store the invitation so when they log in we can auto-attach them to the org
     const { error: inviteErr } = await supabase.from('invitations').upsert(
