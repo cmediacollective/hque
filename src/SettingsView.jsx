@@ -232,6 +232,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   // Pending invites that haven't been accepted and aren't already members.
   const visiblePending = pendingInvites.filter(inv => !teamMembers.some(m => (m.email || '').toLowerCase() === inv.email.toLowerCase()))
 
+  // Only owners/admins may edit agency info; members see it read-only.
+  const canEditAgency = currentUserRole === 'owner' || currentUserRole === 'admin'
+
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
       <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{label}</div>
@@ -325,12 +328,18 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         {activeTab === 'agency' && (
           <div>
             {sectionTitle('Agency Info')}
-            {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective' }))}
-            {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email' }))}
-            {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://youragency.com' }))}
+            {!canEditAgency && (
+              <div style={{ fontSize: '11px', color: subtle, marginBottom: '18px', lineHeight: 1.6, padding: '10px 12px', border: `0.5px solid ${border}`, borderRadius: '2px' }}>
+                Only owners and admins can edit agency info. You can view it below.
+              </div>
+            )}
+            {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective', disabled: !canEditAgency }))}
+            {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email', disabled: !canEditAgency }))}
+            {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://youragency.com', disabled: !canEditAgency }))}
             {field('Timezone',
               <select
                 value={agencyForm.timezone}
+                disabled={!canEditAgency}
                 onChange={e => setAgencyForm(f => ({ ...f, timezone: e.target.value }))}
                 style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
                 <optgroup label='Americas'>
@@ -363,12 +372,18 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 {agencyForm.agency_logo_url && (
                   <img src={agencyForm.agency_logo_url} alt='logo' style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '2px', border: `0.5px solid ${border}`, background: '#fff', padding: '4px', flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
                 )}
-                <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
-                  {uploadingLogo ? 'Uploading...' : agencyForm.agency_logo_url ? 'Change Logo' : 'Upload Logo'}
-                  <input type='file' accept='image/*' onChange={e => uploadAgencyLogo(e.target.files[0])} style={{ display: 'none' }} />
-                </label>
-                {agencyForm.agency_logo_url && (
-                  <button onClick={() => { setAgencyForm(f => ({ ...f, agency_logo_url: '' })); onAgencyLogoChange?.('') }} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+                {canEditAgency ? (
+                  <>
+                    <label style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, color: '#888', cursor: 'pointer', borderRadius: '1px', display: 'inline-block' }}>
+                      {uploadingLogo ? 'Uploading...' : agencyForm.agency_logo_url ? 'Change Logo' : 'Upload Logo'}
+                      <input type='file' accept='image/*' onChange={e => uploadAgencyLogo(e.target.files[0])} style={{ display: 'none' }} />
+                    </label>
+                    {agencyForm.agency_logo_url && (
+                      <button onClick={() => { setAgencyForm(f => ({ ...f, agency_logo_url: '' })); onAgencyLogoChange?.('') }} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '12px', padding: 0 }}>Remove</button>
+                    )}
+                  </>
+                ) : (
+                  !agencyForm.agency_logo_url && <span style={{ fontSize: '12px', color: subtle }}>No logo set</span>
                 )}
               </div>
             )}
@@ -396,30 +411,34 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                       <div style={{ fontSize: '13px', color: text }}>{s.label}</div>
                       <div style={{ fontSize: '11px', color: muted, marginTop: '2px' }}>{s.email} · Gmail account #{s.gmail_index}</div>
                     </div>
-                    <button onClick={() => removeSender(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
+                    {canEditAgency && <button onClick={() => removeSender(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>}
                   </div>
                 ))}
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '8px', marginBottom: '16px' }}>
-              <div>
-                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Label</div>
-                <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-              <div>
-                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Gmail Address</div>
-                <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-              <div>
-                <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Index</div>
-                <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-            </div>
-            <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', marginBottom: '24px' }}>+ Add Account</button>
-            <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1, display: 'block' }}>
-              {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
-            </button>
+            {canEditAgency && (
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '8px', marginBottom: '16px' }}>
+                  <div>
+                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Label</div>
+                    <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Gmail Address</div>
+                    <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Index</div>
+                    <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                </div>
+                <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', marginBottom: '24px' }}>+ Add Account</button>
+                <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1, display: 'block' }}>
+                  {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
+                </button>
+              </>
+            )}
           </div>
         )}
 

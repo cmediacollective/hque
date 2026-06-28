@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-06-28
 
+**Agency Info is now edit-protected.** Everyone on the team can still *view* Settings → Agency Info, but only **Owners and Admins can change** it (agency name, logo, branding, timezone, sender accounts). Regular members see the fields read-only with a note explaining why — so a team member can't accidentally rename the agency or swap the white-label logo.
+
 **Marketing demo: "View as" tier switcher (internal).** Platform admins now have a **Demo — View as: Starter / Pro / Business** switch at the bottom of the left sidebar. It flips the workspace between standard HQue branding (Starter/Pro) and full white-label (Business, showing the agency logo), and notes each tier's key limits — so the team can demo any plan from a single login on a real, populated workspace. It's a per-browser preview only; it changes nothing about the account or its data. (This replaces the earlier Business-only "My logo / HQue" toggle in Settings, folding it into one clearer control.)
 
 **Product Updates now auto-post on deploy (internal).** Shipped features are listed in a single file (`roadmap-updates.json`); a build step posts any new ones to the public Product Updates roadmap automatically on each deploy. No more adding them by hand in Settings. It only ever *adds* new items (matched by title) — it never edits or deletes, so anything changed in the admin UI is left untouched.
