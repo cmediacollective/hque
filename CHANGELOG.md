@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-06-28
+
+**A logo is now required to subscribe — and the top plan is renamed "Business."** Foundation for the upcoming white-label / branded-login feature. (1) When anyone clicks **Get Started** on a paid plan — whether from **Settings → Billing** or the trial-ended **upgrade screen** — they're now asked to **upload their agency logo first**. One tap uploads it and continues straight to Stripe checkout; free trials are unaffected. This guarantees every paying agency has a logo, which is what powers their branded login page and white-label workspace. (2) Renamed the **$199 tier from "Agency" to "Business"** everywhere inside the app (Billing, the trial-ended screen, FAQ) so it matches the pricing page, which already said "Business." Nothing changes about the plan itself.
+
+---
+
 ## 2026-06-27
 
 **Fixed dead "Start free" / plan buttons on the pricing page (and FAQ/blog) for logged-in users.** The buttons on h-que.com/pricing only ever opened the signup form — and the signup form is hidden from anyone already signed in, so for a logged-in person every "Start free" and plan button did nothing. Now, if you're already logged in, clicking those CTAs takes you straight into the app's **Settings → Billing** page to subscribe; logged-out visitors still get the signup form as before. Same fix applies to the shared "Start free" button on the FAQ and blog pages.

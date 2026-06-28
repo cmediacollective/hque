@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
 
 const PLANS = [
   {
@@ -20,7 +21,7 @@ const PLANS = [
   },
   {
     key: 'agency',
-    name: 'Agency',
+    name: 'Business',
     price: '$199',
     period: '/month',
     priceId: import.meta.env.VITE_STRIPE_PRICE_AGENCY,
@@ -31,8 +32,36 @@ const PLANS = [
 export default function UpgradeWall({ orgId, user, onLogout }) {
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
+  const [logoUrl, setLogoUrl] = useState(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState(null)
 
-  async function checkout(plan) {
+  useEffect(() => {
+    supabase.from('org_settings').select('agency_logo_url').eq('org_id', orgId).single()
+      .then(({ data }) => { if (data?.agency_logo_url) setLogoUrl(data.agency_logo_url) })
+  }, [orgId])
+
+  async function uploadLogo(file) {
+    if (!file) return
+    setUploadingLogo(true)
+    setError('')
+    const ext = file.name.split('.').pop()
+    const path = `agency-logos/${Date.now()}.${ext}`
+    const { error: upErr } = await supabase.storage.from('campaign-logos').upload(path, file, { upsert: true })
+    if (upErr) { setError('Logo upload failed. Please try again.'); setUploadingLogo(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('campaign-logos').getPublicUrl(path)
+    const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', orgId).single()
+    if (existing) await supabase.from('org_settings').update({ agency_logo_url: publicUrl }).eq('org_id', orgId)
+    else await supabase.from('org_settings').insert([{ org_id: orgId, agency_logo_url: publicUrl }])
+    setLogoUrl(publicUrl)
+    setUploadingLogo(false)
+    const plan = pendingPlan
+    setPendingPlan(null)
+    if (plan) checkout(plan, true)
+  }
+
+  async function checkout(plan, skipGate = false) {
+    if (!skipGate && !logoUrl) { setPendingPlan(plan); setError(''); return }
     setLoading(plan.key)
     setError('')
     try {
@@ -59,6 +88,23 @@ export default function UpgradeWall({ orgId, user, onLogout }) {
       </div>
 
       {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
+
+      {pendingPlan && (
+        <div style={{ background: '#222', border: '0.5px solid #5b7c99', borderRadius: '2px', padding: '20px 24px', marginBottom: '24px', width: '100%', maxWidth: '460px' }}>
+          <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>One quick step</div>
+          <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: '#F0ECE6', marginBottom: '6px' }}>Add your agency logo to continue</div>
+          <div style={{ fontSize: '12px', color: '#999', lineHeight: 1.6, marginBottom: '16px' }}>
+            Your logo powers your branded login page and white-label workspace. Upload it once here to start your {pendingPlan.name} plan.
+          </div>
+          <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+            <label style={{ padding: '10px 18px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', color: '#fff', cursor: uploadingLogo ? 'default' : 'pointer', borderRadius: '1px', display: 'inline-block', opacity: uploadingLogo ? 0.7 : 1 }}>
+              {uploadingLogo ? 'Uploading...' : 'Upload Logo & Continue'}
+              <input type='file' accept='image/*' disabled={uploadingLogo} onChange={e => uploadLogo(e.target.files[0])} style={{ display: 'none' }} />
+            </label>
+            <button onClick={() => setPendingPlan(null)} disabled={uploadingLogo} style={{ background: 'none', border: 'none', color: '#666', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>Cancel</button>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? '1fr' : 'repeat(3, 1fr)', gap: '12px', width: '100%', maxWidth: '700px' }}>
         {PLANS.map(plan => (
