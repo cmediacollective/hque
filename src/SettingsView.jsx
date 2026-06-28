@@ -19,6 +19,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
   const [agencySaved, setAgencySaved] = useState(false)
+  const [orgSlug, setOrgSlug] = useState('')
+  const [loginCopied, setLoginCopied] = useState(false)
 
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -79,6 +81,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
       setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', timezone: data.timezone || 'America/Los_Angeles' })
       setSenderAccounts(data.sender_accounts || [])
     }
+    const { data: org } = await supabase.from('organizations').select('slug').eq('id', orgId).single()
+    if (org?.slug) setOrgSlug(org.slug)
   }
 
   async function fetchTeam() {
@@ -380,6 +384,16 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   })}
                 </div>
                 <div style={{ fontSize: '11px', color: subtle, marginTop: '8px', lineHeight: 1.6 }}>Switches the logo shown in your workspace. This is a preview for this browser only — it doesn't change what your team or clients see.</div>
+              </div>
+            )}
+
+            {orgSlug && field('Login Page',
+              <div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <a href={`https://h-que.com/${orgSlug}`} target='_blank' rel='noreferrer' style={{ fontSize: '13px', color: '#5b7c99', textDecoration: 'none', wordBreak: 'break-all' }}>h-que.com/{orgSlug}</a>
+                  <button onClick={() => { try { navigator.clipboard.writeText(`https://h-que.com/${orgSlug}`); setLoginCopied(true); setTimeout(() => setLoginCopied(false), 2000) } catch (e) {} }} style={{ padding: '5px 12px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${border}`, background: 'none', color: loginCopied ? '#5C9E52' : '#888', cursor: 'pointer', borderRadius: '1px' }}>{loginCopied ? 'Copied' : 'Copy'}</button>
+                </div>
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '8px', lineHeight: 1.6 }}>Your team's sign-in page. {stripePlan ? 'It shows your agency logo.' : 'Once you upload a logo, it appears here on a paid plan.'}</div>
               </div>
             )}
 
