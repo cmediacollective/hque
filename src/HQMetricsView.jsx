@@ -17,8 +17,24 @@ export default function HQMetricsView({ dark = true }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [ga, setGa] = useState(null)
+  const [gaLoading, setGaLoading] = useState(true)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); loadGA() }, [])
+
+  async function loadGA() {
+    setGaLoading(true)
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const token = sess?.session?.access_token
+      if (token) {
+        const res = await fetch('/.netlify/functions/ga-metrics', { headers: { Authorization: `Bearer ${token}` } })
+        const body = await res.json().catch(() => ({}))
+        if (res.ok && body.ok) setGa(body)
+      }
+    } catch (e) { /* GA is optional — never block the page */ }
+    setGaLoading(false)
+  }
 
   async function load() {
     setLoading(true)
@@ -82,6 +98,57 @@ export default function HQMetricsView({ dark = true }) {
         <Stat label="Est. monthly revenue" value={`$${s.mrr.toLocaleString()}`} sub="from active plans" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} />
+      </div>
+
+      {/* Website traffic (Google Analytics) */}
+      <div style={{ marginBottom: '32px' }}>
+        {sectionLabel('Website traffic · Google Analytics')}
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          {gaLoading && (
+            <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Google Analytics…</div>
+          )}
+          {!gaLoading && (!ga || ga.configured === false) && (
+            <div>
+              <div style={{ fontSize: '13px', color: text, marginBottom: '8px' }}>Google Analytics isn’t connected yet.</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px' }}>
+                Once it’s connected, visitor counts and traffic sources for the last 28 days will show right here. In the meantime, open the full dashboard:
+              </div>
+              <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: accent, fontWeight: 500, textDecoration: 'none' }}>Open Google Analytics →</a>
+            </div>
+          )}
+          {!gaLoading && ga && ga.configured && ga.error && (
+            <div>
+              <div style={{ fontSize: '13px', color: text, marginBottom: '6px' }}>Couldn’t reach Google Analytics.</div>
+              <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6 }}>Usually this means the service account hasn’t been given access to the property yet, or the property ID is wrong. ({ga.error})</div>
+            </div>
+          )}
+          {!gaLoading && ga && ga.configured && !ga.error && (
+            <div>
+              <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.users.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Visitors · {ga.rangeLabel}</div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.sessions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Sessions</div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views</div></div>
+              </div>
+              {ga.channels && ga.channels.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Where traffic comes from</div>
+                  {(() => {
+                    const maxS = Math.max(1, ...ga.channels.map(c => c.sessions))
+                    return ga.channels.map((c) => (
+                      <div key={c.source} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                        <div style={{ width: '110px', fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.source}</div>
+                        <div style={{ flex: 1, height: '10px', background: dark ? '#1A1A1A' : '#EFECE6', borderRadius: '5px', overflow: 'hidden' }}>
+                          <div style={{ width: `${(c.sessions / maxS) * 100}%`, height: '100%', background: accent, borderRadius: '5px' }} />
+                        </div>
+                        <div style={{ width: '48px', textAlign: 'right', fontSize: '11px', color: muted }}>{c.sessions.toLocaleString()}</div>
+                      </div>
+                    ))
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Subscribers breakdown */}

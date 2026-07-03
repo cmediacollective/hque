@@ -632,7 +632,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin ? [['metrics', 'HQ Metrics']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin ? [['metrics', 'HQ Metrics']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -796,7 +796,7 @@ function App() {
                   <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} active={view === 'reports'} initialMonth={pendingReports?.month} initialYear={pendingReports?.year} />
                 </div>
               )}
-              {isMasterAdmin && visited.has('metrics') && (
+              {isMasterAdmin && isAdmin && visited.has('metrics') && (
                 <div style={{ display: view === 'metrics' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <HQMetricsView dark={dark} />
                 </div>

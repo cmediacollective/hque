@@ -21,13 +21,17 @@ exports.handler = async (event) => {
   const user = userData?.user
   if (userErr || !user) return json(401, { ok: false, reason: 'bad_auth' })
 
-  // 2. Are they a master admin? If not, refuse — no data leaks.
-  const { data: admin } = await supabase
-    .from('platform_admins')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .maybeSingle()
+  // 2. Are they a master admin AND an owner/admin? If not, refuse — no data
+  //    leaks. Master account (platform_admins) gates WHICH account; owner/admin
+  //    role gates WHO on that account. Both required.
+  const [{ data: admin }, { data: profile }] = await Promise.all([
+    supabase.from('platform_admins').select('user_id').eq('user_id', user.id).maybeSingle(),
+    supabase.from('profiles').select('role').eq('id', user.id).maybeSingle(),
+  ])
   if (!admin) return json(403, { ok: false, reason: 'not_admin' })
+  if (!profile || (profile.role !== 'owner' && profile.role !== 'admin')) {
+    return json(403, { ok: false, reason: 'not_admin' })
+  }
 
   // 3. Gather the aggregates.
   try {
