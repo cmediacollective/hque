@@ -1,0 +1,226 @@
+import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
+
+// HQ Metrics — a master-admin-only marketing/business dashboard for the HQue team.
+// Shows the numbers that live in OUR database (subscribers, plans, AppSumo
+// redemptions, signups) and links out to Stripe + Google Analytics for the money
+// and traffic detail that lives there. Data comes from the hq-metrics function,
+// which double-checks the caller is a platform admin before returning anything.
+export default function HQMetricsView({ dark = true }) {
+  const card = dark ? '#222' : '#FFFFFF'
+  const border = dark ? '#2A2A2A' : '#DBD7D0'
+  const text = dark ? '#F0ECE6' : '#1A1A1A'
+  const muted = dark ? '#999' : '#666'
+  const subtle = dark ? '#777' : '#888'
+  const accent = '#5b7c99'
+
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => { load() }, [])
+
+  async function load() {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const token = sess?.session?.access_token
+      if (!token) { setError('Please sign in again.'); setLoading(false); return }
+      const res = await fetch('/.netlify/functions/hq-metrics', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const body = await res.json().catch(() => ({}))
+      if (!res.ok || !body.ok) {
+        setError(res.status === 403 ? 'This dashboard is master-admin only.' : (body.reason || 'Could not load metrics.'))
+        setLoading(false)
+        return
+      }
+      setData(body)
+    } catch (e) {
+      setError('Could not reach the metrics service.')
+    }
+    setLoading(false)
+  }
+
+  const sectionLabel = (t) => (
+    <div style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: subtle, marginBottom: '14px' }}>{t}</div>
+  )
+
+  const wrap = { flex: 1, overflow: 'auto', padding: '28px', maxWidth: '1100px', width: '100%' }
+
+  if (loading) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+      <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading…</div>
+    </div>
+  )
+
+  if (error) return (
+    <div style={wrap}>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '32px', textAlign: 'center' }}>
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Couldn’t load metrics</div>
+        <div style={{ fontSize: '12px', color: muted, marginBottom: '20px' }}>{error}</div>
+        <button onClick={load} style={btn(accent)}>Try again</button>
+      </div>
+    </div>
+  )
+
+  const s = data.subscribers
+  const a = data.appsumo
+  const g = data.signups
+
+  return (
+    <div style={wrap}>
+      <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '28px', maxWidth: '620px' }}>
+        Live business numbers from inside HQue — subscribers, plans, and AppSumo redemptions.
+        For exact revenue &amp; promo codes, and for website visitors &amp; traffic sources, use the two shortcuts at the bottom.
+      </div>
+
+      {/* Headline stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '32px' }}>
+        <Stat label="Paying subscribers" value={s.paying} sub={`${s.total} accounts total`} {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="Est. monthly revenue" value={`$${s.mrr.toLocaleString()}`} sub="from active plans" {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} />
+      </div>
+
+      {/* Subscribers breakdown */}
+      <div style={{ marginBottom: '32px' }}>
+        {sectionLabel('Subscribers')}
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '18px' }}>
+            <Line label="Starter · $49" value={s.byPlan.starter} {...{ text, muted }} />
+            <Line label="Pro · $99" value={s.byPlan.pro} {...{ text, muted }} />
+            <Line label="Business · $199" value={s.byPlan.agency} {...{ text, muted }} />
+            <Line label="Lifetime (AppSumo)" value={s.lifetime} {...{ text, muted }} />
+            <Line label="Trialing" value={s.trialing} {...{ text, muted }} />
+            <Line label="Trial expired" value={s.trialExpired} {...{ text, muted }} />
+            <Line label="Past due" value={s.pastDue} {...{ text, muted }} />
+            <Line label="Canceled" value={s.canceled} {...{ text, muted }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Signups over time */}
+      <div style={{ marginBottom: '32px' }}>
+        {sectionLabel('New signups')}
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          <div style={{ display: 'flex', gap: '28px', marginBottom: '20px' }}>
+            <div><span style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text }}>{g.last7}</span><span style={{ fontSize: '10px', color: subtle, marginLeft: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>last 7 days</span></div>
+            <div><span style={{ fontFamily: 'Georgia, serif', fontSize: '24px', color: text }}>{g.last30}</span><span style={{ fontSize: '10px', color: subtle, marginLeft: '8px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>last 30 days</span></div>
+          </div>
+          <BarRow data={g.byMonth} accent={accent} {...{ border, subtle, text }} />
+        </div>
+      </div>
+
+      {/* AppSumo */}
+      <div style={{ marginBottom: '32px' }}>
+        {sectionLabel('AppSumo codes')}
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          <div style={{ display: 'flex', gap: '28px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <Line label="Total codes" value={a.total} {...{ text, muted }} />
+            <Line label="Redeemed" value={a.redeemed} {...{ text, muted }} />
+            <Line label="Remaining" value={a.unused} {...{ text, muted }} />
+            <Line label="Redemption rate" value={`${a.redemptionRate}%`} {...{ text, muted }} />
+          </div>
+          <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, margin: '4px 0 12px' }}>Redemptions by month</div>
+          <BarRow data={a.byMonth} accent="#A67C52" {...{ border, subtle, text }} />
+
+          {a.recent.length > 0 && (
+            <div style={{ marginTop: '24px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '10px' }}>Recent redemptions</div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {a.recent.map((r, i) => (
+                  <div key={r.code + i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i === 0 ? 'none' : `0.5px solid ${border}` }}>
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontSize: '13px', color: text }}>{r.orgName}</span>
+                      <span style={{ fontSize: '10px', color: subtle, marginLeft: '10px', fontFamily: 'monospace' }}>{r.code}</span>
+                    </div>
+                    <span style={{ fontSize: '11px', color: muted, whiteSpace: 'nowrap' }}>{fmtDate(r.redeemedAt)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* External dashboards */}
+      <div style={{ marginBottom: '20px' }}>
+        {sectionLabel('Sales & traffic (external)')}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+          <LinkCard
+            href="https://dashboard.stripe.com/dashboard"
+            title="Stripe →"
+            body="Exact revenue, individual sales, refunds, and which promo codes were used at checkout."
+            {...{ card, border, text, muted, subtle }} accent={accent}
+          />
+          <LinkCard
+            href="https://analytics.google.com/"
+            title="Google Analytics →"
+            body="Website visitors, where traffic comes from (search, social, referrals), and top pages."
+            {...{ card, border, text, muted, subtle }} accent={accent}
+          />
+        </div>
+        <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.7, marginTop: '12px' }}>
+          Tip: add your marketing team directly in Stripe (Settings → Team) and Google Analytics (Admin → Access management) so they can see these without your login.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Stat({ label, value, sub, card, border, text, muted, subtle, accent }) {
+  return (
+    <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '18px 20px' }}>
+      <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '10px' }}>{label}</div>
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>{sub}</div>
+    </div>
+  )
+}
+
+function Line({ label, value, text, muted }) {
+  return (
+    <div>
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{label}</div>
+    </div>
+  )
+}
+
+function BarRow({ data, accent, border, subtle, text }) {
+  const max = Math.max(1, ...data.map(d => d.count))
+  return (
+    <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', height: '110px' }}>
+      {data.map((d) => (
+        <div key={d.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
+          <div style={{ fontSize: '11px', color: text }}>{d.count}</div>
+          <div style={{ width: '100%', maxWidth: '46px', height: `${(d.count / max) * 72}px`, minHeight: d.count > 0 ? '3px' : '0', background: accent, borderRadius: '2px 2px 0 0', opacity: d.count > 0 ? 1 : 0.15 }} />
+          <div style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: subtle }}>{d.label}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function LinkCard({ href, title, body, card, border, text, muted, accent }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px', display: 'block' }}>
+      <div style={{ fontSize: '13px', letterSpacing: '0.06em', color: accent, marginBottom: '8px', fontWeight: 500 }}>{title}</div>
+      <div style={{ fontSize: '12px', color: muted, lineHeight: 1.6 }}>{body}</div>
+    </a>
+  )
+}
+
+function btn(accent) {
+  return { padding: '10px 24px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '2px' }
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  if (isNaN(d)) return '—'
+  const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return `${M[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`
+}
