@@ -124,6 +124,8 @@ export default function HQMetricsView({ dark = true }) {
     const money = (n) => `$${Math.round(n || 0).toLocaleString()}`
     const num = (n) => Number(n || 0).toLocaleString()
     const genDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    // Absolute URL — the print window is about:blank, so relative paths won't resolve.
+    const logoUrl = `${window.location.origin}/logo-dark.svg`
 
     const box = (label, value) => `<div style="flex:1;min-width:130px;padding:14px 16px;border:1px solid #e6e2db;border-radius:4px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">${label}</div><div style="font-family:Georgia,serif;font-size:24px;color:#1a1a1a;">${value}</div></div>`
     const row = (items) => `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">${items.join('')}</div>`
@@ -160,7 +162,7 @@ export default function HQMetricsView({ dark = true }) {
 
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HQue Metrics — ${rangeLabel}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}section{page-break-inside:avoid;}}</style></head><body><div style="padding:40px 48px;max-width:900px;margin:0 auto;">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;padding-bottom:20px;border-bottom:2px solid #1a1a1a;">
-        <div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin-bottom:8px;">HQue</div><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Business Metrics</div></div>
+        <div><img src="${logoUrl}" alt="HQue" style="height:30px;width:auto;display:block;margin-bottom:12px;" onerror="this.style.display='none'" /><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Business Metrics</div></div>
         <div style="text-align:right;"><div style="font-size:12px;color:#555;">${rangeLabel}</div><div style="font-size:11px;color:#999;">Generated ${genDate}</div></div>
       </div>
       <section>${title('Revenue &amp; growth · ' + rangeLabel)}${revenueHtml}</section>
