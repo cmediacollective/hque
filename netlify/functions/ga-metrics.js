@@ -92,8 +92,16 @@ exports.handler = async (event) => {
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
       limit: 8,
     })
+    // Report 5: most-viewed pages.
+    const pagesReq = call({
+      dateRanges: range,
+      dimensions: [{ name: 'pagePath' }],
+      metrics: [{ name: 'screenPageViews' }],
+      orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
+      limit: 12,
+    })
 
-    const [totals, sources, countries, cities] = await Promise.all([totalsReq, sourcesReq, countriesReq, citiesReq])
+    const [totals, sources, countries, cities, pages] = await Promise.all([totalsReq, sourcesReq, countriesReq, citiesReq, pagesReq])
 
     const t = totals.rows?.[0]?.metricValues || []
     const users = Number(t[0]?.value || 0)
@@ -109,6 +117,13 @@ exports.handler = async (event) => {
       .filter(x => x.name && x.name !== '(not set)')
     const countryList = mapLoc(countries)
     const cityList = mapLoc(cities)
+    // Friendly page names: "/" → "Home", strip query strings, keep the path.
+    const pageList = (pages.rows || []).map(r => {
+      let p = r.dimensionValues?.[0]?.value || ''
+      p = p.split('?')[0]
+      const name = p === '/' || p === '' ? 'Home' : p
+      return { name, views: Number(r.metricValues?.[0]?.value || 0) }
+    })
 
     return json(200, {
       ok: true,
@@ -119,6 +134,7 @@ exports.handler = async (event) => {
       channels,
       countries: countryList,
       cities: cityList,
+      pages: pageList,
     })
   } catch (e) {
     console.error('ga-metrics error:', e.message)

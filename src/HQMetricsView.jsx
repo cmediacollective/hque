@@ -146,6 +146,7 @@ export default function HQMetricsView({ dark = true }) {
     let trafficHtml
     if (ga && ga.configured && !ga.error) {
       trafficHtml = row([box('Visitors', num(ga.totals.users)), box('Sessions', num(ga.totals.sessions)), box('Page views', num(ga.totals.views))]) +
+        `<div style="margin-top:16px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top pages viewed</div>${list(ga.pages, 'name', 'views')}</div>` +
         `<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:14px;"><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Traffic sources</div>${list(ga.channels, 'source', 'sessions')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top countries</div>${list(ga.countries, 'name', 'users')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top cities</div>${list(ga.cities, 'name', 'users')}</div></div>`
     } else {
       trafficHtml = `<div style="font-size:12px;color:#aaa;">Google Analytics data unavailable.</div>`
@@ -271,6 +272,9 @@ export default function HQMetricsView({ dark = true }) {
                 <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.sessions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Sessions</div></div>
                 <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views</div></div>
               </div>
+              <div style={{ marginBottom: '24px' }}>
+                <LocBlock title="Top pages viewed" items={ga.pages} nameKey="name" valueKey="views" nameWidth="220px" empty="No page data in this range." {...{ dark, accent, border, text, muted, subtle }} />
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '28px' }}>
                 <LocBlock title="Where traffic comes from" items={ga.channels} nameKey="source" valueKey="sessions" empty="No traffic in this range." {...{ dark, accent, border, text, muted, subtle }} />
                 <LocBlock title="Top countries" items={ga.countries} nameKey="name" valueKey="users" empty="No location data in this range." {...{ dark, accent, border, text, muted, subtle }} />
@@ -387,7 +391,7 @@ function Line({ label, value, text, muted }) {
 }
 
 // A titled horizontal bar list — used for traffic sources, countries, and cities.
-function LocBlock({ title, items, nameKey, valueKey, empty, dark, accent, border, text, muted, subtle }) {
+function LocBlock({ title, items, nameKey, valueKey, empty, nameWidth = '96px', dark, accent, border, text, muted, subtle }) {
   const list = items || []
   const max = Math.max(1, ...list.map(i => i[valueKey] || 0))
   return (
@@ -396,7 +400,7 @@ function LocBlock({ title, items, nameKey, valueKey, empty, dark, accent, border
       {list.length === 0 && <div style={{ fontSize: '11px', color: subtle }}>{empty}</div>}
       {list.map((i, idx) => (
         <div key={(i[nameKey] || '') + idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-          <div style={{ width: '96px', fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i[nameKey] || '—'}</div>
+          <div style={{ width: nameWidth, fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i[nameKey] || '—'}</div>
           <div style={{ flex: 1, height: '10px', background: dark ? '#1A1A1A' : '#EFECE6', borderRadius: '5px', overflow: 'hidden' }}>
             <div style={{ width: `${((i[valueKey] || 0) / max) * 100}%`, height: '100%', background: accent, borderRadius: '5px' }} />
           </div>
