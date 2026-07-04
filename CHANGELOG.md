@@ -12,6 +12,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 **HQue Metrics: real revenue over time (Stripe).** New **Revenue & growth** section powered by Stripe: **revenue**, **new subscriptions**, and **new customers** for the selected time period (so you can answer "how did we do in June / this year?"), plus current **active MRR**. Uses the existing payment key — no new setup.
 
+**Download HQue Metrics as a PDF.** A **Download PDF** button (top-right of HQue Metrics) generates a clean, printable one-page report — revenue & growth, website traffic & location, subscribers, signups, and AppSumo — for the selected time period, then opens your browser's Save-as-PDF dialog. No numbers are re-fetched; it prints exactly what's on screen for that period.
+
 **Cleaner customer previews.** The sidebar "View as" control is now a proper **Preview customer view**: switching to Starter/Pro/Business enters a preview that **hides master-only items** (HQue Metrics and the preview switcher itself) and shows that plan's branding/limits, so it looks exactly like a real customer's screen. An **Exit preview** button returns you to your full admin view (and a refresh always exits, so you can't get stuck).
 
 ---

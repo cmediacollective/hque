@@ -118,6 +118,66 @@ export default function HQMetricsView({ dark = true }) {
   const a = data.appsumo
   const g = data.signups
 
+  // Build a clean, light, printable report and open the browser's print dialog
+  // (Save as PDF) — same library-free approach the Talent roster export uses.
+  function downloadPdf() {
+    const money = (n) => `$${Math.round(n || 0).toLocaleString()}`
+    const num = (n) => Number(n || 0).toLocaleString()
+    const genDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+    const box = (label, value) => `<div style="flex:1;min-width:130px;padding:14px 16px;border:1px solid #e6e2db;border-radius:4px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">${label}</div><div style="font-family:Georgia,serif;font-size:24px;color:#1a1a1a;">${value}</div></div>`
+    const row = (items) => `<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">${items.join('')}</div>`
+    const title = (t) => `<div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin:30px 0 12px;padding-top:16px;border-top:1px solid #eee;">${t}</div>`
+    const list = (items, nameKey, valueKey) => items && items.length
+      ? `<table style="width:100%;border-collapse:collapse;">${items.map(i => `<tr><td style="padding:5px 0;font-size:12px;color:#333;border-bottom:1px solid #f2f0ec;">${i[nameKey] || '—'}</td><td style="padding:5px 0;text-align:right;font-size:12px;color:#111;border-bottom:1px solid #f2f0ec;">${num(i[valueKey])}</td></tr>`).join('')}</table>`
+      : `<div style="font-size:12px;color:#aaa;">No data for this period.</div>`
+
+    // Revenue (Stripe)
+    let revenueHtml
+    if (stripe && stripe.configured && !stripe.error) {
+      revenueHtml = row([box('Revenue', money(stripe.revenue)), box('New subscriptions', num(stripe.newSubscriptions)), box('New customers', num(stripe.newCustomers)), box('Active MRR (now)', money(stripe.activeMrr))])
+    } else {
+      revenueHtml = `<div style="font-size:12px;color:#aaa;">Stripe revenue data unavailable.</div>`
+    }
+
+    // Traffic (GA)
+    let trafficHtml
+    if (ga && ga.configured && !ga.error) {
+      trafficHtml = row([box('Visitors', num(ga.totals.users)), box('Sessions', num(ga.totals.sessions)), box('Page views', num(ga.totals.views))]) +
+        `<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:14px;"><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Traffic sources</div>${list(ga.channels, 'source', 'sessions')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top countries</div>${list(ga.countries, 'name', 'users')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top cities</div>${list(ga.cities, 'name', 'users')}</div></div>`
+    } else {
+      trafficHtml = `<div style="font-size:12px;color:#aaa;">Google Analytics data unavailable.</div>`
+    }
+
+    const subsHtml = row([box('Starter · $49', num(s.byPlan.starter)), box('Pro · $99', num(s.byPlan.pro)), box('Business · $199', num(s.byPlan.agency)), box('Lifetime (AppSumo)', num(s.lifetime))]) +
+      row([box('Trialing', num(s.trialing)), box('Trial expired', num(s.trialExpired)), box('Past due', num(s.pastDue)), box('Canceled', num(s.canceled))])
+
+    const signupsHtml = row([box('New (last 7 days)', num(g.last7)), box('New (last 30 days)', num(g.last30))]) +
+      `<div style="margin-top:10px;">${list(g.byMonth, 'label', 'count')}</div>`
+
+    const appsumoHtml = row([box('Total codes', num(a.total)), box('Redeemed', num(a.redeemed)), box('Remaining', num(a.unused)), box('Redemption rate', `${a.redemptionRate}%`)]) +
+      (a.recent && a.recent.length ? `<div style="margin-top:12px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Recent redemptions</div><table style="width:100%;border-collapse:collapse;">${a.recent.map(r => `<tr><td style="padding:5px 0;font-size:12px;color:#333;border-bottom:1px solid #f2f0ec;">${r.orgName || '—'}</td><td style="padding:5px 0;font-size:11px;color:#888;font-family:monospace;border-bottom:1px solid #f2f0ec;">${r.code}</td><td style="padding:5px 0;text-align:right;font-size:11px;color:#888;border-bottom:1px solid #f2f0ec;">${r.redeemedAt ? new Date(r.redeemedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}</td></tr>`).join('')}</table></div>` : '')
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>HQue Metrics — ${rangeLabel}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}section{page-break-inside:avoid;}}</style></head><body><div style="padding:40px 48px;max-width:900px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;padding-bottom:20px;border-bottom:2px solid #1a1a1a;">
+        <div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin-bottom:8px;">HQue</div><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Business Metrics</div></div>
+        <div style="text-align:right;"><div style="font-size:12px;color:#555;">${rangeLabel}</div><div style="font-size:11px;color:#999;">Generated ${genDate}</div></div>
+      </div>
+      <section>${title('Revenue &amp; growth · ' + rangeLabel)}${revenueHtml}</section>
+      <section>${title('Website traffic &amp; location · ' + rangeLabel)}${trafficHtml}</section>
+      <section>${title('Subscribers (current)')}${subsHtml}</section>
+      <section>${title('New signups')}${signupsHtml}</section>
+      <section>${title('AppSumo codes')}${appsumoHtml}</section>
+      <div style="text-align:center;margin-top:40px;padding-top:20px;border-top:0.5px solid #e0e0e0;font-size:10px;color:#999;letter-spacing:0.12em;">HQue · h-que.com · Internal</div>
+    </div></body></html>`
+
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(html)
+    win.document.close()
+    setTimeout(() => win.print(), 500)
+  }
+
   return (
     <div style={wrap}>
       <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '18px', maxWidth: '640px' }}>
@@ -137,6 +197,10 @@ export default function HQMetricsView({ dark = true }) {
             }}>{label}</button>
           ))}
         </div>
+        <button onClick={downloadPdf} style={{
+          marginLeft: 'auto', padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase',
+          background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', whiteSpace: 'nowrap',
+        }}>↓ Download PDF</button>
       </div>
 
       {/* Revenue & growth (Stripe) */}
