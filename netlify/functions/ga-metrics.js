@@ -36,6 +36,14 @@ exports.handler = async (event) => {
     return json(200, { ok: true, configured: false })
   }
 
+  // Date range: the dashboard passes ?start=YYYY-MM-DD&end=YYYY-MM-DD. Fall back
+  // to the last 28 days if they're missing or malformed.
+  const qs = event.queryStringParameters || {}
+  const isDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s || '')
+  const startDate = isDate(qs.start) ? qs.start : '28daysAgo'
+  const endDate = isDate(qs.end) ? qs.end : 'today'
+  const range = [{ startDate, endDate }]
+
   try {
     // Get an OAuth access token for the service account (read-only analytics).
     const auth = new GoogleAuth({
@@ -55,14 +63,10 @@ exports.handler = async (event) => {
       return b
     })
 
-    const range = [{ startDate: '28daysAgo', endDate: 'today' }]
-
-    // Report 1: totals + daily trend.
+    // Report 1: headline totals for the range.
     const totalsReq = call({
       dateRanges: range,
-      dimensions: [{ name: 'date' }],
       metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
-      orderBys: [{ dimension: { dimensionName: 'date' } }],
     })
     // Report 2: where the traffic comes from (default channel grouping).
     const sourcesReq = call({
@@ -72,33 +76,49 @@ exports.handler = async (event) => {
       orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
       limit: 8,
     })
+    // Report 3: visitors by country.
+    const countriesReq = call({
+      dateRanges: range,
+      dimensions: [{ name: 'country' }],
+      metrics: [{ name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+      limit: 8,
+    })
+    // Report 4: visitors by city.
+    const citiesReq = call({
+      dateRanges: range,
+      dimensions: [{ name: 'city' }],
+      metrics: [{ name: 'activeUsers' }],
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
+      limit: 8,
+    })
 
-    const [totals, sources] = await Promise.all([totalsReq, sourcesReq])
+    const [totals, sources, countries, cities] = await Promise.all([totalsReq, sourcesReq, countriesReq, citiesReq])
 
-    // Sum the totals and build a compact daily visitor trend.
-    let users = 0, sessions = 0, views = 0
-    const trend = []
-    for (const row of totals.rows || []) {
-      const d = row.dimensionValues?.[0]?.value || ''
-      const u = Number(row.metricValues?.[0]?.value || 0)
-      users += u
-      sessions += Number(row.metricValues?.[1]?.value || 0)
-      views += Number(row.metricValues?.[2]?.value || 0)
-      trend.push({ date: d, label: d.slice(6, 8), users: u })
-    }
+    const t = totals.rows?.[0]?.metricValues || []
+    const users = Number(t[0]?.value || 0)
+    const sessions = Number(t[1]?.value || 0)
+    const views = Number(t[2]?.value || 0)
 
     const channels = (sources.rows || []).map(r => ({
       source: r.dimensionValues?.[0]?.value || '(other)',
       sessions: Number(r.metricValues?.[0]?.value || 0),
     }))
+    const mapLoc = (rep) => (rep.rows || [])
+      .map(r => ({ name: r.dimensionValues?.[0]?.value || '(unknown)', users: Number(r.metricValues?.[0]?.value || 0) }))
+      .filter(x => x.name && x.name !== '(not set)')
+    const countryList = mapLoc(countries)
+    const cityList = mapLoc(cities)
 
     return json(200, {
       ok: true,
       configured: true,
-      rangeLabel: 'Last 28 days',
+      startDate,
+      endDate,
       totals: { users, sessions, views },
-      trend,
       channels,
+      countries: countryList,
+      cities: cityList,
     })
   } catch (e) {
     console.error('ga-metrics error:', e.message)

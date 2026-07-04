@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
+// Date-range presets for the Google Analytics section.
+const RANGE_ORDER = [
+  ['7d', 'Last 7 days'],
+  ['30d', 'Last 30 days'],
+  ['90d', 'Last 90 days'],
+  ['tm', 'This month'],
+  ['lm', 'Last month'],
+]
+
+// Turn a preset key into concrete YYYY-MM-DD start/end dates (computed now).
+function rangeDates(key) {
+  const today = new Date()
+  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const back = (n) => { const d = new Date(today); d.setDate(d.getDate() - n); return d }
+  const cy = today.getFullYear(), cm = today.getMonth()
+  if (key === '7d') return { start: fmt(back(6)), end: fmt(today) }
+  if (key === '90d') return { start: fmt(back(89)), end: fmt(today) }
+  if (key === 'tm') return { start: fmt(new Date(cy, cm, 1)), end: fmt(today) }
+  if (key === 'lm') return { start: fmt(new Date(cy, cm - 1, 1)), end: fmt(new Date(cy, cm, 0)) }
+  return { start: fmt(back(29)), end: fmt(today) } // 30d default
+}
+
 // HQ Metrics — a master-admin-only marketing/business dashboard for the HQue team.
 // Shows the numbers that live in OUR database (subscribers, plans, AppSumo
 // redemptions, signups) and links out to Stripe + Google Analytics for the money
@@ -19,16 +41,21 @@ export default function HQMetricsView({ dark = true }) {
   const [error, setError] = useState(null)
   const [ga, setGa] = useState(null)
   const [gaLoading, setGaLoading] = useState(true)
+  const [range, setRange] = useState('30d')
 
-  useEffect(() => { load(); loadGA() }, [])
+  const rangeLabel = (RANGE_ORDER.find(([k]) => k === range) || [])[1] || ''
 
-  async function loadGA() {
+  useEffect(() => { load() }, [])
+  useEffect(() => { loadGA(range) }, [range])
+
+  async function loadGA(key) {
     setGaLoading(true)
     try {
       const { data: sess } = await supabase.auth.getSession()
       const token = sess?.session?.access_token
       if (token) {
-        const res = await fetch('/.netlify/functions/ga-metrics', { headers: { Authorization: `Bearer ${token}` } })
+        const { start, end } = rangeDates(key)
+        const res = await fetch(`/.netlify/functions/ga-metrics?start=${start}&end=${end}`, { headers: { Authorization: `Bearer ${token}` } })
         const body = await res.json().catch(() => ({}))
         if (res.ok && body.ok) setGa(body)
       }
@@ -102,7 +129,19 @@ export default function HQMetricsView({ dark = true }) {
 
       {/* Website traffic (Google Analytics) */}
       <div style={{ marginBottom: '32px' }}>
-        {sectionLabel('Website traffic · Google Analytics')}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: subtle }}>Website traffic &amp; location · {rangeLabel}</div>
+          <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '5px', overflow: 'hidden' }}>
+            {RANGE_ORDER.map(([k, label], i) => (
+              <button key={k} onClick={() => setRange(k)} style={{
+                padding: '6px 10px', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+                background: range === k ? accent : (dark ? '#242424' : '#FFFFFF'), border: 'none',
+                borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`,
+                color: range === k ? '#fff' : muted, cursor: 'pointer', fontWeight: range === k ? 500 : 400,
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
         <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
           {gaLoading && (
             <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Google Analytics…</div>
@@ -111,7 +150,7 @@ export default function HQMetricsView({ dark = true }) {
             <div>
               <div style={{ fontSize: '13px', color: text, marginBottom: '8px' }}>Google Analytics isn’t connected yet.</div>
               <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px' }}>
-                Once it’s connected, visitor counts and traffic sources for the last 28 days will show right here. In the meantime, open the full dashboard:
+                Once it’s connected, visitor counts, traffic sources, and locations for the selected range will show right here. In the meantime, open the full dashboard:
               </div>
               <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: accent, fontWeight: 500, textDecoration: 'none' }}>Open Google Analytics →</a>
             </div>
@@ -124,28 +163,16 @@ export default function HQMetricsView({ dark = true }) {
           )}
           {!gaLoading && ga && ga.configured && !ga.error && (
             <div>
-              <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.users.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Visitors · {ga.rangeLabel}</div></div>
+              <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', marginBottom: '22px' }}>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.users.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Visitors · {rangeLabel}</div></div>
                 <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.sessions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Sessions</div></div>
                 <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views</div></div>
               </div>
-              {ga.channels && ga.channels.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Where traffic comes from</div>
-                  {(() => {
-                    const maxS = Math.max(1, ...ga.channels.map(c => c.sessions))
-                    return ga.channels.map((c) => (
-                      <div key={c.source} style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                        <div style={{ width: '110px', fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.source}</div>
-                        <div style={{ flex: 1, height: '10px', background: dark ? '#1A1A1A' : '#EFECE6', borderRadius: '5px', overflow: 'hidden' }}>
-                          <div style={{ width: `${(c.sessions / maxS) * 100}%`, height: '100%', background: accent, borderRadius: '5px' }} />
-                        </div>
-                        <div style={{ width: '48px', textAlign: 'right', fontSize: '11px', color: muted }}>{c.sessions.toLocaleString()}</div>
-                      </div>
-                    ))
-                  })()}
-                </div>
-              )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '28px' }}>
+                <LocBlock title="Where traffic comes from" items={ga.channels} nameKey="source" valueKey="sessions" empty="No traffic in this range." {...{ dark, accent, border, text, muted, subtle }} />
+                <LocBlock title="Top countries" items={ga.countries} nameKey="name" valueKey="users" empty="No location data in this range." {...{ dark, accent, border, text, muted, subtle }} />
+                <LocBlock title="Top cities" items={ga.cities} nameKey="name" valueKey="users" empty="No city data in this range." {...{ dark, accent, border, text, muted, subtle }} />
+              </div>
             </div>
           )}
         </div>
@@ -252,6 +279,27 @@ function Line({ label, value, text, muted }) {
     <div>
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: '10px', color: muted, marginTop: '6px' }}>{label}</div>
+    </div>
+  )
+}
+
+// A titled horizontal bar list — used for traffic sources, countries, and cities.
+function LocBlock({ title, items, nameKey, valueKey, empty, dark, accent, border, text, muted, subtle }) {
+  const list = items || []
+  const max = Math.max(1, ...list.map(i => i[valueKey] || 0))
+  return (
+    <div>
+      <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>{title}</div>
+      {list.length === 0 && <div style={{ fontSize: '11px', color: subtle }}>{empty}</div>}
+      {list.map((i, idx) => (
+        <div key={(i[nameKey] || '') + idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <div style={{ width: '96px', fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i[nameKey] || '—'}</div>
+          <div style={{ flex: 1, height: '10px', background: dark ? '#1A1A1A' : '#EFECE6', borderRadius: '5px', overflow: 'hidden' }}>
+            <div style={{ width: `${((i[valueKey] || 0) / max) * 100}%`, height: '100%', background: accent, borderRadius: '5px' }} />
+          </div>
+          <div style={{ width: '44px', textAlign: 'right', fontSize: '11px', color: muted }}>{(i[valueKey] || 0).toLocaleString()}</div>
+        </div>
+      ))}
     </div>
   )
 }
