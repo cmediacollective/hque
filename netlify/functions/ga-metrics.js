@@ -92,13 +92,24 @@ exports.handler = async (event) => {
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
       limit: 8,
     })
-    // Report 5: most-viewed pages.
+    // Report 5: most-viewed MARKETING pages. GA tracks the whole site, including
+    // the logged-in app (which lives on the same domain), so we exclude internal
+    // app routes (/task, /campaign, /roster, /reports, /sandbox) — this is for
+    // marketing tracking, not internal usage.
     const pagesReq = call({
       dateRanges: range,
       dimensions: [{ name: 'pagePath' }],
       metrics: [{ name: 'screenPageViews' }],
       orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
-      limit: 12,
+      dimensionFilter: {
+        notExpression: {
+          filter: {
+            fieldName: 'pagePath',
+            stringFilter: { matchType: 'FULL_REGEXP', value: '^/(task|campaign|roster|reports|sandbox)(/.*)?$', caseSensitive: false },
+          },
+        },
+      },
+      limit: 25,
     })
 
     const [totals, sources, countries, cities, pages] = await Promise.all([totalsReq, sourcesReq, countriesReq, citiesReq, pagesReq])
