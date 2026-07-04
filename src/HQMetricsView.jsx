@@ -41,27 +41,33 @@ export default function HQMetricsView({ dark = true }) {
   const [error, setError] = useState(null)
   const [ga, setGa] = useState(null)
   const [gaLoading, setGaLoading] = useState(true)
+  const [stripe, setStripe] = useState(null)
+  const [stripeLoading, setStripeLoading] = useState(true)
   const [range, setRange] = useState('30d')
 
   const rangeLabel = (RANGE_ORDER.find(([k]) => k === range) || [])[1] || ''
 
   useEffect(() => { load() }, [])
-  useEffect(() => { loadGA(range) }, [range])
+  useEffect(() => { loadGA(range); loadStripe(range) }, [range])
 
-  async function loadGA(key) {
-    setGaLoading(true)
+  // Both range-based fetches share this shape: get the token, hit the function
+  // with the selected start/end, store the body if it came back ok.
+  async function loadRanged(key, path, setBody, setBusy) {
+    setBusy(true)
     try {
       const { data: sess } = await supabase.auth.getSession()
       const token = sess?.session?.access_token
       if (token) {
         const { start, end } = rangeDates(key)
-        const res = await fetch(`/.netlify/functions/ga-metrics?start=${start}&end=${end}`, { headers: { Authorization: `Bearer ${token}` } })
+        const res = await fetch(`${path}?start=${start}&end=${end}`, { headers: { Authorization: `Bearer ${token}` } })
         const body = await res.json().catch(() => ({}))
-        if (res.ok && body.ok) setGa(body)
+        if (res.ok && body.ok) setBody(body)
       }
-    } catch (e) { /* GA is optional — never block the page */ }
-    setGaLoading(false)
+    } catch (e) { /* these sections are optional — never block the page */ }
+    setBusy(false)
   }
+  const loadGA = (key) => loadRanged(key, '/.netlify/functions/ga-metrics', setGa, setGaLoading)
+  const loadStripe = (key) => loadRanged(key, '/.netlify/functions/stripe-metrics', setStripe, setStripeLoading)
 
   async function load() {
     setLoading(true)
@@ -114,34 +120,65 @@ export default function HQMetricsView({ dark = true }) {
 
   return (
     <div style={wrap}>
-      <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '28px', maxWidth: '620px' }}>
-        Live business numbers from inside HQue — subscribers, plans, and AppSumo redemptions.
-        For exact revenue &amp; promo codes, and for website visitors &amp; traffic sources, use the two shortcuts at the bottom.
+      <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '18px', maxWidth: '640px' }}>
+        Live business numbers for HQue — revenue, subscribers, website traffic, and AppSumo redemptions.
+      </div>
+
+      {/* Time-period control — drives the Revenue and Website-traffic sections. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
+        <span style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>Time period</span>
+        <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '5px', overflow: 'hidden' }}>
+          {RANGE_ORDER.map(([k, label], i) => (
+            <button key={k} onClick={() => setRange(k)} style={{
+              padding: '7px 12px', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+              background: range === k ? accent : (dark ? '#242424' : '#FFFFFF'), border: 'none',
+              borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`,
+              color: range === k ? '#fff' : muted, cursor: 'pointer', fontWeight: range === k ? 500 : 400,
+            }}>{label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Revenue & growth (Stripe) */}
+      <div style={{ marginBottom: '32px' }}>
+        {sectionLabel(`Revenue & growth · ${rangeLabel}`)}
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          {stripeLoading && (
+            <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Stripe…</div>
+          )}
+          {!stripeLoading && (!stripe || stripe.configured === false) && (
+            <div style={{ fontSize: '12px', color: muted }}>
+              Stripe isn’t connected. <a href="https://dashboard.stripe.com/dashboard" target="_blank" rel="noopener noreferrer" style={{ color: accent, fontWeight: 500, textDecoration: 'none' }}>Open Stripe →</a>
+            </div>
+          )}
+          {!stripeLoading && stripe && stripe.configured && stripe.error && (
+            <div>
+              <div style={{ fontSize: '13px', color: text, marginBottom: '6px' }}>Couldn’t read from Stripe.</div>
+              <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6 }}>The payment key may not have read access to charges/subscriptions. ({stripe.error})</div>
+            </div>
+          )}
+          {!stripeLoading && stripe && stripe.configured && !stripe.error && (
+            <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap' }}>
+              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>${Math.round(stripe.revenue).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Revenue · {rangeLabel}</div></div>
+              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions</div></div>
+              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
+              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Headline stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '32px' }}>
         <Stat label="Paying subscribers" value={s.paying} sub={`${s.total} accounts total`} {...{ card, border, text, muted, subtle }} accent={accent} />
-        <Stat label="Est. monthly revenue" value={`$${s.mrr.toLocaleString()}`} sub="from active plans" {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="Lifetime deals" value={s.lifetime} sub="AppSumo, permanent" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} />
       </div>
 
       {/* Website traffic (Google Analytics) */}
       <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '14px' }}>
-          <div style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: subtle }}>Website traffic &amp; location · {rangeLabel}</div>
-          <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '5px', overflow: 'hidden' }}>
-            {RANGE_ORDER.map(([k, label], i) => (
-              <button key={k} onClick={() => setRange(k)} style={{
-                padding: '6px 10px', fontSize: '8px', letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-                background: range === k ? accent : (dark ? '#242424' : '#FFFFFF'), border: 'none',
-                borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`,
-                color: range === k ? '#fff' : muted, cursor: 'pointer', fontWeight: range === k ? 500 : 400,
-              }}>{label}</button>
-            ))}
-          </div>
-        </div>
+        {sectionLabel(`Website traffic & location · ${rangeLabel}`)}
         <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
           {gaLoading && (
             <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Google Analytics…</div>

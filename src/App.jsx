@@ -184,6 +184,12 @@ function App() {
     setDemoTier(v)
     try { localStorage.setItem('hque_demo_tier', v) } catch (e) {}
   }
+  // Preview mode: when ON, the app hides master-only tools (HQue Metrics, the
+  // preview switcher) and reflects the previewed tier's branding/limits so it
+  // looks exactly like a real customer's screen for demos. Not persisted, so a
+  // refresh always returns the admin to their full view. When OFF, a platform
+  // admin sees their real master view (own logo, full access).
+  const [previewing, setPreviewing] = useState(false)
 
   // Count active talent to enforce the plan's talent limit. RLS scopes to the org.
   useEffect(() => {
@@ -279,7 +285,10 @@ function App() {
   // HQue team's own account). Reports is a Pro+ feature; for platform admins it
   // follows the demo-tier preview so a Starter demo correctly hides Reports.
   const talentLimit = planLimits(stripePlan).talent
-  const demoPlan = isMasterAdmin ? (demoTier === 'business' ? 'agency' : demoTier) : stripePlan
+  // The tier that governs branding/limits: while previewing, the chosen demo
+  // tier; otherwise 'business' (the admin's real full-access white-label view).
+  const activeTier = previewing ? demoTier : 'business'
+  const demoPlan = isMasterAdmin ? (activeTier === 'business' ? 'agency' : activeTier) : stripePlan
   const reportsAllowed = planLimits(demoPlan).reports
 
   // Reports is admin-only AND Pro+: kick ineligible users off the route, and only
@@ -626,13 +635,13 @@ function App() {
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-              {agencyLogoUrl && (isMasterAdmin ? demoTier === 'business' : stripePlan === 'agency') ? (
+              {agencyLogoUrl && (isMasterAdmin ? activeTier === 'business' : stripePlan === 'agency') ? (
                 <img src={agencyLogoUrl} alt={agencyName || 'Agency'} onError={e => { e.target.onerror = null; e.target.src = '/logo.svg' }} style={{ maxWidth: '140px', maxHeight: '48px', height: 'auto', display: 'block', objectFit: 'contain' }} />
               ) : (
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -662,17 +671,25 @@ function App() {
                   </div>
                 </div>
               )}
-              {isMasterAdmin && (
+              {isMasterAdmin && !previewing && (
                 <div style={{ padding: '8px 16px 12px', margin: '4px 0', borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
-                  <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>Demo — view as</div>
+                  <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>Preview customer view</div>
                   <div style={{ display: 'flex', border: `1px solid ${border}`, borderRadius: '4px', overflow: 'hidden' }}>
                     {[['starter', 'Starter'], ['pro', 'Pro'], ['business', 'Business']].map(([key, label], i) => (
-                      <button key={key} onClick={() => changeDemoTier(key)} style={{ flex: 1, padding: '6px 4px', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: demoTier === key ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'), border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: demoTier === key ? '#fff' : muted, cursor: 'pointer', fontWeight: demoTier === key ? 500 : 400 }}>{label}</button>
+                      <button key={key} onClick={() => { changeDemoTier(key); setPreviewing(true); if (view === 'metrics') setView('workspace') }} style={{ flex: 1, padding: '6px 4px', fontSize: '8px', letterSpacing: '0.08em', textTransform: 'uppercase', background: dark ? '#242424' : '#FFFFFF', border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, color: muted, cursor: 'pointer' }}>{label}</button>
                     ))}
                   </div>
                   <div style={{ fontSize: '8px', color: subtle, marginTop: '6px', lineHeight: 1.5 }}>
-                    {demoTier === 'starter' ? 'Up to 50 talent · 2 seats' : demoTier === 'pro' ? 'Unlimited talent · 5 seats' : 'Unlimited · full white-label'}
+                    See the app exactly as a customer on that plan would.
                   </div>
+                </div>
+              )}
+              {isMasterAdmin && previewing && (
+                <div style={{ padding: '8px 16px 12px', margin: '4px 0', borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
+                  <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>
+                    Previewing as {demoTier === 'starter' ? 'Starter' : demoTier === 'pro' ? 'Pro' : 'Business'}
+                  </div>
+                  <button onClick={() => setPreviewing(false)} style={{ width: '100%', padding: '7px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}>Exit preview</button>
                 </div>
               )}
               <button onClick={() => setView('settings')} style={{
@@ -796,7 +813,7 @@ function App() {
                   <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} active={view === 'reports'} initialMonth={pendingReports?.month} initialYear={pendingReports?.year} />
                 </div>
               )}
-              {isMasterAdmin && isAdmin && visited.has('metrics') && (
+              {isMasterAdmin && isAdmin && !previewing && visited.has('metrics') && (
                 <div style={{ display: view === 'metrics' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <HQMetricsView dark={dark} />
                 </div>
