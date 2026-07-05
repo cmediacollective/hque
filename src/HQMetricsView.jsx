@@ -273,7 +273,7 @@ export default function HQMetricsView({ dark = true }) {
                 <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views</div></div>
               </div>
               <div style={{ marginBottom: '24px' }}>
-                <LocBlock title="Top pages viewed" items={ga.pages} nameKey="name" valueKey="views" nameWidth="220px" empty="No page data in this range." {...{ dark, accent, border, text, muted, subtle }} />
+                <LocBlock title="Top pages viewed" items={ga.pages} nameKey="name" valueKey="views" nameWidth="220px" initialCount={10} empty="No page data in this range." {...{ dark, accent, border, text, muted, subtle }} />
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '28px' }}>
                 <LocBlock title="Where traffic comes from" items={ga.channels} nameKey="source" valueKey="sessions" empty="No traffic in this range." {...{ dark, accent, border, text, muted, subtle }} />
@@ -390,15 +390,19 @@ function Line({ label, value, text, muted }) {
   )
 }
 
-// A titled horizontal bar list — used for traffic sources, countries, and cities.
-function LocBlock({ title, items, nameKey, valueKey, empty, nameWidth = '96px', dark, accent, border, text, muted, subtle }) {
+// A titled horizontal bar list — used for traffic sources, countries, cities,
+// and pages. Pass initialCount to show only the top N with a "Show all" toggle.
+function LocBlock({ title, items, nameKey, valueKey, empty, nameWidth = '96px', initialCount, dark, accent, border, text, muted, subtle }) {
+  const [expanded, setExpanded] = useState(false)
   const list = items || []
   const max = Math.max(1, ...list.map(i => i[valueKey] || 0))
+  const collapsible = initialCount && list.length > initialCount
+  const shown = collapsible && !expanded ? list.slice(0, initialCount) : list
   return (
     <div>
       <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>{title}</div>
       {list.length === 0 && <div style={{ fontSize: '11px', color: subtle }}>{empty}</div>}
-      {list.map((i, idx) => (
+      {shown.map((i, idx) => (
         <div key={(i[nameKey] || '') + idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
           <div style={{ width: nameWidth, fontSize: '11px', color: text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{i[nameKey] || '—'}</div>
           <div style={{ flex: 1, height: '10px', background: dark ? '#1A1A1A' : '#EFECE6', borderRadius: '5px', overflow: 'hidden' }}>
@@ -407,6 +411,11 @@ function LocBlock({ title, items, nameKey, valueKey, empty, nameWidth = '96px', 
           <div style={{ width: '44px', textAlign: 'right', fontSize: '11px', color: muted }}>{(i[valueKey] || 0).toLocaleString()}</div>
         </div>
       ))}
+      {collapsible && (
+        <button onClick={() => setExpanded(e => !e)} style={{ marginTop: '4px', padding: '4px 0', fontSize: '10px', letterSpacing: '0.06em', background: 'none', border: 'none', color: accent, cursor: 'pointer', fontWeight: 500 }}>
+          {expanded ? 'Show less' : `Show all ${list.length} →`}
+        </button>
+      )}
     </div>
   )
 }
