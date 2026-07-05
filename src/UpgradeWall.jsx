@@ -10,8 +10,8 @@ export default function UpgradeWall({ orgId, user, onLogout }) {
   const [pendingPlan, setPendingPlan] = useState(null)
 
   useEffect(() => {
-    supabase.from('org_settings').select('agency_logo_url').eq('org_id', orgId).single()
-      .then(({ data }) => { if (data?.agency_logo_url) setLogoUrl(data.agency_logo_url) })
+    supabase.from('org_settings').select('*').eq('org_id', orgId).single()
+      .then(({ data }) => { if (data?.use_agency_logo && data?.agency_logo_url) setLogoUrl(data.agency_logo_url) })
   }, [orgId])
 
   async function uploadLogo(file) {

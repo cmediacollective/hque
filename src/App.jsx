@@ -173,6 +173,9 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
+  // Branding preference: show the agency's own logo (true) or the default hque
+  // logo (false). Defaults to hque; only a Business/master account can turn it on.
+  const [useAgencyLogo, setUseAgencyLogo] = useState(false)
   const [stripePlan, setStripePlan] = useState(null)
   // Demo tier preview (platform admins only, this browser only): lets the HQue
   // team show a prospect how the app looks on each plan. 'business' shows the
@@ -445,9 +448,12 @@ function App() {
   }
 
   async function fetchAgencyName(oid) {
-    const { data } = await supabase.from('org_settings').select('agency_name, agency_logo_url, timezone').eq('org_id', oid).single()
+    // select('*') (not an explicit column list) so a not-yet-added
+    // use_agency_logo column can't break this load — it just reads as undefined.
+    const { data } = await supabase.from('org_settings').select('*').eq('org_id', oid).single()
     if (data?.agency_name) setAgencyName(data.agency_name)
     if (data?.agency_logo_url) setAgencyLogoUrl(data.agency_logo_url)
+    setUseAgencyLogo(!!data?.use_agency_logo)
     if (data?.timezone) setAgencyTz(data.timezone)
     const [{ data: org }, { data: master }] = await Promise.all([
       supabase.from('organizations').select('trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id').eq('id', oid).single(),
@@ -540,7 +546,7 @@ function App() {
     // exactly what that customer's export would look like.
     const businessBrand = isMasterAdmin ? activeTier === 'business' : stripePlan === 'agency'
     const hqueMark = `<div style="background:#1a1a1a;border-radius:4px;padding:11px 15px;display:flex;align-items:center;flex-shrink:0;"><img src="${window.location.origin}/logo.svg" alt="hque" style="height:22px;width:auto;display:block;" /></div>`
-    const headerLogo = businessBrand && agencyLogoUrl
+    const headerLogo = businessBrand && useAgencyLogo && agencyLogoUrl
       ? `<img src="${agencyLogoUrl}" alt="${agencyName}" style="width:56px;height:56px;object-fit:contain;border:0.5px solid #e0e0e0;border-radius:2px;padding:4px;background:#fff;flex-shrink:0;" />`
       : hqueMark
     const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Talent Roster — ${agencyName}</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;background:#fff;}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}tr{page-break-inside:avoid;}}</style></head><body><div style="padding:40px 48px;"><div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #1a1a1a;"><div style="display:flex;align-items:center;gap:16px;">${headerLogo}<div><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#999;margin-bottom:8px;">${agencyName}</div><div style="font-family:Georgia,serif;font-size:28px;color:#1a1a1a;">Talent Roster</div></div></div><div style="text-align:right;"><div style="font-size:11px;color:#999;">${creators.length} creators</div><div style="font-size:11px;color:#999;">${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</div></div></div><table style="width:100%;border-collapse:collapse;"><thead><tr style="background:#f8f8f8;"><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Photo</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Name</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Niches</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Handles</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Followers</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Eng Rate</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Rates</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Location</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Contact</th><th style="padding:10px 12px;text-align:left;font-size:8px;letter-spacing:0.18em;text-transform:uppercase;color:#999;font-weight:500;border-bottom:1px solid #e0e0e0;">Tier</th></tr></thead><tbody>${rows}</tbody></table>${!businessBrand ? '<div style="text-align:center;margin-top:40px;padding-top:20px;border-top:0.5px solid #e0e0e0;font-size:10px;color:#999;letter-spacing:0.12em;">Powered by HQue &middot; h-que.com</div>' : ''}</div></body></html>`
@@ -644,7 +650,7 @@ function App() {
         {!isMobile && (
           <nav style={{ width: '200px', background: nav, borderRight: `0.5px solid ${border}`, padding: '24px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
             <div style={{ padding: '0 0 20px 16px', borderBottom: `0.5px solid ${border}`, marginBottom: '16px' }}>
-              {agencyLogoUrl && (isMasterAdmin ? activeTier === 'business' : stripePlan === 'agency') ? (
+              {agencyLogoUrl && useAgencyLogo && (isMasterAdmin ? activeTier === 'business' : stripePlan === 'agency') ? (
                 <img src={agencyLogoUrl} alt={agencyName || 'Agency'} onError={e => { e.target.onerror = null; e.target.src = '/logo.svg' }} style={{ maxWidth: '140px', maxHeight: '48px', height: 'auto', display: 'block', objectFit: 'contain' }} />
               ) : (
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
@@ -829,7 +835,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} onAgencyLogoChange={setAgencyLogoUrl} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} isMaster={isMasterAdmin} onAgencyLogoChange={setAgencyLogoUrl} onUseAgencyLogoChange={setUseAgencyLogo} />
                 </div>
               )}
             </Suspense>

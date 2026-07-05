@@ -42,7 +42,10 @@ export default function TalentInquiry() {
         name: org.name,
         stripe_plan: org.stripe_plan,
         displayName: org.agency_name || org.name,
-        logoUrl: org.agency_logo_url,
+        // Show the agency's own logo only when opted in; otherwise fall back to
+        // the hque logo. use_agency_logo comes from the get_inquiry_org RPC once
+        // its dashboard definition is updated to return it.
+        logoUrl: (org.use_agency_logo && org.agency_logo_url) ? org.agency_logo_url : null,
         isAgencyTier: org.stripe_plan === 'agency'
       })
     } else {

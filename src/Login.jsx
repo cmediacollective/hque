@@ -16,7 +16,10 @@ export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
     if (!agencySlug) return
     supabase.rpc('get_inquiry_org', { p_slug: agencySlug }).then(({ data }) => {
       const org = data && data[0]
-      if (org && org.agency_logo_url) {
+      // Only show the agency's own logo when they've opted in (use_agency_logo).
+      // The RPC returns use_agency_logo once its dashboard definition is updated;
+      // until then it's undefined, so this safely defaults to the hque logo.
+      if (org && org.use_agency_logo && org.agency_logo_url) {
         setBrand({ logoUrl: org.agency_logo_url, name: org.agency_name || org.name })
       }
     })

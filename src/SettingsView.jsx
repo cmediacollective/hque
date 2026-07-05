@@ -4,7 +4,7 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
-export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, onAgencyLogoChange }) {
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, onAgencyLogoChange, onUseAgencyLogoChange }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -15,7 +15,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const subtle = dark ? '#777' : '#888'
 
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
-  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', timezone: 'America/Los_Angeles' })
+  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
@@ -79,7 +79,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (data) {
-      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', timezone: data.timezone || 'America/Los_Angeles' })
+      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', use_agency_logo: !!data.use_agency_logo, timezone: data.timezone || 'America/Los_Angeles' })
       setSenderAccounts(data.sender_accounts || [])
     }
     const { data: org } = await supabase.from('organizations').select('slug').eq('id', orgId).single()
@@ -138,9 +138,14 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function saveAgency() {
     setAgencySaving(true)
     const { data: existing } = await supabase.from('org_settings').select('id').eq('org_id', orgId).single()
-    const payload = { ...agencyForm, sender_accounts: senderAccounts }
+    // Keep use_agency_logo out of the main payload and save it separately, so if
+    // the column hasn't been added to the database yet the rest of Agency Info
+    // still saves fine (the flag write just no-ops until the column exists).
+    const { use_agency_logo, ...rest } = agencyForm
+    const payload = { ...rest, sender_accounts: senderAccounts }
     if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', orgId) }
     else { await supabase.from('org_settings').insert([{ ...payload, org_id: orgId }]) }
+    await supabase.from('org_settings').update({ use_agency_logo: !!use_agency_logo }).eq('org_id', orgId)
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
@@ -394,6 +399,29 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 ) : (
                   !agencyForm.agency_logo_url && <span style={{ fontSize: '12px', color: subtle }}>No logo set</span>
                 )}
+              </div>
+            )}
+
+            {(stripePlan === 'agency' || isMaster) && canEditAgency && field('Logo Shown',
+              <div>
+                <div style={{ display: 'flex', border: `0.5px solid ${border}`, borderRadius: '3px', overflow: 'hidden', width: 'fit-content' }}>
+                  {[['hque logo', false], ['My logo', true]].map(([label, val], i) => {
+                    const selected = !!agencyForm.use_agency_logo === val
+                    const disabled = val === true && !agencyForm.agency_logo_url
+                    return (
+                      <button key={label} disabled={disabled}
+                        onClick={() => { setAgencyForm(f => ({ ...f, use_agency_logo: val })); onUseAgencyLogoChange?.(val) }}
+                        style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: 'none', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}`, background: selected ? '#5b7c99' : (dark ? '#242424' : '#fff'), color: selected ? '#fff' : (disabled ? '#555' : '#888'), cursor: disabled ? 'not-allowed' : 'pointer' }}>
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '8px', lineHeight: 1.6 }}>
+                  {agencyForm.agency_logo_url
+                    ? 'Choose what shows across your workspace, PDF exports, and login page — your logo or the hque logo. Defaults to hque. Click Save to apply.'
+                    : 'Upload a logo above first, then switch this to use your own branding. Defaults to the hque logo.'}
+                </div>
               </div>
             )}
 

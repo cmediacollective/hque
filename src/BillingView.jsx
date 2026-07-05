@@ -26,8 +26,8 @@ export default function BillingView({ dark = true, orgId, user }) {
     const { data } = await supabase.from('organizations').select('stripe_customer_id, stripe_plan').eq('id', orgId).single()
     if (data?.stripe_customer_id) setStripeCustomerId(data.stripe_customer_id)
     if (data?.stripe_plan) setStripePlan(data.stripe_plan)
-    const { data: settings } = await supabase.from('org_settings').select('agency_logo_url').eq('org_id', orgId).single()
-    if (settings?.agency_logo_url) setLogoUrl(settings.agency_logo_url)
+    const { data: settings } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
+    if (settings?.use_agency_logo && settings?.agency_logo_url) setLogoUrl(settings.agency_logo_url)
   }
 
   async function uploadLogo(file) {
