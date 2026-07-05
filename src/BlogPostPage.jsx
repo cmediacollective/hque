@@ -11,7 +11,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
   try { publishedISO = post && post.date ? new Date(post.date).toISOString().slice(0, 10) : undefined } catch { publishedISO = undefined }
 
   useSEO({
-    title: post ? post.title : 'Article Not Found',
+    title: post ? post.title + ' | hque' : 'Article Not Found | hque',
     description: post ? post.excerpt : '',
     image: post ? post.image : undefined,
     canonical: post ? 'https://h-que.com/blog/' + post.slug : undefined,

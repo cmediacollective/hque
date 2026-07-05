@@ -5,7 +5,9 @@ const DEFAULT_IMAGE = BASE + '/og-image.png'
 
 export default function useSEO({ title, description, image, canonical, type = 'website', jsonLd }) {
   useEffect(() => {
-    const fullTitle = title ? title + ' | HQue' : 'HQue — Agency OS for Talent & Influencer Agencies'
+    // `title` is treated as the complete page title so it matches exactly what
+    // the prerender step (scripts/prerender.mjs) bakes into the static HTML.
+    const fullTitle = title || 'HQue — Agency OS for Talent & Influencer Agencies'
     const desc = description || 'HQue is the operating system for talent and influencer agencies. Manage your roster, campaigns, payments, and team — all in one place.'
     const img = image || DEFAULT_IMAGE
     const url = canonical || BASE + window.location.pathname

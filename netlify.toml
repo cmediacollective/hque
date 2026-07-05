@@ -7,57 +7,12 @@
 [functions."task-reminders"]
   schedule = "0 19 * * *"
 
-[[redirects]]
-  from = "/privacy"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/terms"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/faq"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/pricing"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/blog"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/blog/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/help"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/help/*"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/apply"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/redeem"
-  to = "/index.html"
-  status = 200
-
+# Prerendered public marketing pages (/, /pricing, /faq, /blog, /blog/*, /updates,
+# /privacy, /terms) are written as real static files by scripts/prerender.mjs and
+# are served directly — Netlify serves an existing file before applying this rule.
+# Everything else (the logged-in app, /apply, /redeem, /talent/*, /task/*, deep
+# app links, etc.) falls back to the SPA shell, which is marked noindex.
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/app.html"
   status = 200

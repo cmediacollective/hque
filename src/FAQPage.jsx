@@ -1,26 +1,23 @@
 import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
-
-const FAQS = [
-  { q: 'What is HQue?', a: 'HQue is an operating system for talent agencies and brands built on talent partnerships. It replaces spreadsheets, email threads, and disconnected tools with one platform for managing your roster, campaigns, payments, and team.' },
-  { q: 'Who is HQue for?', a: 'HQue is built for influencer marketing agencies, talent management companies, and brand partnerships teams. If you manage a roster of creators or public figures and run campaigns on their behalf, HQue was made for you.' },
-  { q: 'How is HQue different from Monday.com or a spreadsheet?', a: 'Spreadsheets break quickly. Monday.com is generic — it has no concept of talent, campaigns, or brand partnerships. HQue is purpose-built for the way agencies actually work.' },
-  { q: 'Can multiple team members use HQue?', a: 'Yes. All plans include multiple team members. Starter includes 2 seats, Pro includes 5, and Business includes unlimited seats.' },
-  { q: 'Is there a free trial?', a: 'Yes — every plan starts with a 14-day free trial. No credit card required. You\'ll have full access to all features during your trial.' },
-  { q: 'What happens after my trial ends?', a: 'You\'ll be prompted to choose a plan to continue. Your data is never deleted — if you need more time, reach out to us at support@h-que.com.' },
-  { q: 'Can I cancel anytime?', a: 'Yes. No long-term contracts. Cancel anytime from your billing settings and you\'ll retain access until the end of your billing period.' },
-  { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams.' },
-  { q: "Where can I see what's new, what's been fixed, and what's coming next?", a: (
-    <>We keep a live product updates page at <a href="https://h-que.com/updates" style={{ color: '#5b7c99', textDecoration: 'underline' }}>h-que.com/updates</a>. It shows everything that's been shipped (new features, improvements, and bug fixes), what we're currently building, and what's planned. You can also submit your own feature requests or report an issue directly from that page.</>
-  ) },
-]
+import Linkify from './Linkify'
+import { FAQS } from './faqData'
 
 export default function FAQPage({ onGetStarted, onSignIn }) {
   useSEO({
     title: 'FAQ — HQue',
     description: 'Answers to the most common questions about HQue, the agency OS built for talent and influencer agencies.',
     canonical: 'https://h-que.com/faq',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: FAQS.map(f => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
   })
   const [open, setOpen] = useState(null)
   const isMobile = window.innerWidth < 768
@@ -50,7 +47,7 @@ export default function FAQPage({ onGetStarted, onSignIn }) {
                 <span style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '17px', color: '#F0ECE6', lineHeight: 1.4 }}>{faq.q}</span>
                 <span style={{ color: '#5b7c99', fontSize: '20px', lineHeight: 1, flexShrink: 0, display: 'inline-block', transform: open === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', marginTop: '2px' }}>+</span>
               </button>
-              {open === i && <div style={{ paddingBottom: '22px', fontSize: '14px', color: '#DCDCDC', lineHeight: 1.85 }}>{faq.a}</div>}
+              {open === i && <div style={{ paddingBottom: '22px', fontSize: '14px', color: '#DCDCDC', lineHeight: 1.85 }}><Linkify text={faq.a} dark /></div>}
             </div>
           ))}
           <div style={{ borderTop: '0.5px solid #1A1A1A' }} />

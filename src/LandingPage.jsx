@@ -412,7 +412,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
       operatingSystem: 'Web',
       url: 'https://h-que.com',
       description: 'HQue is the operating system for talent and influencer agencies — manage your roster, track campaigns, handle payments, and run your team in one place. Built for agencies, brands managing talent in-house, and solo talent managers.',
-      offers: { '@type': 'Offer', category: 'SaaS' },
+      offers: { '@type': 'AggregateOffer', priceCurrency: 'USD', lowPrice: '49', highPrice: '199', offerCount: 3 },
       publisher: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
     },
   })

@@ -1,5 +1,11 @@
 [
   {
+    "title": "hque now shows up on Google, AI search, and shared links",
+    "description": "Our public pages — homepage, pricing, FAQ, blog, and every blog post — are now fully readable by Google, ChatGPT, and other AI assistants, with unique titles, descriptions, and a branded preview image when you share a link. Your logged-in workspace stays private and out of search.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-05"
+  },
+  {
     "title": "Compare plans at a glance",
     "description": "The pricing page now has a full feature-by-feature comparison table across Starter, Pro, and Business, so you can see exactly what each plan includes before you choose.",
     "category": "Improvement",

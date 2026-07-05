@@ -16,6 +16,17 @@ export default function PricingPage({ onGetStarted }) {
     title: 'HQue Pricing — Plans for Agencies, Brands & Entrepreneurs',
     description: 'Simple, transparent pricing for agencies, brand teams, and entrepreneurs who work with talent. Start free, upgrade as you grow.',
     canonical: 'https://h-que.com/pricing',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      name: 'HQue',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      url: 'https://h-que.com/pricing',
+      description: 'HQue is the operating system for talent and influencer agencies — manage your roster, track campaigns, handle payments, and run your team in one place.',
+      offers: { '@type': 'AggregateOffer', priceCurrency: 'USD', lowPrice: '49', highPrice: '199', offerCount: 3 },
+      publisher: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
+    },
   })
   const [openFaq, setOpenFaq] = useState(null)
   const [hoveredPlan, setHoveredPlan] = useState(null)
