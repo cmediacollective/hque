@@ -76,6 +76,14 @@ exports.handler = async (event) => {
       orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
       limit: 8,
     })
+    // Report 2b: the actual referring sites/sources (google, instagram.com, …).
+    const referrersReq = call({
+      dateRanges: range,
+      dimensions: [{ name: 'sessionSource' }],
+      metrics: [{ name: 'sessions' }],
+      orderBys: [{ metric: { metricName: 'sessions' }, desc: true }],
+      limit: 15,
+    })
     // Report 3: visitors by country.
     const countriesReq = call({
       dateRanges: range,
@@ -112,7 +120,7 @@ exports.handler = async (event) => {
       limit: 25,
     })
 
-    const [totals, sources, countries, cities, pages] = await Promise.all([totalsReq, sourcesReq, countriesReq, citiesReq, pagesReq])
+    const [totals, sources, referrers, countries, cities, pages] = await Promise.all([totalsReq, sourcesReq, referrersReq, countriesReq, citiesReq, pagesReq])
 
     const t = totals.rows?.[0]?.metricValues || []
     const users = Number(t[0]?.value || 0)
@@ -123,6 +131,14 @@ exports.handler = async (event) => {
       source: r.dimensionValues?.[0]?.value || '(other)',
       sessions: Number(r.metricValues?.[0]?.value || 0),
     }))
+    // Referring sites/sources — tidy "(direct)" and drop "(not set)".
+    const referrerList = (referrers.rows || [])
+      .map(r => {
+        const raw = r.dimensionValues?.[0]?.value || ''
+        const name = raw === '(direct)' ? 'Direct' : raw
+        return { name, sessions: Number(r.metricValues?.[0]?.value || 0) }
+      })
+      .filter(x => x.name && x.name !== '(not set)')
     const mapLoc = (rep) => (rep.rows || [])
       .map(r => ({ name: r.dimensionValues?.[0]?.value || '(unknown)', users: Number(r.metricValues?.[0]?.value || 0) }))
       .filter(x => x.name && x.name !== '(not set)')
@@ -143,6 +159,7 @@ exports.handler = async (event) => {
       endDate,
       totals: { users, sessions, views },
       channels,
+      referrers: referrerList,
       countries: countryList,
       cities: cityList,
       pages: pageList,

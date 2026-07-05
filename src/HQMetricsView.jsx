@@ -147,7 +147,8 @@ export default function HQMetricsView({ dark = true }) {
     if (ga && ga.configured && !ga.error) {
       trafficHtml = row([box('Visitors', num(ga.totals.users)), box('Sessions', num(ga.totals.sessions)), box('Page views', num(ga.totals.views))]) +
         `<div style="margin-top:16px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top pages viewed</div>${list(ga.pages, 'name', 'views')}</div>` +
-        `<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:14px;"><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Traffic sources</div>${list(ga.channels, 'source', 'sessions')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top countries</div>${list(ga.countries, 'name', 'users')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top cities</div>${list(ga.cities, 'name', 'users')}</div></div>`
+        `<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:14px;"><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Traffic by channel</div>${list(ga.channels, 'source', 'sessions')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Referring sites &amp; sources</div>${list(ga.referrers, 'name', 'sessions')}</div></div>` +
+        `<div style="display:flex;gap:32px;flex-wrap:wrap;margin-top:14px;"><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top countries</div>${list(ga.countries, 'name', 'users')}</div><div style="flex:1;min-width:180px;"><div style="font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#999;margin-bottom:8px;">Top cities</div>${list(ga.cities, 'name', 'users')}</div></div>`
     } else {
       trafficHtml = `<div style="font-size:12px;color:#aaa;">Google Analytics data unavailable.</div>`
     }
@@ -277,6 +278,7 @@ export default function HQMetricsView({ dark = true }) {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '28px' }}>
                 <LocBlock title="Where traffic comes from" items={ga.channels} nameKey="source" valueKey="sessions" empty="No traffic in this range." {...{ dark, accent, border, text, muted, subtle }} />
+                <LocBlock title="Referring sites & sources" items={ga.referrers} nameKey="name" valueKey="sessions" nameWidth="150px" initialCount={8} empty="No referral data in this range." {...{ dark, accent, border, text, muted, subtle }} />
                 <LocBlock title="Top countries" items={ga.countries} nameKey="name" valueKey="users" empty="No location data in this range." {...{ dark, accent, border, text, muted, subtle }} />
                 <LocBlock title="Top cities" items={ga.cities} nameKey="name" valueKey="users" empty="No city data in this range." {...{ dark, accent, border, text, muted, subtle }} />
               </div>
