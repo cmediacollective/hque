@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import GrantLifetimeAccess from './GrantLifetimeAccess'
 
 // Date-range presets for the Google Analytics section.
 const RANGE_ORDER = [
@@ -187,6 +188,9 @@ export default function HQMetricsView({ dark = true }) {
       <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '18px', maxWidth: '640px' }}>
         Live business numbers for HQue — revenue, subscribers, website traffic, and AppSumo redemptions.
       </div>
+
+      {/* Master-admin action: comp someone to free lifetime Business access. */}
+      <GrantLifetimeAccess {...{ dark, card, border, text, muted, subtle, accent }} />
 
       {/* Time-period control — drives the Revenue and Website-traffic sections. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '28px' }}>
