@@ -46,7 +46,11 @@ const esc = (s) => String(s)
 // Inline: escape text first, then turn [text](url) and **bold** into real tags.
 function mdInline(s) {
   let out = esc(s)
-  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, t, u) => `<a href="${u}">${t}</a>`)
+  // External (http/https) links open in a new tab; internal links stay in-page.
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (m, t, u) =>
+    /^https?:\/\//i.test(u)
+      ? `<a href="${u}" target="_blank" rel="noopener noreferrer">${t}</a>`
+      : `<a href="${u}">${t}</a>`)
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
   return out
 }

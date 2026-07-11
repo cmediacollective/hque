@@ -1,5 +1,51 @@
 export const POSTS = [
   {
+    slug: 'how-to-price-a-creator-campaign',
+    title: 'How to Price a Creator Campaign (Without Underselling Your Talent)',
+    category: 'Campaign Management',
+    readTime: '6 min read',
+    date: 'July 10, 2026',
+    excerpt: "Pricing is where most agencies either win the room or lose their margin. Here's how the best ones do it.",
+    image: 'https://h-que.com/blog/how-to-price-a-creator-campaign.jpg',
+    body: `Every brand wants a number fast. Every agency that gives one too fast ends up leaving money on the table — or worse, locking talent into a rate that doesn't reflect what they're actually worth. Pricing a campaign well isn't about picking a number that sounds fair. It's about building a rate that holds up when the brand pushes back, and that you can defend without flinching.
+
+Here's the framework agencies who don't underprice their talent actually use.
+
+**Start with the deliverable, not the follower count**
+
+Follower count is the number brands fixate on, but it's rarely the number that should drive price. What matters is the actual deliverable: a single feed post, a full-funnel content series, usage rights, exclusivity, whitelisting access. Two creators with identical audiences can command very different rates depending on what's being asked of them and how the content will be used after it's posted.
+
+Agencies that anchor pricing to deliverables instead of vanity metrics end up with rates that are easier to defend, because the number is tied to concrete scope rather than a follower count the brand can always find cheaper elsewhere.
+
+**Price usage rights separately, every time**
+
+This is the line item agencies most often give away for free — and it's usually the most valuable part of the deal. A single Instagram post and a 12-month paid media license to run that same content across a brand's entire ad account are not the same product. They shouldn't be the same price.
+
+Usage rights need their own line, with clear terms on duration, placement, and whether the brand can repurpose the content beyond its original platform. If a brand wants to extend usage later, that's a new negotiation, not a favor.
+
+**Build a rate card, but don't let it be the ceiling**
+
+A rate card gives your agency a starting point and keeps pricing consistent across similar deals. But treating it as fixed pricing rather than a floor is how agencies leave money on the table. Exclusivity requests, tight turnarounds, whitelisting, and multi-platform asks should all push the number up from the base rate, not get absorbed into it.
+
+The agencies with the strongest negotiating position are the ones who know exactly which levers raise price — and use them every time the brand asks for more than the standard scope. Once a rate is set, it needs to live alongside the rest of the campaign record — our [guide to creator campaign tracking](/blog/influencer-campaign-tracking-complete-guide) covers how top agencies keep pricing, deliverables, and terms in one place instead of scattered across email threads.
+
+**Hold the line in negotiation**
+
+Brands will push. That's expected, and it's not a sign the deal is falling apart — it's the deal actually starting. The agencies that hold their pricing best are the ones who've already separated the number from their ego. It's not "is this fair to me," it's "does this reflect the scope and usage being requested."
+
+When a brand asks for a lower rate, the answer isn't automatically no — it's "what comes off the table if the number comes down." Fewer deliverables, shorter usage window, less exclusivity. Give the brand a lever to pull that isn't just your talent's rate.
+
+**Keep a record of what actually closed**
+
+The rate you quote and the rate you land on are often different, and the gap between them is where the real pricing intelligence lives. Agencies that don't track this end up re-negotiating from scratch on every deal. Agencies that do build an internal sense, deal by deal, of what the market will actually bear for a given creator, deliverable, and usage window — which makes every future quote sharper than the last.
+
+This is also where a lot of agencies lose the thread entirely. Rates get discussed over email, finalized in a call, and never logged anywhere consistent. HQue keeps campaign pricing, negotiated terms, and usage rights attached to every deal record, so the next quote for that creator starts from real history instead of a guess.
+
+**What this means for your operations**
+
+Pricing isn't a single decision made at the top of a deal. It's a discipline that compounds — every well-defended rate makes the next negotiation easier, and every rate given away too easily makes the next one harder. The agencies that protect their pricing consistently are the ones brands eventually stop trying to talk down, because they know the number reflects real value, not guesswork. For more on evaluating the tools that support this kind of operation, see [what to look for in talent management software](/blog/what-to-look-for-talent-management-software).`,
+  },
+  {
     slug: 'why-agencies-ditching-spreadsheets-2026',
     title: 'Why Talent Agencies Are Finally Ditching Spreadsheets in 2026',
     category: 'Agency Operations',
