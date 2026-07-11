@@ -44,14 +44,9 @@ function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt
 
         {/* Content */}
         <div style={{ padding: wide ? '24px 28px' : '16px 18px' }}>
-          <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>
+          <div style={{ fontSize: '11px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>
             {post.category}
           </div>
-          {post.date && (
-            <div style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#777', marginBottom: '8px' }}>
-              {post.date}
-            </div>
-          )}
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: titleSize, color: '#F0ECE6', lineHeight: 1.25 }}>
             {post.title}
           </div>
@@ -101,8 +96,7 @@ function HeroSpotlight({ post }) {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.93) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)' }} />
 
         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: isMobile ? '28px' : '56px' }}>
-          <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '6px' }}>{post.category}</div>
-          {post.date && <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#888', marginBottom: '18px' }}>{post.date}</div>}
+          <div style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '18px' }}>{post.category}</div>
           <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '26px' : '42px', color: '#F0ECE6', lineHeight: 1.1, marginBottom: '16px', maxWidth: '680px' }}>{post.title}</div>
           <div style={{ fontSize: '14px', color: '#DCDCDC', maxWidth: '520px', lineHeight: 1.75 }}>{post.excerpt}</div>
           <div style={{ marginTop: '20px', fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99' }}>Read article →</div>

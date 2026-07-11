@@ -153,14 +153,14 @@ function blogIndexContent() {
     ${POSTS.map((p) => `
     <div style="border-top:1px solid #2a2a2a;padding:20px 0;">
       <h2 style="font-family:'Fraunces',Georgia,serif;font-size:20px;margin-bottom:6px;"><a href="/blog/${p.slug}" style="color:#F0ECE6;text-decoration:none;">${esc(p.title)}</a></h2>
-      <p style="font-size:12px;color:#9a9a9a;">${esc(p.category)} · ${esc(p.date)} · ${esc(p.readTime)}</p>
+      <p style="font-size:12px;color:#9a9a9a;">${esc(p.category)} · ${esc(p.readTime)}</p>
       <p>${esc(p.excerpt)}</p>
     </div>`).join('')}`
 }
 
 function blogPostContent(p) {
   return `
-    <p style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#5b7c99;">${esc(p.category)} · ${esc(p.date)} · ${esc(p.readTime)}</p>
+    <p style="font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#5b7c99;">${esc(p.category)} · ${esc(p.readTime)}</p>
     <h1 style="font-family:'Fraunces',Georgia,serif;font-size:38px;color:#F0ECE6;line-height:1.15;margin:8px 0 24px;">${esc(p.title)}</h1>
     <article>${mdToHtml(p.body)}</article>`
 }
@@ -184,15 +184,12 @@ function updatesContent() {
 
 // JSON-LD for a blog post (mirrors the client-side BlogPostPage schema).
 function articleJsonLd(p) {
-  let published
-  try { published = new Date(p.date).toISOString() } catch { published = undefined }
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: p.title,
     description: p.excerpt,
     image: p.image,
-    ...(published ? { datePublished: published } : {}),
     author: { '@type': 'Organization', name: 'HQue', url: BASE },
     publisher: { '@type': 'Organization', name: 'HQue', logo: { '@type': 'ImageObject', url: BASE + '/logo.svg' } },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${BASE}/blog/${p.slug}` },

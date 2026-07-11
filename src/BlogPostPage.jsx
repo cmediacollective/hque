@@ -7,9 +7,6 @@ export default function BlogPostPage({ slug, onGetStarted }) {
   const post = POSTS.find(p => p.slug === slug)
   const isMobile = window.innerWidth < 768
 
-  let publishedISO
-  try { publishedISO = post && post.date ? new Date(post.date).toISOString().slice(0, 10) : undefined } catch { publishedISO = undefined }
-
   useSEO({
     title: post ? post.title + ' | hque' : 'Article Not Found | hque',
     description: post ? post.excerpt : '',
@@ -22,7 +19,6 @@ export default function BlogPostPage({ slug, onGetStarted }) {
       headline: post.title,
       description: post.excerpt,
       image: post.image,
-      ...(publishedISO ? { datePublished: publishedISO } : {}),
       author: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com' },
       publisher: { '@type': 'Organization', name: 'HQue', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
       mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://h-que.com/blog/' + post.slug },
@@ -64,7 +60,6 @@ export default function BlogPostPage({ slug, onGetStarted }) {
           <a href="/blog" style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', textDecoration: 'none' }}>← The Pitch</a>
           <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#444', border: '0.5px solid #2A2A2A', padding: '3px 10px', borderRadius: '1px' }}>{post.category}</span>
           <span style={{ fontSize: '10px', color: '#444' }}>{post.readTime}</span>
-          <span style={{ fontSize: '10px', color: '#333' }}>{post.date}</span>
         </div>
 
         <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: isMobile ? '28px' : '42px', fontWeight: 'normal', color: '#F0ECE6', lineHeight: 1.15, marginBottom: '20px' }}>{post.title}</div>
