@@ -28,9 +28,10 @@ export default function CompsPanel({ dark = true }) {
     setListError(null)
     const { data, error } = await supabase.rpc('list_comped_accounts')
     if (error) {
-      setListError(/does not exist|function|schema/.test(error.message || '')
+      const notFound = error.code === 'PGRST202' || /could not find the function/i.test(error.message || '')
+      setListError(notFound
         ? 'The comps list isn’t set up in the database yet — the one-time SQL step still needs to be run.'
-        : 'Couldn’t load the list.')
+        : `Couldn’t load the list: ${error.message || 'unknown error'}${error.hint ? ' — ' + error.hint : ''}`)
       setList([])
       return
     }
@@ -48,11 +49,12 @@ export default function CompsPanel({ dark = true }) {
       const { data, error } = await supabase.rpc('grant_lifetime_business', { p_email: e })
       if (error) {
         const m = error.message || ''
+        const notFound = error.code === 'PGRST202' || /could not find the function/i.test(m)
         setResult({ ok: false, msg: /not_authorized/.test(m)
           ? 'Only the master account’s owner or admin can do this.'
-          : /does not exist|function|schema/.test(m)
+          : notFound
             ? 'The access tool isn’t set up in the database yet — the one-time SQL step still needs to be run.'
-            : 'Something went wrong. Please try again.' })
+            : `Something went wrong: ${m || 'unknown error'}` })
       } else if (data?.ok) {
         setResult({ ok: true, msg: `✓ ${data.org_name || 'That account'} now has lifetime Business access. Ask them to refresh or log back in.` })
         setEmail('')
@@ -80,7 +82,7 @@ export default function CompsPanel({ dark = true }) {
     try {
       const { data, error } = await supabase.rpc('revoke_lifetime_access', { p_org: row.org_id })
       if (error || !data?.ok) {
-        window.alert('Couldn’t revoke access. Please try again.')
+        window.alert(error ? `Couldn’t revoke access: ${error.message || 'unknown error'}` : 'Couldn’t revoke access. Please try again.')
       } else {
         loadList()
       }
