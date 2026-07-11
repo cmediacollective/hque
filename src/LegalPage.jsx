@@ -1,4 +1,5 @@
 import MarketingNav from './MarketingNav'
+import Footer from './Footer'
 import useSEO from './useSEO'
 
 const PRIVACY_HTML = `<div style="font-family: Arial, sans-serif; color: #595959; font-size: 14px; line-height: 1.6; max-width: 860px; margin: 0 auto;">
@@ -215,14 +216,7 @@ export default function LegalPage({ type, onGetStarted }) {
         <div dangerouslySetInnerHTML={{ __html: isPrivacy ? PRIVACY_HTML : TERMS_HTML }} />
       </div>
 
-      <div style={{ borderTop: '1px solid #eee', padding: '24px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-        <a href="/" style={{ fontSize: '12px', color: '#5b7c99', textDecoration: 'none' }}>← Back to HQue</a>
-        <div style={{ display: 'flex', gap: '24px' }}>
-          <a href="/privacy" style={{ fontSize: '12px', color: '#999', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="/terms" style={{ fontSize: '12px', color: '#999', textDecoration: 'none' }}>Terms of Service</a>
-          <a href="mailto:support@h-que.com" style={{ fontSize: '12px', color: '#999', textDecoration: 'none' }}>support@h-que.com</a>
-        </div>
-      </div>
+      <Footer />
     </div>
   )
 }
