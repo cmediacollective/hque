@@ -544,27 +544,24 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
   return (
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden', background: bg }}>
-      <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} />
+      {/* Mobile drills down instead of splitting the screen: the brand list fills
+          the phone until you pick a brand, then the board gets the full width.
+          A 220px column next to a board leaves ~170px for the board on a phone. */}
+      {(!isMobile || !selectedBrand) && (
+        <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} fullWidth={isMobile} />
+      )}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: isMobile && !selectedBrand ? 'none' : 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {!selectedBrand && !isMobile && (
           <MyTasksDashboard userId={userId} orgId={orgId} dark={dark} brands={brands} onSelectBrand={setSelectedBrand} onOpenTask={openTaskById} agencyTz={agencyTz} />
-        )}
-        {!selectedBrand && isMobile && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
-            <div style={{ textAlign: 'center', maxWidth: '360px' }}>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, marginBottom: '10px' }}>Select a brand/client</div>
-              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7 }}>Choose a brand or client from the sidebar to see its Kanban board.</div>
-            </div>
-          </div>
         )}
 
         {selectedBrand && (
           <>
-            <div style={{ padding: '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
-              <button onClick={() => setSelectedBrand(null)} title='Back to My Tasks dashboard' style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 500 }}>
+            <div style={{ padding: isMobile ? '14px 16px' : '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
+              <button onClick={() => setSelectedBrand(null)} title={isMobile ? 'Back to brands' : 'Back to My Tasks dashboard'} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 500 }}>
                 <span style={{ fontSize: '12px', lineHeight: 1 }}>←</span>
-                <span>My Tasks</span>
+                <span>{isMobile ? 'Brands' : 'My Tasks'}</span>
               </button>
               {selectedBrand.id === '__internal' ? (
                 <div style={{ width: '44px', height: '44px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>

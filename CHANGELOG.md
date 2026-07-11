@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-11
+
+**The workspace finally works on a phone.** On mobile, the brand/client list used to sit in a fixed 220px column right next to your Kanban board — on a normal phone that's more than half the screen, leaving the board squeezed into a sliver you couldn't really use. Now the workspace drills down the way phone apps do: **the brand list fills the screen until you tap a brand, then the board gets the whole screen**, with a **← Brands** button in the header to go back. Nothing changes on desktop — you still get the brand list and board side by side. *(Requested by a customer on the Product Updates page.)*
+
+---
+
 ## 2026-07-10
 
 **Fixed: marketing links now go where they should.** Clicking **Pricing**, **The Pitch** (blog), **Privacy**, **Terms**, or an individual blog post used to dump you back on the home page instead of opening the page. Two things were behind it: a deploy that was missing the prerendered page files, and — the real culprit — the app was looking for the URL to be exactly `/pricing` while the live address is `/pricing/` (with a trailing slash), so it gave up and showed home. Both are fixed, so every marketing link now opens the right page.

@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 
-export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand }) {
+// fullWidth: on mobile the brand list is its own full-screen step (you pick a
+// brand, then the board takes the whole screen), so it fills the width instead
+// of sitting in a 220px column next to the board.
+export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
@@ -158,7 +161,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   }
 
   return (
-    <div style={{ width: '220px', background: bg, borderRight: `0.5px solid ${border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+    <div style={{ width: fullWidth ? '100%' : '220px', background: bg, borderRight: fullWidth ? 'none' : `0.5px solid ${border}`, display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
 
       {archiving && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setArchiving(null)}>
