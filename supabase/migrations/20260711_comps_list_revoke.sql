@@ -15,19 +15,21 @@ begin
     raise exception 'not_authorized';
   end if;
 
+  -- Explicit ::text casts: auth.users.email (and some org columns) are varchar,
+  -- and a RETURNS TABLE function requires the query's types to match exactly.
   return query
   select
     o.id,
-    o.name,
-    o.stripe_plan,
-    (select u.email
+    o.name::text,
+    o.stripe_plan::text,
+    (select u.email::text
        from profiles p
        join auth.users u on u.id = p.id
       where p.org_id = o.id
       order by (p.role = 'owner') desc nulls last
       limit 1) as owner_email,
-    case when exists (select 1 from appsumo_codes c where c.redeemed_by = o.id)
-         then 'AppSumo' else 'Comp' end as source
+    (case when exists (select 1 from appsumo_codes c where c.redeemed_by = o.id)
+          then 'AppSumo' else 'Comp' end)::text as source
   from organizations o
   where o.is_lifetime = true
   order by o.name;
