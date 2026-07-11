@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-10
+
+**Fixed: marketing links now go where they should.** Clicking **Pricing**, **The Pitch** (blog), **Privacy**, **Terms**, or an individual blog post used to dump you back on the home page instead of opening the page. Two things were behind it: a deploy that was missing the prerendered page files, and — the real culprit — the app was looking for the URL to be exactly `/pricing` while the live address is `/pricing/` (with a trailing slash), so it gave up and showed home. Both are fixed, so every marketing link now opens the right page.
+
+---
+
 ## 2026-07-05
 
 **Pick your logo or hque's — one switch, everywhere.** Business accounts now have a **"Logo Shown"** choice in **Settings → Agency Info**: show *your* uploaded logo or the default *hque* logo. It applies across every place your brand appears — workspace sidebar, PDF exports, your branded login page, the talent inquiry form, and billing screens — so your branding stays consistent. It **defaults to the hque logo** until you switch it on, which means uploading a logo no longer changes your branding by itself; you decide when to flip it. Starter and Pro always show the hque logo. (The switch is only offered on Business and the master account.)

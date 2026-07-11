@@ -354,25 +354,31 @@ function App() {
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
 
-  const isSandboxPage = window.location.pathname === '/sandbox'
-  const isInquiryPage = window.location.pathname === '/apply' || window.location.search.includes('agency=')
-  const isRedeemPage = window.location.pathname === '/redeem'
-  const isPrivacyPage = window.location.pathname === '/privacy'
-  const isTermsPage = window.location.pathname === '/terms'
-  const isUpdatesPage = window.location.pathname === '/updates' || window.location.pathname === '/updates/'
-  const isFaqPage = window.location.pathname === '/faq'
-  const isPricingPage = window.location.pathname === '/pricing'
-  const isBlogPage = window.location.pathname === '/blog'
-  const blogPostSlug = window.location.pathname.startsWith('/blog/') ? window.location.pathname.replace('/blog/', '') : null
-  const talentProfileSlug = window.location.pathname.startsWith('/talent/')
-    ? decodeURIComponent(window.location.pathname.replace('/talent/', '').replace(/\/$/, ''))
+  // Normalize a trailing slash. Netlify 301-redirects prerendered pages like
+  // /pricing to /pricing/ (they're served from /pricing/index.html), so the
+  // browser lands on the slashed URL. Without stripping it, these exact-path
+  // checks miss and the app falls back to the home view — i.e. clicking a nav
+  // link (Pricing, The Pitch, Privacy, Terms…) would dump the user on home.
+  const path = window.location.pathname !== '/' ? window.location.pathname.replace(/\/+$/, '') : '/'
+  const isSandboxPage = path === '/sandbox'
+  const isInquiryPage = path === '/apply' || window.location.search.includes('agency=')
+  const isRedeemPage = path === '/redeem'
+  const isPrivacyPage = path === '/privacy'
+  const isTermsPage = path === '/terms'
+  const isUpdatesPage = path === '/updates'
+  const isFaqPage = path === '/faq'
+  const isPricingPage = path === '/pricing'
+  const isBlogPage = path === '/blog'
+  const blogPostSlug = path.startsWith('/blog/') ? path.replace('/blog/', '') : null
+  const talentProfileSlug = path.startsWith('/talent/')
+    ? decodeURIComponent(path.replace('/talent/', ''))
     : null
   // Branded login: a single-segment path like /acme (the agency's workspace slug)
   // shows a login screen with that agency's logo. Excludes all known top-level routes.
   const RESERVED_PATHS = new Set(['sandbox', 'apply', 'redeem', 'privacy', 'terms', 'updates', 'faq', 'pricing', 'blog', 'talent', 'campaign', 'roster', 'task', 'reports', 'login', 'signup', 'app', 'admin', 'onboarding', 'settings'])
   const brandedLoginSlug = (() => {
     try {
-      const m = (window.location.pathname || '').match(/^\/([^/]+)\/?$/)
+      const m = (path || '').match(/^\/([^/]+)\/?$/)
       if (!m) return null
       const seg = decodeURIComponent(m[1]).toLowerCase()
       return RESERVED_PATHS.has(seg) ? null : seg
