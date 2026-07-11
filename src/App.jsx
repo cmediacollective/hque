@@ -841,7 +841,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} isMaster={isMasterAdmin} onAgencyLogoChange={setAgencyLogoUrl} onUseAgencyLogoChange={setUseAgencyLogo} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} isMaster={isMasterAdmin} previewing={previewing} onAgencyLogoChange={setAgencyLogoUrl} onUseAgencyLogoChange={setUseAgencyLogo} />
                 </div>
               )}
             </Suspense>

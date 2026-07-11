@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import CompsPanel from './CompsPanel'
 import { supabase } from './supabase'
 import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
-export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, onAgencyLogoChange, onUseAgencyLogoChange }) {
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, previewing, onAgencyLogoChange, onUseAgencyLogoChange }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -274,7 +275,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
     ...(currentUserRole === 'owner' || currentUserRole === 'admin' ? [{ key: 'billing', label: 'Billing' }] : []),
-    { key: 'updates', label: 'Product Updates' }
+    { key: 'updates', label: 'Product Updates' },
+    ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : [])
   ]
 
   return (
@@ -591,6 +593,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
         {activeTab === 'updates' && (
           <ProductUpdatesAdmin dark={dark} isMaster={isPlatformAdmin} />
+        )}
+
+        {activeTab === 'comps' && isMaster && !previewing && (
+          <CompsPanel dark={dark} />
         )}
 
       </div>
