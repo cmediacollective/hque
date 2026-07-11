@@ -153,7 +153,7 @@ export default function HQMetricsView({ dark = true }) {
       trafficHtml = `<div style="font-size:12px;color:#aaa;">Google Analytics data unavailable.</div>`
     }
 
-    const subsHtml = row([box('Starter · $49', num(s.byPlan.starter)), box('Pro · $99', num(s.byPlan.pro)), box('Business · $199', num(s.byPlan.agency)), box('Lifetime (AppSumo)', num(s.lifetime))]) +
+    const subsHtml = row([box('Starter · $49', num(s.byPlan.starter)), box('Pro · $99', num(s.byPlan.pro)), box('Business · $199', num(s.byPlan.agency)), box('Lifetime (AppSumo)', num(s.lifetime)), box('Comped (free)', num(s.comps || 0))]) +
       row([box('Trialing', num(s.trialing)), box('Trial expired', num(s.trialExpired)), box('Past due', num(s.pastDue)), box('Canceled', num(s.canceled))])
 
     const signupsHtml = row([box('New (last 7 days)', num(g.last7)), box('New (last 30 days)', num(g.last30))]) +
@@ -240,6 +240,7 @@ export default function HQMetricsView({ dark = true }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '32px' }}>
         <Stat label="Paying subscribers" value={s.paying} sub={`${s.total} accounts total`} {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="Lifetime deals" value={s.lifetime} sub="AppSumo, permanent" {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="Comped accounts" value={s.comps || 0} sub="free Business, granted" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} />
         <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} />
       </div>

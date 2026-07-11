@@ -49,11 +49,16 @@ exports.handler = async (event) => {
     const now = Date.now()
     const PRICE = { starter: 49, pro: 99, agency: 199 }
 
+    // Orgs that redeemed an AppSumo code — used to split lifetime accounts into
+    // paid AppSumo deals vs. free comps granted from Settings → Comps.
+    const appsumoOrgIds = new Set(codeList.filter(c => c.status === 'redeemed' && c.redeemed_by).map(c => c.redeemed_by))
+
     // --- Subscribers -----------------------------------------------------
     const s = {
       total: orgList.length,
       paying: 0,
       lifetime: 0,
+      comps: 0,
       trialing: 0,
       trialExpired: 0,
       pastDue: 0,
@@ -62,7 +67,7 @@ exports.handler = async (event) => {
       mrr: 0,
     }
     for (const o of orgList) {
-      if (o.is_lifetime) { s.lifetime++; continue }
+      if (o.is_lifetime) { if (appsumoOrgIds.has(o.id)) s.lifetime++; else s.comps++; continue }
       if (o.stripe_plan && o.subscription_status === 'active') {
         s.paying++
         if (s.byPlan[o.stripe_plan] != null) s.byPlan[o.stripe_plan]++
