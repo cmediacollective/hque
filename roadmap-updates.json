@@ -1,5 +1,11 @@
 [
   {
+    "title": "Marketing pages now open correctly",
+    "description": "Fixed an issue where clicking Pricing, The Pitch, Privacy, or Terms could send you back to the home page instead of opening the page. Every public link now goes straight to the right page.",
+    "category": "Fix",
+    "shipped_at": "2026-07-10"
+  },
+  {
     "title": "hque now shows up on Google, AI search, and shared links",
     "description": "Our public pages — homepage, pricing, FAQ, blog, and every blog post — are now fully readable by Google, ChatGPT, and other AI assistants, with unique titles, descriptions, and a branded preview image when you share a link. Your logged-in workspace stays private and out of search.",
     "category": "Improvement",
