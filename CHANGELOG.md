@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-11
 
+**Light mode is properly light now.** A few screens ignored your theme and stayed dark regardless. Opening a **Creator** or **Campaign** detail panel showed it in the *opposite* theme to the rest of the app, and adding a creator did the same — so in light mode you'd get a black panel sliding over a white page. Inside those panels, some parts were dark no matter what: the talent payment/performance editor was a black form with black boxes dropped into a white panel, and outreach-log rows were near-black with near-black text on them, which made them effectively unreadable. Hovering a campaign row also left it stuck black. All of it now follows whichever theme you've chosen, and a few grey labels that were too faint to read against their own background have been darkened.
+
 **You can now cancel your plan, or close your account, from inside HQue.** Neither was possible before — cancelling meant finding your way into Stripe's portal, and there was no way at all to delete an account. Both now live in a **Danger zone** at the bottom of Settings → Billing, and only the Owner sees them.
 
 **Cancel my plan** stops the billing at the end of the period you've already paid for. You keep full access until then, and **your data is kept** — the workspace simply locks until you pick a plan again. While a cancellation is pending, Billing shows the exact end date and a **Resume my plan** button, so changing your mind costs one click. (Lifetime and AppSumo accounts don't see this — there's no subscription to cancel.)

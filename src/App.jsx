@@ -632,7 +632,7 @@ function App() {
 
   return (
     <div style={{ background: bg, minHeight: '100vh', color: text, fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif", overflowX: 'hidden' }}>
-      {showForm && <AddCreatorForm orgId={orgId} dark={!dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
+      {showForm && <AddCreatorForm orgId={orgId} dark={dark} onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); setRefresh(r => r + 1) }} />}
       {showLimitModal && (
         <div onClick={() => setShowLimitModal(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: dark ? '#222' : '#FFF', border: `0.5px solid ${border}`, borderRadius: '3px', padding: '32px', width: '100%', maxWidth: '380px', textAlign: 'center' }}>

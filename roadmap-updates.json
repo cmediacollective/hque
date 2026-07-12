@@ -1,5 +1,11 @@
 [
   {
+    "title": "Light mode now looks right everywhere",
+    "description": "Creator and Campaign detail panels used to open in the opposite theme to the rest of the app, so in light mode you'd get a black panel over a white page. Parts of them stayed dark regardless of your theme — the talent payment editor and the outreach log were unreadable in light mode, and hovering a campaign row left it stuck black. Everything now follows the theme you've picked.",
+    "category": "Fix",
+    "shipped_at": "2026-07-11"
+  },
+  {
     "title": "Cancel your plan or close your account, from inside HQue",
     "description": "Settings → Billing now has a Danger zone. Cancel my plan stops the billing at the end of the period you've paid for and keeps all your data — with a Resume button if you change your mind. Close this account locks the workspace and cancels billing straight away, but nothing is deleted for 30 days: until then the owner can restore everything with one click. Both are owner-only.",
     "category": "Feature",

@@ -43,7 +43,16 @@ function DocPreview({ url, label, onClose }) {
   )
 }
 
-function TalentEditor({ link, onSave, onCancel }) {
+function TalentEditor({ link, onSave, onCancel, dark = true }) {
+  // Follows the panel it's rendered inside — it used to be hardcoded dark, which
+  // put a black form with black inputs in the middle of the light-mode panel.
+  const editorBg = dark ? '#141414' : '#F5F3EF'
+  const inputBg = dark ? '#1A1A1A' : '#FFFFFF'
+  const editorBorder = dark ? '#3A3A3A' : '#CCC7BF'
+  const editorText = dark ? '#F2EEE8' : '#1A1A1A'
+  const label = dark ? '#666' : '#888'
+  const idle = dark ? '#777' : '#666'
+
   const [form, setForm] = useState({
     payment_status: link.payment_status || 'Pending',
     payment_method: link.payment_method || '',
@@ -56,45 +65,45 @@ function TalentEditor({ link, onSave, onCancel }) {
   })
 
   return (
-    <div style={{ background: '#141414', border: '0.5px solid #3A3A3A', padding: '16px', marginTop: '1px' }}>
+    <div style={{ background: editorBg, border: `0.5px solid ${editorBorder}`, padding: '16px', marginTop: '1px' }}>
 
       <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>Payment</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Status</div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>Status</div>
           <div style={{ display: 'flex', gap: '4px' }}>
             {['Pending', 'Paid'].map(s => (
               <button key={s} onClick={() => setForm(f => ({ ...f, payment_status: s }))} style={{
                 padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase',
-                border: `0.5px solid ${form.payment_status === s ? '#5b7c99' : '#3A3A3A'}`,
-                color: form.payment_status === s ? '#5b7c99' : '#777',
+                border: `0.5px solid ${form.payment_status === s ? '#5b7c99' : editorBorder}`,
+                color: form.payment_status === s ? '#5b7c99' : idle,
                 background: 'none', cursor: 'pointer', borderRadius: '1px'
               }}>{s}</button>
             ))}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Method</div>
-          <select value={form.payment_method} onChange={e => setForm(f => ({ ...f, payment_method: e.target.value }))} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>Method</div>
+          <select value={form.payment_method} onChange={e => setForm(f => ({ ...f, payment_method: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${editorBorder}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: editorText, outline: 'none' }}>
             <option value=''>Select...</option>
             {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </div>
         <div>
-          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Date Paid</div>
-          <input type='date' value={form.payment_date} onChange={e => setForm(f => ({ ...f, payment_date: e.target.value }))} style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }} />
+          <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>Date Paid</div>
+          <input type='date' value={form.payment_date} onChange={e => setForm(f => ({ ...f, payment_date: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${editorBorder}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: editorText, outline: 'none', boxSizing: 'border-box' }} />
         </div>
       </div>
 
       <div style={{ fontSize: '7px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>Role & Performance</div>
       <div>
-        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Role</div>
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>Role</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '12px' }}>
           {ROLES.map(r => (
             <button key={r} onClick={() => setForm(f => ({ ...f, role: f.role === r ? '' : r }))} style={{
               padding: '3px 10px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase',
-              border: `0.5px solid ${form.role === r ? '#5b7c99' : '#3A3A3A'}`,
-              color: form.role === r ? '#5b7c99' : '#777',
+              border: `0.5px solid ${form.role === r ? '#5b7c99' : editorBorder}`,
+              color: form.role === r ? '#5b7c99' : idle,
               background: 'none', cursor: 'pointer', borderRadius: '1px'
             }}>{r}</button>
           ))}
@@ -103,19 +112,19 @@ function TalentEditor({ link, onSave, onCancel }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '12px' }}>
         {[['Views', 'views'], ['Likes', 'likes'], ['Reach', 'reach']].map(([lbl, key]) => (
           <div key={key}>
-            <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>{lbl}</div>
-            <input type='number' value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder='0' style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }} />
+            <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>{lbl}</div>
+            <input type='number' value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${editorBorder}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: editorText, outline: 'none', boxSizing: 'border-box' }} />
           </div>
         ))}
       </div>
       <div style={{ marginBottom: '14px' }}>
-        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#666', marginBottom: '5px' }}>Performance Notes</div>
-        <textarea value={form.performance_notes} onChange={e => setForm(f => ({ ...f, performance_notes: e.target.value }))} placeholder='e.g. Strong engagement, comment section very positive...' style={{ width: '100%', background: '#1A1A1A', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '8px', fontSize: '11px', color: '#F2EEE8', outline: 'none', height: '70px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+        <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: label, marginBottom: '5px' }}>Performance Notes</div>
+        <textarea value={form.performance_notes} onChange={e => setForm(f => ({ ...f, performance_notes: e.target.value }))} placeholder='e.g. Strong engagement, comment section very positive...' style={{ width: '100%', background: inputBg, border: `0.5px solid ${editorBorder}`, borderRadius: '1px', padding: '8px', fontSize: '11px', color: editorText, outline: 'none', height: '70px', resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
       </div>
 
       <div style={{ display: 'flex', gap: '6px' }}>
         <button onClick={() => onSave(form)} style={{ padding: '5px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Save</button>
-        <button onClick={onCancel} style={{ padding: '5px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #3A3A3A', color: '#777', cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
+        <button onClick={onCancel} style={{ padding: '5px 14px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${editorBorder}`, color: idle, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
       </div>
     </div>
   )
@@ -347,7 +356,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
       {editingBrandId && (
         <BrandDetail
           brandId={editingBrandId}
-          dark={true}
+          dark={dark}
           onClose={() => setEditingBrandId(null)}
           onSaved={() => fetchCampaign()}
         />
@@ -550,6 +559,7 @@ export default function CampaignDetail({ campaign: initialCampaign, onClose, onS
                       {editingLink === link.id && (
                         <TalentEditor
                           link={link}
+                          dark={dark}
                           onSave={(form) => saveLink(link.id, form)}
                           onCancel={() => setEditingLink(null)}
                         />

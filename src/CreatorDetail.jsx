@@ -136,12 +136,13 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
   )
 }
 
-export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = false }) {
+export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = true }) {
   const panelBg = dark ? '#1A1A1A' : '#F8F7F3'
   const panelBorder = dark ? '#2A2A2A' : '#DBD7D0'
   const panelText = dark ? '#F2EEE8' : '#1A1A1A'
   const panelMuted = dark ? '#888' : '#666'
   const panelCard = dark ? '#222' : '#FFFFFF'
+  const panelHover = dark ? '#222' : '#ECEAE4'
   const [editing, setEditing] = useState(false)
   const [campaigns, setCampaigns] = useState([])
   const [allCampaigns, setAllCampaigns] = useState([])
@@ -384,7 +385,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Niches</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                   {creator.niches.map(n => (
-                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${panelBorder}`, color: '#999', borderRadius: '1px' }}>{n}</span>
+                    <span key={n} style={{ padding: '3px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${panelBorder}`, color: panelMuted, borderRadius: '1px' }}>{n}</span>
                   ))}
                 </div>
               </div>
@@ -423,13 +424,13 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             {creator.notes && (
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Internal Notes</div>
-                <div style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.7, padding: '14px', background: panelCard, borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={creator.notes} dark={dark} /></div>
+                <div style={{ fontSize: '13px', color: panelMuted, lineHeight: 1.7, padding: '14px', background: panelCard, borderRadius: '1px', whiteSpace: 'pre-wrap' }}><Linkify text={creator.notes} dark={dark} /></div>
               </div>
             )}
 
             <div style={{ marginBottom: '28px' }}>
               {sectionHeader('Outreach Log',
-                <button onClick={() => setShowOutreachForm(f => !f)} style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: showOutreachForm ? 'none' : '#5b7c99', border: `0.5px solid ${showOutreachForm ? '#3A3A3A' : 'none'}`, color: showOutreachForm ? '#777' : '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                <button onClick={() => setShowOutreachForm(f => !f)} style={{ padding: '3px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', background: showOutreachForm ? 'none' : '#5b7c99', border: `0.5px solid ${showOutreachForm ? panelBorder : 'none'}`, color: showOutreachForm ? panelMuted : '#fff', cursor: 'pointer', borderRadius: '1px' }}>
                   {showOutreachForm ? 'Cancel' : '+ Log Outreach'}
                 </button>
               )}
@@ -450,7 +451,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: panelCard, borderRadius: '1px', overflow: 'hidden' }}>
                   {outreachLogs.map(log => (
                     <div key={log.id}
-                      style={{ background: hoveredLog === log.id ? '#222' : '#1A1A1A', padding: '12px 14px', position: 'relative' }}
+                      style={{ background: hoveredLog === log.id ? panelHover : panelBg, padding: '12px 14px', position: 'relative' }}
                       onMouseEnter={() => setHoveredLog(log.id)}
                       onMouseLeave={() => setHoveredLog(null)}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
@@ -483,8 +484,8 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
                     <div key={c.id}
                       onClick={() => onOpenCampaign(c)}
                       style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px', background: panelBg, cursor: 'pointer' }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#222'}
-                      onMouseLeave={e => e.currentTarget.style.background = '#1A1A1A'}>
+                      onMouseEnter={e => e.currentTarget.style.background = panelHover}
+                      onMouseLeave={e => e.currentTarget.style.background = panelBg}>
                       <div>
                         <div style={{ fontSize: '13px', color: panelText }}>{c.name}</div>
                         {c.brand && <div style={{ fontSize: '10px', color: panelMuted, marginTop: '2px' }}>{c.brand}</div>}

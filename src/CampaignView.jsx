@@ -229,7 +229,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       {selected && (
         <CampaignDetail
           campaign={selected}
-          dark={!dark}
+          dark={dark}
           orgId={orgId}
           members={members}
           onClose={() => setSelected(null)}

@@ -453,7 +453,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                       <div style={{ fontSize: '13px', color: text }}>{s.label}</div>
                       <div style={{ fontSize: '11px', color: muted, marginTop: '2px' }}>{s.email} · Gmail account #{s.gmail_index}</div>
                     </div>
-                    {canEditAgency && <button onClick={() => removeSender(i)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>}
+                    {canEditAgency && <button onClick={() => removeSender(i)} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>}
                   </div>
                 ))}
               </div>
