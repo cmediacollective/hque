@@ -4,8 +4,15 @@
 // feature, add an entry there — on the next deploy it's posted to the public
 // Product Updates roadmap automatically. No manual admin step needed.
 //
-// Safety: idempotent (only inserts titles that don't already exist), never
-// updates or deletes existing rows, and never fails the build (always exits 0).
+// Two things happen on deploy, both driven only by titles listed in that file:
+//   1. New titles are inserted as 'shipped'.
+//   2. Titles that already exist but aren't shipped yet (e.g. a customer's own
+//      feature request sitting in 'under_review' or 'planned') are PROMOTED to
+//      'shipped'. This keeps the submitter's name and votes on the original row
+//      instead of creating a duplicate — and means shipping a requested feature
+//      needs no manual admin step.
+// Safety: idempotent, never deletes, never touches rows whose titles aren't in
+// the file, and never fails the build (always exits 0).
 import { createClient } from '@supabase/supabase-js'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -35,25 +42,44 @@ async function main() {
 
   const supabase = createClient(url, key, { auth: { persistSession: false } })
 
-  const { data: existing, error: readErr } = await supabase.from('product_updates').select('title')
+  const { data: existing, error: readErr } = await supabase.from('product_updates').select('id, title, status')
   if (readErr) {
     console.log('[sync-roadmap] could not read existing updates — skipping.', readErr.message)
     return
   }
-  const have = new Set((existing || []).map(r => (r.title || '').trim()))
+  const byTitle = new Map((existing || []).map(r => [(r.title || '').trim(), r]))
+  const today = new Date().toISOString().slice(0, 10)
 
-  const toInsert = items
-    .filter(it => it && it.title && !have.has(it.title.trim()))
+  const wanted = items.filter(it => it && it.title)
+
+  // 1. Promote anything already in the table that we've now shipped (typically a
+  //    customer's own request, still sitting in under_review/planned).
+  const toPromote = wanted
+    .map(it => ({ it, row: byTitle.get(it.title.trim()) }))
+    .filter(({ row }) => row && row.status !== 'shipped')
+
+  for (const { it, row } of toPromote) {
+    const { error: upErr } = await supabase
+      .from('product_updates')
+      .update({ status: 'shipped', shipped_at: it.shipped_at || today })
+      .eq('id', row.id)
+    if (upErr) console.log(`[sync-roadmap] could not promote "${row.title}":`, upErr.message)
+    else console.log(`[sync-roadmap] promoted to shipped (was ${row.status}): ${row.title}`)
+  }
+
+  // 2. Insert titles we've never seen before.
+  const toInsert = wanted
+    .filter(it => !byTitle.has(it.title.trim()))
     .map(it => ({
       title: it.title.trim(),
       description: it.description ? String(it.description).trim() : null,
       category: ['Feature', 'Improvement', 'Fix'].includes(it.category) ? it.category : 'Feature',
       status: 'shipped',
-      shipped_at: it.shipped_at || new Date().toISOString().slice(0, 10),
+      shipped_at: it.shipped_at || today,
     }))
 
   if (toInsert.length === 0) {
-    console.log('[sync-roadmap] all roadmap items already present — nothing to insert.')
+    console.log(`[sync-roadmap] nothing new to insert (${toPromote.length} promoted).`)
     return
   }
 

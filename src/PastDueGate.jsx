@@ -22,10 +22,13 @@ export default function PastDueGate({ stripeCustomerId, pastDueSince, onLogout, 
     setLoading(true)
     setError('')
     try {
+      // The function looks the customer up from our own org — it no longer
+      // accepts a customerId from the browser.
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/.netlify/functions/create-portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: stripeCustomerId })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: '{}'
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url

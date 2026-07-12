@@ -1,5 +1,23 @@
 [
   {
+    "title": "Option to hide Workspace Band list on mobile view",
+    "description": "On a phone, the brand/client list used to sit in a fixed column next to your board, leaving the board squeezed into a sliver. The workspace now drills down instead: the brand list fills the screen, you tap a brand, and the board gets the whole screen — with a Brands button to go back. Desktop is unchanged.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-11"
+  },
+  {
+    "title": "Add definitions of roles",
+    "description": "Settings → Team now explains what Owner, Admin, and Member each can do, so you know exactly what you're handing someone before you invite them.",
+    "category": "Feature",
+    "shipped_at": "2026-07-11"
+  },
+  {
+    "title": "Only the account owner can change or cancel your plan",
+    "description": "Billing is now owner-only. Admins can still run the workspace — invite people, change roles, edit agency info — but they can no longer change your plan, update the card, or cancel the account. Anyone else who lands on the trial-ended or payment-failed screen is simply told which owner to ask.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-11"
+  },
+  {
     "title": "Marketing pages now open correctly",
     "description": "Fixed an issue where clicking Pricing, The Pitch, Privacy, or Terms could send you back to the home page instead of opening the page. Every public link now goes straight to the right page.",
     "category": "Fix",

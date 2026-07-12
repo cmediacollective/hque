@@ -54,10 +54,13 @@ export default function BillingView({ dark = true, orgId, user }) {
     setLoading(plan.key)
     setError('')
     try {
+      // The function verifies we're the owner from this token — it no longer
+      // trusts an orgId sent from the browser.
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/.netlify/functions/create-checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: plan.priceId, orgId, email: user?.email })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ priceId: plan.priceId })
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -72,10 +75,13 @@ export default function BillingView({ dark = true, orgId, user }) {
     if (!stripeCustomerId) return
     setPortalLoading(true)
     try {
+      // The function looks the customer up from our own org — it no longer
+      // accepts a customerId from the browser.
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/.netlify/functions/create-portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: stripeCustomerId })
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: '{}'
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
