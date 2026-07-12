@@ -494,7 +494,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <button
                 onClick={() => setShowRoleHelp(v => !v)}
                 style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>What each role can do</span>
+                <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>Role Descriptions</span>
                 <span style={{ fontSize: '9px', color: subtle, marginLeft: 'auto' }}>{showRoleHelp ? '−' : '+'}</span>
               </button>
 
