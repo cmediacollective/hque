@@ -22,6 +22,7 @@ const InquiriesView = lazy(() => import('./InquiriesView'))
 const Onboarding = lazy(() => import('./Onboarding'))
 const UpgradeWall = lazy(() => import('./UpgradeWall'))
 const PastDueGate = lazy(() => import('./PastDueGate'))
+const ClosedAccountGate = lazy(() => import('./ClosedAccountGate'))
 const LandingPage = lazy(() => import('./LandingPage'))
 const LegalPage = lazy(() => import('./LegalPage'))
 const FAQPage = lazy(() => import('./FAQPage'))
@@ -170,6 +171,9 @@ function App() {
   const [isMasterAdmin, setIsMasterAdmin] = useState(false)
   const [pastDueSince, setPastDueSince] = useState(null)
   const [stripeCustomerId, setStripeCustomerId] = useState(null)
+  // Account closed by its owner: locked for everyone, restorable until purge_after.
+  const [closedAt, setClosedAt] = useState(null)
+  const [purgeAfter, setPurgeAfter] = useState(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [showWelcome, setShowWelcome] = useState(false)
   const [agencyLogoUrl, setAgencyLogoUrl] = useState(null)
@@ -464,7 +468,7 @@ function App() {
     setUseAgencyLogo(!!data?.use_agency_logo)
     if (data?.timezone) setAgencyTz(data.timezone)
     const [{ data: org }, { data: master }] = await Promise.all([
-      supabase.from('organizations').select('trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id').eq('id', oid).single(),
+      supabase.from('organizations').select('name, trial_ends_at, stripe_plan, subscription_status, past_due_since, stripe_customer_id, deleted_at, purge_after').eq('id', oid).single(),
       supabase.rpc('is_platform_admin'),
     ])
     setIsMasterAdmin(master === true)  // master account (HQue creator) — never gated by billing
@@ -473,6 +477,8 @@ function App() {
     setSubscriptionStatus(org?.subscription_status || null)
     setPastDueSince(org?.past_due_since || null)
     setStripeCustomerId(org?.stripe_customer_id || null)
+    setClosedAt(org?.deleted_at || null)
+    setPurgeAfter(org?.purge_after || null)
   }
 
   function handleOnboardingComplete(newOrgId, newAgencyName) {
@@ -601,6 +607,9 @@ function App() {
   if (!user && brandedLoginSlug) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} agencySlug={brandedLoginSlug} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
+  // A closed account outranks every billing gate: nobody gets in, and only the
+  // owner can bring it back (until purge_after, when it's wiped for good).
+  if (closedAt) return <ClosedAccountGate isOwner={isOwner} purgeAfter={purgeAfter} onLogout={handleLogout} />
   if (!isMasterAdmin && trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} isOwner={isOwner} />
   if (!isMasterAdmin && subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} isOwner={isOwner} orgId={orgId} />
   if (!isMasterAdmin && subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} isOwner={isOwner} />

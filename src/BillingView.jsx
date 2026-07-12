@@ -20,14 +20,80 @@ export default function BillingView({ dark = true, orgId, user }) {
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [pendingPlan, setPendingPlan] = useState(null)
 
+  // Danger zone: cancel the plan (keeps data) or close the account (30-day grace).
+  const [orgName, setOrgName] = useState('')
+  const [cancelAt, setCancelAt] = useState(null)
+  const [isLifetime, setIsLifetime] = useState(false)
+  const [cancelBusy, setCancelBusy] = useState(false)
+  const [confirmCancel, setConfirmCancel] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [deleteTyped, setDeleteTyped] = useState('')
+  const [deleteBusy, setDeleteBusy] = useState(false)
+
   useEffect(() => { fetchOrgBilling() }, [])
 
   async function fetchOrgBilling() {
-    const { data } = await supabase.from('organizations').select('stripe_customer_id, stripe_plan').eq('id', orgId).single()
+    const { data } = await supabase.from('organizations').select('name, stripe_customer_id, stripe_plan, cancel_at, is_lifetime').eq('id', orgId).single()
     if (data?.stripe_customer_id) setStripeCustomerId(data.stripe_customer_id)
     if (data?.stripe_plan) setStripePlan(data.stripe_plan)
+    setOrgName(data?.name || '')
+    setCancelAt(data?.cancel_at || null)
+    setIsLifetime(!!data?.is_lifetime)
     const { data: settings } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (settings?.use_agency_logo && settings?.agency_logo_url) setLogoUrl(settings.agency_logo_url)
+  }
+
+  const fmtDate = (d) => new Date(d).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+
+  // Cancel ends the plan when the paid period runs out; resume undoes that.
+  async function setCancellation(resume) {
+    setCancelBusy(true)
+    setError('')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/.netlify/functions/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({ resume: !!resume }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) setError(data.error || 'Something went wrong')
+      else { setCancelAt(data.cancel_at); setConfirmCancel(false) }
+    } catch (err) {
+      setError('Couldn’t reach the server. Please try again.')
+    }
+    setCancelBusy(false)
+  }
+
+  // Closing the account cancels billing and starts a 30-day countdown to a
+  // permanent wipe. App.jsx locks the workspace as soon as deleted_at is set.
+  async function deleteAccount() {
+    setDeleteBusy(true)
+    setError('')
+    try {
+      const { data, error: rpcErr } = await supabase.rpc('request_account_deletion')
+      if (rpcErr || !data?.ok) {
+        const reason = data?.reason
+        setError(
+          reason === 'not_owner' ? 'Only the workspace owner can close the account.'
+          : reason === 'master_account' ? 'This is the master account — it can’t be deleted.'
+          : rpcErr?.message || 'Couldn’t close the account. Please try again.'
+        )
+        setDeleteBusy(false)
+        return
+      }
+      // Best-effort: stop the billing too. The workspace is closed either way.
+      const { data: { session } } = await supabase.auth.getSession()
+      await fetch('/.netlify/functions/cancel-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token || ''}` },
+        body: JSON.stringify({}),
+      }).catch(() => {})
+      window.location.reload()
+    } catch (err) {
+      setError('Couldn’t close the account. Please try again.')
+      setDeleteBusy(false)
+    }
   }
 
   async function uploadLogo(file) {
@@ -185,8 +251,88 @@ export default function BillingView({ dark = true, orgId, user }) {
       </div>
 
       <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.7 }}>
-        Payments processed securely by Stripe. Click Manage Plan above to cancel or update your subscription through Stripe's billing portal. Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com</a>
+        Payments processed securely by Stripe. Questions? <a href='mailto:support@h-que.com' style={{ color: '#5b7c99', textDecoration: 'none' }}>support@h-que.com</a>
+      </div>
+
+      {/* Danger zone — cancelling and closing are deliberately different things:
+          cancelling stops the billing and keeps the data; closing wipes it. */}
+      <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#C77B5B', margin: '48px 0 14px' }}>Danger zone</div>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+
+        {/* Cancel plan (nothing to cancel on a lifetime/comped account) */}
+        {!isLifetime && (
+          <div style={{ padding: '20px 24px', borderBottom: `0.5px solid ${border}` }}>
+            {cancelAt ? (
+              <>
+                <div style={{ fontSize: '13px', color: text, marginBottom: '6px' }}>Your plan ends on {fmtDate(cancelAt)}</div>
+                <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px', maxWidth: '560px' }}>
+                  You keep full access until then. After that the workspace locks until you choose a plan again — your data stays put.
+                </div>
+                <button onClick={() => setCancellation(true)} disabled={cancelBusy} style={{ padding: '9px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: cancelBusy ? 'default' : 'pointer', borderRadius: '3px', opacity: cancelBusy ? 0.6 : 1 }}>
+                  {cancelBusy ? 'Working…' : 'Resume my plan'}
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: '13px', color: text, marginBottom: '6px' }}>Cancel my plan</div>
+                <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px', maxWidth: '560px' }}>
+                  Stops the billing at the end of the period you've already paid for. <strong style={{ color: text }}>Your data is kept</strong> — you can pick a plan again whenever you like.
+                </div>
+                {confirmCancel ? (
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '12px', color: text }}>Cancel the plan at the end of this period?</span>
+                    <button onClick={() => setCancellation(false)} disabled={cancelBusy} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#C77B5B', border: 'none', color: '#fff', cursor: cancelBusy ? 'default' : 'pointer', borderRadius: '3px', opacity: cancelBusy ? 0.6 : 1 }}>
+                      {cancelBusy ? 'Working…' : 'Yes, cancel'}
+                    </button>
+                    <button onClick={() => setConfirmCancel(false)} disabled={cancelBusy} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '3px' }}>Keep it</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setConfirmCancel(true)} disabled={!stripePlan} title={!stripePlan ? 'No active plan to cancel' : undefined} style={{ padding: '9px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: stripePlan ? 'pointer' : 'default', borderRadius: '3px', opacity: stripePlan ? 1 : 0.5 }}>
+                    Cancel plan
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Close the account */}
+        <div style={{ padding: '20px 24px' }}>
+          <div style={{ fontSize: '13px', color: text, marginBottom: '6px' }}>Close this account</div>
+          <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px', maxWidth: '560px' }}>
+            Locks everyone out immediately and cancels any billing. Your brands, boards, tasks, campaigns, and talent are <strong style={{ color: text }}>permanently deleted after 30 days</strong> — until then you can restore it yourself.
+          </div>
+
+          {deleteOpen ? (
+            <div style={{ border: `0.5px solid #C77B5B`, borderRadius: '3px', padding: '16px', maxWidth: '460px' }}>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '10px' }}>
+                Type <strong style={{ color: text }}>{orgName}</strong> to confirm.
+              </div>
+              <input
+                value={deleteTyped}
+                onChange={e => setDeleteTyped(e.target.value)}
+                placeholder={orgName}
+                style={{ width: '100%', background: inputBgSafe(dark), border: `0.5px solid ${border2}`, borderRadius: '3px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', marginBottom: '12px' }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={deleteAccount}
+                  disabled={deleteBusy || deleteTyped.trim() !== orgName}
+                  style={{ padding: '9px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#C0392B', border: 'none', color: '#fff', borderRadius: '3px', cursor: deleteBusy || deleteTyped.trim() !== orgName ? 'default' : 'pointer', opacity: deleteBusy || deleteTyped.trim() !== orgName ? 0.5 : 1 }}>
+                  {deleteBusy ? 'Closing…' : 'Close account'}
+                </button>
+                <button onClick={() => { setDeleteOpen(false); setDeleteTyped('') }} disabled={deleteBusy} style={{ padding: '9px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '3px' }}>Keep my account</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setDeleteOpen(true)} style={{ padding: '9px 18px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #C0392B', color: '#C0392B', cursor: 'pointer', borderRadius: '3px' }}>
+              Close account
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
 }
+
+const inputBgSafe = (dark) => (dark ? '#1A1A1A' : '#FFFFFF')

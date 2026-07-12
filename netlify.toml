@@ -7,6 +7,11 @@
 [functions."task-reminders"]
   schedule = "0 19 * * *"
 
+# Permanently wipes accounts whose owner closed them and whose 30-day grace
+# period has expired. Runs daily at 09:00 UTC (early morning Pacific).
+[functions."purge-accounts"]
+  schedule = "0 9 * * *"
+
 # Prerendered public marketing pages (/, /pricing, /faq, /blog, /blog/*, /updates,
 # /privacy, /terms) are written as real static files by scripts/prerender.mjs and
 # are served directly — Netlify serves an existing file before applying this rule.

@@ -1,5 +1,11 @@
 [
   {
+    "title": "Cancel your plan or close your account, from inside HQue",
+    "description": "Settings → Billing now has a Danger zone. Cancel my plan stops the billing at the end of the period you've paid for and keeps all your data — with a Resume button if you change your mind. Close this account locks the workspace and cancels billing straight away, but nothing is deleted for 30 days: until then the owner can restore everything with one click. Both are owner-only.",
+    "category": "Feature",
+    "shipped_at": "2026-07-11"
+  },
+  {
     "title": "Option to hide Workspace Band list on mobile view",
     "description": "On a phone, the brand/client list used to sit in a fixed column next to your board, leaving the board squeezed into a sliver. The workspace now drills down instead: the brand list fills the screen, you tap a brand, and the board gets the whole screen — with a Brands button to go back. Desktop is unchanged.",
     "category": "Improvement",
