@@ -5,6 +5,14 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 
+// A transparent version of a hex colour, so the tab-bar fade starts invisible and
+// ends in the page background rather than fading through grey.
+const hexToRgba = (hex, alpha) => {
+  const h = hex.replace('#', '')
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16)
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
+}
+
 export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, previewing, onAgencyLogoChange, onUseAgencyLogoChange }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
@@ -14,6 +22,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
+
+  const mobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles' })
@@ -49,6 +59,22 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [pendingInvites, setPendingInvites] = useState([])
   const [currentUserRole, setCurrentUserRole] = useState('member')
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false)
+
+  // Mobile tab bar: show the trailing fade only while there are tabs off-screen.
+  const tabsRef = useRef(null)
+  const [tabsOverflow, setTabsOverflow] = useState(false)
+
+  function updateTabFade() {
+    const el = tabsRef.current
+    if (!el) return
+    setTabsOverflow(el.scrollWidth - el.clientWidth - el.scrollLeft > 8)
+  }
+
+  useEffect(() => {
+    updateTabFade()
+    window.addEventListener('resize', updateTabFade)
+    return () => window.removeEventListener('resize', updateTabFade)
+  }, [])
 
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar(); checkPlatformAdmin() }, [])
 
@@ -285,17 +311,37 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   return (
     <div style={{ flex: 1, overflowY: 'auto', background: bg, display: 'flex', flexDirection: window.innerWidth < 768 ? 'column' : 'row' }}>
 
-      <div style={{ width: window.innerWidth < 768 ? '100%' : '180px', borderRight: window.innerWidth < 768 ? 'none' : `0.5px solid ${border}`, borderBottom: window.innerWidth < 768 ? `0.5px solid ${border}` : 'none', padding: '12px 0', flexShrink: 0, display: 'flex', flexDirection: window.innerWidth < 768 ? 'row' : 'column', overflowX: window.innerWidth < 768 ? 'auto' : 'visible' }}>
-        {tabs.map(t => (
-          <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
-            width: '100%', textAlign: 'left', padding: '9px 20px',
-            fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
-            background: 'none', border: 'none',
-            borderLeft: activeTab === t.key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-            color: activeTab === t.key ? text : muted, cursor: 'pointer',
-            fontWeight: activeTab === t.key ? '500' : '400'
-          }}>{t.label}</button>
-        ))}
+      {/* On mobile the tabs scroll sideways. Without a hint, the ones past the
+          edge (Billing, Product Updates, Comps) look like they don't exist — so
+          a fade sits over the trailing edge until you've scrolled to the end. */}
+      <div style={{ position: 'relative', flexShrink: 0, width: mobile ? '100%' : '180px' }}>
+        <div
+          ref={tabsRef}
+          onScroll={updateTabFade}
+          style={{ width: '100%', borderRight: mobile ? 'none' : `0.5px solid ${border}`, borderBottom: mobile ? `0.5px solid ${border}` : 'none', padding: '12px 0', display: 'flex', flexDirection: mobile ? 'row' : 'column', overflowX: mobile ? 'auto' : 'visible', scrollbarWidth: 'none' }}>
+          {tabs.map(t => (
+            <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+              width: mobile ? 'auto' : '100%', flexShrink: mobile ? 0 : 1,
+              whiteSpace: 'nowrap', textAlign: 'left', padding: '9px 20px',
+              fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
+              background: 'none', border: 'none',
+              borderLeft: activeTab === t.key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+              color: activeTab === t.key ? text : muted, cursor: 'pointer',
+              fontWeight: activeTab === t.key ? '500' : '400'
+            }}>{t.label}</button>
+          ))}
+        </div>
+
+        {mobile && tabsOverflow && (
+          <div style={{
+            position: 'absolute', top: 0, right: 0, bottom: '1px', width: '44px',
+            pointerEvents: 'none',
+            background: `linear-gradient(to right, ${hexToRgba(bg, 0)}, ${bg})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '6px',
+          }}>
+            <span style={{ fontSize: '12px', color: muted }}>›</span>
+          </div>
+        )}
       </div>
 
       <div style={{ flex: 1, padding: activeTab === 'billing' ? '0' : '32px', maxWidth: 'none', overflowY: 'auto' }}>
@@ -501,12 +547,15 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               {showRoleHelp && (
                 <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
-                    { role: 'Owner', color: '#5b7c99', summary: 'The person who created this workspace, and the only one who controls the money. There is one Owner, and they can’t be removed or switched to another role.', can: 'Everything an Admin can do, plus billing: change or cancel the plan, and update the payment method.' },
+                    { role: 'Owner', color: '#5b7c99', summary: 'Runs the workspace and controls the money.', can: 'Everything an Admin can do, plus billing: change or cancel the plan, and update the payment method. The Owner is the person who created this workspace — there is only one, and they can’t be removed or switched to another role.' },
                     { role: 'Admin', color: '#888', summary: 'Runs the workspace day to day, but can’t touch billing.', can: 'Invite and remove teammates, change roles, edit agency info, and view Reports. Can’t change the plan, pay, or cancel the account.' },
                     { role: 'Member', color: '#666', summary: 'Day-to-day access to the work itself.', can: 'Use brands, boards, tasks, campaigns, and talent. Can’t invite or remove teammates, change roles, see billing, or view Reports.' },
                   ].map(r => (
                     <div key={r.role} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: r.color, border: `0.5px solid ${r.color}`, padding: '3px 8px', borderRadius: '1px', flexShrink: 0, minWidth: '58px', textAlign: 'center' }}>{r.role}</span>
+                      {/* Fixed width, not minWidth: "MEMBER" is wider than "OWNER"/"ADMIN"
+                          at this size, so a min-width badge grew and pushed that row's
+                          text right, which read as a stray indent. */}
+                      <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: r.color, border: `0.5px solid ${r.color}`, padding: '3px 0', borderRadius: '1px', flexShrink: 0, width: '72px', boxSizing: 'border-box', textAlign: 'center' }}>{r.role}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: '12px', color: text, lineHeight: 1.6 }}>{r.summary}</div>
                         <div style={{ fontSize: '11px', color: muted, lineHeight: 1.6, marginTop: '3px' }}>{r.can}</div>
