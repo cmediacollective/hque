@@ -275,7 +275,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     { key: 'password', label: 'Password' },
-    ...(currentUserRole === 'owner' || currentUserRole === 'admin' ? [{ key: 'billing', label: 'Billing' }] : []),
+    // Billing is owner-only: plan changes, payment, and cancellation stay with
+    // the one person who owns the account, not every admin.
+    ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : []),
     { key: 'updates', label: 'Product Updates' },
     ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : [])
   ]
@@ -486,10 +488,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           <div>
             {sectionTitle('Team')}
 
-            {/* What each role can do. Kept in step with the actual gates:
-                every permission check in the app is (owner || admin), so an Admin
-                really does have the same access as the Owner — the Owner is just
-                the one account that can't be demoted or removed. */}
+            {/* What each role can do. Must stay in step with the actual gates:
+                billing is owner-only, everything else admin-level is (owner || admin). */}
             <div style={{ marginBottom: '20px', padding: '18px 20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
               <button
                 onClick={() => setShowRoleHelp(v => !v)}
@@ -501,8 +501,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               {showRoleHelp && (
                 <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {[
-                    { role: 'Owner', color: '#5b7c99', summary: 'The person who created this workspace. There is only one, and they can’t be removed or switched to another role.', can: 'Everything an Admin can do.' },
-                    { role: 'Admin', color: '#888', summary: 'Full access — the same as the Owner, apart from being removable.', can: 'Invite and remove teammates, change roles, manage billing, edit agency info, and view Reports.' },
+                    { role: 'Owner', color: '#5b7c99', summary: 'The person who created this workspace, and the only one who controls the money. There is one Owner, and they can’t be removed or switched to another role.', can: 'Everything an Admin can do, plus billing: change or cancel the plan, and update the payment method.' },
+                    { role: 'Admin', color: '#888', summary: 'Runs the workspace day to day, but can’t touch billing.', can: 'Invite and remove teammates, change roles, edit agency info, and view Reports. Can’t change the plan, pay, or cancel the account.' },
                     { role: 'Member', color: '#666', summary: 'Day-to-day access to the work itself.', can: 'Use brands, boards, tasks, campaigns, and talent. Can’t invite or remove teammates, change roles, see billing, or view Reports.' },
                   ].map(r => (
                     <div key={r.role} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
@@ -623,7 +623,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           </div>
         )}
 
-        {activeTab === 'billing' && (currentUserRole === 'owner' || currentUserRole === 'admin') && (
+        {activeTab === 'billing' && currentUserRole === 'owner' && (
           <BillingView dark={dark} orgId={orgId} user={user} />
         )}
 

@@ -2,17 +2,26 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { PLANS } from './plans'
 
-export default function UpgradeWall({ orgId, user, onLogout }) {
+// isOwner: only the workspace owner may choose a plan or pay. Admins and members
+// hitting this wall are told who to ask instead of being handed a checkout.
+export default function UpgradeWall({ orgId, user, onLogout, isOwner = false }) {
   const [loading, setLoading] = useState(null)
   const [error, setError] = useState('')
   const [logoUrl, setLogoUrl] = useState(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [pendingPlan, setPendingPlan] = useState(null)
+  const [owner, setOwner] = useState(null)
 
   useEffect(() => {
     supabase.from('org_settings').select('*').eq('org_id', orgId).single()
       .then(({ data }) => { if (data?.use_agency_logo && data?.agency_logo_url) setLogoUrl(data.agency_logo_url) })
   }, [orgId])
+
+  useEffect(() => {
+    if (isOwner || !orgId) return
+    supabase.from('profiles').select('full_name, email').eq('org_id', orgId).eq('role', 'owner').limit(1).maybeSingle()
+      .then(({ data }) => setOwner(data || null))
+  }, [isOwner, orgId])
 
   async function uploadLogo(file) {
     if (!file) return
@@ -50,6 +59,30 @@ export default function UpgradeWall({ orgId, user, onLogout }) {
       setError('Failed to start checkout. Please try again.')
     }
     setLoading(null)
+  }
+
+  if (!isOwner) {
+    const who = owner?.full_name || owner?.email
+    return (
+      <div style={{ background: '#1A1A1A', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+        <img src="/logo.svg" alt="HQue" style={{ width: '120px', marginBottom: '40px' }} />
+        <div style={{ fontFamily: 'Georgia, serif', fontSize: '28px', color: '#F0ECE6', marginBottom: '12px', textAlign: 'center' }}>Your trial has ended</div>
+        <div style={{ fontSize: '14px', color: '#999', marginBottom: '8px', textAlign: 'center', lineHeight: 1.7, maxWidth: '440px' }}>
+          Only the workspace owner can choose a plan and pay for this account.
+        </div>
+        <div style={{ fontSize: '13px', color: '#777', textAlign: 'center', lineHeight: 1.8, maxWidth: '440px' }}>
+          {who
+            ? <>Ask <span style={{ color: '#F0ECE6' }}>{who}</span> to pick a plan{owner?.email && owner?.full_name ? <> — <a href={`mailto:${owner.email}`} style={{ color: '#5b7c99', textDecoration: 'underline' }}>{owner.email}</a></> : null} and you'll be back in as soon as they do.</>
+            : <>Ask the owner of this workspace to pick a plan and you'll be back in as soon as they do.</>}
+        </div>
+        <div style={{ fontSize: '11px', color: '#555', marginTop: '32px', textAlign: 'center', maxWidth: '380px', lineHeight: 1.6 }}>
+          Need a hand? Email <a href="mailto:support@h-que.com" style={{ color: '#777', textDecoration: 'underline' }}>support@h-que.com</a>.
+        </div>
+        <button onClick={onLogout} style={{ marginTop: '24px', background: 'none', border: 'none', color: '#555', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+          Sign out
+        </button>
+      </div>
+    )
   }
 
   return (

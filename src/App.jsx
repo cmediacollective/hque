@@ -283,6 +283,8 @@ function App() {
   }, [user])
 
   const isAdmin = userRole === 'owner' || userRole === 'admin'
+  // Billing (plan changes, payment, cancellation) is owner-only — not admin.
+  const isOwner = userRole === 'owner'
 
   // Plan limits. Talent/seat caps follow the real plan (so they never block the
   // HQue team's own account). Reports is a Pro+ feature; for platform admins it
@@ -599,9 +601,9 @@ function App() {
   if (!user && brandedLoginSlug) return <Login onLogin={setUser} onShowSignUp={() => setShowSignUp(true)} agencySlug={brandedLoginSlug} />
   if (!user) return <LandingPage onGetStarted={() => setShowSignUp(true)} onSignIn={() => setShowLogin(true)} />
   if (user && !orgId) return <Onboarding user={user} onComplete={handleOnboardingComplete} />
-  if (!isMasterAdmin && trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
-  if (!isMasterAdmin && subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} />
-  if (!isMasterAdmin && subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} />
+  if (!isMasterAdmin && trialEndsAt && new Date(trialEndsAt) < new Date()) return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} isOwner={isOwner} />
+  if (!isMasterAdmin && subscriptionStatus === 'past_due') return <PastDueGate stripeCustomerId={stripeCustomerId} pastDueSince={pastDueSince} onLogout={handleLogout} isOwner={isOwner} orgId={orgId} />
+  if (!isMasterAdmin && subscriptionStatus === 'canceled') return <UpgradeWall orgId={orgId} user={user} onLogout={handleLogout} isOwner={isOwner} />
 
   const navItems = [
     { key: 'workspace', label: 'Workspace', pageLabel: 'Workspace' },

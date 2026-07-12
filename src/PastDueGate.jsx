@@ -1,8 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from './supabase'
 
-export default function PastDueGate({ stripeCustomerId, pastDueSince, onLogout }) {
+// isOwner: only the workspace owner may fix billing. Admins and members are told
+// who to ask rather than being sent into the Stripe portal.
+export default function PastDueGate({ stripeCustomerId, pastDueSince, onLogout, isOwner = false, orgId }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [owner, setOwner] = useState(null)
+
+  useEffect(() => {
+    if (isOwner || !orgId) return
+    supabase.from('profiles').select('full_name, email').eq('org_id', orgId).eq('role', 'owner').limit(1).maybeSingle()
+      .then(({ data }) => setOwner(data || null))
+  }, [isOwner, orgId])
 
   async function openPortal() {
     if (!stripeCustomerId) {
@@ -42,19 +52,30 @@ export default function PastDueGate({ stripeCustomerId, pastDueSince, onLogout }
         We weren't able to charge the card on file{sinceLabel ? ` since ${sinceLabel}` : ''}. Your HQue workspace is paused until billing is up to date.
       </div>
 
-      <div style={{ fontSize: '12px', color: '#777', marginBottom: '40px', textAlign: 'center', lineHeight: 1.7, maxWidth: '440px' }}>
-        Update your payment method and we'll retry the charge automatically — you'll be back in right after.
-      </div>
+      {isOwner ? (
+        <>
+          <div style={{ fontSize: '12px', color: '#777', marginBottom: '40px', textAlign: 'center', lineHeight: 1.7, maxWidth: '440px' }}>
+            Update your payment method and we'll retry the charge automatically — you'll be back in right after.
+          </div>
 
-      {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
+          {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
 
-      <button
-        onClick={openPortal}
-        disabled={loading}
-        style={{ padding: '12px 28px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: '0.5px solid #5b7c99', color: '#fff', cursor: loading ? 'default' : 'pointer', borderRadius: '1px', opacity: loading ? 0.7 : 1 }}
-      >
-        {loading ? 'Opening…' : 'Update payment method'}
-      </button>
+          <button
+            onClick={openPortal}
+            disabled={loading}
+            style={{ padding: '12px 28px', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', background: '#5b7c99', border: '0.5px solid #5b7c99', color: '#fff', cursor: loading ? 'default' : 'pointer', borderRadius: '1px', opacity: loading ? 0.7 : 1 }}
+          >
+            {loading ? 'Opening…' : 'Update payment method'}
+          </button>
+        </>
+      ) : (
+        <div style={{ fontSize: '13px', color: '#777', marginBottom: '8px', textAlign: 'center', lineHeight: 1.8, maxWidth: '440px' }}>
+          Only the workspace owner can update the payment method.{' '}
+          {owner?.full_name || owner?.email
+            ? <>Ask <span style={{ color: '#F0ECE6' }}>{owner.full_name || owner.email}</span>{owner.email && owner.full_name ? <> (<a href={`mailto:${owner.email}`} style={{ color: '#5b7c99', textDecoration: 'underline' }}>{owner.email}</a>)</> : null} to sort the card out.</>
+            : <>Ask the owner of this workspace to sort the card out.</>}
+        </div>
+      )}
 
       <div style={{ fontSize: '11px', color: '#555', marginTop: '32px', textAlign: 'center', maxWidth: '380px', lineHeight: 1.6 }}>
         Need a hand? Email <a href="mailto:support@h-que.com" style={{ color: '#777', textDecoration: 'underline' }}>support@h-que.com</a>.
