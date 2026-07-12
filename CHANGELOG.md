@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-11
 
+**You can now see what Owner, Admin, and Member actually mean.** Settings → Team let you assign roles without ever explaining them. There's now a **"What each role can do"** panel at the top of the Team tab spelling out all three. Worth knowing: **Admin and Owner have the same access** — the Owner is simply the person who created the workspace and the one account that can't be demoted or removed. **Members** get the day-to-day work (brands, boards, tasks, campaigns, talent) but can't manage the team, see billing, or open Reports. *(Requested by a customer on the Product Updates page.)*
+
 **The workspace finally works on a phone.** On mobile, the brand/client list used to sit in a fixed 220px column right next to your Kanban board — on a normal phone that's more than half the screen, leaving the board squeezed into a sliver you couldn't really use. Now the workspace drills down the way phone apps do: **the brand list fills the screen until you tap a brand, then the board gets the whole screen**, with a **← Brands** button in the header to go back. Nothing changes on desktop — you still get the brand list and board side by side. *(Requested by a customer on the Product Updates page.)*
 
 ---

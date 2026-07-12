@@ -42,6 +42,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('member')
+  const [showRoleHelp, setShowRoleHelp] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
   const [teamMembers, setTeamMembers] = useState([])
@@ -484,6 +485,41 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         {activeTab === 'team' && (
           <div>
             {sectionTitle('Team')}
+
+            {/* What each role can do. Kept in step with the actual gates:
+                every permission check in the app is (owner || admin), so an Admin
+                really does have the same access as the Owner — the Owner is just
+                the one account that can't be demoted or removed. */}
+            <div style={{ marginBottom: '20px', padding: '18px 20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+              <button
+                onClick={() => setShowRoleHelp(v => !v)}
+                style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>What each role can do</span>
+                <span style={{ fontSize: '9px', color: subtle, marginLeft: 'auto' }}>{showRoleHelp ? '−' : '+'}</span>
+              </button>
+
+              {showRoleHelp && (
+                <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {[
+                    { role: 'Owner', color: '#5b7c99', summary: 'The person who created this workspace. There is only one, and they can’t be removed or switched to another role.', can: 'Everything an Admin can do.' },
+                    { role: 'Admin', color: '#888', summary: 'Full access — the same as the Owner, apart from being removable.', can: 'Invite and remove teammates, change roles, manage billing, edit agency info, and view Reports.' },
+                    { role: 'Member', color: '#666', summary: 'Day-to-day access to the work itself.', can: 'Use brands, boards, tasks, campaigns, and talent. Can’t invite or remove teammates, change roles, see billing, or view Reports.' },
+                  ].map(r => (
+                    <div key={r.role} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: r.color, border: `0.5px solid ${r.color}`, padding: '3px 8px', borderRadius: '1px', flexShrink: 0, minWidth: '58px', textAlign: 'center' }}>{r.role}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '12px', color: text, lineHeight: 1.6 }}>{r.summary}</div>
+                        <div style={{ fontSize: '11px', color: muted, lineHeight: 1.6, marginTop: '3px' }}>{r.can}</div>
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
+                    Reports also require a Pro or Business plan, so a Member won’t see them even on those plans.
+                  </div>
+                </div>
+              )}
+            </div>
+
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
               <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
