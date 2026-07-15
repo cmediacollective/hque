@@ -9,6 +9,7 @@ import AddCreatorForm from './AddCreatorForm'
 import { planLimits } from './plans'
 import NotificationsPanel from './NotificationsPanel'
 import MiniCalendar from './MiniCalendar'
+import OrgSwitcher from './OrgSwitcher'
 
 // Heavier views and the marketing pages load on demand so the first
 // page load only downloads what it actually needs.
@@ -152,6 +153,7 @@ function App() {
   const [exporting, setExporting] = useState(false)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [agencyName, setAgencyName] = useState('HQue')
+  const [myOrgs, setMyOrgs] = useState([])
   const [agencyTz, setAgencyTz] = useState('America/Los_Angeles')
   const [avatarUrl, setAvatarUrl] = useState(null)
   const [orgId, setOrgId] = useState(null)
@@ -415,6 +417,10 @@ function App() {
 
   useEffect(() => { if (user) fetchProfile() }, [user])
 
+  // The companies this user belongs to (powers the header switcher). Refetched
+  // whenever the active company changes so the list stays current.
+  useEffect(() => { if (orgId) fetchMyOrgs() }, [orgId])
+
   useEffect(() => {
     if (!user) return
     // Use head + count to skip the row payload — we only need the number.
@@ -479,6 +485,22 @@ function App() {
     setStripeCustomerId(org?.stripe_customer_id || null)
     setClosedAt(org?.deleted_at || null)
     setPurgeAfter(org?.purge_after || null)
+  }
+
+  async function fetchMyOrgs() {
+    const { data } = await supabase.rpc('my_organizations')
+    if (data) setMyOrgs(data)
+  }
+
+  // Flip to another company the user belongs to, then reload so every view
+  // re-scopes cleanly to the new company (no stale cross-company state).
+  async function switchOrg(targetOrgId) {
+    const { error } = await supabase.rpc('switch_org', { p_org_id: targetOrgId })
+    if (error) {
+      console.error('Could not switch company:', error.message)
+      return
+    }
+    window.location.reload()
   }
 
   function handleOnboardingComplete(newOrgId, newAgencyName) {
@@ -751,7 +773,7 @@ function App() {
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isMobile ? 'auto' : 'hidden', background: bg, minWidth: 0 }}>
           <div style={{ padding: isMobile ? '12px 16px' : '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              {!isMobile && <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{agencyName}</div>}
+              <OrgSwitcher orgs={myOrgs} activeOrgId={orgId} onSwitch={switchOrg} dark={dark} colors={{ text, subtle, muted, border, nav }} isMobile={isMobile} />
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
