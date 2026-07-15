@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors, isMobile }) {
   const [open, setOpen] = useState(false)
   const [switching, setSwitching] = useState(false)
+  const [err, setErr] = useState(null)
   const ref = useRef(null)
   const { text, subtle, border, nav } = colors
 
@@ -28,8 +29,10 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
 
   const handleSwitch = async (orgId) => {
     if (orgId === activeOrgId) { setOpen(false); return }
+    setErr(null)
     setSwitching(true)
-    await onSwitch(orgId)   // onSwitch reloads the page on success
+    const errMsg = await onSwitch(orgId)   // reloads on success; returns a message on failure
+    if (errMsg) { setSwitching(false); setErr(errMsg) }
   }
 
   return (
@@ -52,6 +55,11 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
           boxShadow: dark ? '0 6px 24px rgba(0,0,0,0.5)' : '0 6px 24px rgba(0,0,0,0.12)', overflow: 'hidden',
         }}>
           <div style={{ padding: '10px 14px 6px', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, borderBottom: `0.5px solid ${border}` }}>Switch company</div>
+          {err && (
+            <div style={{ padding: '8px 14px', fontSize: '10px', color: '#c0392b', background: dark ? 'rgba(192,57,43,0.12)' : '#fdecea', borderBottom: `0.5px solid ${border}`, lineHeight: 1.4 }}>
+              Couldn't switch: {err}
+            </div>
+          )}
           {orgs.map((o, i) => {
             const isActive = o.org_id === activeOrgId
             return (

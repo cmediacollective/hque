@@ -494,11 +494,13 @@ function App() {
 
   // Flip to another company the user belongs to, then reload so every view
   // re-scopes cleanly to the new company (no stale cross-company state).
+  // Returns an error message string on failure (so the switcher can un-freeze
+  // and show it); on success it reloads and never returns.
   async function switchOrg(targetOrgId) {
     const { error } = await supabase.rpc('switch_org', { p_org_id: targetOrgId })
     if (error) {
       console.error('Could not switch company:', error.message)
-      return
+      return error.message || 'Could not switch company.'
     }
     window.location.reload()
   }
