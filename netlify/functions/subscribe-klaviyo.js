@@ -1,63 +1,96 @@
-// Adds an email to the right Klaviyo list based on the capture point's `list`
-// tag (marketing / leads / feedback). Best-effort: called alongside the existing
-// Google Sheet write, and never throws back to the visitor.
+// Klaviyo lifecycle sync. Every contact lives in EXACTLY ONE of four lists that
+// mirror their journey; this moves them to the target stage and removes them
+// from the other three, so they never pile up in multiple lists.
 //
-// Env vars (set in Netlify → Site settings → Environment variables):
-//   KLAVIYO_API_KEY        private API key (pk_...) — server-only, never VITE_*
-//   KLAVIYO_LIST_MARKETING list id for chat + blog signups
-//   KLAVIYO_LIST_LEADS     list id for footer signups
-//   KLAVIYO_LIST_FEEDBACK  list id for Product Updates submissions
+//   leads          — marketing opt-in (footer / chat / blog), no trial yet
+//   nonsubscribers — started a free trial, hasn't paid
+//   subscribers    — paying (incl. lifetime / AppSumo / comped)
+//   winback        — was a trial/customer and lapsed
+//
+// Call with { email, firstName?, lastName?, stage }. Best-effort; never throws
+// back to the caller.
+//
+// Env vars (Netlify → Site settings → Environment variables):
+//   KLAVIYO_API_KEY              private key (pk_...) — server-only
+//   KLAVIYO_LIST_LEADS
+//   KLAVIYO_LIST_NONSUBSCRIBERS
+//   KLAVIYO_LIST_SUBSCRIBERS
+//   KLAVIYO_LIST_WINBACK
 
 const API_KEY = process.env.KLAVIYO_API_KEY
 const LISTS = {
-  marketing: process.env.KLAVIYO_LIST_MARKETING,
   leads: process.env.KLAVIYO_LIST_LEADS,
-  feedback: process.env.KLAVIYO_LIST_FEEDBACK,
+  nonsubscribers: process.env.KLAVIYO_LIST_NONSUBSCRIBERS,
+  subscribers: process.env.KLAVIYO_LIST_SUBSCRIBERS,
+  winback: process.env.KLAVIYO_LIST_WINBACK,
+}
+const REVISION = '2026-07-15'
+const headers = () => ({
+  revision: REVISION,
+  'Content-Type': 'application/json',
+  accept: 'application/json',
+  Authorization: `Klaviyo-API-Key ${API_KEY}`,
+})
+
+async function subscribeToList(listId, email, firstName, lastName) {
+  const attributes = { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } }
+  if (firstName) attributes.first_name = firstName
+  if (lastName) attributes.last_name = lastName
+  const res = await fetch('https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs', {
+    method: 'POST',
+    headers: headers(),
+    body: JSON.stringify({
+      data: {
+        type: 'profile-subscription-bulk-create-job',
+        attributes: { profiles: { data: [{ type: 'profile', attributes }] }, list_id: listId },
+      },
+    }),
+  })
+  if (!res.ok) console.error('klaviyo subscribe error', res.status, await res.text().catch(() => ''))
+  return res.ok
+}
+
+async function getProfileId(email) {
+  const url = `https://a.klaviyo.com/api/profiles/?filter=${encodeURIComponent(`equals(email,"${email}")`)}`
+  const res = await fetch(url, { headers: headers() })
+  if (!res.ok) return null
+  const j = await res.json().catch(() => null)
+  return j && j.data && j.data[0] && j.data[0].id
+}
+
+async function removeFromList(listId, profileId) {
+  const res = await fetch(`https://a.klaviyo.com/api/lists/${listId}/relationships/profiles`, {
+    method: 'DELETE',
+    headers: headers(),
+    body: JSON.stringify({ data: [{ type: 'profile', id: profileId }] }),
+  })
+  if (!res.ok && res.status !== 404) console.error('klaviyo remove error', listId, res.status)
 }
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' }
   try {
-    const { email, firstName, lastName, list } = JSON.parse(event.body || '{}')
-    if (!email) return { statusCode: 400, body: JSON.stringify({ error: 'email required' }) }
-
-    const listId = LISTS[list] || LISTS.marketing
-    if (!API_KEY || !listId) {
-      console.error('subscribe-klaviyo: missing config', { hasKey: !!API_KEY, list, hasListId: !!listId })
-      return { statusCode: 200, body: JSON.stringify({ skipped: true }) } // don't break capture
+    const { email, firstName, lastName, stage } = JSON.parse(event.body || '{}')
+    if (!email || !stage) return { statusCode: 400, body: JSON.stringify({ error: 'email and stage required' }) }
+    const target = LISTS[stage]
+    if (!API_KEY || !target) {
+      console.error('klaviyo-sync: missing config', { hasKey: !!API_KEY, stage, hasList: !!target })
+      return { statusCode: 200, body: JSON.stringify({ skipped: true }) }
     }
 
-    const attributes = { email }
-    if (firstName) attributes.first_name = firstName
-    if (lastName) attributes.last_name = lastName
-    attributes.subscriptions = { email: { marketing: { consent: 'SUBSCRIBED' } } }
+    // 1. Put them in the target list (creates/updates the profile).
+    await subscribeToList(target, email, firstName, lastName)
 
-    const res = await fetch('https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs', {
-      method: 'POST',
-      headers: {
-        revision: '2026-07-15',
-        'Content-Type': 'application/json',
-        accept: 'application/json',
-        Authorization: `Klaviyo-API-Key ${API_KEY}`,
-      },
-      body: JSON.stringify({
-        data: {
-          type: 'profile-subscription-bulk-create-job',
-          attributes: {
-            profiles: { data: [{ type: 'profile', attributes }] },
-            list_id: listId,
-          },
-        },
-      }),
-    })
-
-    if (!res.ok) {
-      console.error('subscribe-klaviyo: Klaviyo error', res.status, await res.text().catch(() => ''))
-      return { statusCode: 502, body: JSON.stringify({ error: 'klaviyo failed' }) }
+    // 2. Move: remove them from the other three lists so they're in exactly one.
+    const profileId = await getProfileId(email)
+    if (profileId) {
+      const others = Object.entries(LISTS).filter(([k, v]) => k !== stage && v).map(([, v]) => v)
+      await Promise.all(others.map(listId => removeFromList(listId, profileId)))
     }
+
     return { statusCode: 200, body: JSON.stringify({ ok: true }) }
   } catch (e) {
-    console.error('subscribe-klaviyo error', e)
+    console.error('klaviyo-sync error', e)
     return { statusCode: 200, body: JSON.stringify({ ok: false }) }
   }
 }

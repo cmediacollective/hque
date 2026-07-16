@@ -156,7 +156,7 @@ export default function HQueChat() {
     }).catch(() => {})
     fetch('/.netlify/functions/subscribe-klaviyo', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: trimmedEmail, firstName: trimmedFirstName, list: 'marketing' })
+      body: JSON.stringify({ email: trimmedEmail, firstName: trimmedFirstName, stage: 'leads' })
     }).catch(() => {})
 
     setSubmitting(false)

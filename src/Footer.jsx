@@ -29,7 +29,7 @@ export default function Footer() {
     }).catch(() => {})
     fetch('/.netlify/functions/subscribe-klaviyo', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: e, firstName: 'Footer Subscriber', list: 'leads' }),
+      body: JSON.stringify({ email: e, firstName: 'Footer Subscriber', stage: 'leads' }),
     }).catch(() => {})
   }
 
