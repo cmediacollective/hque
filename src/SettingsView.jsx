@@ -324,7 +324,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     // the one person who owns the account, not every admin.
     ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : []),
     { key: 'updates', label: 'Product Updates' },
-    ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : [])
+    ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : []),
+    ...(isMaster && !previewing ? [{ key: 'defaults', label: 'Default Labels' }] : [])
   ]
 
   return (
@@ -678,6 +679,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
         {activeTab === 'labels' && (
           <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+        )}
+
+        {activeTab === 'defaults' && isMaster && !previewing && (
+          <TalentLabelsManager mode="defaults" dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
         )}
 
         {activeTab === 'password' && (

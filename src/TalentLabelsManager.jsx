@@ -5,7 +5,12 @@ import { supabase } from './supabase'
 // lists. Reads org_talent_labels; all writes go through the SECURITY DEFINER
 // RPCs (add/rename/remove/reorder), which enforce owner/admin + plan tier.
 // Locked (read-only + upgrade note) when the plan can't customize.
-export default function TalentLabelsManager({ orgId, dark, colors }) {
+export default function TalentLabelsManager({ orgId, dark, colors, mode = 'company' }) {
+  const isDefaults = mode === 'defaults'
+  const RPCS = isDefaults
+    ? { add: 'add_default_talent_label', rename: 'rename_default_talent_label', remove: 'remove_default_talent_label', reorder: 'reorder_default_talent_labels' }
+    : { add: 'add_talent_label', rename: 'rename_talent_label', remove: 'remove_talent_label', reorder: 'reorder_talent_labels' }
+  const labelArgs = (extra) => isDefaults ? extra : { p_org_id: orgId, ...extra }
   const { text, muted, subtle, border, border2, inputBg, card, accent = '#5b7c99' } = colors
   const [types, setTypes] = useState([])
   const [niches, setNiches] = useState([])
@@ -18,16 +23,22 @@ export default function TalentLabelsManager({ orgId, dark, colors }) {
   const dragRef = useRef({ kind: null, label: null })
 
   async function load() {
-    const [{ data }, { data: allowed }] = await Promise.all([
-      supabase.from('org_talent_labels').select('kind,label,position').eq('org_id', orgId).order('position'),
-      supabase.rpc('can_customize_labels', { p_org_id: orgId }),
-    ])
+    let data, allowed = true
+    if (isDefaults) {
+      ({ data } = await supabase.from('talent_label_defaults').select('kind,label,position').order('position'))
+    } else {
+      const res = await Promise.all([
+        supabase.from('org_talent_labels').select('kind,label,position').eq('org_id', orgId).order('position'),
+        supabase.rpc('can_customize_labels', { p_org_id: orgId }),
+      ])
+      data = res[0].data; allowed = res[1].data === true
+    }
     setTypes((data || []).filter(r => r.kind === 'type').map(r => r.label))
     setNiches((data || []).filter(r => r.kind === 'niche').map(r => r.label))
-    setCanEdit(allowed === true)
+    setCanEdit(allowed)
     setLoading(false)
   }
-  useEffect(() => { if (orgId) load() }, [orgId])
+  useEffect(() => { if (isDefaults || orgId) load() }, [orgId, mode])
 
   const flash = (m) => { setErr(m); setTimeout(() => setErr(''), 4000) }
 
@@ -41,20 +52,20 @@ export default function TalentLabelsManager({ orgId, dark, colors }) {
     const label = (adding[kind === 'type' ? 'type' : 'niche'] || '').trim()
     if (!label) return
     setAdding(a => ({ ...a, [kind === 'type' ? 'type' : 'niche']: '' }))
-    if (await run('add_talent_label', { p_org_id: orgId, p_kind: kind, p_label: label })) load()
+    if (await run(RPCS.add, labelArgs({ p_kind: kind, p_label: label }))) load()
   }
   async function removeLabel(kind, label) {
-    if (await run('remove_talent_label', { p_org_id: orgId, p_kind: kind, p_label: label })) load()
+    if (await run(RPCS.remove, labelArgs({ p_kind: kind, p_label: label }))) load()
   }
   async function commitRename(kind, oldLabel) {
     const next = editVal.trim()
     setEditing(null)
     if (!next || next === oldLabel) return
-    if (await run('rename_talent_label', { p_org_id: orgId, p_kind: kind, p_old: oldLabel, p_new: next })) load()
+    if (await run(RPCS.rename, labelArgs({ p_kind: kind, p_old: oldLabel, p_new: next }))) load()
   }
   async function persistOrder(kind, ordered) {
     if (kind === 'type') setTypes(ordered); else setNiches(ordered)
-    await run('reorder_talent_labels', { p_org_id: orgId, p_kind: kind, p_labels: ordered })
+    await run(RPCS.reorder, labelArgs({ p_kind: kind, p_labels: ordered }))
   }
   function onDrop(kind, targetLabel) {
     const src = dragRef.current
@@ -125,10 +136,12 @@ export default function TalentLabelsManager({ orgId, dark, colors }) {
 
   return (
     <div style={{ maxWidth: '620px' }}>
-      <div style={eyebrow}>Settings / Talent Labels</div>
-      <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, margin: '8px 0 6px' }}>Talent Labels</div>
+      <div style={eyebrow}>{isDefaults ? 'Master / Default Labels' : 'Settings / Talent Labels'}</div>
+      <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, margin: '8px 0 6px' }}>{isDefaults ? 'Default Talent Labels' : 'Talent Labels'}</div>
       <div style={{ fontSize: '13px', color: muted, lineHeight: 1.6, marginBottom: '18px' }}>
-        The Types and Niches you use to categorize your roster. Rename them, remove the ones you don't use, and add the categories your agency actually works in. Renaming updates it on every talent already tagged.
+        {isDefaults
+          ? 'The starting Types and Niches every NEW company inherits when it signs up. Editing here only shapes future companies — existing companies keep their own lists untouched.'
+          : "The Types and Niches you use to categorize your roster. Rename them, remove the ones you don't use, and add the categories your agency actually works in. Renaming updates it on every talent already tagged."}
       </div>
 
       {canEdit === false && (
