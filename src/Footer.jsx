@@ -27,6 +27,10 @@ export default function Footer() {
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ email: e, firstName: 'Footer Subscriber', list: 'leads', source: 'footer' }),
     }).catch(() => {})
+    fetch('/.netlify/functions/subscribe-klaviyo', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: e, firstName: 'Footer Subscriber', list: 'leads' }),
+    }).catch(() => {})
   }
 
   const Column = (title, links) => (

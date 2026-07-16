@@ -79,6 +79,10 @@ export default function ProductUpdates() {
         method: 'POST', headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ email: sForm.email.trim(), firstName: sForm.firstName.trim(), lastName: sForm.lastName.trim(), list: 'feedback', note: sForm.title.trim() }),
       })
+      await fetch('/.netlify/functions/subscribe-klaviyo', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sForm.email.trim(), firstName: sForm.firstName.trim(), lastName: sForm.lastName.trim(), list: 'feedback' }),
+      })
     } catch (_) { /* ignore */ }
     setSState('done')
   }
