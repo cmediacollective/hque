@@ -828,7 +828,7 @@ function App() {
             </div>
           )}
 
-          <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} />
+          <TrialBanner trialEndsAt={trialEndsAt} onUpgrade={() => setView('settings')} dark={dark} />
 
           <div style={{ flex: 1, overflow: isMobile ? 'visible' : 'hidden', display: 'flex', flexDirection: 'column', paddingBottom: isMobile ? '70px' : '0' }}>
             <Suspense fallback={viewLoader}>
