@@ -20,9 +20,10 @@ create table if not exists public.talent_label_defaults (
   kind       text not null check (kind in ('type','niche')),
   label      text not null,
   position   int  not null default 0,
-  created_at timestamptz not null default now(),
-  unique (kind, lower(label))
+  created_at timestamptz not null default now()
 );
+-- Case-insensitive uniqueness needs an expression index (can't be an inline UNIQUE).
+create unique index if not exists talent_label_defaults_uniq on public.talent_label_defaults (kind, lower(label));
 
 create table if not exists public.org_talent_labels (
   id         uuid primary key default gen_random_uuid(),
@@ -30,9 +31,9 @@ create table if not exists public.org_talent_labels (
   kind       text not null check (kind in ('type','niche')),
   label      text not null,
   position   int  not null default 0,
-  created_at timestamptz not null default now(),
-  unique (org_id, kind, lower(label))
+  created_at timestamptz not null default now()
 );
+create unique index if not exists org_talent_labels_uniq on public.org_talent_labels (org_id, kind, lower(label));
 create index if not exists org_talent_labels_org_idx on public.org_talent_labels (org_id, kind, position);
 
 -- ── Seed the master defaults with today's presets (idempotent) ───────────────
