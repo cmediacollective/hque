@@ -12,6 +12,22 @@ const STATUSES = [
 ]
 const CATEGORIES = ['Feature', 'Improvement', 'Fix']
 
+// "Submitted Jul 15, 2026 · 3d ago" — so you can see how old a submission is.
+function submittedLabel(created_at) {
+  if (!created_at) return null
+  const d = new Date(created_at)
+  if (isNaN(d)) return null
+  const date = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const days = Math.floor((Date.now() - d.getTime()) / 86400000)
+  let age
+  if (days <= 0) age = 'today'
+  else if (days < 7) age = `${days}d ago`
+  else if (days < 31) age = `${Math.floor(days / 7)}w ago`
+  else if (days < 365) age = `${Math.floor(days / 30)}mo ago`
+  else age = `${Math.floor(days / 365)}y ago`
+  return `Submitted ${date} · ${age}`
+}
+
 export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -239,7 +255,10 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
                         <span style={{ fontSize: '13px', fontWeight: 600, color: text }}>{item.title}</span>
                         {(item.vote_count || 0) > 0 && <span style={{ fontSize: '10px', color: accent, fontWeight: 600 }}>▲ {item.vote_count}</span>}
                         {item.source === 'customer' && <span style={{ fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C77B5B' }}>· from customer</span>}
-                        {item.status === 'shipped' && item.shipped_at && <span style={{ fontSize: '10px', color: subtle, marginLeft: 'auto' }}>{item.shipped_at}</span>}
+                        <span style={{ fontSize: '10px', color: subtle, marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                          {submittedLabel(item.created_at)}
+                          {item.status === 'shipped' && item.shipped_at ? ` · Shipped ${item.shipped_at}` : ''}
+                        </span>
                       </div>
                       {item.description && <div style={{ fontSize: '12px', color: muted, lineHeight: 1.5, marginBottom: '8px' }}>{item.description}</div>}
                       {(item.area || item.screenshot_url || item.submitter_email) && (
