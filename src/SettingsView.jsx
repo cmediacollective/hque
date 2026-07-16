@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
+import TalentLabelsManager from './TalentLabelsManager'
 
 // A transparent version of a hex colour, so the tab-bar fade starts invisible and
 // ends in the page background rather than fading through grey.
@@ -316,6 +317,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'profile', label: 'Profile' },
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
+    // Talent Labels: owners/admins manage the company's Type/Niche lists.
+    ...((currentUserRole === 'owner' || currentUserRole === 'admin') ? [{ key: 'labels', label: 'Talent Labels' }] : []),
     { key: 'password', label: 'Password' },
     // Billing is owner-only: plan changes, payment, and cancellation stay with
     // the one person who owns the account, not every admin.
@@ -671,6 +674,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               </>
             )}
           </div>
+        )}
+
+        {activeTab === 'labels' && (
+          <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
         )}
 
         {activeTab === 'password' && (
