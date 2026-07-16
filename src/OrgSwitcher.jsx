@@ -32,7 +32,7 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, onCreate, can
   const showChrome = list.length > 1 || canCreate
   if (!showChrome) {
     if (isMobile) return null
-    return <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{activeName}</div>
+    return <div style={{ fontSize: '9px', color: text, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '6px' }}>{activeName}</div>
   }
 
   const handleSwitch = async (orgId) => {
@@ -57,7 +57,7 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, onCreate, can
       <button onClick={() => setOpen(o => !o)} disabled={switching} style={{
         display: 'flex', alignItems: 'center', gap: '5px', background: 'none', border: 'none',
         padding: 0, cursor: switching ? 'default' : 'pointer',
-        fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase',
+        fontSize: '9px', color: text, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>
         <span style={{ maxWidth: isMobile ? '150px' : '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {switching ? 'Switching…' : activeName}

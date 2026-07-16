@@ -83,17 +83,20 @@ security definer
 set search_path = ''
 stable
 as $function$
+  -- Prefer the editable Agency name (Settings → Agency Info), trimmed of stray
+  -- spaces; fall back to the org's internal name.
   select m.org_id,
-         coalesce(o.name, 'Untitled')  as name,
+         coalesce(nullif(btrim(s.agency_name), ''), nullif(btrim(o.name), ''), 'Untitled') as name,
          m.role,
          (m.org_id = p.org_id)         as is_active,
          coalesce(o.is_lifetime, false) as is_lifetime
   from public.org_members m
   join public.organizations o on o.id = m.org_id
+  left join public.org_settings s on s.org_id = m.org_id
   join public.profiles p      on p.id = auth.uid()
   where m.user_id = auth.uid()
     and o.deleted_at is null
-  order by lower(coalesce(o.name, 'Untitled'));
+  order by lower(coalesce(nullif(btrim(s.agency_name), ''), o.name, 'Untitled'));
 $function$;
 
 revoke all on function public.my_organizations() from public;
