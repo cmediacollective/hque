@@ -1,5 +1,17 @@
 [
   {
+    "title": "One login, many companies — switch between them instantly",
+    "description": "Your email can now belong to more than one company. When another agency or brand invites you to their HQue, their company appears in a switcher at the top of the app — click to swap your whole workspace to it, and switch back just as fast, all without signing out. You can also create additional companies you own from the same menu, each with its own trial, team, and billing. If you only belong to one company, nothing changes.",
+    "category": "Feature",
+    "shipped_at": "2026-07-15"
+  },
+  {
+    "title": "Invitations now send a branded email",
+    "description": "When you invite a teammate, they get an on-brand HQue email that says who invited them and to which company, with a one-click Accept invitation button that signs them straight in — whether they're new to HQue or already have an account.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-15"
+  },
+  {
     "title": "Light mode now looks right everywhere",
     "description": "Creator and Campaign detail panels used to open in the opposite theme to the rest of the app, so in light mode you'd get a black panel over a white page. Parts of them stayed dark regardless of your theme — the talent payment editor and the outreach log were unreadable in light mode, and hovering a campaign row left it stuck black. Everything now follows the theme you've picked.",
     "category": "Fix",

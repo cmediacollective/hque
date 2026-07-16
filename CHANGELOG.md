@@ -4,6 +4,18 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-15
+
+**One login can now belong to many companies — and you switch between them in one click.** Until today, an email address belonged to exactly one company, forever. Now, if an agency or brand you work with invites `you@youremail.com` to *their* HQue, their company simply appears in a **company switcher** at the top of the app, right where your company name shows. Click it and your whole workspace — campaigns, talent, clients, settings — swaps to that company. Switch back just as fast. You stay signed in the entire time; there's no second login and no signing out. If you only belong to one company, nothing changes — the switcher stays out of your way.
+
+**You can also create additional companies you own.** From the same switcher there's an **"Add a company"** option, so an owner running more than one business can spin up a separate HQue for each. Each new company gets its own free trial and pays its own way, and each company's team, billing, and data stay completely separate. (Lifetime and AppSumo accounts are the exception: that deal covers the one company you own — you can still be invited into and switch to others, but you can't create extra companies off the single deal.)
+
+**When someone's invited, the whole team page now understands it.** Invite a teammate and they show up on your Team roster even if their "home base" is another company — and roles and removals apply per-company, so removing someone from one company doesn't touch their access to another. Seat counts are correct across all of it.
+
+**Invitations now send a proper branded email.** Inviting someone used to fire off a bare "here's a sign-in link" email with no context. Now they get an on-brand HQue email that says **who** invited them and to **which company**, with a one-click **Accept invitation** button that signs them straight in — whether they're brand new to HQue or already have an account.
+
+---
+
 ## 2026-07-11
 
 **Light mode is properly light now.** A few screens ignored your theme and stayed dark regardless. Opening a **Creator** or **Campaign** detail panel showed it in the *opposite* theme to the rest of the app, and adding a creator did the same — so in light mode you'd get a black panel sliding over a white page. Inside those panels, some parts were dark no matter what: the talent payment/performance editor was a black form with black boxes dropped into a white panel, and outreach-log rows were near-black with near-black text on them, which made them effectively unreadable. Hovering a campaign row also left it stuck black. All of it now follows whichever theme you've chosen, and a few grey labels that were too faint to read against their own background have been darkened.
