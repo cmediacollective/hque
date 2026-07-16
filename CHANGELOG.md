@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-16
+
+**Your talent Types and Niches are now yours to customize.** Until now, the labels you tag talent with — Types (Influencer, UGC, Model…) and Niches (Beauty, Fitness, Food…) — were a fixed list, identical for everyone. Now, on **Pro & Business**, you can make them your own in **Settings → Talent Labels**: **rename** a label (it updates automatically on every talent already tagged), **add** the categories your agency actually works in, **remove** the ones you don't use, and **drag to reorder**. Your roster filter chips and the Add-Talent form both use your own list. Every talent keeps every tag they already have — nothing is ever stripped — and **Starter** stays on the standard set. *(Requested by a customer on the Product Updates page.)*
+
+---
+
 ## 2026-07-15
 
 **One login can now belong to many companies — and you switch between them in one click.** Until today, an email address belonged to exactly one company, forever. Now, if an agency or brand you work with invites `you@youremail.com` to *their* HQue, their company simply appears in a **company switcher** at the top of the app, right where your company name shows. Click it and your whole workspace — campaigns, talent, clients, settings — swaps to that company. Switch back just as fast. You stay signed in the entire time; there's no second login and no signing out. If you only belong to one company, nothing changes — the switcher stays out of your way.
