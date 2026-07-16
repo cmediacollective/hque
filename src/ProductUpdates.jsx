@@ -60,6 +60,18 @@ export default function ProductUpdates() {
       p_category: sForm.category, p_area: sForm.area, p_screenshot_url: shot.url || null,
     })
     if (error) { setSState('error'); return }
+    // Best-effort: alert the master admin(s) — in-app bell + email to support.
+    // The request is already saved, so any failure here is non-fatal.
+    try {
+      await fetch('/.netlify/functions/notify-feature-request', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: sForm.title.trim(), description: sForm.description, name: fullName,
+          email: sForm.email.trim(), category: sForm.category, area: sForm.area,
+          screenshotUrl: shot.url || null,
+        }),
+      })
+    } catch (_) { /* ignore */ }
     // Best-effort: capture the email to our Google Sheet under the "feedback"
     // list. The request is already saved, so a capture failure is non-fatal.
     try {
