@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
 import ExpandableTextarea from './ExpandableTextarea'
+import { useTalentLabels } from './useTalentLabels'
 
-const TYPES = ['Influencer', 'UGC', 'Model', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books', 'Specialty']
 const PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Pinterest', 'LinkedIn']
 const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
 export default function AddCreatorForm({ onClose, onSaved, existing, dark = true, orgId }) {
+  // This company's own label lists. Falls back to the talent's org when editing
+  // from the detail panel (which doesn't pass orgId). Chips always include any
+  // tag the talent already has, even if that label was later removed.
+  const { types: orgTypes, niches: orgNiches } = useTalentLabels(orgId || existing?.org_id)
+  const typeOptions = [...orgTypes, ...(existing?.types || []).filter(t => !orgTypes.includes(t))]
+  const nicheOptions = [...orgNiches, ...(existing?.niches || []).filter(n => !orgNiches.includes(n))]
   const bg = dark ? '#1A1A1A' : '#FFFFFF'
   const text = dark ? '#EDEAE4' : '#1A1A1A'
   const muted = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)'
@@ -198,7 +203,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
             <>
               <div style={{ fontSize: '11px', color: muted, opacity: 0.7, marginTop: '-1px', marginBottom: '8px' }}>Select all that apply</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {TYPES.map(t => chip(t, form.types.includes(t), () => toggleType(t)))}
+                {typeOptions.map(t => chip(t, form.types.includes(t), () => toggleType(t)))}
               </div>
             </>
           )}
@@ -226,7 +231,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
           {field('Niches',
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {NICHES.map(n => chip(n, form.niches.includes(n), () => toggleNiche(n)))}
+              {nicheOptions.map(n => chip(n, form.niches.includes(n), () => toggleNiche(n)))}
             </div>
           )}
 

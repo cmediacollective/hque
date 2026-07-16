@@ -4,11 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
-
-const TYPES = ['All Types', 'Influencer', 'UGC', 'Model', 'Actor', 'Public Figure', 'Sports', 'Athlete', 'Podcast', 'Speaker/Host']
-// Keep this list identical to NICHES in AddCreatorForm.jsx — the filter chips
-// must match the categories a creator can actually be tagged with.
-const NICHES = ['Wellness', 'Beauty', 'Lifestyle', 'Parenting', 'Fashion', 'Fitness', 'Food', 'Travel', 'Entertainment', 'Books', 'Specialty']
+import { useTalentLabels } from './useTalentLabels'
 
 
 function totalFollowers(creator) {
@@ -23,6 +19,10 @@ function totalFollowers(creator) {
 }
 export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0, openCreatorId, onOpenCreatorHandled }) {
   const [creators, setCreators] = useState([])
+  // This company's own filter chips (Settings > Talent Labels).
+  const { types: orgTypes, niches: orgNiches } = useTalentLabels(orgId)
+  const TYPES = ['All Types', ...orgTypes]
+  const NICHES = orgNiches
   const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
   const [nicheFilter, setNicheFilter] = useState(null)
