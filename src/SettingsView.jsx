@@ -115,7 +115,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   async function fetchTeam() {
-    const { data } = await supabase.from('profiles').select('*').eq('org_id', orgId).order('created_at', { ascending: true })
+    // Roster comes from the membership list so stacked members (whose active
+    // company is elsewhere) still appear on this org's team.
+    const { data } = await supabase.rpc('org_team', { p_org_id: orgId })
     setTeamMembers(data || [])
     const { data: invites } = await supabase.from('invitations').select('*').eq('org_id', orgId).is('accepted_at', null).order('created_at', { ascending: true })
     setPendingInvites(invites || [])
@@ -247,7 +249,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   async function updateRole(id, role) {
-    const { error } = await supabase.from('profiles').update({ role }).eq('id', id)
+    // Role is per-company now, so update the membership (the RPC also mirrors it
+    // to the member's profile if this is their active company).
+    const { error } = await supabase.rpc('set_member_role', { p_org_id: orgId, p_user_id: id, p_role: role })
     if (error) {
       alert(`Could not update role: ${error.message}`)
       return
@@ -257,14 +261,13 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   async function removeUser(member) {
     const displayName = member.full_name || member.email
-    if (!confirm(`Remove ${displayName} from the team? They will lose access immediately.`)) return
-    const { error } = await supabase.from('profiles').update({ org_id: null, role: 'member' }).eq('id', member.id)
+    if (!confirm(`Remove ${displayName} from the team? They will lose access to this company immediately.`)) return
+    // Removes only this company's membership (and its pending invites); if it was
+    // their active company the RPC re-homes them to another one they belong to.
+    const { error } = await supabase.rpc('remove_member', { p_org_id: orgId, p_user_id: member.id })
     if (error) {
       alert(`Could not remove user: ${error.message}`)
       return
-    }
-    if (member.email) {
-      await supabase.from('invitations').delete().ilike('email', member.email).eq('org_id', orgId)
     }
     fetchTeam()
   }
