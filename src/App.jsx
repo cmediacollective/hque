@@ -502,6 +502,17 @@ function App() {
     window.location.reload()
   }
 
+  // Create a brand-new company owned by the current user, then reload into it.
+  // Returns an error message string on failure (e.g. the lifetime/comped block).
+  async function createOrg(name) {
+    const { error } = await supabase.rpc('create_organization', { p_name: name })
+    if (error) {
+      console.error('Could not create company:', error.message)
+      return error.message || 'Could not create company.'
+    }
+    window.location.reload()
+  }
+
   function handleOnboardingComplete(newOrgId, newAgencyName) {
     setOrgId(newOrgId)
     setAgencyName(newAgencyName)
@@ -772,7 +783,7 @@ function App() {
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isMobile ? 'auto' : 'hidden', background: bg, minWidth: 0 }}>
           <div style={{ padding: isMobile ? '12px 16px' : '20px 28px 16px', borderBottom: `0.5px solid ${border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <OrgSwitcher orgs={myOrgs} activeOrgId={orgId} onSwitch={switchOrg} dark={dark} colors={{ text, subtle, muted, border, nav }} isMobile={isMobile} />
+              <OrgSwitcher orgs={myOrgs} activeOrgId={orgId} onSwitch={switchOrg} onCreate={createOrg} canCreate={!myOrgs.some(o => o.role === 'owner' && o.is_lifetime)} dark={dark} colors={{ text, subtle, muted, border, nav }} isMobile={isMobile} />
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

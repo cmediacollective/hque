@@ -1,17 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
 
-// Company switcher shown in the main header. When the user belongs to a single
-// company it renders exactly the plain agency-name label it replaced (and
-// nothing at all on mobile, matching the old behavior). With two or more
-// companies it becomes a dropdown that flips the active company.
-export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors, isMobile }) {
+// Company switcher shown in the main header. Renders as the plain agency-name
+// label when the user has a single company and can't create more (zero change
+// for those users). Otherwise it's a dropdown that switches the active company
+// and — unless the user owns a lifetime/comped company — lets them add another.
+export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, onCreate, canCreate, dark, colors, isMobile }) {
   const [open, setOpen] = useState(false)
   const [switching, setSwitching] = useState(false)
   const [err, setErr] = useState(null)
+  const [adding, setAdding] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [creating, setCreating] = useState(false)
   const ref = useRef(null)
   const { text, subtle, border, nav } = colors
 
-  const active = (orgs || []).find(o => o.org_id === activeOrgId)
+  const list = orgs || []
+  const active = list.find(o => o.org_id === activeOrgId)
   const activeName = active?.name || 'HQue'
 
   useEffect(() => {
@@ -21,8 +25,12 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
     return () => document.removeEventListener('mousedown', onDoc)
   }, [open])
 
-  // Single company (or none): behave exactly like the label it replaced.
-  if (!orgs || orgs.length <= 1) {
+  useEffect(() => { if (!open) { setAdding(false); setNewName(''); setErr(null) } }, [open])
+
+  // Single company AND can't create more: behave exactly like the plain label
+  // it replaced (and nothing on mobile).
+  const showChrome = list.length > 1 || canCreate
+  if (!showChrome) {
     if (isMobile) return null
     return <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.28em', textTransform: 'uppercase', marginBottom: '6px' }}>{activeName}</div>
   }
@@ -33,6 +41,15 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
     setSwitching(true)
     const errMsg = await onSwitch(orgId)   // reloads on success; returns a message on failure
     if (errMsg) { setSwitching(false); setErr(errMsg) }
+  }
+
+  const handleCreate = async () => {
+    const name = newName.trim()
+    if (!name) return
+    setErr(null)
+    setCreating(true)
+    const errMsg = await onCreate(name)    // reloads into the new company on success
+    if (errMsg) { setCreating(false); setErr(errMsg) }
   }
 
   return (
@@ -54,13 +71,15 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
           background: nav, border: `0.5px solid ${border}`, borderRadius: '6px',
           boxShadow: dark ? '0 6px 24px rgba(0,0,0,0.5)' : '0 6px 24px rgba(0,0,0,0.12)', overflow: 'hidden',
         }}>
-          <div style={{ padding: '10px 14px 6px', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, borderBottom: `0.5px solid ${border}` }}>Switch company</div>
+          <div style={{ padding: '10px 14px 6px', fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, borderBottom: `0.5px solid ${border}` }}>
+            {list.length > 1 ? 'Switch company' : 'Company'}
+          </div>
           {err && (
             <div style={{ padding: '8px 14px', fontSize: '10px', color: '#c0392b', background: dark ? 'rgba(192,57,43,0.12)' : '#fdecea', borderBottom: `0.5px solid ${border}`, lineHeight: 1.4 }}>
-              Couldn't switch: {err}
+              {err}
             </div>
           )}
-          {orgs.map((o, i) => {
+          {list.map((o, i) => {
             const isActive = o.org_id === activeOrgId
             return (
               <button key={o.org_id} onClick={() => handleSwitch(o.org_id)} style={{
@@ -76,6 +95,40 @@ export default function OrgSwitcher({ orgs, activeOrgId, onSwitch, dark, colors,
               </button>
             )
           })}
+
+          {canCreate && (
+            <div style={{ borderTop: `0.5px solid ${border}` }}>
+              {!adding ? (
+                <button onClick={() => setAdding(true)} style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', width: '100%', padding: '11px 14px',
+                  background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
+                  fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: '#5b7c99', fontWeight: 600,
+                }}>
+                  <span style={{ fontSize: '14px', lineHeight: 1 }}>+</span> Add a company
+                </button>
+              ) : (
+                <div style={{ padding: '10px 14px' }}>
+                  <input
+                    autoFocus
+                    value={newName}
+                    onChange={e => setNewName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
+                    placeholder='Company name'
+                    disabled={creating}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '7px 9px', fontSize: '12px', color: text, background: dark ? '#1a1a1a' : '#fff', border: `0.5px solid ${border}`, borderRadius: '4px', outline: 'none', marginBottom: '8px' }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={handleCreate} disabled={creating || !newName.trim()} style={{ flex: 1, padding: '7px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: creating ? 'default' : 'pointer', borderRadius: '4px', fontWeight: 600, opacity: (creating || !newName.trim()) ? 0.6 : 1 }}>
+                      {creating ? 'Creating…' : 'Create'}
+                    </button>
+                    <button onClick={() => { setAdding(false); setNewName(''); setErr(null) }} disabled={creating} style={{ padding: '7px 10px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border}`, color: subtle, cursor: 'pointer', borderRadius: '4px' }}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
