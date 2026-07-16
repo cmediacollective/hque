@@ -317,15 +317,16 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'profile', label: 'Profile' },
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
-    // Talent Labels: owners/admins manage the company's Type/Niche lists.
+    // Talent Labels + Default Labels sit together: this company's labels, then
+    // (master only) the defaults that seed new companies.
     ...((currentUserRole === 'owner' || currentUserRole === 'admin') ? [{ key: 'labels', label: 'Talent Labels' }] : []),
+    ...(isMaster && !previewing ? [{ key: 'defaults', label: 'Default Labels' }] : []),
     { key: 'password', label: 'Password' },
     // Billing is owner-only: plan changes, payment, and cancellation stay with
     // the one person who owns the account, not every admin.
     ...(currentUserRole === 'owner' ? [{ key: 'billing', label: 'Billing' }] : []),
     { key: 'updates', label: 'Product Updates' },
-    ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : []),
-    ...(isMaster && !previewing ? [{ key: 'defaults', label: 'Default Labels' }] : [])
+    ...(isMaster && !previewing ? [{ key: 'comps', label: 'Comps' }] : [])
   ]
 
   return (
