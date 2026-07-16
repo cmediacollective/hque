@@ -231,14 +231,27 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
       return setInviteMsg(`Error: ${inviteErr.message}`)
     }
 
-    // Now send the magic link
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })
+    // Send the branded invitation email — names the inviter + company and gives
+    // a one-click sign-in link (works for brand-new and existing HQue users).
+    let emailOk = true
+    try {
+      const res = await fetch('/.netlify/functions/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          companyName: agencyForm.agency_name || '',
+          inviterName: profileForm.full_name || user?.email || '',
+          role: inviteRole,
+        }),
+      })
+      emailOk = res.ok
+    } catch (e) { emailOk = false }
     setInviting(false)
-    if (error) return setInviteMsg(`Error: ${error.message}`)
-    setInviteMsg(`Invite sent to ${email}`)
+    setInviteMsg(emailOk ? `Invite sent to ${email}` : `Invite saved, but the email couldn't be sent to ${email}.`)
     setInviteEmail('')
     fetchTeam()
-    setTimeout(() => setInviteMsg(''), 4000)
+    setTimeout(() => setInviteMsg(''), 5000)
   }
 
   async function cancelInvite(invite) {
