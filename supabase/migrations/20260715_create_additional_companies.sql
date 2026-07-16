@@ -73,6 +73,9 @@ revoke all on function public.create_organization(text) from public;
 grant execute on function public.create_organization(text) to authenticated;
 
 -- my_organizations() + is_lifetime so the app can gate the create button.
+-- Drop first: adding an OUT column changes the return type, which
+-- create-or-replace can't do.
+drop function if exists public.my_organizations();
 create or replace function public.my_organizations()
 returns table (org_id uuid, name text, role text, is_active boolean, is_lifetime boolean)
 language sql
