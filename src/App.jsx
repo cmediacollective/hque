@@ -442,23 +442,20 @@ function App() {
 
   async function fetchProfile() {
     setProfileLoading(true)
+
+    // Apply any pending invitations FIRST. This stacks newly-invited companies
+    // into the switcher for an existing user, and attaches a brand-new invited
+    // user to their first org — atomically, so a half-failed accept can never
+    // strand the user. Then we read the (now up-to-date) profile.
+    const { error: acceptErr } = await supabase.rpc('accept_pending_invitations')
+    if (acceptErr) console.error('Could not apply invitations:', acceptErr.message)
+
     const { data } = await supabase.from('profiles').select('org_id, avatar_url, role').eq('id', user.id).single()
     setUserRole(data?.role || null)
 
     if (data?.org_id) {
       setOrgId(data.org_id)
       fetchAgencyName(data.org_id)
-    } else {
-      // No org — ask the server to accept any pending invitation for this email.
-      // accept_invitation() attaches the profile and marks the invite accepted
-      // in one atomic step, so a half-failed accept can never strand the user.
-      const { data: joinedOrgId, error: acceptErr } = await supabase.rpc('accept_invitation')
-      if (joinedOrgId) {
-        setOrgId(joinedOrgId)
-        fetchAgencyName(joinedOrgId)
-      } else if (acceptErr) {
-        console.error('Could not accept invitation:', acceptErr.message)
-      }
     }
 
     if (data?.avatar_url) setAvatarUrl(data.avatar_url)
