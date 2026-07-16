@@ -1,5 +1,11 @@
 [
   {
+    "title": "Custom Type and Niche Talent Labels",
+    "description": "Your talent Types and Niches are no longer a fixed list. On Pro and Business, make them your own in Settings → Talent Labels: rename a label (it updates on every talent already tagged), add the categories your agency actually works in, remove the ones you don't use, and drag to reorder. Your roster filters and the Add-Talent form both use your own list, and every talent keeps the tags they already have.",
+    "category": "Feature",
+    "shipped_at": "2026-07-16"
+  },
+  {
     "title": "One login, many companies — switch between them instantly",
     "description": "Your email can now belong to more than one company. When another agency or brand invites you to their HQue, their company appears in a switcher at the top of the app — click to swap your whole workspace to it, and switch back just as fast, all without signing out. You can also create additional companies you own from the same menu, each with its own trial, team, and billing. If you only belong to one company, nothing changes.",
     "category": "Feature",
