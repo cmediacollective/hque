@@ -258,9 +258,17 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   // One-off custom notes for specific days. Unlike holidays, these KEEP the normal
   // time-of-day greeting ("Good morning, Cherie") and only change the blue box.
   // `intro` is the blue label; `note` is the line underneath. Keyed by year, then 'month-day'.
+  // Dated, topical pop-culture / sports moments — playful, entertainment-side,
+  // no politics. Keyed by year so they only fire in the right one; dates are the
+  // scheduled events for that year and can be refreshed annually.
   const CUSTOM_NOTES = {
     2026: {
-      '6-8': { intro: 'NBA Game 3', note: 'Spurs vs. Knicks. Who you got?' }
+      '2-1':  { intro: 'Grammys Tonight', note: "Music's biggest night. Someone in your feed will have Very Strong Opinions by morning." },
+      '2-8':  { intro: 'Super Bowl LX', note: "Super Bowl LX is at Levi's Stadium in the Bay Area today. Whatever your team, the ads and the halftime show are undefeated." },
+      '3-15': { intro: 'Oscars Tonight', note: 'The 98th Academy Awards air tonight — red carpet, gold statuettes, and at least one acceptance speech that runs long.' },
+      '6-11': { intro: 'World Cup Kicks Off', note: 'The 2026 FIFA World Cup opens today — the first ever co-hosted by the US, Canada, and Mexico, and the biggest yet at 48 teams.' },
+      '7-15': { intro: 'World Cup on Home Soil', note: "The World Cup is in its final days right here in North America — the final is July 19 at MetLife Stadium, New Jersey. First time on US soil since 1994." },
+      '7-19': { intro: 'World Cup Final', note: 'The 2026 World Cup final is today at MetLife Stadium. About a billion people worldwide are watching the same match you could be.' }
     }
   }
 
@@ -271,56 +279,51 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     return 1 + offset + (n - 1) * 7
   }
 
+  // Everyday rotating notes — leaning pop culture, film, music, TV, sports, and
+  // internet lore. Playful, accurate, and off the politics.
   const FUN_NOTES = [
-    'Octopuses have three hearts and blue blood.',
-    'A group of flamingos is called a flamboyance.',
+    'Toy Story (1995) was the first feature film made entirely with computer animation.',
+    'The Beatles still hold the record for the most #1 singles on the Billboard Hot 100.',
+    'The Simpsons is the longest-running scripted primetime show in US history.',
+    "The first-ever YouTube video, 'Me at the zoo,' is just 18 seconds long (2005).",
+    'Jaws basically invented the summer blockbuster back in 1975.',
     'Honey never spoils. Neither do great creative briefs.',
-    "The shortest war in history lasted 38 minutes.",
-    "Sea otters hold hands while sleeping so they don't drift apart.",
-    "Bananas are berries. Strawberries aren't.",
-    'The Eiffel Tower grows ~15cm taller in the summer.',
-    'A cloud can weigh more than a million pounds — talk about overhead.',
-    'Wombats poop in cubes.',
-    'The first domain ever registered was symbolics.com, in 1985.',
-    'Cows have best friends and get stressed when separated.',
-    'Honeybees can recognize human faces.',
-    'The dot over the letter i is called a tittle.',
-    'Oxford comma wars have been ongoing for 100+ years.',
-    'Slugs have four noses.',
-    'A day on Venus is longer than its year.',
-    'Bubble wrap was originally invented as wallpaper.',
-    "A shrimp's heart is in its head.",
-    'Butterflies taste with their feet.',
-    'There are more stars in the universe than grains of sand on Earth.',
-    'Penguins propose with pebbles.',
-    'Crows can recognize individual human faces and hold grudges.',
+    'A basketball hoop has been exactly 10 feet high since the game was invented in 1891.',
+    'Beyoncé has won more Grammy Awards than any artist in history.',
+    "Netflix started out mailing DVDs in little red envelopes.",
+    "The 'Wilhelm scream' sound effect has turned up in hundreds of movies since 1951.",
+    'Michael Jackson\'s "Thriller" is the best-selling album of all time.',
+    'Avatar and Titanic — the biggest films of their eras — share the same director.',
+    "Golf is the only sport that's been played on the surface of the Moon.",
+    "Friends was filmed in front of a live studio audience for all 10 seasons.",
+    'The 2026 World Cup is the first ever with 48 teams — and the first co-hosted by three countries.',
+    "The Hollywood sign originally read 'HOLLYWOODLAND.'",
+    "Star Wars came out in 1977 as just 'Star Wars' — the 'Episode IV' subtitle was added later.",
+    'The NBA\'s 24-second shot clock, added in 1954, saved the game from stalling out.',
+    "The first text message ever sent, in 1992, simply said 'Merry Christmas.'",
+    'The M*A*S*H finale in 1983 was watched by over 100 million Americans.',
+    'Video games are now a bigger industry than film and recorded music combined.',
+    'Tennis scoring — 15, 30, 40 — has an origin nobody has fully explained.',
+    'The Oscar statuette is 13.5 inches tall and gold-plated.',
+    "'Happy Birthday' was under copyright until 2016 — films used to pay to use it.",
+    'The Stanley Cup has its own full-time keeper who travels with it year-round.',
+    'The first film to win Best Picture, "Wings" (1929), was a silent movie.',
+    'The Olympic rings use five colors so that every national flag shares at least one.',
+    'A vinyl record is one single continuous groove, spiraling inward.',
+    'The @ symbol was picked for email in 1971 because almost nobody else was using it.',
+    'Pixar\'s hopping desk lamp, "Luxo Jr.," dates to 1986 and became the studio\'s logo.',
     'The inventor of the Frisbee was cremated and made into a Frisbee.',
-    'Sloths can hold their breath longer than dolphins can.',
-    'A snail can sleep for three years.',
-    'Saturn would float if you could find a bathtub big enough.',
-    "The Great Wall of China is not actually visible from space.",
-    "Koalas have fingerprints nearly identical to humans'.",
-    'A jellyfish is 95% water.',
-    'Your stomach gets a new lining every 3–4 days.',
-    "There's a species of jellyfish that is biologically immortal.",
-    'Pineapples take two years to grow.',
-    'Bees can do math. Really.',
-    'Goats have rectangular pupils.',
-    'Giraffes have the same number of neck vertebrae as humans: seven.',
-    'Ketchup was once sold as medicine.',
-    'The unicorn is Scotland’s national animal.',
-    'Wasps invented paper 50 million years before humans.',
-    'A blue whale’s heart is the size of a small car.',
-    'A "jiffy" is a real unit of time: 1/100th of a second.',
-    "You can't hum while holding your nose closed.",
-    'Carrots were originally purple.',
-    'The plastic tip on a shoelace is called an aglet.',
+    'A "jiffy" is a real unit of time: about 1/100th of a second.',
+    'The clapperboard\'s snap is what lets editors line up picture and sound.',
+    "The word 'emoji' comes from Japanese for 'picture' + 'character' — not from 'emotion.'",
+    'Bubble wrap was originally invented as wallpaper.',
+    'The most-followed people on social media are almost all athletes and pop stars.',
+    'The first domain ever registered was symbolics.com, in 1985.',
+    'A soccer pitch has no single official size — the rules allow a whole range.',
     "There's a word for the smell of rain: petrichor.",
-    'Norway once knighted a penguin.',
-    'A group of owls is called a parliament.',
-    'Your nose can detect about one trillion smells.',
-    'Apples, pears, cherries, and plums are all in the rose family.',
-    'Mosquitoes have killed more humans than all wars combined.'
+    'The Grammys, Oscars, Emmys, and Tonys together make up the "EGOT" — only a handful of people have all four.',
+    'The Super Bowl halftime show sometimes pulls a bigger audience than the game itself.',
+    'The dot over a lowercase i or j is called a tittle.'
   ]
 
   function tzParts(now, tz) {
