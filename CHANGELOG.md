@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-17
+
+**No more duplicate brands or clients.** When you add a brand, HQue now checks your whole list — **including archived brands** — as you type, ignoring case, punctuation, and small spelling differences. So if you archived **"Dr. Brown's"** and later start typing **"Dr Brown,"** it catches it and shows the existing one with a one-click **Restore & open** (or **Open it** if it's already active) — so you reuse it instead of creating a duplicate. Genuinely a different brand that just sounds similar? The button becomes **"Add anyway,"** so you're never blocked.
+
+---
+
 ## 2026-07-16
 
 **Task comments now lock down after 5 minutes.** Every comment is time-stamped (with an "edited" marker if it was changed). You can **edit or delete your own comment only within 5 minutes** of posting it — after that it becomes a permanent record. And you can **never edit or delete a teammate's comment.** These rules are enforced both in the app and at the database level, so they can't be worked around.

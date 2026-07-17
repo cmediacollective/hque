@@ -1,5 +1,11 @@
 [
   {
+    "title": "Duplicate brand & client protection (including archived)",
+    "description": "When you add a brand or client, HQue now checks your whole list — active and archived — as you type, ignoring case, punctuation, and small spelling differences. If a match already exists (even an archived one), it shows it with a one-click Open or Restore, so you don't end up with duplicates. Genuinely different brand that just sounds similar? You can still 'Add anyway.'",
+    "category": "Feature",
+    "shipped_at": "2026-07-17"
+  },
+  {
     "title": "Time-stamped comments that lock after 5 minutes",
     "description": "Every task comment is time-stamped (and marked 'edited' if it was changed). You can edit or delete your own comment for 5 minutes after posting; after that it becomes a permanent record. You can never edit or delete someone else's comment — enforced in the app and the database.",
     "category": "Improvement",
