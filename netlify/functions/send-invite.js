@@ -34,8 +34,8 @@ function inviteHtml({ companyName, inviterName, role, link }) {
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
   <body style="margin:0;padding:0;background:#f4f1ec;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1a1a1a;">
     <div style="max-width:520px;margin:0 auto;padding:32px 20px;">
-      <div style="background:#5b7c99;border-radius:8px 8px 0 0;padding:22px 28px;">
-        <div style="font-family:Georgia,serif;font-size:22px;color:#fff;letter-spacing:0.02em;">HQue</div>
+      <div style="background:#5b7c99;border-radius:8px 8px 0 0;padding:20px 28px;">
+        <img src="https://h-que.com/logo-email.png" alt="HQue" width="128" style="display:block;height:auto;border:0;" />
       </div>
       <div style="background:#ffffff;border:0.5px solid #e4ded6;border-top:none;border-radius:0 0 8px 8px;padding:30px 28px;">
         <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#5b7c99;margin-bottom:14px;">You're invited</div>
