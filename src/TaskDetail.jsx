@@ -160,7 +160,13 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
 
   async function saveCommentEdit(id) {
     if (!editingBody.trim()) return
-    await supabase.from('task_comments').update({ body: editingBody.trim(), edited_at: new Date().toISOString() }).eq('id', id)
+    const { error, count } = await supabase.from('task_comments')
+      .update({ body: editingBody.trim(), edited_at: new Date().toISOString() }, { count: 'exact' })
+      .eq('id', id)
+    if (error || count === 0) {
+      alert('You can only edit your own comment, and only within 5 minutes of posting it.')
+      return
+    }
     setEditingCommentId(null)
     setEditingBody('')
     fetchComments()
@@ -626,9 +632,9 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                 const authorName = author?.full_name || author?.email || 'Unknown'
                 const isMine = c.user_id === currentUserId
                 const isEditing = editingCommentId === c.id
-                // You can only delete your own comment, and only within 5 minutes
-                // of posting it (also enforced server-side).
-                const canDelete = isMine && (Date.now() - new Date(c.created_at).getTime()) < 5 * 60 * 1000
+                // Edit and Delete are allowed only on your OWN comment, and only
+                // within 5 minutes of posting it (also enforced server-side).
+                const canModify = isMine && (Date.now() - new Date(c.created_at).getTime()) < 5 * 60 * 1000
                 return (
                   <div key={c.id} style={{ display: 'flex', gap: '10px' }}>
                     {author?.avatar_url ? (
@@ -640,10 +646,10 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
                         <span style={{ fontSize: '12px', color: text, fontWeight: 500 }}>{authorName}</span>
                         <span title={fullTime(c.created_at)} style={{ fontSize: '10px', color: subtle }}>{timeAgo(c.created_at)}{c.edited_at ? ' · edited' : ''}</span>
-                        {isMine && !isEditing && (
+                        {canModify && !isEditing && (
                           <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
                             <button onClick={() => { setEditingCommentId(c.id); setEditingBody(c.body) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Edit</button>
-                            {canDelete && <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>}
+                            <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>
                           </div>
                         )}
                       </div>
