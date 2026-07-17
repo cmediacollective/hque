@@ -37,7 +37,12 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
 
   const [comments, setComments] = useState([])
   const [loadingComments, setLoadingComments] = useState(true)
-  const [newComment, setNewComment] = useState('')
+  // Persist the comment draft per task in the browser, so an unsent comment
+  // survives closing the task, navigating away, or a refresh (cleared on post).
+  const draftKey = `hque_comment_draft_${task.id}`
+  const [newComment, setNewComment] = useState(() => {
+    try { return localStorage.getItem(draftKey) || '' } catch { return '' }
+  })
   const [postingComment, setPostingComment] = useState(false)
   const [currentUserId, setCurrentUserId] = useState(null)
   const [editingCommentId, setEditingCommentId] = useState(null)
@@ -55,6 +60,14 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   const [commentExpanded, setCommentExpanded] = useState(false)
 
   useEffect(() => { fetchComments(); fetchCurrentUser(); fetchAttachments() }, [task.id])
+
+  // Save the draft as it changes; remove it once the box is empty (e.g. posted).
+  useEffect(() => {
+    try {
+      if (newComment) localStorage.setItem(draftKey, newComment)
+      else localStorage.removeItem(draftKey)
+    } catch { /* localStorage unavailable — non-fatal */ }
+  }, [newComment, draftKey])
 
   async function fetchCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser()

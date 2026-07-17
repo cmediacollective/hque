@@ -749,6 +749,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
       {editingTask && (
         <TaskDetail
+          key={editingTask.id}
           task={editingTask}
           dark={dark}
           members={members}
