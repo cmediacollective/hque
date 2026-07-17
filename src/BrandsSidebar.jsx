@@ -385,9 +385,13 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         {showArchived && archivedBrands.map(b => (
           <div key={b.id} style={{ padding: '10px 14px', borderBottom: `0.5px solid ${border}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-              <div style={{ width: '30px', height: '30px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {initial(b.name)}
-              </div>
+              {b.logo_url ? (
+                <img src={b.logo_url} alt={b.name} style={{ width: '30px', height: '30px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
+              ) : (
+                <div style={{ width: '30px', height: '30px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {initial(b.name)}
+                </div>
+              )}
               <span style={{ fontSize: '13px', color: text, flex: 1, minWidth: 0, wordBreak: 'break-word', lineHeight: 1.3 }}>{b.name}</span>
             </div>
             <div style={{ display: 'flex', gap: '6px', paddingLeft: '40px' }}>
