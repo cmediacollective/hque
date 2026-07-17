@@ -12,6 +12,11 @@
 [functions."purge-accounts"]
   schedule = "0 9 * * *"
 
+# Moves owners whose free trial just lapsed (without paying) into the Klaviyo
+# Winback list. Runs daily at 08:00 UTC.
+[functions."klaviyo-winback"]
+  schedule = "0 8 * * *"
+
 # Prerendered public marketing pages (/, /pricing, /faq, /blog, /blog/*, /updates,
 # /privacy, /terms) are written as real static files by scripts/prerender.mjs and
 # are served directly — Netlify serves an existing file before applying this rule.

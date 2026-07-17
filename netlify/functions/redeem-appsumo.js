@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js')
+const { syncStage } = require('./klaviyo-lib')
 
 // Redeem an AppSumo lifetime code.
 // Body: { code, orgId }
@@ -76,6 +77,18 @@ exports.handler = async (event) => {
       .eq('code', code)
     return json(500, { ok: false, reason: 'org_failed' })
   }
+
+  // Lifetime (AppSumo) → Subscribers in Klaviyo (best-effort).
+  try {
+    const { data: m } = await supabase.from('org_members').select('user_id').eq('org_id', orgId).eq('role', 'owner').maybeSingle()
+    let email = null
+    if (m) {
+      const { data: p } = await supabase.from('profiles').select('email').eq('id', m.user_id).maybeSingle()
+      email = p?.email
+      if (!email) { const { data: u } = await supabase.auth.admin.getUserById(m.user_id).catch(() => ({ data: null })); email = u?.user?.email }
+    }
+    if (email) await syncStage(email, 'subscribers')
+  } catch (e) { console.error('klaviyo subscribers (appsumo) failed', e) }
 
   return json(200, { ok: true })
 }

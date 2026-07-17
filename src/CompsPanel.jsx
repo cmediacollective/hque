@@ -57,6 +57,11 @@ export default function CompsPanel({ dark = true }) {
             : `Something went wrong: ${m || 'unknown error'}` })
       } else if (data?.ok) {
         setResult({ ok: true, msg: `✓ ${data.org_name || 'That account'} now has lifetime Business access. Ask them to refresh or log back in.` })
+        // Comped account → Subscribers in Klaviyo (best-effort).
+        fetch('/.netlify/functions/subscribe-klaviyo', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: e, stage: 'subscribers' }),
+        }).catch(() => {})
         setEmail('')
         loadList()
       } else if (data?.reason === 'no_user') {

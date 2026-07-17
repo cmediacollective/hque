@@ -516,6 +516,14 @@ function App() {
   function handleOnboardingComplete(newOrgId, newAgencyName) {
     setOrgId(newOrgId)
     setAgencyName(newAgencyName)
+    // Creating a workspace starts the free trial → move the owner from Leads to
+    // Nonsubscribers in Klaviyo (best-effort).
+    if (user?.email) {
+      fetch('/.netlify/functions/subscribe-klaviyo', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, stage: 'nonsubscribers' }),
+      }).catch(() => {})
+    }
   }
 
   async function handleLogout() {

@@ -1,5 +1,37 @@
 const Stripe = require('stripe')
 const { createClient } = require('@supabase/supabase-js')
+const { syncStage } = require('./klaviyo-lib')
+
+// Look up an org (id + lifetime flag) by its Stripe customer id.
+async function orgForCustomer(supabase, customerId) {
+  if (!customerId) return null
+  const { data } = await supabase.from('organizations').select('id, is_lifetime').eq('stripe_customer_id', customerId).maybeSingle()
+  return data || null
+}
+
+// The owner's email for an org (for Klaviyo). Prefers the membership list, falls
+// back to the auth record.
+async function ownerEmail(supabase, orgId) {
+  if (!orgId) return null
+  const { data: m } = await supabase.from('org_members').select('user_id').eq('org_id', orgId).eq('role', 'owner').maybeSingle()
+  if (!m) return null
+  const { data: p } = await supabase.from('profiles').select('email').eq('id', m.user_id).maybeSingle()
+  if (p?.email) return p.email
+  const { data: u } = await supabase.auth.admin.getUserById(m.user_id).catch(() => ({ data: null }))
+  return u?.user?.email || null
+}
+
+// Move an org's owner to a Klaviyo stage — never lets a Klaviyo failure affect
+// the webhook's response to Stripe.
+async function klaviyo(supabase, { orgId, customerId, stage }) {
+  try {
+    const oid = orgId || (await orgForCustomer(supabase, customerId))?.id
+    const email = await ownerEmail(supabase, oid)
+    if (email) await syncStage(email, stage)
+  } catch (e) {
+    console.error('klaviyo sync failed (non-fatal)', stage, e)
+  }
+}
 
 exports.handler = async (event) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -60,6 +92,8 @@ exports.handler = async (event) => {
     if (customerId) {
       const { error } = await supabase.from('organizations').update({ subscription_status: 'active', past_due_since: null }).eq('stripe_customer_id', customerId)
       if (error) console.error('Supabase recovery update error:', error)
+      // Paying (or recovered) → Subscribers.
+      await klaviyo(supabase, { customerId, stage: 'subscribers' })
     }
     return { statusCode: 200, body: 'OK' }
   }
@@ -72,6 +106,9 @@ exports.handler = async (event) => {
       // Never cancel a lifetime (AppSumo) org — their access is permanent.
       const { error } = await supabase.from('organizations').update({ subscription_status: 'canceled' }).eq('stripe_customer_id', customerId).neq('is_lifetime', true)
       if (error) console.error('Supabase cancel update error:', error)
+      // Canceled (and not lifetime) → Winback.
+      const org = await orgForCustomer(supabase, customerId)
+      if (org && !org.is_lifetime) await klaviyo(supabase, { orgId: org.id, stage: 'winback' })
     }
     return { statusCode: 200, body: 'OK' }
   }
@@ -114,6 +151,9 @@ exports.handler = async (event) => {
 
     if (error) console.error('Supabase update error:', error)
     else console.log('Organization updated successfully with plan:', plan)
+
+    // Paid → Subscribers.
+    await klaviyo(supabase, { orgId, customerId, stage: 'subscribers' })
   }
 
   return { statusCode: 200, body: 'OK' }
