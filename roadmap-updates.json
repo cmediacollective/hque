@@ -1,5 +1,11 @@
 [
   {
+    "title": "Search and filter the Product Updates page",
+    "description": "As this list grows, you can now search it (by title and description) and filter by type — Features, Improvements, or Fixes — alongside the status tabs, so you can quickly find whether something's been built. Every item keeps its date.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-17"
+  },
+  {
     "title": "Permanently delete archived brands & clients",
     "description": "You can now permanently delete a brand or client — but only from the Archive, and only after typing its exact name to confirm, so nothing is ever deleted by accident. It removes the brand and its boards, tasks, contacts, and notes. Campaigns are kept (moved to unassigned) so their history isn't lost. Owner/admin only.",
     "category": "Feature",
