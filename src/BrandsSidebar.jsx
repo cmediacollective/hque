@@ -62,6 +62,10 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [newBrandName, setNewBrandName] = useState('')
   const [newBrandWebsite, setNewBrandWebsite] = useState('')
   const [newBrandLogoFile, setNewBrandLogoFile] = useState(null)
+  const [deletingBrand, setDeletingBrand] = useState(null)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -188,6 +192,22 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     setError('')
     if (brand.status === 'archived') archiveBrand(brand, true)
     onSelectBrand?.(brand.id)
+  }
+
+  // Permanent delete (archive-only). Requires the typed name to match, and
+  // removes the brand plus everything attached to it via the delete_brand RPC.
+  async function confirmDeleteBrand() {
+    if (!deletingBrand) return
+    if (deleteConfirmText.trim().toLowerCase() !== deletingBrand.name.trim().toLowerCase()) return
+    setDeleting(true)
+    setDeleteError('')
+    const { error } = await supabase.rpc('delete_brand', { p_brand_id: deletingBrand.id })
+    setDeleting(false)
+    if (error) { setDeleteError(error.message || 'Could not delete this brand.'); return }
+    if (selectedBrandId === deletingBrand.id) onSelectBrand?.(null)
+    setDeletingBrand(null)
+    setDeleteConfirmText('')
+    fetchBrands()
   }
 
   async function archiveBrand(brand, restore = false) {
@@ -371,9 +391,41 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             <button
               onClick={() => setArchiving({ brand: b, restore: true })}
               style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Restore</button>
+            <button
+              onClick={() => { setDeletingBrand(b); setDeleteConfirmText(''); setDeleteError('') }}
+              style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #c0392b', color: '#c0392b', cursor: 'pointer', borderRadius: '1px' }}>Delete</button>
           </div>
         ))}
       </div>
+
+      {deletingBrand && (() => {
+        const canDelete = deleteConfirmText.trim().toLowerCase() === deletingBrand.name.trim().toLowerCase()
+        return (
+          <div onClick={e => { if (e.target === e.currentTarget && !deleting) { setDeletingBrand(null); setDeleteConfirmText('') } }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.7)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(2px)' }}>
+            <div style={{ background: dark ? '#1e1e1e' : '#FFFFFF', border: `0.5px solid ${border}`, borderRadius: '8px', padding: '26px', width: '380px', maxWidth: '100%' }}>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '19px', color: text, marginBottom: '10px' }}>Delete “{deletingBrand.name}” permanently?</div>
+              <div style={{ fontSize: '12px', color: muted, lineHeight: 1.65, marginBottom: '18px' }}>
+                This permanently removes the brand and <b style={{ color: text }}>everything attached to it</b> — its boards, tasks, contacts, and notes. This cannot be undone.
+              </div>
+              <div style={{ fontSize: '11px', color: subtle, marginBottom: '6px' }}>Type <b style={{ color: text }}>{deletingBrand.name}</b> to confirm:</div>
+              <input value={deleteConfirmText} autoFocus onChange={e => setDeleteConfirmText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && canDelete) confirmDeleteBrand(); if (e.key === 'Escape' && !deleting) { setDeletingBrand(null); setDeleteConfirmText('') } }}
+                placeholder={deletingBrand.name}
+                style={{ width: '100%', padding: '9px 11px', fontSize: '13px', background: dark ? '#141414' : '#F5F3EF', border: `0.5px solid ${border}`, borderRadius: '3px', color: text, outline: 'none', boxSizing: 'border-box', marginBottom: '16px' }} />
+              {deleteError && <div style={{ fontSize: '11px', color: '#c0392b', marginBottom: '12px', lineHeight: 1.5 }}>{deleteError}</div>}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={confirmDeleteBrand} disabled={!canDelete || deleting}
+                  style={{ flex: 1, padding: '10px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#c0392b', border: 'none', color: '#fff', cursor: canDelete && !deleting ? 'pointer' : 'default', borderRadius: '3px', opacity: canDelete && !deleting ? 1 : 0.4 }}>
+                  {deleting ? 'Deleting…' : 'Delete permanently'}
+                </button>
+                <button onClick={() => { if (!deleting) { setDeletingBrand(null); setDeleteConfirmText('') } }}
+                  style={{ padding: '10px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '3px' }}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       <div style={{ borderTop: `0.5px solid ${border}`, padding: '10px 14px' }}>
         {showNewBrand ? (() => {
