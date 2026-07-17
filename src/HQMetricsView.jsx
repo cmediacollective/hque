@@ -44,11 +44,34 @@ export default function HQMetricsView({ dark = true }) {
   const [stripe, setStripe] = useState(null)
   const [stripeLoading, setStripeLoading] = useState(true)
   const [range, setRange] = useState('30d')
+  // AppSumo payout — kept by hand (no live AppSumo feed), stored in platform_settings.
+  const [appsumoRev, setAppsumoRev] = useState(null)
+  const [revEditing, setRevEditing] = useState(false)
+  const [revInput, setRevInput] = useState('')
+  const [revSaving, setRevSaving] = useState(false)
 
   const rangeLabel = (RANGE_ORDER.find(([k]) => k === range) || [])[1] || ''
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); fetchAppsumoRev() }, [])
   useEffect(() => { loadGA(range); loadStripe(range) }, [range])
+
+  async function fetchAppsumoRev() {
+    const { data } = await supabase.from('platform_settings').select('value').eq('key', 'appsumo_revenue').maybeSingle()
+    if (data?.value) setAppsumoRev(data.value)
+  }
+
+  async function saveAppsumoRev() {
+    const amount = parseFloat(revInput)
+    if (isNaN(amount) || amount < 0) return
+    setRevSaving(true)
+    const value = { amount, as_of: new Date().toISOString().slice(0, 10) }
+    const { error } = await supabase.from('platform_settings')
+      .upsert({ key: 'appsumo_revenue', value, updated_at: new Date().toISOString() }, { onConflict: 'key' })
+    setRevSaving(false)
+    if (error) { alert('Could not save: ' + error.message); return }
+    setAppsumoRev(value)
+    setRevEditing(false)
+  }
 
   // Both range-based fetches share this shape: get the token, hit the function
   // with the selected start/end, store the body if it came back ok.
@@ -321,6 +344,27 @@ export default function HQMetricsView({ dark = true }) {
       <div style={{ marginBottom: '32px' }}>
         {sectionLabel('AppSumo codes')}
         <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+          {/* Payout — hand-entered from the AppSumo partner dashboard. */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', flexWrap: 'wrap', paddingBottom: '18px', marginBottom: '20px', borderBottom: `0.5px solid ${border}` }}>
+            <div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>
+                {appsumoRev?.amount != null ? `$${Number(appsumoRev.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
+              </div>
+              <div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>
+                AppSumo payout · estimated{appsumoRev?.as_of ? ` · as of ${appsumoRev.as_of}` : ''}
+              </div>
+            </div>
+            {!revEditing ? (
+              <button onClick={() => { setRevInput(appsumoRev?.amount != null ? String(appsumoRev.amount) : ''); setRevEditing(true) }} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', padding: '6px 12px', borderRadius: '3px' }}>Update</button>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '15px', color: muted }}>$</span>
+                <input type='number' step='0.01' min='0' value={revInput} autoFocus onChange={e => setRevInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') saveAppsumoRev() }} style={{ width: '110px', background: dark ? '#141414' : '#fff', border: `0.5px solid ${border}`, borderRadius: '3px', padding: '7px 10px', fontSize: '14px', color: text, outline: 'none' }} />
+                <button onClick={saveAppsumoRev} disabled={revSaving} style={{ background: accent, border: 'none', color: '#fff', cursor: 'pointer', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', padding: '7px 12px', borderRadius: '3px', opacity: revSaving ? 0.6 : 1 }}>{revSaving ? 'Saving…' : 'Save'}</button>
+                <button onClick={() => setRevEditing(false)} style={{ background: 'none', border: `0.5px solid ${border}`, color: muted, cursor: 'pointer', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', padding: '7px 12px', borderRadius: '3px' }}>Cancel</button>
+              </div>
+            )}
+          </div>
           <div style={{ display: 'flex', gap: '28px', marginBottom: '20px', flexWrap: 'wrap' }}>
             <Line label="Total codes" value={a.total} {...{ text, muted }} />
             <Line label="Redeemed" value={a.redeemed} {...{ text, muted }} />
