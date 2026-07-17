@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-16
 
+**Task comments now lock down after 5 minutes.** Every comment is time-stamped (with an "edited" marker if it was changed). You can **edit or delete your own comment only within 5 minutes** of posting it — after that it becomes a permanent record. And you can **never edit or delete a teammate's comment.** These rules are enforced both in the app and at the database level, so they can't be worked around.
+
 **Your half-written comment is saved if you close the task.** Start typing a comment, get pulled away, and close the task — your draft is now still there when you reopen it. The comment box remembers what you were writing (per task, on your device) through closing, navigating away, or even a refresh, and clears itself once you post. *(Requested by a customer on the Product Updates page.)*
 
 **Paste a screenshot straight into a task comment.** You no longer have to save an image to your computer and dig it out of the file picker — just copy a screenshot (or any image) and **paste it right into the comment box**, and it attaches to your comment like any other file. Drag-and-drop still works too. *(Requested by a customer on the Product Updates page.)*

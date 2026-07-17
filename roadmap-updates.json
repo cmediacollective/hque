@@ -1,5 +1,11 @@
 [
   {
+    "title": "Time-stamped comments that lock after 5 minutes",
+    "description": "Every task comment is time-stamped (and marked 'edited' if it was changed). You can edit or delete your own comment for 5 minutes after posting; after that it becomes a permanent record. You can never edit or delete someone else's comment — enforced in the app and the database.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-16"
+  },
+  {
     "title": "Retain draft text on the comment section, even if the tasks closes",
     "description": "If you're partway through writing a task comment and close the task (or navigate away, or refresh the page), your unsent text is now saved and waiting for you when you reopen the task. It clears automatically once you post the comment.",
     "category": "Improvement",
