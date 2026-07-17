@@ -383,17 +383,21 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         )}
 
         {showArchived && archivedBrands.map(b => (
-          <div key={b.id} style={{ padding: '11px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: subtle, fontSize: '13px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {initial(b.name)}
+          <div key={b.id} style={{ padding: '10px 14px', borderBottom: `0.5px solid ${border}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '3px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '12px', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {initial(b.name)}
+              </div>
+              <span style={{ fontSize: '13px', color: text, flex: 1, minWidth: 0, wordBreak: 'break-word', lineHeight: 1.3 }}>{b.name}</span>
             </div>
-            <span style={{ fontSize: '13px', color: subtle, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.name}</span>
-            <button
-              onClick={() => setArchiving({ brand: b, restore: true })}
-              style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>Restore</button>
-            <button
-              onClick={() => { setDeletingBrand(b); setDeleteConfirmText(''); setDeleteError('') }}
-              style={{ padding: '2px 8px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #c0392b', color: '#c0392b', cursor: 'pointer', borderRadius: '1px' }}>Delete</button>
+            <div style={{ display: 'flex', gap: '6px', paddingLeft: '40px' }}>
+              <button
+                onClick={() => setArchiving({ brand: b, restore: true })}
+                style={{ padding: '4px 12px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '2px' }}>Restore</button>
+              <button
+                onClick={() => { setDeletingBrand(b); setDeleteConfirmText(''); setDeleteError('') }}
+                style={{ padding: '4px 12px', fontSize: '8px', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #c0392b', color: '#c0392b', cursor: 'pointer', borderRadius: '2px' }}>Delete</button>
+            </div>
           </div>
         ))}
       </div>
