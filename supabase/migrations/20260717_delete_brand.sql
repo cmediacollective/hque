@@ -36,8 +36,7 @@ begin
   end if;
 
   -- Tasks first (their comments/attachments/assignees/watchers/notifications
-  -- cascade automatically). Match by the brand tag and by board, to be safe.
-  delete from tasks where brand_id = p_brand_id;
+  -- cascade automatically). Tasks link to a brand only via their board.
   delete from tasks where board_id in (select id from boards where brand_id = p_brand_id);
 
   -- Boards (board_columns cascade off them).
