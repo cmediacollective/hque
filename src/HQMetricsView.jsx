@@ -261,6 +261,9 @@ export default function HQMetricsView({ dark = true }) {
                   <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
                   <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions<Delta cur={stripe.newSubscriptions} prev={stripe.prevNewSubscriptions} /></div></div>
                   <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
+                  {appsumoRev?.amount != null && (
+                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Number(appsumoRev.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>AppSumo · lifetime</div></div>
+                  )}
                 </div>
               </div>
               {stripe.dailyRevenue && stripe.dailyRevenue.length > 1 && (
