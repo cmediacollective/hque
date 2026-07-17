@@ -405,17 +405,45 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
     title: 'HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs',
     description: 'Whether you run an agency, manage talent campaigns in-house, or are building something on your own — HQue is how you manage your talent, track every campaign, and close deals without the chaos.',
     canonical: 'https://h-que.com',
-    jsonLd: {
-      '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
-      name: 'HQue',
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Web',
-      url: 'https://h-que.com',
-      description: 'HQue is the operating system for talent and influencer agencies — manage your roster, track campaigns, handle payments, and run your team in one place. Built for agencies, brands managing talent in-house, and solo talent managers.',
-      offers: { '@type': 'AggregateOffer', priceCurrency: 'USD', lowPrice: '49', highPrice: '199', offerCount: 3 },
-      publisher: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
-    },
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'SoftwareApplication',
+        name: 'HQue',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: 'https://h-que.com',
+        description: 'HQue is the operating system for talent and influencer agencies — manage your roster, track campaigns, handle payments, and run your team in one place. Built for agencies, brands managing talent in-house, and solo talent managers.',
+        offers: { '@type': 'AggregateOffer', priceCurrency: 'USD', lowPrice: '49', highPrice: '199', offerCount: 3 },
+        publisher: { '@type': 'Organization', name: 'HQue', url: 'https://h-que.com', logo: { '@type': 'ImageObject', url: 'https://h-que.com/logo.svg' } },
+      },
+      {
+        // Brand entity — helps Google identify HQue and tell it apart from
+        // similarly-named products (hCue, HQueue, Hque Space).
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'HQue',
+        alternateName: 'HQue Agency OS',
+        url: 'https://h-que.com',
+        logo: 'https://h-que.com/logo.svg',
+        description: 'HQue is the agency operating system for talent and influencer agencies, brands managing talent in-house, and solo talent managers.',
+        sameAs: ['https://instagram.com/theofficialHQue', 'https://www.linkedin.com/company/h-que'],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'HQue',
+        url: 'https://h-que.com',
+        publisher: { '@type': 'Organization', name: 'HQue' },
+      },
+      {
+        // Declares the main sections — the sitelink candidates.
+        '@context': 'https://schema.org',
+        '@type': 'SiteNavigationElement',
+        name: ['Pricing', 'FAQ', 'The Pitch', 'Product Updates'],
+        url: ['https://h-que.com/pricing', 'https://h-que.com/faq', 'https://h-que.com/blog', 'https://h-que.com/updates'],
+      },
+    ],
   })
   const [activeScreen, setActiveScreen] = useState(0)
   const [scrolled, setScrolled] = useState(false)

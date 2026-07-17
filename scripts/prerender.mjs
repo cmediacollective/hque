@@ -212,6 +212,35 @@ function softwareAppJsonLd(url) {
   }
 }
 
+// Brand + site + navigation schemas for the homepage. The Organization (with
+// social profiles) helps Google identify HQue and tell it apart from similarly
+// named products; SiteNavigationElement declares the main sections that are
+// candidates for sitelinks.
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'HQue',
+  alternateName: 'HQue Agency OS',
+  url: BASE,
+  logo: BASE + '/logo.svg',
+  description: 'HQue is the agency operating system for talent and influencer agencies, brands managing talent in-house, and solo talent managers.',
+  sameAs: ['https://instagram.com/theofficialHQue', 'https://www.linkedin.com/company/h-que'],
+}
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'HQue',
+  url: BASE,
+  publisher: { '@type': 'Organization', name: 'HQue' },
+}
+const siteNavJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SiteNavigationElement',
+  name: ['Pricing', 'FAQ', 'The Pitch', 'Product Updates'],
+  url: [BASE + '/pricing', BASE + '/faq', BASE + '/blog', BASE + '/updates'],
+}
+const homeJsonLd = (url) => [softwareAppJsonLd(url), orgJsonLd, websiteJsonLd, siteNavJsonLd]
+
 // FAQPage schema built from the real questions & answers.
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -227,7 +256,7 @@ const faqJsonLd = {
 const routes = [
   { path: '/', title: 'HQue — Talent & Campaign Management for Agencies, Brands & Entrepreneurs',
     description: 'HQue is how you manage your talent, track every campaign, and close deals without the chaos. Built for agencies, brands, and entrepreneurs.',
-    canonical: BASE + '/', jsonLd: softwareAppJsonLd(BASE + '/'), contentHtml: homeContent() },
+    canonical: BASE + '/', jsonLd: homeJsonLd(BASE + '/'), contentHtml: homeContent() },
   { path: '/pricing', title: 'HQue Pricing — Plans for Agencies, Brands & Entrepreneurs',
     description: 'Simple, transparent pricing for agencies, brand teams, and entrepreneurs who work with talent. Start free, upgrade as you grow.',
     canonical: BASE + '/pricing', jsonLd: softwareAppJsonLd(BASE + '/pricing'), contentHtml: pricingContent() },
