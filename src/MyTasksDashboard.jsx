@@ -268,7 +268,8 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
       '3-15': { intro: 'Oscars Tonight', note: 'The 98th Academy Awards air tonight — red carpet, gold statuettes, and at least one acceptance speech that runs long.' },
       '6-11': { intro: 'World Cup Kicks Off', note: 'The 2026 FIFA World Cup opens today — the first ever co-hosted by the US, Canada, and Mexico, and the biggest yet at 48 teams.' },
       '7-15': { intro: 'World Cup on Home Soil', note: "The World Cup is in its final days right here in North America — the final is July 19 at MetLife Stadium, New Jersey. First time on US soil since 1994." },
-      '7-19': { intro: 'World Cup Final', note: 'The 2026 World Cup final is today at MetLife Stadium. About a billion people worldwide are watching the same match you could be.' }
+      '7-18': { intro: 'World Cup: France v England', note: 'France take on England today at 2:00 PM — one of the last matches before tomorrow\'s final. Grab a screen.' },
+      '7-19': { intro: 'World Cup Final: Spain v Argentina', note: 'The 2026 World Cup final is today — Spain v Argentina, kicking off at 12:00 PM at MetLife Stadium. About a billion people worldwide watching the same match you could be.' }
     }
   }
 
