@@ -35,6 +35,8 @@ export default function HQMetricsView({ dark = true }) {
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
   const accent = '#5b7c99'
+  const cat = CAT[dark ? 'dark' : 'light']
+  const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 4px rgba(0,0,0,0.06)'
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -233,7 +235,7 @@ export default function HQMetricsView({ dark = true }) {
       {/* Revenue & growth (Stripe) */}
       <div style={{ marginBottom: '32px' }}>
         {sectionLabel(`Revenue & growth · ${rangeLabel}`)}
-        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderLeft: `3px solid ${accent}`, borderRadius: '6px', padding: '28px 30px', boxShadow: cardShadow }}>
           {stripeLoading && (
             <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Stripe…</div>
           )}
@@ -249,11 +251,16 @@ export default function HQMetricsView({ dark = true }) {
             </div>
           )}
           {!stripeLoading && stripe && stripe.configured && !stripe.error && (
-            <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap' }}>
-              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>${Math.round(stripe.revenue).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Revenue · {rangeLabel}</div></div>
-              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions</div></div>
-              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
-              <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
+            <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '52px', color: text, lineHeight: 0.95 }}>${Math.round(stripe.revenue).toLocaleString()}</div>
+                <div style={{ fontSize: '10px', color: muted, marginTop: '10px', letterSpacing: '0.08em' }}>Revenue · {rangeLabel}</div>
+              </div>
+              <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap', paddingBottom: '6px' }}>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions</div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
+              </div>
             </div>
           )}
         </div>
@@ -261,11 +268,11 @@ export default function HQMetricsView({ dark = true }) {
 
       {/* Headline stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px', marginBottom: '32px' }}>
-        <Stat label="Paying subscribers" value={s.paying} sub={`${s.total} accounts total`} {...{ card, border, text, muted, subtle }} accent={accent} />
-        <Stat label="Lifetime deals" value={s.lifetime} sub="AppSumo, permanent" {...{ card, border, text, muted, subtle }} accent={accent} />
-        <Stat label="Comped accounts" value={s.comps || 0} sub="free Business, granted" {...{ card, border, text, muted, subtle }} accent={accent} />
-        <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} />
-        <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} />
+        <Stat label="Paying subscribers" value={s.paying} sub={`${s.total} accounts total`} {...{ card, border, text, muted, subtle }} accent={accent} tone={STATUS.good} shadow={cardShadow} />
+        <Stat label="Lifetime deals" value={s.lifetime} sub="AppSumo, permanent" {...{ card, border, text, muted, subtle }} accent={accent} shadow={cardShadow} />
+        <Stat label="Comped accounts" value={s.comps || 0} sub="free Business, granted" {...{ card, border, text, muted, subtle }} accent={accent} shadow={cardShadow} />
+        <Stat label="Trials in progress" value={s.trialing} sub="not yet converted" {...{ card, border, text, muted, subtle }} accent={accent} tone={STATUS.warning} shadow={cardShadow} />
+        <Stat label="AppSumo redeemed" value={a.redeemed} sub={`${a.unused} codes left`} {...{ card, border, text, muted, subtle }} accent={accent} shadow={cardShadow} />
       </div>
 
       {/* Website traffic (Google Analytics) */}
@@ -311,19 +318,32 @@ export default function HQMetricsView({ dark = true }) {
         </div>
       </div>
 
-      {/* Subscribers breakdown */}
+      {/* Subscribers breakdown — paying mix (donut) + states (status-colored) */}
       <div style={{ marginBottom: '32px' }}>
         {sectionLabel('Subscribers')}
-        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '20px 24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '18px' }}>
-            <Line label="Starter · $49" value={s.byPlan.starter} {...{ text, muted }} />
-            <Line label="Pro · $99" value={s.byPlan.pro} {...{ text, muted }} />
-            <Line label="Business · $199" value={s.byPlan.agency} {...{ text, muted }} />
-            <Line label="Lifetime (AppSumo)" value={s.lifetime} {...{ text, muted }} />
-            <Line label="Trialing" value={s.trialing} {...{ text, muted }} />
-            <Line label="Trial expired" value={s.trialExpired} {...{ text, muted }} />
-            <Line label="Past due" value={s.pastDue} {...{ text, muted }} />
-            <Line label="Canceled" value={s.canceled} {...{ text, muted }} />
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '24px', boxShadow: cardShadow }}>
+          <div style={{ display: 'flex', gap: '44px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <Donut
+              segments={[
+                { label: 'Starter · $49', value: s.byPlan.starter || 0, color: cat[0] },
+                { label: 'Pro · $99', value: s.byPlan.pro || 0, color: cat[1] },
+                { label: 'Business · $199', value: s.byPlan.agency || 0, color: cat[2] },
+                { label: 'Lifetime', value: s.lifetime || 0, color: cat[3] },
+              ]}
+              centerValue={(s.byPlan.starter || 0) + (s.byPlan.pro || 0) + (s.byPlan.agency || 0) + (s.lifetime || 0)}
+              centerLabel="Paying"
+              {...{ dark, text, muted, subtle }}
+            />
+            <div style={{ flex: 1, minWidth: '220px' }}>
+              <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '14px' }}>Account states</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px 24px' }}>
+                <StateLine label="Trialing" value={s.trialing} color={STATUS.warning} {...{ text, subtle }} />
+                <StateLine label="Comped" value={s.comps || 0} color={STATUS.good} {...{ text, subtle }} />
+                <StateLine label="Trial expired" value={s.trialExpired} color={STATUS.critical} {...{ text, subtle }} />
+                <StateLine label="Past due" value={s.pastDue} color={STATUS.critical} {...{ text, subtle }} />
+                <StateLine label="Canceled" value={s.canceled} color={muted} {...{ text, subtle }} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -418,9 +438,67 @@ export default function HQMetricsView({ dark = true }) {
   )
 }
 
-function Stat({ label, value, sub, card, border, text, muted, subtle, accent }) {
+// Validated categorical palette (dataviz skill — first 4 slots, all-pairs safe
+// in both modes with direct labels). Brand blue is too desaturated to be a
+// series color, so the categorical donut uses these; single-series bars keep
+// brand blue. Status colors are the reserved good/warning/critical set.
+const CAT = { light: ['#2a78d6', '#008300', '#e87ba4', '#eda100'], dark: ['#3987e5', '#008300', '#d55181', '#c98500'] }
+const STATUS = { good: '#0ca30c', goodTextLight: '#006300', warning: '#fab219', warningInk: '#8a6100', critical: '#d03b3b' }
+
+// Native-SVG donut. segments: [{ label, value, color }].
+function Donut({ segments, centerValue, centerLabel, dark, text, muted, subtle }) {
+  const size = 158, stroke = 26, r = (size - stroke) / 2, cx = size / 2, cy = size / 2
+  const circ = 2 * Math.PI * r
+  const sum = segments.reduce((a, s) => a + (s.value || 0), 0)
+  const track = dark ? '#242424' : '#ECE8E1'
+  let offset = 0
   return (
-    <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '3px', padding: '18px 20px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '28px', flexWrap: 'wrap' }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }} role="img" aria-label={`${centerLabel}: ${centerValue}`}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={track} strokeWidth={stroke} />
+        {sum > 0 && segments.map((s, i) => {
+          if (!s.value) return null
+          const frac = s.value / sum
+          const gap = segments.filter(x => x.value).length > 1 ? 2 : 0
+          const dash = Math.max(0, frac * circ - gap)
+          const el = (
+            <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={stroke}
+              strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-offset}
+              transform={`rotate(-90 ${cx} ${cy})`} strokeLinecap="butt" />
+          )
+          offset += frac * circ
+          return el
+        })}
+        <text x={cx} y={cy - 1} textAnchor="middle" style={{ fontFamily: 'Georgia, serif', fontSize: '30px', fill: text }}>{centerValue}</text>
+        <text x={cx} y={cy + 17} textAnchor="middle" style={{ fontSize: '8px', letterSpacing: '0.18em', textTransform: 'uppercase', fill: subtle }}>{centerLabel}</text>
+      </svg>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '9px', minWidth: '160px' }}>
+        {segments.map((s, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '12px' }}>
+            <span style={{ width: '11px', height: '11px', borderRadius: '3px', background: s.color, flexShrink: 0 }} />
+            <span style={{ color: text, flex: 1 }}>{s.label}</span>
+            <span style={{ color: muted, fontVariantNumeric: 'tabular-nums' }}>{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// A status-colored account-state figure (dot + number + label).
+function StateLine({ label, value, color, text, subtle }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '9px' }}>
+      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+      <span style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: text, lineHeight: 1 }}>{value ?? 0}</span>
+      <span style={{ fontSize: '10px', color: subtle, letterSpacing: '0.08em' }}>{label}</span>
+    </div>
+  )
+}
+
+function Stat({ label, value, sub, card, border, text, muted, subtle, accent, tone, shadow }) {
+  return (
+    <div style={{ background: card, border: `0.5px solid ${border}`, borderLeft: `3px solid ${tone || accent}`, borderRadius: '6px', padding: '18px 20px', boxShadow: shadow }}>
       <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '10px' }}>{label}</div>
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>{sub}</div>
@@ -474,7 +552,7 @@ function BarRow({ data, accent, border, subtle, text }) {
       {data.map((d) => (
         <div key={d.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
           <div style={{ fontSize: '11px', color: text }}>{d.count}</div>
-          <div style={{ width: '100%', maxWidth: '46px', height: `${(d.count / max) * 72}px`, minHeight: d.count > 0 ? '3px' : '0', background: accent, borderRadius: '2px 2px 0 0', opacity: d.count > 0 ? 1 : 0.15 }} />
+          <div style={{ width: '100%', maxWidth: '46px', height: `${(d.count / max) * 72}px`, minHeight: d.count > 0 ? '3px' : '0', background: accent, borderRadius: '4px 4px 0 0', opacity: d.count > 0 ? 1 : 0.15 }} />
           <div style={{ fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', color: subtle }}>{d.label}</div>
         </div>
       ))}
