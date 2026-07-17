@@ -15,6 +15,8 @@ export default function ProductUpdates() {
   const [state, setState] = useState('loading') // loading | ready | error
   const [items, setItems] = useState([])
   const [filter, setFilter] = useState('all')   // all | in_progress | planned | shipped
+  const [search, setSearch] = useState('')
+  const [catFilter, setCatFilter] = useState('all') // all | Feature | Improvement | Fix
   const [expanded, setExpanded] = useState({})  // per-section "show all" toggles
   const [voted, setVoted] = useState(() => {
     try { return new Set(JSON.parse(localStorage.getItem('hque_roadmap_votes') || '[]')) } catch { return new Set() }
@@ -148,6 +150,15 @@ export default function ProductUpdates() {
     shipped: items.filter(i => i.status === 'shipped').length,
   }
   const filterTabs = [{ key: 'all', label: 'All' }, ...sections.map(s => ({ key: s.key, label: s.label }))]
+  const catTabs = [['all', 'All types'], ['Feature', 'Features'], ['Improvement', 'Improvements'], ['Fix', 'Fixes']]
+
+  // Search (title + description) and category filter, applied on top of the
+  // status tabs. When either is active, sections show every match (no cap).
+  const q = search.trim().toLowerCase()
+  const matchesFilters = (i) =>
+    (catFilter === 'all' || i.category === catFilter) &&
+    (!q || (i.title || '').toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q))
+  const filtering = q.length > 0 || catFilter !== 'all'
 
   const sInput = { width: '100%', background: '#fff', border: `0.5px solid ${border}`, borderRadius: '4px', padding: '10px 12px', fontSize: '13px', color: ink, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '10px' }
   const sSelect = { width: '100%', background: '#fff', border: `0.5px solid ${border}`, borderRadius: '4px', padding: '9px 10px', fontSize: '13px', color: ink, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
@@ -221,23 +232,48 @@ export default function ProductUpdates() {
         )}
       </div>
 
-      <div style={{ position: 'sticky', top: 0, background: bg, zIndex: 5, display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '8px 0 14px', marginBottom: '14px', borderBottom: `0.5px solid ${border}` }}>
-        {filterTabs.map(t => {
-          const active = filter === t.key
-          const count = t.key === 'all' ? items.length : counts[t.key]
-          return (
-            <button key={t.key} onClick={() => setFilter(t.key)} style={{ padding: '6px 13px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', borderRadius: '20px', cursor: 'pointer', border: `0.5px solid ${active ? ink : border}`, background: active ? ink : 'transparent', color: active ? '#fff' : muted, fontWeight: active ? 700 : 500 }}>
-              {t.label}{count > 0 && <span style={{ opacity: 0.55, marginLeft: '5px' }}>{count}</span>}
-            </button>
-          )
-        })}
+      <div style={{ position: 'sticky', top: 0, background: bg, zIndex: 5, padding: '8px 0 14px', marginBottom: '14px', borderBottom: `0.5px solid ${border}` }}>
+        <div style={{ position: 'relative', marginBottom: '12px' }}>
+          <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#A8A39B', fontSize: '13px', pointerEvents: 'none' }}>⌕</span>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder='Search updates…'
+            style={{ width: '100%', boxSizing: 'border-box', padding: '10px 34px 10px 34px', fontSize: '13px', border: `0.5px solid ${border}`, borderRadius: '8px', background: card, color: ink, outline: 'none' }}
+          />
+          {search && (
+            <button onClick={() => setSearch('')} title='Clear' style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '15px', lineHeight: 1 }}>×</button>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {filterTabs.map(t => {
+            const active = filter === t.key
+            const count = t.key === 'all' ? items.length : counts[t.key]
+            return (
+              <button key={t.key} onClick={() => setFilter(t.key)} style={{ padding: '6px 13px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', borderRadius: '20px', cursor: 'pointer', border: `0.5px solid ${active ? ink : border}`, background: active ? ink : 'transparent', color: active ? '#fff' : muted, fontWeight: active ? 700 : 500 }}>
+                {t.label}{count > 0 && <span style={{ opacity: 0.55, marginLeft: '5px' }}>{count}</span>}
+              </button>
+            )
+          })}
+        </div>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
+          {catTabs.map(([key, label]) => {
+            const active = catFilter === key
+            const col = key === 'all' ? '#8B857C' : catColor(key)
+            return (
+              <button key={key} onClick={() => setCatFilter(key)} style={{ padding: '4px 11px', fontSize: '9px', letterSpacing: '0.1em', textTransform: 'uppercase', borderRadius: '20px', cursor: 'pointer', border: `0.5px solid ${active ? col : border}`, background: active ? col : 'transparent', color: active ? '#fff' : muted, fontWeight: active ? 700 : 500 }}>
+                {label}
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {sections.map(sec => {
         if (filter !== 'all' && filter !== sec.key) return null
-        const rows = items.filter(i => i.status === sec.key)
+        const rows = items.filter(i => i.status === sec.key && matchesFilters(i))
         if (rows.length === 0) return null
-        const showAll = filter === sec.key || expanded[sec.key]
+        const showAll = filter === sec.key || expanded[sec.key] || filtering
         const visible = showAll ? rows : rows.slice(0, CAP)
         return (
           <div key={sec.key} style={{ marginBottom: '36px' }}>
@@ -273,7 +309,7 @@ export default function ProductUpdates() {
                 )
               })}
             </div>
-            {filter === 'all' && rows.length > CAP && (
+            {filter === 'all' && !filtering && rows.length > CAP && (
               <button onClick={() => setExpanded(e => ({ ...e, [sec.key]: !showAll }))} style={{ background: 'none', border: 'none', color: accent, cursor: 'pointer', fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 0' }}>
                 {showAll ? 'Show less' : `Show all ${rows.length}`}
               </button>
@@ -283,6 +319,11 @@ export default function ProductUpdates() {
       })}
       {items.length === 0 && (
         <div style={{ fontSize: '13px', color: muted }}>No updates to show yet — check back soon.</div>
+      )}
+      {items.length > 0 && !items.some(i => (filter === 'all' || i.status === filter) && matchesFilters(i)) && (
+        <div style={{ fontSize: '13px', color: muted, padding: '8px 0' }}>
+          No updates match{q ? <> “<b style={{ color: ink }}>{search.trim()}</b>”</> : ''}{catFilter !== 'all' ? ` in ${catFilter}s` : ''}. <button onClick={() => { setSearch(''); setCatFilter('all') }} style={{ background: 'none', border: 'none', color: accent, cursor: 'pointer', fontSize: '13px', padding: 0 }}>Clear filters</button>
+        </div>
       )}
     </div>
   )
