@@ -1,5 +1,11 @@
 [
   {
+    "title": "Permanently delete archived brands & clients",
+    "description": "You can now permanently delete a brand or client — but only from the Archive, and only after typing its exact name to confirm, so nothing is ever deleted by accident. It removes the brand and its boards, tasks, contacts, and notes. Campaigns are kept (moved to unassigned) so their history isn't lost. Owner/admin only.",
+    "category": "Feature",
+    "shipped_at": "2026-07-17"
+  },
+  {
     "title": "Duplicate brand & client protection (including archived)",
     "description": "When you add a brand or client, HQue now checks your whole list — active and archived — as you type, ignoring case, punctuation, and small spelling differences. If a match already exists (even an archived one), it shows it with a one-click Open or Restore, so you don't end up with duplicates. Genuinely different brand that just sounds similar? You can still 'Add anyway.'",
     "category": "Feature",

@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-17
 
+**Permanently delete a brand or client — safely.** You can now fully delete a brand, but **only from the Archive** — so you have to archive it first, and an active client can never be deleted by accident. Deleting asks you to **type the brand's exact name** to confirm, then removes the brand and everything under it: its boards, tasks (and all their comments and attachments), contacts, and notes. **Only owners and admins** can delete. Campaigns are kept (moved to "unassigned") so their history isn't lost.
+
 **No more duplicate brands or clients.** When you add a brand, HQue now checks your whole list — **including archived brands** — as you type, ignoring case, punctuation, and small spelling differences. So if you archived **"Dr. Brown's"** and later start typing **"Dr Brown,"** it catches it and shows the existing one with a one-click **Restore & open** (or **Open it** if it's already active) — so you reuse it instead of creating a duplicate. Genuinely a different brand that just sounds similar? The button becomes **"Add anyway,"** so you're never blocked.
 
 **(Behind the scenes) Google can now identify HQue as a brand.** Added structured data to the homepage — a brand profile (with your Instagram and LinkedIn), a website entity, and your main navigation — so Google can tell HQue apart from similarly-named products (hCue, HQueue) and has the signals it needs to eventually show sub-page links ("sitelinks") under your search result.
