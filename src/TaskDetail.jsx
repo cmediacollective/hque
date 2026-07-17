@@ -164,6 +164,31 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
     fetchAttachments()
   }
 
+  // Paste a screenshot (or any image) straight from the clipboard into the
+  // comment as an attachment. Pasted images arrive without a real filename, so
+  // we give them a timestamped one, then reuse the normal staging flow.
+  function handleCommentPaste(e) {
+    const items = e.clipboardData?.items
+    if (!items) return
+    const files = []
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i]
+      if (it.kind === 'file' && it.type && it.type.startsWith('image/')) {
+        const f = it.getAsFile()
+        if (!f) continue
+        const ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg')
+        const named = (f.name && f.name.toLowerCase() !== 'image.png')
+          ? f
+          : new File([f], `pasted-${Date.now()}-${files.length + 1}.${ext}`, { type: f.type })
+        files.push(named)
+      }
+    }
+    if (files.length) {
+      e.preventDefault() // don't also paste the image as junk text
+      handleCommentFiles(files)
+    }
+  }
+
   function handleCommentFiles(fileList) {
     const files = Array.from(fileList || [])
     if (!files.length) return
@@ -647,7 +672,8 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                 onDragOver={e => { e.preventDefault(); setCommentDragOver(true) }}
                 onDragLeave={() => setCommentDragOver(false)}
                 onDrop={e => { e.preventDefault(); setCommentDragOver(false); handleCommentFiles(e.dataTransfer.files) }}
-                placeholder='Add a comment... (drag files in to attach, @ to mention, Cmd+Enter to post)'
+                onPaste={handleCommentPaste}
+                placeholder='Add a comment... (paste or drag in a screenshot, @ to mention, Cmd+Enter to post)'
                 style={{ width: '100%', background: commentDragOver ? (dark ? 'rgba(91,124,153,0.10)' : 'rgba(91,124,153,0.06)') : inputBg, border: `0.5px solid ${commentDragOver ? '#5b7c99' : border}`, borderRadius: '1px', padding: '10px 12px', fontSize: '12px', color: text, outline: 'none', resize: 'vertical', minHeight: commentExpanded ? '260px' : '70px', fontFamily: 'inherit', boxSizing: 'border-box', marginBottom: '8px', transition: 'min-height 0.15s' }}
               />
               {showCommentMentions && members.filter(m => (m.full_name || m.email).toLowerCase().includes(commentMentionQuery.toLowerCase())).length > 0 && (
