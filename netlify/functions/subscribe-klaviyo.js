@@ -32,17 +32,19 @@ const headers = () => ({
   Authorization: `Klaviyo-API-Key ${API_KEY}`,
 })
 
-async function subscribeToList(listId, email, firstName, lastName) {
-  const attributes = { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } }
-  if (firstName) attributes.first_name = firstName
-  if (lastName) attributes.last_name = lastName
+async function subscribeToList(listId, email) {
+  // NB: this endpoint only accepts email + subscriptions on the profile (no
+  // first_name/last_name), and the list goes in relationships (not attributes).
   const res = await fetch('https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs', {
     method: 'POST',
     headers: headers(),
     body: JSON.stringify({
       data: {
         type: 'profile-subscription-bulk-create-job',
-        attributes: { profiles: { data: [{ type: 'profile', attributes }] }, list_id: listId },
+        attributes: {
+          profiles: { data: [{ type: 'profile', attributes: { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } }] },
+        },
+        relationships: { list: { data: { type: 'list', id: listId } } },
       },
     }),
   })
@@ -79,7 +81,7 @@ exports.handler = async (event) => {
     }
 
     // 1. Put them in the target list (creates/updates the profile).
-    await subscribeToList(target, email, firstName, lastName)
+    await subscribeToList(target, email)
 
     // 2. Move: remove them from the other three lists so they're in exactly one.
     const profileId = await getProfileId(email)
