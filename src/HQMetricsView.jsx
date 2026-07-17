@@ -250,29 +250,32 @@ export default function HQMetricsView({ dark = true }) {
               <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6 }}>The payment key may not have read access to charges/subscriptions. ({stripe.error})</div>
             </div>
           )}
-          {!stripeLoading && stripe && stripe.configured && !stripe.error && (
-            <div>
-              <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                <div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '52px', color: text, lineHeight: 0.95 }}>${Math.round(stripe.revenue).toLocaleString()}</div>
-                  <div style={{ fontSize: '10px', color: muted, marginTop: '10px', letterSpacing: '0.08em' }}>Revenue · {rangeLabel}<Delta cur={stripe.revenue} prev={stripe.prevRevenue} /></div>
+          {!stripeLoading && stripe && stripe.configured && !stripe.error && (() => {
+            const lifetimeStripe = stripe.lifetimeRevenue != null ? stripe.lifetimeRevenue : (stripe.revenue || 0)
+            const appsumo = appsumoRev?.amount != null ? Number(appsumoRev.amount) : 0
+            const money2 = (v) => `$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            return (
+              <div>
+                <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div>
+                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '52px', color: text, lineHeight: 0.95 }}>{money2(lifetimeStripe + appsumo)}</div>
+                    <div style={{ fontSize: '10px', color: muted, marginTop: '10px', letterSpacing: '0.06em' }}>Total revenue to date · Stripe {money2(lifetimeStripe)} + AppSumo {money2(appsumo)}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap', paddingBottom: '6px' }}>
+                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.revenue).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Revenue · {rangeLabel}<Delta cur={stripe.revenue} prev={stripe.prevRevenue} /></div></div>
+                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
+                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions<Delta cur={stripe.newSubscriptions} prev={stripe.prevNewSubscriptions} /></div></div>
+                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap', paddingBottom: '6px' }}>
-                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
-                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions<Delta cur={stripe.newSubscriptions} prev={stripe.prevNewSubscriptions} /></div></div>
-                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
-                  {appsumoRev?.amount != null && (
-                    <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Number(appsumoRev.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>AppSumo · lifetime</div></div>
-                  )}
-                </div>
+                {stripe.dailyRevenue && stripe.dailyRevenue.length > 1 && (
+                  <div style={{ marginTop: '24px' }}>
+                    <LineChart series={[{ label: 'Revenue', color: accent, points: stripe.dailyRevenue.map(d => ({ date: d.date, value: d.revenue })) }]} area dark={dark} muted={muted} subtle={subtle} />
+                  </div>
+                )}
               </div>
-              {stripe.dailyRevenue && stripe.dailyRevenue.length > 1 && (
-                <div style={{ marginTop: '24px' }}>
-                  <LineChart series={[{ label: 'Revenue', color: accent, points: stripe.dailyRevenue.map(d => ({ date: d.date, value: d.revenue })) }]} area dark={dark} muted={muted} subtle={subtle} />
-                </div>
-              )}
-            </div>
-          )}
+            )
+          })()}
         </div>
       </div>
 

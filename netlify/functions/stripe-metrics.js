@@ -83,6 +83,13 @@ exports.handler = async (event) => {
     let prevNewSubscriptions = 0
     await each(stripe.subscriptions, { created: { gte: prevGte, lte: prevLte }, status: 'all' }, () => { prevNewSubscriptions++ })
 
+    // All-time Stripe revenue (net of refunds) — for the "total revenue to date"
+    // figure that combines with the AppSumo payout.
+    let lifetimeCents = 0
+    await each(stripe.charges, {}, (c) => {
+      if (c.status === 'succeeded' && c.paid) lifetimeCents += (c.amount || 0) - (c.amount_refunded || 0)
+    })
+
     let newCustomers = 0
     await each(stripe.customers, { created: { gte, lte } }, () => { newCustomers++ })
 
@@ -120,6 +127,7 @@ exports.handler = async (event) => {
       dailyRevenue,
       prevRevenue: Math.round(prevRevenueCents) / 100,
       prevNewSubscriptions,
+      lifetimeRevenue: Math.round(lifetimeCents) / 100,
     })
   } catch (e) {
     console.error('stripe-metrics error:', e.message)
