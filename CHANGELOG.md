@@ -8,6 +8,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 **No more duplicate brands or clients.** When you add a brand, HQue now checks your whole list — **including archived brands** — as you type, ignoring case, punctuation, and small spelling differences. So if you archived **"Dr. Brown's"** and later start typing **"Dr Brown,"** it catches it and shows the existing one with a one-click **Restore & open** (or **Open it** if it's already active) — so you reuse it instead of creating a duplicate. Genuinely a different brand that just sounds similar? The button becomes **"Add anyway,"** so you're never blocked.
 
+**(Behind the scenes) Google can now identify HQue as a brand.** Added structured data to the homepage — a brand profile (with your Instagram and LinkedIn), a website entity, and your main navigation — so Google can tell HQue apart from similarly-named products (hCue, HQueue) and has the signals it needs to eventually show sub-page links ("sitelinks") under your search result.
+
 ---
 
 ## 2026-07-16
@@ -17,6 +19,12 @@ A plain-English log of everything shipped. Newest at the top.
 **Your half-written comment is saved if you close the task.** Start typing a comment, get pulled away, and close the task — your draft is now still there when you reopen it. The comment box remembers what you were writing (per task, on your device) through closing, navigating away, or even a refresh, and clears itself once you post. *(Requested by a customer on the Product Updates page.)*
 
 **Paste a screenshot straight into a task comment.** You no longer have to save an image to your computer and dig it out of the file picker — just copy a screenshot (or any image) and **paste it right into the comment box**, and it attaches to your comment like any other file. Drag-and-drop still works too. *(Requested by a customer on the Product Updates page.)*
+
+**(Master admin only) HQ Metrics dashboard, redesigned with real charts.** Your metrics page got proper visual hierarchy — a hero revenue panel, a subscribers **donut**, **line charts** for revenue and website traffic over time, **↑/↓ trend arrows** vs. the prior period, and meaningful color-coding — replacing the flat grid of identical stat cards.
+
+**(Master admin only) AppSumo revenue on your metrics page.** Added an editable **"AppSumo payout"** figure you update by hand (AppSumo has no live feed), plus a combined **"Total revenue to date"** that adds it to your all-time Stripe revenue — so your revenue reads honestly even before direct website sales come in.
+
+**(Behind the scenes) Email-list automation via Klaviyo.** Every contact now flows into the right Klaviyo list automatically as they move through the funnel — **Leads → Nonsubscribers** (started a trial) **→ Subscribers** (paid, incl. AppSumo/lifetime) **→ Winback** (lapsed) — always in exactly one list at a time. Marketing opt-ins (footer/chat/blog), Stripe payments, AppSumo redemptions, and trial expirations all move people between lists on their own.
 
 **Your talent Types and Niches are now yours to customize.** Until now, the labels you tag talent with — Types (Influencer, UGC, Model…) and Niches (Beauty, Fitness, Food…) — were a fixed list, identical for everyone. Now, on **Pro & Business**, you can make them your own in **Settings → Talent Labels**: **rename** a label (it updates automatically on every talent already tagged), **add** the categories your agency actually works in, **remove** the ones you don't use, and **drag to reorder**. Your roster filter chips and the Add-Talent form both use your own list. Every talent keeps every tag they already have — nothing is ever stripped — and **Starter** stays on the standard set. *(Requested by a customer on the Product Updates page.)*
 
