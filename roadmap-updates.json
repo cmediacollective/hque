@@ -1,5 +1,11 @@
 [
   {
+    "title": "Paste Screenshots as an attachment while writing on the comment section",
+    "description": "You can now paste a screenshot (or any image) straight from your clipboard into a task comment and it attaches automatically — no need to save the file first and pick it from the file browser. Drag-and-drop still works too.",
+    "category": "Feature",
+    "shipped_at": "2026-07-16"
+  },
+  {
     "title": "Custom Type and Niche Talent Labels",
     "description": "Your talent Types and Niches are no longer a fixed list. On Pro and Business, make them your own in Settings → Talent Labels: rename a label (it updates on every talent already tagged), add the categories your agency actually works in, remove the ones you don't use, and drag to reorder. Your roster filters and the Add-Talent form both use your own list, and every talent keeps the tags they already have.",
     "category": "Feature",
