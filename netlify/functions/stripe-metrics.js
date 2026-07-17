@@ -55,12 +55,33 @@ exports.handler = async (event) => {
 
   try {
     let revenueCents = 0, chargeCount = 0
+    const dailyMap = {}
     await each(stripe.charges, { created: { gte, lte } }, (c) => {
       if (c.status === 'succeeded' && c.paid) {
-        revenueCents += (c.amount || 0) - (c.amount_refunded || 0)
+        const net = (c.amount || 0) - (c.amount_refunded || 0)
+        revenueCents += net
         chargeCount++
+        const day = new Date((c.created || 0) * 1000).toISOString().slice(0, 10)
+        dailyMap[day] = (dailyMap[day] || 0) + net
       }
     })
+    // Fill every day in the range (zeros included) for a continuous line.
+    const dailyRevenue = []
+    for (let t = gte; t <= lte; t += 86400) {
+      const day = new Date(t * 1000).toISOString().slice(0, 10)
+      dailyRevenue.push({ date: day, revenue: Math.round(dailyMap[day] || 0) / 100 })
+    }
+
+    // Prior equal-length period — for the trend arrows.
+    const span = lte - gte
+    const prevLte = gte - 1
+    const prevGte = gte - span - 1
+    let prevRevenueCents = 0
+    await each(stripe.charges, { created: { gte: prevGte, lte: prevLte } }, (c) => {
+      if (c.status === 'succeeded' && c.paid) prevRevenueCents += (c.amount || 0) - (c.amount_refunded || 0)
+    })
+    let prevNewSubscriptions = 0
+    await each(stripe.subscriptions, { created: { gte: prevGte, lte: prevLte }, status: 'all' }, () => { prevNewSubscriptions++ })
 
     let newCustomers = 0
     await each(stripe.customers, { created: { gte, lte } }, () => { newCustomers++ })
@@ -96,6 +117,9 @@ exports.handler = async (event) => {
       newCustomers,
       newSubscriptions,
       activeMrr: Math.round(mrrCents) / 100,
+      dailyRevenue,
+      prevRevenue: Math.round(prevRevenueCents) / 100,
+      prevNewSubscriptions,
     })
   } catch (e) {
     console.error('stripe-metrics error:', e.message)

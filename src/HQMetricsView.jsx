@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
 // Date-range presets for the Google Analytics section.
@@ -251,16 +251,23 @@ export default function HQMetricsView({ dark = true }) {
             </div>
           )}
           {!stripeLoading && stripe && stripe.configured && !stripe.error && (
-            <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-              <div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '52px', color: text, lineHeight: 0.95 }}>${Math.round(stripe.revenue).toLocaleString()}</div>
-                <div style={{ fontSize: '10px', color: muted, marginTop: '10px', letterSpacing: '0.08em' }}>Revenue · {rangeLabel}</div>
+            <div>
+              <div style={{ display: 'flex', gap: '48px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '52px', color: text, lineHeight: 0.95 }}>${Math.round(stripe.revenue).toLocaleString()}</div>
+                  <div style={{ fontSize: '10px', color: muted, marginTop: '10px', letterSpacing: '0.08em' }}>Revenue · {rangeLabel}<Delta cur={stripe.revenue} prev={stripe.prevRevenue} /></div>
+                </div>
+                <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap', paddingBottom: '6px' }}>
+                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
+                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions<Delta cur={stripe.newSubscriptions} prev={stripe.prevNewSubscriptions} /></div></div>
+                  <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '36px', flexWrap: 'wrap', paddingBottom: '6px' }}>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>${Math.round(stripe.activeMrr).toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Active MRR · now</div></div>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newSubscriptions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New subscriptions</div></div>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '26px', color: text, lineHeight: 1 }}>{stripe.newCustomers.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>New customers</div></div>
-              </div>
+              {stripe.dailyRevenue && stripe.dailyRevenue.length > 1 && (
+                <div style={{ marginTop: '24px' }}>
+                  <LineChart series={[{ label: 'Revenue', color: accent, points: stripe.dailyRevenue.map(d => ({ date: d.date, value: d.revenue })) }]} area dark={dark} muted={muted} subtle={subtle} />
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -300,10 +307,22 @@ export default function HQMetricsView({ dark = true }) {
           {!gaLoading && ga && ga.configured && !ga.error && (
             <div>
               <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', marginBottom: '22px' }}>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.users.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Visitors · {rangeLabel}</div></div>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.sessions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Sessions</div></div>
-                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views</div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.users.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Visitors · {rangeLabel}<Delta cur={ga.totals.users} prev={ga.prev?.users} /></div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.sessions.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Sessions<Delta cur={ga.totals.sessions} prev={ga.prev?.sessions} /></div></div>
+                <div><div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{ga.totals.views.toLocaleString()}</div><div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>Page views<Delta cur={ga.totals.views} prev={ga.prev?.views} /></div></div>
               </div>
+              {ga.daily && ga.daily.length > 1 && (
+                <div style={{ marginBottom: '24px' }}>
+                  <LineChart
+                    series={[
+                      { label: 'Visitors', color: cat[0], points: ga.daily.map(d => ({ date: d.date, value: d.users })) },
+                      { label: 'Sessions', color: cat[1], points: ga.daily.map(d => ({ date: d.date, value: d.sessions })) },
+                      { label: 'Page views', color: cat[2], points: ga.daily.map(d => ({ date: d.date, value: d.views })) },
+                    ]}
+                    dark={dark} muted={muted} subtle={subtle}
+                  />
+                </div>
+              )}
               <div style={{ marginBottom: '24px' }}>
                 <LocBlock title="Top pages viewed" items={ga.pages} nameKey="name" valueKey="views" nameWidth="220px" initialCount={10} empty="No page data in this range." {...{ dark, accent, border, text, muted, subtle }} />
               </div>
@@ -480,6 +499,87 @@ function Donut({ segments, centerValue, centerLabel, dark, text, muted, subtle }
             <span style={{ color: muted, fontVariantNumeric: 'tabular-nums' }}>{s.value}</span>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function fmtShort(d) {
+  if (!d) return ''
+  const dt = new Date(d + 'T00:00:00')
+  if (isNaN(dt)) return d
+  return `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dt.getMonth()]} ${dt.getDate()}`
+}
+
+// Trend vs. the prior equal-length period. Up is treated as good (revenue,
+// subs, visitors). Green/red are the reserved status colors; the arrow glyph
+// carries the direction so it isn't color-alone.
+function Delta({ cur, prev }) {
+  if (prev == null || cur == null) return null
+  if (prev === 0) {
+    if (!cur) return null
+    return <span style={{ fontSize: '11px', color: STATUS.good, fontWeight: 600, marginLeft: '10px' }}>▲ new</span>
+  }
+  const pct = ((cur - prev) / Math.abs(prev)) * 100
+  if (Math.abs(pct) < 0.5) return <span style={{ fontSize: '11px', color: '#999', fontWeight: 600, marginLeft: '10px' }}>◆ 0%</span>
+  const up = pct > 0
+  return <span style={{ fontSize: '11px', color: up ? STATUS.good : STATUS.critical, fontWeight: 600, marginLeft: '10px' }}>{up ? '▲' : '▼'} {Math.abs(pct).toFixed(0)}%</span>
+}
+
+// Native-SVG line chart, measured to real pixels so marks stay crisp. series:
+// [{ label, color, points: [{ date, value }] }]. area fills a single series.
+function LineChart({ series, height = 150, dark, muted, subtle, area = false, valueFmt = (v) => v }) {
+  const ref = useRef(null)
+  const [w, setW] = useState(600)
+  useEffect(() => {
+    if (!ref.current) return
+    const ro = new ResizeObserver(entries => { const cw = entries[0]?.contentRect?.width; if (cw) setW(Math.round(cw)) })
+    ro.observe(ref.current)
+    return () => ro.disconnect()
+  }, [])
+  const h = height
+  const pad = { top: 14, right: 14, bottom: 6, left: 12 }
+  const n = Math.max(...series.map(s => s.points.length), 1)
+  const maxV = Math.max(1, ...series.flatMap(s => s.points.map(p => p.value)))
+  const iw = Math.max(1, w - pad.left - pad.right)
+  const ih = h - pad.top - pad.bottom
+  const X = (i) => pad.left + (n <= 1 ? iw / 2 : (i / (n - 1)) * iw)
+  const Y = (v) => pad.top + ih - (v / maxV) * ih
+  const grid = dark ? '#2A2A2A' : '#ECE8E1'
+  const base = series[0]?.points || []
+  return (
+    <div ref={ref} style={{ overflow: 'hidden' }}>
+      {series.length > 1 && (
+        <div style={{ display: 'flex', gap: '18px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          {series.map((s, i) => (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontSize: '11px', color: muted }}>
+              <span style={{ width: '13px', height: '3px', borderRadius: '2px', background: s.color }} />{s.label}
+            </span>
+          ))}
+        </div>
+      )}
+      <svg width={w} height={h} style={{ display: 'block' }}>
+        {[0, 0.5, 1].map((f, i) => (
+          <line key={i} x1={pad.left} x2={w - pad.right} y1={pad.top + ih * f} y2={pad.top + ih * f} stroke={grid} strokeWidth="1" />
+        ))}
+        {series.map((s, si) => {
+          const pts = s.points.map((p, i) => `${X(i)},${Y(p.value)}`).join(' ')
+          const lastI = s.points.length - 1
+          const last = s.points[lastI]
+          return (
+            <g key={si}>
+              {area && series.length === 1 && s.points.length > 1 && (
+                <polygon points={`${X(0)},${pad.top + ih} ${pts} ${X(lastI)},${pad.top + ih}`} fill={s.color} opacity={dark ? 0.14 : 0.10} />
+              )}
+              <polyline points={pts} fill="none" stroke={s.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              {last && <circle cx={X(lastI)} cy={Y(last.value)} r="3.5" fill={s.color} />}
+            </g>
+          )
+        })}
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px', fontSize: '9px', color: subtle, letterSpacing: '0.06em' }}>
+        <span>{fmtShort(base[0]?.date)}</span>
+        <span>{fmtShort(base[base.length - 1]?.date)}</span>
       </div>
     </div>
   )

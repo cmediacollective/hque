@@ -43,6 +43,17 @@ exports.handler = async (event) => {
   const startDate = isDate(qs.start) ? qs.start : '28daysAgo'
   const endDate = isDate(qs.end) ? qs.end : 'today'
   const range = [{ startDate, endDate }]
+  // Prior equal-length period (for the trend arrows).
+  const priorRange = (() => {
+    if (isDate(qs.start) && isDate(qs.end)) {
+      const s = new Date(qs.start + 'T00:00:00Z'), e = new Date(qs.end + 'T00:00:00Z')
+      const spanDays = Math.round((e - s) / 86400000)
+      const pe = new Date(s.getTime() - 86400000)
+      const ps = new Date(pe.getTime() - spanDays * 86400000)
+      return [{ startDate: ps.toISOString().slice(0, 10), endDate: pe.toISOString().slice(0, 10) }]
+    }
+    return [{ startDate: '56daysAgo', endDate: '29daysAgo' }]
+  })()
 
   try {
     // Get an OAuth access token for the service account (read-only analytics).
@@ -120,7 +131,21 @@ exports.handler = async (event) => {
       limit: 25,
     })
 
-    const [totals, sources, referrers, countries, cities, pages] = await Promise.all([totalsReq, sourcesReq, referrersReq, countriesReq, citiesReq, pagesReq])
+    // Report 6: daily series over the range (for the traffic line chart).
+    const dailyReq = call({
+      dateRanges: range,
+      dimensions: [{ name: 'date' }],
+      metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
+      orderBys: [{ dimension: { dimensionName: 'date' } }],
+      limit: 400,
+    })
+    // Report 7: prior-period totals (for the trend arrows).
+    const prevTotalsReq = call({
+      dateRanges: priorRange,
+      metrics: [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }],
+    })
+
+    const [totals, sources, referrers, countries, cities, pages, dailyRep, prevTotals] = await Promise.all([totalsReq, sourcesReq, referrersReq, countriesReq, citiesReq, pagesReq, dailyReq, prevTotalsReq])
 
     const t = totals.rows?.[0]?.metricValues || []
     const users = Number(t[0]?.value || 0)
@@ -152,12 +177,23 @@ exports.handler = async (event) => {
       return { name, views: Number(r.metricValues?.[0]?.value || 0) }
     })
 
+    const daily = (dailyRep.rows || []).map(r => {
+      const d = r.dimensionValues?.[0]?.value || ''
+      const date = d.length === 8 ? `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}` : d
+      const m = r.metricValues || []
+      return { date, users: Number(m[0]?.value || 0), sessions: Number(m[1]?.value || 0), views: Number(m[2]?.value || 0) }
+    })
+    const pt = prevTotals.rows?.[0]?.metricValues || []
+    const prev = { users: Number(pt[0]?.value || 0), sessions: Number(pt[1]?.value || 0), views: Number(pt[2]?.value || 0) }
+
     return json(200, {
       ok: true,
       configured: true,
       startDate,
       endDate,
       totals: { users, sessions, views },
+      prev,
+      daily,
       channels,
       referrers: referrerList,
       countries: countryList,
