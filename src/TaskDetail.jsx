@@ -168,11 +168,17 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
 
   async function deleteComment(id) {
     if (!confirm('Delete this comment?')) return
-    // Remove this comment's attached files from storage (the metadata rows are
-    // removed automatically by the comment_id ON DELETE CASCADE).
+    // Delete the row FIRST — if the server rejects it (not yours, or older than
+    // 5 minutes) we stop here, so we never orphan the stored files. count === 0
+    // means the row-level rule blocked it.
+    const { error, count } = await supabase.from('task_comments').delete({ count: 'exact' }).eq('id', id)
+    if (error || count === 0) {
+      alert('You can only delete your own comment, and only within 5 minutes of posting it.')
+      return
+    }
+    // Row gone (its attachment rows cascade away) — clean up the stored files.
     const atts = attachments.filter(a => a.comment_id === id)
     if (atts.length) await supabase.storage.from('task-attachments').remove(atts.map(a => a.storage_path))
-    await supabase.from('task_comments').delete().eq('id', id)
     fetchComments()
     fetchAttachments()
   }
@@ -620,6 +626,9 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                 const authorName = author?.full_name || author?.email || 'Unknown'
                 const isMine = c.user_id === currentUserId
                 const isEditing = editingCommentId === c.id
+                // You can only delete your own comment, and only within 5 minutes
+                // of posting it (also enforced server-side).
+                const canDelete = isMine && (Date.now() - new Date(c.created_at).getTime()) < 5 * 60 * 1000
                 return (
                   <div key={c.id} style={{ display: 'flex', gap: '10px' }}>
                     {author?.avatar_url ? (
@@ -634,7 +643,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                         {isMine && !isEditing && (
                           <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
                             <button onClick={() => { setEditingCommentId(c.id); setEditingBody(c.body) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Edit</button>
-                            <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>
+                            {canDelete && <button onClick={() => deleteComment(c.id)} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '10px', padding: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Delete</button>}
                           </div>
                         )}
                       </div>
