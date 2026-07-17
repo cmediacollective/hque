@@ -1,5 +1,11 @@
 [
   {
+    "title": "Retain draft text on the comment section, even if the tasks closes",
+    "description": "If you're partway through writing a task comment and close the task (or navigate away, or refresh the page), your unsent text is now saved and waiting for you when you reopen the task. It clears automatically once you post the comment.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-16"
+  },
+  {
     "title": "Paste Screenshots as an attachment while writing on the comment section",
     "description": "You can now paste a screenshot (or any image) straight from your clipboard into a task comment and it attaches automatically — no need to save the file first and pick it from the file browser. Drag-and-drop still works too.",
     "category": "Feature",

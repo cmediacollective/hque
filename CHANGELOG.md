@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-16
 
+**Your half-written comment is saved if you close the task.** Start typing a comment, get pulled away, and close the task — your draft is now still there when you reopen it. The comment box remembers what you were writing (per task, on your device) through closing, navigating away, or even a refresh, and clears itself once you post. *(Requested by a customer on the Product Updates page.)*
+
 **Paste a screenshot straight into a task comment.** You no longer have to save an image to your computer and dig it out of the file picker — just copy a screenshot (or any image) and **paste it right into the comment box**, and it attaches to your comment like any other file. Drag-and-drop still works too. *(Requested by a customer on the Product Updates page.)*
 
 **Your talent Types and Niches are now yours to customize.** Until now, the labels you tag talent with — Types (Influencer, UGC, Model…) and Niches (Beauty, Fitness, Food…) — were a fixed list, identical for everyone. Now, on **Pro & Business**, you can make them your own in **Settings → Talent Labels**: **rename** a label (it updates automatically on every talent already tagged), **add** the categories your agency actually works in, **remove** the ones you don't use, and **drag to reorder**. Your roster filter chips and the Add-Talent form both use your own list. Every talent keeps every tag they already have — nothing is ever stripped — and **Starter** stays on the standard set. *(Requested by a customer on the Product Updates page.)*
