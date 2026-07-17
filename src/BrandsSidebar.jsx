@@ -5,6 +5,45 @@ import BrandDetail from './BrandDetail'
 // fullWidth: on mobile the brand list is its own full-screen step (you pick a
 // brand, then the board takes the whole screen), so it fills the width instead
 // of sitting in a 220px column next to the board.
+// Normalize a brand name for comparison: lowercase, punctuation → space,
+// collapse spaces. So "Dr. Brown's", "Dr Brown", "dr. browns" all converge.
+function normalizeBrand(s) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ')
+}
+// Edit distance (for catching near-duplicates like "Dr Brown" vs "Dr Browns").
+function editDistance(a, b) {
+  const m = a.length, n = b.length
+  if (!m) return n
+  if (!n) return m
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)])
+  for (let j = 0; j <= n; j++) dp[0][j] = j
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+    }
+  }
+  return dp[m][n]
+}
+// Find the closest existing brand to `name`: exact (normalized) match, one name
+// containing the other, or a small edit distance. Returns { brand, kind } or null.
+function findBrandMatch(name, list) {
+  const n = normalizeBrand(name)
+  if (n.length < 2) return null
+  let best = null
+  for (const b of list) {
+    const bn = normalizeBrand(b.name)
+    if (!bn) continue
+    if (bn === n) return { brand: b, kind: 'exact' }
+    const d = editDistance(n, bn)
+    const contained = (n.includes(bn) && bn.length >= 3) || (bn.includes(n) && n.length >= 3)
+    const threshold = Math.max(1, Math.floor(Math.max(n.length, bn.length) * 0.18))
+    if (contained || d <= threshold) {
+      if (!best || d < best.d) best = { brand: b, kind: 'similar', d }
+    }
+  }
+  return best
+}
+
 export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -137,6 +176,18 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     setNewBrandLogoFile(null)
     setShowNewBrand(false)
     fetchBrands()
+  }
+
+  // Use the existing brand instead of creating a duplicate — restores it first
+  // if it was archived, then selects it and closes the new-brand form.
+  function useExistingBrand(brand) {
+    setShowNewBrand(false)
+    setNewBrandName('')
+    setNewBrandWebsite('')
+    setNewBrandLogoFile(null)
+    setError('')
+    if (brand.status === 'archived') archiveBrand(brand, true)
+    onSelectBrand?.(brand.id)
   }
 
   async function archiveBrand(brand, restore = false) {
@@ -325,7 +376,9 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
       </div>
 
       <div style={{ borderTop: `0.5px solid ${border}`, padding: '10px 14px' }}>
-        {showNewBrand ? (
+        {showNewBrand ? (() => {
+          const dupMatch = newBrandName.trim() ? findBrandMatch(newBrandName, brands.concat(archivedBrands)) : null
+          return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <input
               value={newBrandName}
@@ -335,6 +388,17 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               autoFocus
               style={{ width: '100%', padding: '7px 10px', fontSize: '12px', background: dark ? '#141414' : '#F5F3EF', border: `0.5px solid ${border}`, borderRadius: '1px', color: text, outline: 'none', boxSizing: 'border-box' }}
             />
+            {dupMatch && (
+              <div style={{ fontSize: '11px', color: text, background: dark ? 'rgba(184,121,27,0.14)' : '#FBF3E4', border: `0.5px solid ${dark ? '#5a4a2a' : '#EAD9B8'}`, borderRadius: '3px', padding: '8px 10px', lineHeight: 1.5 }}>
+                <div style={{ marginBottom: '7px' }}>
+                  {dupMatch.kind === 'exact' ? 'This brand already exists: ' : 'Possible duplicate of: '}
+                  <b>{dupMatch.brand.name}</b>{dupMatch.brand.status === 'archived' ? <span style={{ color: muted }}> · archived</span> : ''}
+                </div>
+                <button onClick={() => useExistingBrand(dupMatch.brand)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                  {dupMatch.brand.status === 'archived' ? 'Restore & open' : 'Open it'}
+                </button>
+              </div>
+            )}
             <input
               value={newBrandWebsite}
               onChange={e => setNewBrandWebsite(e.target.value)}
@@ -348,12 +412,13 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             {error && <div style={{ fontSize: '10px', color: '#e74c3c' }}>{error}</div>}
             <div style={{ display: 'flex', gap: '6px' }}>
               <button onClick={createBrand} disabled={saving} style={{ flex: 1, padding: '7px 10px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.6 : 1 }}>
-                {saving ? 'Saving...' : 'Add'}
+                {saving ? 'Saving...' : (dupMatch ? 'Add anyway' : 'Add')}
               </button>
               <button onClick={() => { setShowNewBrand(false); setError(''); setNewBrandName(''); setNewBrandWebsite(''); setNewBrandLogoFile(null) }} style={{ padding: '7px 10px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>Cancel</button>
             </div>
           </div>
-        ) : (
+          )
+        })() : (
           <button onClick={() => setShowNewBrand(true)} style={{ width: '100%', padding: '8px 0', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
             + New Brand/Client
           </button>
