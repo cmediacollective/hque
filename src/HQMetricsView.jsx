@@ -235,7 +235,7 @@ export default function HQMetricsView({ dark = true }) {
       {/* Revenue & growth (Stripe) */}
       <div style={{ marginBottom: '32px' }}>
         {sectionLabel(`Revenue & growth · ${rangeLabel}`)}
-        <div style={{ background: card, border: `0.5px solid ${border}`, borderLeft: `3px solid ${accent}`, borderRadius: '6px', padding: '28px 30px', boxShadow: cardShadow }}>
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '28px 30px', boxShadow: cardShadow }}>
           {stripeLoading && (
             <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 0' }}>Loading Stripe…</div>
           )}
@@ -498,7 +498,7 @@ function StateLine({ label, value, color, text, subtle }) {
 
 function Stat({ label, value, sub, card, border, text, muted, subtle, accent, tone, shadow }) {
   return (
-    <div style={{ background: card, border: `0.5px solid ${border}`, borderLeft: `3px solid ${tone || accent}`, borderRadius: '6px', padding: '18px 20px', boxShadow: shadow }}>
+    <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '18px 20px', boxShadow: shadow }}>
       <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '10px' }}>{label}</div>
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '30px', color: text, lineHeight: 1 }}>{value}</div>
       <div style={{ fontSize: '10px', color: muted, marginTop: '8px' }}>{sub}</div>
