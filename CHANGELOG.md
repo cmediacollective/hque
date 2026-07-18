@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-17
 
+**Talent cards: the Archive button no longer floats into the location.** On a talent card, the **Archive** button (which appears when you hover) now sits neatly in the **top-right corner** instead of squeezing into the followers/location row. Long locations like "Tennessee, Florida and New York" now trim with a "…" instead of shoving the button out of place.
+
 **Search and filter the Product Updates page.** As the updates list grows, you can now **search** it (by title and description) and **filter by type** — Features, Improvements, or Fixes — on top of the existing status tabs. Every item keeps its date, and there's no month grouping. Quick way to check "did they ever build X?"
 
 **Permanently delete a brand or client — safely.** You can now fully delete a brand, but **only from the Archive** — so you have to archive it first, and an active client can never be deleted by accident. Deleting asks you to **type the brand's exact name** to confirm, then removes the brand and everything under it: its boards, tasks (and all their comments and attachments), contacts, and notes. **Only owners and admins** can delete. Campaigns are kept (moved to "unassigned") so their history isn't lost.

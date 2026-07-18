@@ -273,20 +273,20 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
                 </div>
               </div>
               <div style={{ display: 'flex', paddingTop: '10px', borderTop: `0.5px solid ${border}`, alignItems: 'center', gap: '8px' }}>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: isMobile ? '12px' : '13px', color: text, fontWeight: 500 }}>{totalFollowers(c)}</div>
                   <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Followers</div>
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '13px', color: text, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.location || '—'}</div>
                     <div style={{ fontSize: '8px', color: subtle, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: '3px' }}>Location</div>
                   </div>
+              </div>
               {hovering === c.id && !isMobile && (
-                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ background: 'none', border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px', flexShrink: 0 }}>
+                <button onClick={e => { e.stopPropagation(); setArchiving(c) }} style={{ position: 'absolute', top: '12px', right: '12px', background: cardBg, border: `0.5px solid ${border2}`, color: subtle, fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', padding: '5px 10px', cursor: 'pointer', borderRadius: '1px' }}>
                   {showArchived ? 'Restore' : 'Archive'}
                 </button>
               )}
-              </div>
             </div>
           ))}
         </div>
