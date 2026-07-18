@@ -4,6 +4,7 @@ import BrandsSidebar from './BrandsSidebar'
 import TaskDetail from './TaskDetail'
 import MyTasksDashboard from './MyTasksDashboard'
 import BrandNotes from './BrandNotes'
+import { useClientLabel } from './useClientLabel'
 import { createNotification, parseMentions, addTaskWatchers } from './notify'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
@@ -133,6 +134,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
 }
 
 export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0 }) {
+  const clientLabel = useClientLabel(orgId)
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
   const [campaigns, setCampaigns] = useState([])
@@ -561,7 +563,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
             <div style={{ padding: isMobile ? '14px 16px' : '18px 28px', display: 'flex', alignItems: 'center', gap: '14px', borderBottom: `0.5px solid ${border}`, flexShrink: 0 }}>
               <button onClick={() => setSelectedBrand(null)} title={isMobile ? 'Back to brands' : 'Back to My Tasks dashboard'} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'transparent', border: `1px solid ${border2}`, color: text, cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 500 }}>
                 <span style={{ fontSize: '12px', lineHeight: 1 }}>←</span>
-                <span>{isMobile ? 'Brands' : 'My Tasks'}</span>
+                <span>{isMobile ? clientLabel.plural : 'My Tasks'}</span>
               </button>
               {selectedBrand.id === '__internal' ? (
                 <div style={{ width: '44px', height: '44px', borderRadius: '4px', background: dark ? '#2A2A2A' : '#E0DCD6', color: muted, fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `0.5px solid ${border}` }}>⚙</div>

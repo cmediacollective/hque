@@ -1,13 +1,33 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
+import { CLIENT_LABEL_PRESETS } from './useClientLabel'
 
 export default function Onboarding({ user, onComplete }) {
   const [agencyName, setAgencyName] = useState('')
+  const [labelChoice, setLabelChoice] = useState('0') // index into CLIENT_LABEL_PRESETS, or 'custom'
+  const [customSingular, setCustomSingular] = useState('')
+  const [customPlural, setCustomPlural] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  // Resolve the chosen client label to {singular, plural}, or null if it's the
+  // default (index 0) — in which case we don't write anything and every company
+  // keeps the standard "Brands/Clients" wording.
+  function chosenLabel() {
+    if (labelChoice === 'custom') {
+      const singular = customSingular.trim()
+      const plural = customPlural.trim()
+      if (!singular || !plural) return { error: 'Please fill in both the singular and plural word.' }
+      return { singular, plural }
+    }
+    if (labelChoice === '0') return null
+    return CLIENT_LABEL_PRESETS[Number(labelChoice)] || null
+  }
+
   async function createOrg() {
     if (!agencyName.trim()) return setError('Please enter your agency name')
+    const label = chosenLabel()
+    if (label && label.error) return setError(label.error)
     setSaving(true)
     setError('')
 
@@ -21,6 +41,15 @@ export default function Onboarding({ user, onComplete }) {
     if (orgErr) {
       setSaving(false)
       return setError('Org error: ' + orgErr.message)
+    }
+
+    // Save their chosen word for the "Brand/Client" section (only if not the
+    // default). Best-effort — if it fails, the workspace still opens with the
+    // standard wording and they can set it later in Settings.
+    if (label && !label.error) {
+      await supabase.from('org_settings')
+        .update({ client_label_singular: label.singular, client_label_plural: label.plural })
+        .eq('org_id', newOrgId)
     }
 
     setSaving(false)
@@ -46,6 +75,36 @@ export default function Onboarding({ user, onComplete }) {
             autoFocus
             style={{ width: '100%', background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '12px 14px', fontSize: '14px', color: '#F0ECE6', outline: 'none', boxSizing: 'border-box' }}
           />
+        </div>
+
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>What do you call your clients?</div>
+          <select
+            value={labelChoice}
+            onChange={e => setLabelChoice(e.target.value)}
+            style={{ width: '100%', background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '12px 14px', fontSize: '14px', color: '#F0ECE6', outline: 'none', boxSizing: 'border-box' }}>
+            {CLIENT_LABEL_PRESETS.map((p, i) => (
+              <option key={i} value={String(i)}>{p.plural}{i === 0 ? ' (default)' : ''}</option>
+            ))}
+            <option value='custom'>Something else…</option>
+          </select>
+          {labelChoice === 'custom' && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+              <input
+                value={customSingular}
+                onChange={e => setCustomSingular(e.target.value)}
+                placeholder='One (e.g. Client)'
+                style={{ flex: 1, background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#F0ECE6', outline: 'none', boxSizing: 'border-box' }}
+              />
+              <input
+                value={customPlural}
+                onChange={e => setCustomPlural(e.target.value)}
+                placeholder='Many (e.g. Clients)'
+                style={{ flex: 1, background: '#141414', border: '0.5px solid #3A3A3A', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#F0ECE6', outline: 'none', boxSizing: 'border-box' }}
+              />
+            </div>
+          )}
+          <div style={{ fontSize: '11px', color: '#555', marginTop: '8px', lineHeight: 1.6 }}>This is what the "Brands/Clients" section will be called for your team. You can change it anytime in Settings.</div>
         </div>
 
         {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '12px' }}>{error}</div>}

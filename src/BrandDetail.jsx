@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import ExpandableTextarea from './ExpandableTextarea'
 
-export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) {
+export default function BrandDetail({ brandId, onClose, onSaved, dark = true, clientLabel = { singular: 'Brand/Client', plural: 'Brands/Clients' } }) {
   const bg = dark ? '#1A1A1A' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
@@ -184,7 +184,7 @@ export default function BrandDetail({ brandId, onClose, onSaved, dark = true }) 
 
         <div style={{ padding: '20px 24px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle }}>Brand / Client</div>
+            <div style={{ fontSize: '8px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle }}>{clientLabel.singular}</div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {savedFlash && <span style={{ fontSize: '10px', color: '#5C9E52', letterSpacing: '0.14em', textTransform: 'uppercase' }}>✓ Saved</span>}
               <button onClick={handleSave} disabled={saving} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: saving ? 0.6 : 1 }}>

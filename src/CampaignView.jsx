@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
+import { useClientLabel } from './useClientLabel'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -22,6 +23,7 @@ const BOARD_COLUMNS = [
 ]
 
 export default function CampaignView({ dark = true, orgId, campaignView = 'grid', openCampaignId, onOpenCampaignHandled, focusVersion = 0 }) {
+  const clientLabel = useClientLabel(orgId)
   const isMobile = window.innerWidth < 768;
   const view = campaignView
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -401,7 +403,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       {!loading && view === 'list' && !isMobile && filtered.length > 0 && (
         <div style={{ flex: 1, overflowY: 'auto', paddingBottom: '100px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '48px 2fr 1fr 120px 120px 140px 120px 80px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, position: 'sticky', top: 0, background: bg, zIndex: 1, gap: '10px' }}>
-            {['', 'Campaign', 'Brand', 'Type', 'Status', 'Dates', 'Talent', 'Budget'].map((h, i) => (
+            {['', 'Campaign', clientLabel.singular, 'Type', 'Status', 'Dates', 'Talent', 'Budget'].map((h, i) => (
               <div key={i} style={{ fontSize: '8px', color: subtle, letterSpacing: '0.22em', textTransform: 'uppercase' }}>{h}</div>
             ))}
           </div>

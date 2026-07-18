@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
+import { useClientLabel } from './useClientLabel'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, onDeleted, dark }) {
+  const clientLabel = useClientLabel(orgId)
   const cardBg = dark ? '#1A1A1A' : '#FFFFFF'
   const text = dark ? '#EDEAE4' : '#1A1A1A'
   const muted = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)'
@@ -370,6 +372,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
         <BrandDetail
           brandId={editingBrandId}
           dark={dark}
+          clientLabel={clientLabel}
           onClose={() => setEditingBrandId(null)}
           onSaved={() => {
             supabase.from('brands').select('*').eq('org_id', orgId).neq('status', 'archived').order('name', { ascending: true }).then(({ data }) => setBrands(data || []))
@@ -395,7 +398,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               {selectEl(form.brand_id || '', e => selectBrand(e.target.value), (
                 <>
-                  <option value=''>Select a brand…</option>
+                  <option value=''>Select a {clientLabel.singular.toLowerCase()}…</option>
                   {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </>
               ), { flex: 1 })}
@@ -429,7 +432,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
             )}
             {showNewBrand && (
               <div style={{ marginTop: '10px', padding: '12px', border: `1px dashed ${fieldBorder}`, borderRadius: '6px' }}>
-                {inp({ value: newBrandName, onChange: e => setNewBrandName(e.target.value), onKeyDown: e => { if (e.key === 'Enter') createBrandInline() }, placeholder: 'New brand name', autoFocus: true, style: { marginBottom: '8px' } })}
+                {inp({ value: newBrandName, onChange: e => setNewBrandName(e.target.value), onKeyDown: e => { if (e.key === 'Enter') createBrandInline() }, placeholder: `New ${clientLabel.singular.toLowerCase()} name`, autoFocus: true, style: { marginBottom: '8px' } })}
                 {inp({ value: newBrandWebsite, onChange: e => setNewBrandWebsite(e.target.value), onKeyDown: e => { if (e.key === 'Enter') createBrandInline() }, placeholder: 'Website (optional, e.g. example.com)', style: { marginBottom: '10px' } })}
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                   <label style={{ fontSize: '11px', color: muted, cursor: 'pointer', flex: 1 }} onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'} onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}>
@@ -459,7 +462,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
               </>
             ))}
             {brandContacts.length === 0 && (
-              <div style={{ fontSize: '11px', color: muted, marginTop: '6px', opacity: 0.8 }}>No contacts for this brand yet — use “Contact” above to add people.</div>
+              <div style={{ fontSize: '11px', color: muted, marginTop: '6px', opacity: 0.8 }}>No contacts for this {clientLabel.singular.toLowerCase()} yet — use “Contact” above to add people.</div>
             )}
           </div>
         )}

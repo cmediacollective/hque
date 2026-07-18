@@ -1,0 +1,51 @@
+functionsDirectory = "/Users/cheriemarquez/hque/netlify/functions"
+functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "/Users/cheriemarquez/hque/dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm run build && node scripts/sync-roadmap.mjs && cd netlify/functions && npm install"
+functions = "/Users/cheriemarquez/hque/netlify/functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions.task-reminders]
+schedule = "0 19 * * *"
+
+[functions.purge-accounts]
+schedule = "0 9 * * *"
+
+[functions.klaviyo-winback]
+schedule = "0 8 * * *"
+
+[functions."*"]
+
+[[redirects]]
+from = "/*"
+to = "/app.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

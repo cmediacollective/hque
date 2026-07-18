@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
+import { useClientLabel } from './useClientLabel'
 
 // fullWidth: on mobile the brand list is its own full-screen step (you pick a
 // brand, then the board takes the whole screen), so it fills the width instead
@@ -73,6 +74,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [hovering, setHovering] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
   const [editingBrandId, setEditingBrandId] = useState(null)
+  const clientLabel = useClientLabel(orgId)
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
@@ -238,11 +240,11 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setArchiving(null)}>
           <div style={{ background: dark ? '#141414' : '#FFFFFF', border: `0.5px solid ${border}`, padding: '28px', width: '380px', borderRadius: '2px' }} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '10px' }}>
-              {archiving.restore ? 'Restore brand?' : 'Archive brand?'}
+              {archiving.restore ? `Restore ${clientLabel.singular.toLowerCase()}?` : `Archive ${clientLabel.singular.toLowerCase()}?`}
             </div>
             <div style={{ fontSize: '12px', color: muted, lineHeight: 1.6, marginBottom: '22px' }}>
               {archiving.restore
-                ? `"${archiving.brand.name}" will be moved back to your active brands.`
+                ? `"${archiving.brand.name}" will be moved back to your active ${clientLabel.plural.toLowerCase()}.`
                 : `"${archiving.brand.name}" will be hidden from your sidebar. Boards assigned to this brand will still exist and be shown under Internal.`}
             </div>
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
@@ -264,7 +266,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder='Search brands/clients...'
+            placeholder={`Search ${clientLabel.plural.toLowerCase()}...`}
             onFocus={e => { e.target.style.borderColor = '#5b7c99'; e.target.style.boxShadow = '0 0 0 2px rgba(91,124,153,0.18)' }}
             onBlur={e => { e.target.style.borderColor = border; e.target.style.boxShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)' }}
             style={{ width: '100%', padding: '8px 10px 8px 30px', fontSize: '12px', background: dark ? '#1A1A1A' : '#F5F3EF', border: `1px solid ${border}`, borderRadius: '6px', color: text, outline: 'none', boxSizing: 'border-box', boxShadow: dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)', transition: 'border-color 0.15s, box-shadow 0.15s' }}
@@ -274,7 +276,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
       <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
         <div style={{ fontSize: '8.5px', letterSpacing: '0.22em', textTransform: 'uppercase', color: muted, fontWeight: 500 }}>
-          {showArchived ? `Archived · ${archivedBrands.length}` : `Brands · ${filtered.length}`}
+          {showArchived ? `Archived · ${archivedBrands.length}` : `${clientLabel.plural} · ${filtered.length}`}
         </div>
         {archivedBrands.length > 0 && (
           <button onClick={() => setShowArchived(!showArchived)}
@@ -288,7 +290,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
         {!showArchived && filtered.length === 0 && !search && (
           <div style={{ padding: '20px 16px', fontSize: '11px', color: subtle, lineHeight: 1.6 }}>
-            No brands or clients yet. Click "+ New Brand/Client" below to add one.
+            No {clientLabel.plural.toLowerCase()} yet. Click "+ New {clientLabel.singular}" below to add one.
           </div>
         )}
 
@@ -343,12 +345,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                         onClick={e => { e.stopPropagation(); setOpenMenuId(null); setEditingBrandId(b.id) }}
                         style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer' }}
                         onMouseEnter={e => e.currentTarget.style.background = cardHover}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Edit brand</button>
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Edit {clientLabel.singular.toLowerCase()}</button>
                       <button
                         onClick={e => { e.stopPropagation(); setOpenMenuId(null); setArchiving({ brand: b, restore: false }) }}
                         style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', fontSize: '11px', background: 'none', border: 'none', color: muted, cursor: 'pointer' }}
                         onMouseEnter={e => e.currentTarget.style.background = cardHover}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Archive brand</button>
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Archive {clientLabel.singular.toLowerCase()}</button>
                     </div>
                   </>
                 )}
@@ -444,7 +446,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               value={newBrandName}
               onChange={e => setNewBrandName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') createBrand(); if (e.key === 'Escape') { setShowNewBrand(false); setError('') } }}
-              placeholder='Brand name'
+              placeholder={`${clientLabel.singular} name`}
               autoFocus
               style={{ width: '100%', padding: '7px 10px', fontSize: '12px', background: dark ? '#141414' : '#F5F3EF', border: `0.5px solid ${border}`, borderRadius: '1px', color: text, outline: 'none', boxSizing: 'border-box' }}
             />
@@ -480,7 +482,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
           )
         })() : (
           <button onClick={() => setShowNewBrand(true)} style={{ width: '100%', padding: '8px 0', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px dashed ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px' }}>
-            + New Brand/Client
+            + New {clientLabel.singular}
           </button>
         )}
       </div>
@@ -489,6 +491,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         <BrandDetail
           brandId={editingBrandId}
           dark={dark}
+          clientLabel={clientLabel}
           onClose={() => setEditingBrandId(null)}
           onSaved={() => { fetchBrands(); fetchBoardCounts() }}
         />

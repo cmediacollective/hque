@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-18
+
+**Call your "Brands/Clients" section whatever fits your team.** Not everyone organizes work by "brands and clients" — some think in departments, categories, teams, or projects. You can now **choose that word for your workspace**: pick it when you create your account, or change it anytime in **Settings → Agency Info** (choose a ready-made option like *Departments* or *Categories*, or type your own). Your choice then replaces "Brand/Client" **everywhere** it appears — the sidebar heading, the "+ New ___" button, the search box, and the labels on task and campaign screens. Every other team is unaffected and keeps the default "Brands/Clients." *(Owners and admins set it; refresh after saving to see it update everywhere.)*
+
+---
+
 ## 2026-07-17
 
 **Talent cards: the Archive button no longer floats into the location.** On a talent card, the **Archive** button (which appears when you hover) now sits neatly in the **top-right corner** instead of squeezing into the followers/location row. Long locations like "Tennessee, Florida and New York" now trim with a "…" instead of shoving the button out of place.

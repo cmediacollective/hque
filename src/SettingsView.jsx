@@ -5,6 +5,7 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
+import { CLIENT_LABEL_PRESETS } from './useClientLabel'
 
 // A transparent version of a hex colour, so the tab-bar fade starts invisible and
 // ends in the page background rather than fading through grey.
@@ -27,7 +28,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const mobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
-  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles' })
+  const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles', client_label_singular: '', client_label_plural: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
   const [agencySaving, setAgencySaving] = useState(false)
@@ -108,7 +109,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   async function fetchAgency() {
     const { data } = await supabase.from('org_settings').select('*').eq('org_id', orgId).single()
     if (data) {
-      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', use_agency_logo: !!data.use_agency_logo, timezone: data.timezone || 'America/Los_Angeles' })
+      setAgencyForm({ agency_name: data.agency_name || '', agency_email: data.agency_email || '', agency_website: data.agency_website || '', agency_logo_url: data.agency_logo_url || '', use_agency_logo: !!data.use_agency_logo, timezone: data.timezone || 'America/Los_Angeles', client_label_singular: data.client_label_singular || '', client_label_plural: data.client_label_plural || '' })
       setSenderAccounts(data.sender_accounts || [])
     }
     const { data: org } = await supabase.from('organizations').select('slug').eq('id', orgId).single()
@@ -172,11 +173,15 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     // Keep use_agency_logo out of the main payload and save it separately, so if
     // the column hasn't been added to the database yet the rest of Agency Info
     // still saves fine (the flag write just no-ops until the column exists).
-    const { use_agency_logo, ...rest } = agencyForm
+    const { use_agency_logo, client_label_singular, client_label_plural, ...rest } = agencyForm
     const payload = { ...rest, sender_accounts: senderAccounts }
     if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', orgId) }
     else { await supabase.from('org_settings').insert([{ ...payload, org_id: orgId }]) }
     await supabase.from('org_settings').update({ use_agency_logo: !!use_agency_logo }).eq('org_id', orgId)
+    // Saved separately (like use_agency_logo) so the rest of Agency Info still
+    // saves even if the client-label columns haven't been added yet. Blank =
+    // fall back to the default "Brands/Clients" wording.
+    await supabase.from('org_settings').update({ client_label_singular: client_label_singular?.trim() || null, client_label_plural: client_label_plural?.trim() || null }).eq('org_id', orgId)
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
@@ -453,6 +458,39 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <option value='UTC'>UTC</option>
               </select>
             )}
+            {(() => {
+              const curS = agencyForm.client_label_singular?.trim() || 'Brand/Client'
+              const curP = agencyForm.client_label_plural?.trim() || 'Brands/Clients'
+              const idx = CLIENT_LABEL_PRESETS.findIndex(p => p.singular.toLowerCase() === curS.toLowerCase() && p.plural.toLowerCase() === curP.toLowerCase())
+              const sel = idx >= 0 ? String(idx) : 'custom'
+              return field('What you call your clients',
+                <>
+                  <select
+                    value={sel}
+                    disabled={!canEditAgency}
+                    onChange={e => {
+                      if (e.target.value === 'custom') {
+                        // Seed the custom inputs from the current words so they aren't blank.
+                        setAgencyForm(f => ({ ...f, client_label_singular: curS, client_label_plural: curP }))
+                      } else {
+                        const p = CLIENT_LABEL_PRESETS[Number(e.target.value)]
+                        setAgencyForm(f => ({ ...f, client_label_singular: p.singular, client_label_plural: p.plural }))
+                      }
+                    }}
+                    style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                    {CLIENT_LABEL_PRESETS.map((p, i) => <option key={i} value={String(i)}>{p.plural}{i === 0 ? ' (default)' : ''}</option>)}
+                    <option value='custom'>Something else…</option>
+                  </select>
+                  {sel === 'custom' && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      {inp({ value: agencyForm.client_label_singular, onChange: e => setAgencyForm(f => ({ ...f, client_label_singular: e.target.value })), placeholder: 'One (e.g. Client)', disabled: !canEditAgency })}
+                      {inp({ value: agencyForm.client_label_plural, onChange: e => setAgencyForm(f => ({ ...f, client_label_plural: e.target.value })), placeholder: 'Many (e.g. Clients)', disabled: !canEditAgency })}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '11px', color: subtle, marginTop: '6px', lineHeight: 1.6 }}>The word used for the "Brands/Clients" section across your workspace. Refresh after saving to see it update everywhere.</div>
+                </>
+              )
+            })()}
             {field('Agency Logo',
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 {agencyForm.agency_logo_url && (

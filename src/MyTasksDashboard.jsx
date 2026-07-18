@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { useClientLabel } from './useClientLabel'
 
 function bucketFor(dueDate, todayMidnight) {
   if (!dueDate) return 'Later'
@@ -18,6 +19,7 @@ const PRIORITY_RANK = { High: 0, Medium: 1, Low: 2 }
 const MAX_PER_BUCKET = 5
 
 export default function MyTasksDashboard({ userId, orgId, dark = true, brands = [], onSelectBrand, onOpenTask, agencyTz = 'America/Los_Angeles' }) {
+  const clientLabel = useClientLabel(orgId)
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
@@ -529,8 +531,8 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
         <div style={{ position: 'sticky', bottom: 0, marginTop: '32px', paddingTop: '14px', paddingBottom: '14px', background: bg, borderTop: `0.5px solid ${border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ fontSize: '12px', color: subtle }}>
             {overdueCount > 0
-              ? `You have ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}${overdueBrandCount > 0 ? ` across ${overdueBrandCount} ${overdueBrandCount === 1 ? 'brand' : 'brands'}` : ''} — pick a brand on the left to see the full board.`
-              : 'All caught up — pick a brand on the left to dive in.'}
+              ? `You have ${overdueCount} overdue ${overdueCount === 1 ? 'task' : 'tasks'}${overdueBrandCount > 0 ? ` across ${overdueBrandCount} ${overdueBrandCount === 1 ? clientLabel.singular.toLowerCase() : clientLabel.plural.toLowerCase()}` : ''} — pick a ${clientLabel.singular.toLowerCase()} on the left to see the full board.`
+              : `All caught up — pick a ${clientLabel.singular.toLowerCase()} on the left to dive in.`}
           </div>
           <div style={{ display: 'flex', gap: '16px', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: muted }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><span style={{ width: '8px', height: '8px', background: '#5b7c99', borderRadius: '50%' }}></span>Assigned</span>
