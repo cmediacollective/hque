@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
-import { useClientLabel } from './useClientLabel'
+import { useClientLabel, PERSONALIZATION_NEW_UNTIL } from './useClientLabel'
 
 // fullWidth: on mobile the brand list is its own full-screen step (you pick a
 // brand, then the board takes the whole screen), so it fills the width instead
@@ -82,6 +82,8 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [showRenameNudge, setShowRenameNudge] = useState(false)
   useEffect(() => {
     if (!isAdmin || !nudgeKey) return
+    // Only within the two-week launch window, and only if not already dismissed.
+    if (Date.now() >= PERSONALIZATION_NEW_UNTIL) return
     try { if (localStorage.getItem(nudgeKey) !== '1') setShowRenameNudge(true) } catch (e) {}
   }, [isAdmin, nudgeKey])
   function dismissNudge() {

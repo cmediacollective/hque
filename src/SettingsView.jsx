@@ -5,7 +5,7 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
-import { CLIENT_LABEL_PRESETS } from './useClientLabel'
+import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL } from './useClientLabel'
 
 // A transparent version of a hex colour, so the tab-bar fade starts invisible and
 // ends in the page background rather than fading through grey.
@@ -378,23 +378,37 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           ref={tabsRef}
           onScroll={updateTabFade}
           style={{ width: '100%', borderRight: mobile ? 'none' : `0.5px solid ${border}`, borderBottom: mobile ? `0.5px solid ${border}` : 'none', padding: '12px 0', display: 'flex', flexDirection: mobile ? 'row' : 'column', overflowX: mobile ? 'auto' : 'visible', scrollbarWidth: 'none' }}>
-          {tabs.map(t => (
-            <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
-              width: mobile ? 'auto' : '100%', flexShrink: mobile ? 0 : 1,
-              whiteSpace: 'nowrap', textAlign: 'left', padding: '9px 20px',
-              fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
-              background: 'none', border: 'none',
-              borderLeft: activeTab === t.key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
-              color: activeTab === t.key ? text : muted, cursor: 'pointer',
-              fontWeight: activeTab === t.key ? '500' : '400',
-              display: 'inline-flex', alignItems: 'center', gap: '7px'
-            }}>
-              {t.label}
-              {t.key === 'personalize' && !seenPersonalize && (
-                <span style={{ fontSize: '7px', letterSpacing: '0.12em', color: '#fff', background: '#5b7c99', borderRadius: '2px', padding: '2px 5px' }}>New</span>
-              )}
-            </button>
-          ))}
+          {tabs.map(t => {
+            const isPersonalize = t.key === 'personalize'
+            const showNew = isPersonalize && !seenPersonalize && Date.now() < PERSONALIZATION_NEW_UNTIL
+            const badge = showNew ? (
+              <span style={{ fontSize: '7px', letterSpacing: '0.12em', color: '#fff', background: '#5b7c99', borderRadius: '2px', padding: '2px 5px' }}>New</span>
+            ) : null
+            return (
+              <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+                width: mobile ? 'auto' : '100%', flexShrink: mobile ? 0 : 1,
+                whiteSpace: 'nowrap', textAlign: 'left', padding: '9px 20px',
+                fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase',
+                background: 'none', border: 'none',
+                borderLeft: activeTab === t.key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
+                color: activeTab === t.key ? text : muted, cursor: 'pointer',
+                fontWeight: activeTab === t.key ? '500' : '400',
+                lineHeight: (isPersonalize && !mobile) ? 1.35 : 'normal'
+              }}>
+                {/* "Workspace Personalization" is long — on desktop stack it to two
+                    lines so it doesn't overflow the column, with the New badge on
+                    the first line next to "Workspace". */}
+                {isPersonalize && !mobile ? (
+                  <span style={{ display: 'inline-flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>Workspace{badge}</span>
+                    <span>Personalization</span>
+                  </span>
+                ) : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>{t.label}{badge}</span>
+                )}
+              </button>
+            )
+          })}
         </div>
 
         {mobile && tabsOverflow && (

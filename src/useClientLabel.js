@@ -9,6 +9,11 @@ import { supabase } from './supabase'
 // that hasn't chosen exactly as before.
 export const DEFAULT_CLIENT_LABEL = { singular: 'Brand/Client', plural: 'Brands/Clients' }
 
+// "New" nudges (the Settings tab badge + the sidebar rename tooltip) stay up for
+// two weeks after launch, then come down for everyone — our standard rule for
+// any "New" flag. Launched 2026-07-18; comes down 2026-08-01.
+export const PERSONALIZATION_NEW_UNTIL = Date.parse('2026-08-01T00:00:00Z')
+
 // The ready-made choices shown at onboarding and in Settings. The first entry is
 // the default (what every company sees unless they pick another). "Custom" is
 // offered alongside these so a company can type their own singular + plural.
