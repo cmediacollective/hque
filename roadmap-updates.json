@@ -13,7 +13,7 @@
   },
   {
     "title": "Rename the \"Brands/Clients\" section to fit your team",
-    "description": "Not every team thinks in \"brands and clients.\" You can now choose what that section is called — Departments, Categories, Teams, Projects, or your own word — when you sign up, or anytime in Settings → Agency Info. Your choice shows up everywhere that word appears, across your whole workspace. Every other team is unaffected.",
+    "description": "Not every team thinks in \"brands and clients.\" When you sign up, HQue now asks how you group your work — Departments, Teams, Projects, Categories, Months, or your own word — and you can change it anytime under the new Settings → Workspace Personalization tab, which brings all your naming (this section + Talent Labels) into one place. Your choice shows up everywhere that word appears. Free on every plan, owner/admin-only, and every other team is unaffected.",
     "category": "Feature",
     "shipped_at": "2026-07-18"
   },

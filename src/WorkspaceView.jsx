@@ -133,7 +133,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0 }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0, isAdmin = false, onOpenSettings }) {
   const clientLabel = useClientLabel(orgId)
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
@@ -558,7 +558,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           the phone until you pick a brand, then the board gets the full width.
           A 220px column next to a board leaves ~170px for the board on a phone. */}
       {(!isMobile || !selectedBrand) && (
-        <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} fullWidth={isMobile} />
+        <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} fullWidth={isMobile} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />
       )}
 
       <div style={{ flex: 1, display: isMobile && !selectedBrand ? 'none' : 'flex', flexDirection: 'column', overflow: 'hidden' }}>

@@ -168,6 +168,7 @@ function App() {
   const [pendingCampaignId, setPendingCampaignId] = useState(null)
   const [pendingCreatorId, setPendingCreatorId] = useState(null)
   const [pendingBrandNotesId, setPendingBrandNotesId] = useState(null)
+  const [pendingSettingsTab, setPendingSettingsTab] = useState(null)
   const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState(null)
   const [isMasterAdmin, setIsMasterAdmin] = useState(false)
@@ -291,6 +292,9 @@ function App() {
   const isAdmin = userRole === 'owner' || userRole === 'admin'
   // Billing (plan changes, payment, cancellation) is owner-only — not admin.
   const isOwner = userRole === 'owner'
+
+  // Open Settings on a specific tab from anywhere (e.g. the sidebar rename pencil).
+  const openSettingsTab = (tab) => { setPendingSettingsTab(tab); setView('settings') }
 
   // Plan limits. Talent/seat caps follow the real plan (so they never block the
   // HQue team's own account). Reports is a Pro+ feature; for platform admins it
@@ -856,7 +860,7 @@ function App() {
                   fetch effects every time the user switches sections. */}
               {visited.has('workspace') && (
                 <div style={{ display: view === 'workspace' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} focusVersion={focusVersion} />
+                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} focusVersion={focusVersion} isAdmin={isAdmin} onOpenSettings={openSettingsTab} />
                 </div>
               )}
               {visited.has('talent') && (
@@ -895,7 +899,7 @@ function App() {
               )}
               {visited.has('settings') && (
                 <div style={{ display: view === 'settings' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} stripePlan={stripePlan} isMaster={isMasterAdmin} previewing={previewing} onAgencyLogoChange={setAgencyLogoUrl} onUseAgencyLogoChange={setUseAgencyLogo} />
+                  <SettingsView dark={dark} user={user} orgId={orgId} onAgencyNameChange={setAgencyName} onAvatarChange={setAvatarUrl} initialTab={initialBilling ? 'billing' : undefined} openTab={pendingSettingsTab} onTabOpened={() => setPendingSettingsTab(null)} stripePlan={stripePlan} isMaster={isMasterAdmin} previewing={previewing} onAgencyLogoChange={setAgencyLogoUrl} onUseAgencyLogoChange={setUseAgencyLogo} />
                 </div>
               )}
             </Suspense>

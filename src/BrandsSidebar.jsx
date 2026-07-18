@@ -45,7 +45,7 @@ function findBrandMatch(name, list) {
   return best
 }
 
-export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false }) {
+export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false, isAdmin = false, onOpenSettings }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
@@ -75,6 +75,19 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [openMenuId, setOpenMenuId] = useState(null)
   const [editingBrandId, setEditingBrandId] = useState(null)
   const clientLabel = useClientLabel(orgId)
+
+  // One-time nudge for owners/admins: you can now rename this section. Shown
+  // until dismissed (per workspace, on this device).
+  const nudgeKey = orgId ? `hque_rename_nudge_${orgId}` : null
+  const [showRenameNudge, setShowRenameNudge] = useState(false)
+  useEffect(() => {
+    if (!isAdmin || !nudgeKey) return
+    try { if (localStorage.getItem(nudgeKey) !== '1') setShowRenameNudge(true) } catch (e) {}
+  }, [isAdmin, nudgeKey])
+  function dismissNudge() {
+    setShowRenameNudge(false)
+    try { if (nudgeKey) localStorage.setItem(nudgeKey, '1') } catch (e) {}
+  }
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
@@ -274,15 +287,35 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
         </div>
       </div>
 
-      <div style={{ padding: '0 14px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-        <div style={{ fontSize: '8.5px', letterSpacing: '0.22em', textTransform: 'uppercase', color: muted, fontWeight: 500 }}>
-          {showArchived ? `Archived · ${archivedBrands.length}` : `${clientLabel.plural} · ${filtered.length}`}
+      <div style={{ position: 'relative', padding: '0 14px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <div style={{ fontSize: '8.5px', letterSpacing: '0.22em', textTransform: 'uppercase', color: muted, fontWeight: 500 }}>
+            {showArchived ? `Archived · ${archivedBrands.length}` : `${clientLabel.plural} · ${filtered.length}`}
+          </div>
+          {!showArchived && isAdmin && onOpenSettings && (
+            <button title={`Rename "${clientLabel.plural}"`} onClick={() => { dismissNudge(); onOpenSettings('personalize') }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px', background: 'none', border: `0.5px solid ${border2}`, borderRadius: '3px', color: subtle, cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+          )}
         </div>
         {archivedBrands.length > 0 && (
           <button onClick={() => setShowArchived(!showArchived)}
             style={{ background: showArchived ? '#5b7c99' : 'rgba(91,124,153,0.12)', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: showArchived ? '#fff' : '#5b7c99', cursor: 'pointer', padding: '3px 9px', borderRadius: '10px', fontWeight: 600 }}>
             {showArchived ? 'Active' : `+${archivedBrands.length} Archived`}
           </button>
+        )}
+        {showRenameNudge && !showArchived && (
+          <div style={{ position: 'absolute', top: '24px', left: '14px', zIndex: 30, width: '236px', background: dark ? '#141414' : '#FFFFFF', border: '0.5px solid rgba(91,124,153,0.5)', borderRadius: '5px', padding: '11px 12px', boxShadow: '0 6px 18px rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '5px' }}>
+              <span style={{ fontSize: '7.5px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', fontWeight: 600 }}>New</span>
+              <span onClick={dismissNudge} style={{ cursor: 'pointer', color: subtle, fontSize: '14px', lineHeight: 1 }}>×</span>
+            </div>
+            <div style={{ fontSize: '11.5px', color: text, lineHeight: 1.5 }}>
+              You can now rename this section to fit your team — call it Departments, Teams, whatever works.{' '}
+              <span onClick={() => { dismissNudge(); onOpenSettings && onOpenSettings('personalize') }} style={{ color: '#5b7c99', cursor: 'pointer', fontWeight: 600 }}>Rename →</span>
+            </div>
+          </div>
         )}
       </div>
 

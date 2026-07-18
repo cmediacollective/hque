@@ -78,7 +78,19 @@ export default function Onboarding({ user, onComplete }) {
         </div>
 
         <div style={{ marginBottom: '16px' }}>
-          <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>What do you call your clients?</div>
+          <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#666', marginBottom: '8px' }}>How do you group your work?</div>
+          <div style={{ display: 'grid', gap: '6px', marginBottom: '12px' }}>
+            {[
+              ['Agency', 'Clients · Brands'],
+              ['HR / Ops', 'Departments — Payroll, HR…'],
+              ['Media', 'Teams (Writers…) — or Months'],
+            ].map(([k, v]) => (
+              <div key={k} style={{ display: 'grid', gridTemplateColumns: '74px 1fr', gap: '10px', alignItems: 'baseline', fontSize: '11.5px' }}>
+                <span style={{ color: '#5b7c99', fontWeight: 600 }}>{k}</span>
+                <span style={{ color: '#888' }}>{v}</span>
+              </div>
+            ))}
+          </div>
           <select
             value={labelChoice}
             onChange={e => setLabelChoice(e.target.value)}
@@ -104,7 +116,7 @@ export default function Onboarding({ user, onComplete }) {
               />
             </div>
           )}
-          <div style={{ fontSize: '11px', color: '#555', marginTop: '8px', lineHeight: 1.6 }}>This is what the "Brands/Clients" section will be called for your team. You can change it anytime in Settings.</div>
+          <div style={{ fontSize: '11px', color: '#555', marginTop: '8px', lineHeight: 1.6 }}>Pick the word that fits your team — or choose "Something else…" to type your own. You can change it anytime in Settings.</div>
         </div>
 
         {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '12px' }}>{error}</div>}

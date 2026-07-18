@@ -15,10 +15,10 @@ export const DEFAULT_CLIENT_LABEL = { singular: 'Brand/Client', plural: 'Brands/
 export const CLIENT_LABEL_PRESETS = [
   { singular: 'Brand/Client', plural: 'Brands/Clients' },
   { singular: 'Department', plural: 'Departments' },
-  { singular: 'Category', plural: 'Categories' },
   { singular: 'Team', plural: 'Teams' },
   { singular: 'Project', plural: 'Projects' },
-  { singular: 'Client', plural: 'Clients' },
+  { singular: 'Category', plural: 'Categories' },
+  { singular: 'Month', plural: 'Months' },
 ]
 
 export function useClientLabel(orgId) {

@@ -15,7 +15,7 @@ const hexToRgba = (hex, alpha) => {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
 }
 
-export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, previewing, onAgencyLogoChange, onUseAgencyLogoChange }) {
+export default function SettingsView({ dark = true, user, orgId, onAgencyNameChange, onAvatarChange, initialTab, stripePlan, isMaster, previewing, onAgencyLogoChange, onUseAgencyLogoChange, openTab, onTabOpened }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
@@ -28,6 +28,13 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const mobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
+  const [labelSaving, setLabelSaving] = useState(false)
+  const [labelSaved, setLabelSaved] = useState(false)
+  // One-time "New" badge on the Workspace Personalization tab (per user, per device).
+  const seenKey = user ? `hque_seen_personalize_${user.id}` : null
+  const [seenPersonalize, setSeenPersonalize] = useState(() => {
+    try { return seenKey ? localStorage.getItem(seenKey) === '1' : true } catch (e) { return true }
+  })
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles', client_label_singular: '', client_label_plural: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
@@ -79,6 +86,21 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }, [])
 
   useEffect(() => { fetchAgency(); fetchTeam(); fetchAvatar(); checkPlatformAdmin() }, [])
+
+  // Open a specific tab on demand (e.g. the rename pencil in the sidebar asks
+  // for 'personalize'). initialTab only seeds the first mount, so this handles
+  // later requests while SettingsView stays mounted.
+  useEffect(() => {
+    if (openTab) { setActiveTab(openTab); onTabOpened?.() }
+  }, [openTab])
+
+  // Clear the "New" badge once they've actually opened the personalization tab.
+  useEffect(() => {
+    if (activeTab === 'personalize' && !seenPersonalize) {
+      setSeenPersonalize(true)
+      try { if (seenKey) localStorage.setItem(seenKey, '1') } catch (e) {}
+    }
+  }, [activeTab])
 
   async function checkPlatformAdmin() {
     const { data } = await supabase.rpc('is_platform_admin')
@@ -178,14 +200,25 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     if (existing) { await supabase.from('org_settings').update(payload).eq('org_id', orgId) }
     else { await supabase.from('org_settings').insert([{ ...payload, org_id: orgId }]) }
     await supabase.from('org_settings').update({ use_agency_logo: !!use_agency_logo }).eq('org_id', orgId)
-    // Saved separately (like use_agency_logo) so the rest of Agency Info still
-    // saves even if the client-label columns haven't been added yet. Blank =
-    // fall back to the default "Brands/Clients" wording.
-    await supabase.from('org_settings').update({ client_label_singular: client_label_singular?.trim() || null, client_label_plural: client_label_plural?.trim() || null }).eq('org_id', orgId)
     if (agencyForm.agency_name) onAgencyNameChange?.(agencyForm.agency_name)
     setAgencySaving(false)
     setAgencySaved(true)
     setTimeout(() => setAgencySaved(false), 2000)
+  }
+
+  // Saves just the group-name words (Workspace Personalization tab). Kept as its
+  // own write so it's independent of Agency Info, and best-effort so it doesn't
+  // hard-fail if the client-label columns aren't in the database yet. Blank =
+  // fall back to the default "Brands/Clients" wording.
+  async function saveClientLabel() {
+    setLabelSaving(true)
+    await supabase.from('org_settings').update({
+      client_label_singular: agencyForm.client_label_singular?.trim() || null,
+      client_label_plural: agencyForm.client_label_plural?.trim() || null,
+    }).eq('org_id', orgId)
+    setLabelSaving(false)
+    setLabelSaved(true)
+    setTimeout(() => setLabelSaved(false), 2000)
   }
 
   function addSender() {
@@ -322,9 +355,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     { key: 'profile', label: 'Profile' },
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
-    // Talent Labels + Default Labels sit together: this company's labels, then
-    // (master only) the defaults that seed new companies.
-    ...((currentUserRole === 'owner' || currentUserRole === 'admin') ? [{ key: 'labels', label: 'Talent Labels' }] : []),
+    // Workspace Personalization (owner/admin) holds what you call things — your
+    // group name + Talent Labels. Default Labels (master only) seeds new companies.
+    ...((currentUserRole === 'owner' || currentUserRole === 'admin') ? [{ key: 'personalize', label: 'Workspace Personalization' }] : []),
     ...(isMaster && !previewing ? [{ key: 'defaults', label: 'Default Labels' }] : []),
     { key: 'password', label: 'Password' },
     // Billing is owner-only: plan changes, payment, and cancellation stay with
@@ -353,8 +386,14 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               background: 'none', border: 'none',
               borderLeft: activeTab === t.key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
               color: activeTab === t.key ? text : muted, cursor: 'pointer',
-              fontWeight: activeTab === t.key ? '500' : '400'
-            }}>{t.label}</button>
+              fontWeight: activeTab === t.key ? '500' : '400',
+              display: 'inline-flex', alignItems: 'center', gap: '7px'
+            }}>
+              {t.label}
+              {t.key === 'personalize' && !seenPersonalize && (
+                <span style={{ fontSize: '7px', letterSpacing: '0.12em', color: '#fff', background: '#5b7c99', borderRadius: '2px', padding: '2px 5px' }}>New</span>
+              )}
+            </button>
           ))}
         </div>
 
@@ -458,39 +497,6 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <option value='UTC'>UTC</option>
               </select>
             )}
-            {(() => {
-              const curS = agencyForm.client_label_singular?.trim() || 'Brand/Client'
-              const curP = agencyForm.client_label_plural?.trim() || 'Brands/Clients'
-              const idx = CLIENT_LABEL_PRESETS.findIndex(p => p.singular.toLowerCase() === curS.toLowerCase() && p.plural.toLowerCase() === curP.toLowerCase())
-              const sel = idx >= 0 ? String(idx) : 'custom'
-              return field('What you call your clients',
-                <>
-                  <select
-                    value={sel}
-                    disabled={!canEditAgency}
-                    onChange={e => {
-                      if (e.target.value === 'custom') {
-                        // Seed the custom inputs from the current words so they aren't blank.
-                        setAgencyForm(f => ({ ...f, client_label_singular: curS, client_label_plural: curP }))
-                      } else {
-                        const p = CLIENT_LABEL_PRESETS[Number(e.target.value)]
-                        setAgencyForm(f => ({ ...f, client_label_singular: p.singular, client_label_plural: p.plural }))
-                      }
-                    }}
-                    style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
-                    {CLIENT_LABEL_PRESETS.map((p, i) => <option key={i} value={String(i)}>{p.plural}{i === 0 ? ' (default)' : ''}</option>)}
-                    <option value='custom'>Something else…</option>
-                  </select>
-                  {sel === 'custom' && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                      {inp({ value: agencyForm.client_label_singular, onChange: e => setAgencyForm(f => ({ ...f, client_label_singular: e.target.value })), placeholder: 'One (e.g. Client)', disabled: !canEditAgency })}
-                      {inp({ value: agencyForm.client_label_plural, onChange: e => setAgencyForm(f => ({ ...f, client_label_plural: e.target.value })), placeholder: 'Many (e.g. Clients)', disabled: !canEditAgency })}
-                    </div>
-                  )}
-                  <div style={{ fontSize: '11px', color: subtle, marginTop: '6px', lineHeight: 1.6 }}>The word used for the "Brands/Clients" section across your workspace. Refresh after saving to see it update everywhere.</div>
-                </>
-              )
-            })()}
             {field('Agency Logo',
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 {agencyForm.agency_logo_url && (
@@ -716,8 +722,55 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           </div>
         )}
 
-        {activeTab === 'labels' && (
-          <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+        {activeTab === 'personalize' && (
+          <div>
+            {sectionTitle('Workspace Personalization')}
+            <div style={{ fontSize: '12.5px', color: subtle, marginBottom: '24px', lineHeight: 1.6, maxWidth: '54ch' }}>
+              Make HQue speak your team's language. These settings change wording only — your work, boards, and data are never affected.
+            </div>
+
+            {(() => {
+              const curS = agencyForm.client_label_singular?.trim() || 'Brand/Client'
+              const curP = agencyForm.client_label_plural?.trim() || 'Brands/Clients'
+              const idx = CLIENT_LABEL_PRESETS.findIndex(p => p.singular.toLowerCase() === curS.toLowerCase() && p.plural.toLowerCase() === curP.toLowerCase())
+              const sel = idx >= 0 ? String(idx) : 'custom'
+              return field('How you group your work',
+                <>
+                  <select
+                    value={sel}
+                    onChange={e => {
+                      if (e.target.value === 'custom') {
+                        // Seed the custom inputs from the current words so they aren't blank.
+                        setAgencyForm(f => ({ ...f, client_label_singular: curS, client_label_plural: curP }))
+                      } else {
+                        const p = CLIENT_LABEL_PRESETS[Number(e.target.value)]
+                        setAgencyForm(f => ({ ...f, client_label_singular: p.singular, client_label_plural: p.plural }))
+                      }
+                    }}
+                    style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                    {CLIENT_LABEL_PRESETS.map((p, i) => <option key={i} value={String(i)}>{p.plural}{i === 0 ? ' (default)' : ''}</option>)}
+                    <option value='custom'>Something else…</option>
+                  </select>
+                  {sel === 'custom' && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                      {inp({ value: agencyForm.client_label_singular, onChange: e => setAgencyForm(f => ({ ...f, client_label_singular: e.target.value })), placeholder: 'One (e.g. Client)' })}
+                      {inp({ value: agencyForm.client_label_plural, onChange: e => setAgencyForm(f => ({ ...f, client_label_plural: e.target.value })), placeholder: 'Many (e.g. Clients)' })}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '11px', color: subtle, margin: '8px 0 14px', lineHeight: 1.6 }}>
+                    The name for the section where your work is organized — the "Brands/Clients" list. It shows up across the whole workspace. Refresh after saving to see it update everywhere.
+                  </div>
+                  <button onClick={saveClientLabel} disabled={labelSaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: labelSaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: labelSaving ? 0.7 : 1 }}>
+                    {labelSaved ? 'Saved!' : labelSaving ? 'Saving...' : 'Save'}
+                  </button>
+                </>
+              )
+            })()}
+
+            <div style={{ borderTop: `0.5px solid ${border}`, marginTop: '30px', paddingTop: '26px' }}>
+              <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+            </div>
+          </div>
         )}
 
         {activeTab === 'defaults' && isMaster && !previewing && (
