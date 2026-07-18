@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
-export default function NotificationsPanel({ user, dark, onClose, onOpenTask, onOpenCampaign }) {
+export default function NotificationsPanel({ user, orgId, dark, onClose, onOpenTask, onOpenCampaign }) {
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -11,11 +11,15 @@ export default function NotificationsPanel({ user, dark, onClose, onOpenTask, on
   const muted = dark ? '#888' : '#666'
   const subtle = dark ? '#555' : '#999'
 
-  useEffect(() => { fetchNotifications() }, [])
+  useEffect(() => { fetchNotifications() }, [orgId])
 
   async function fetchNotifications() {
     setLoading(true)
-    const { data } = await supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50)
+    // Scoped to the active workspace: you only see a company's notifications
+    // while you're in that company. Every notification row carries its org_id.
+    let query = supabase.from('notifications').select('*').eq('user_id', user.id)
+    if (orgId) query = query.eq('org_id', orgId)
+    const { data } = await query.order('created_at', { ascending: false }).limit(50)
     setNotifications(data || [])
     setLoading(false)
   }
@@ -26,7 +30,11 @@ export default function NotificationsPanel({ user, dark, onClose, onOpenTask, on
   }
 
   async function markAllRead() {
-    await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false)
+    // Only clear the active workspace's unread, so "mark all read" in one
+    // company doesn't wipe the badge for another.
+    let query = supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false)
+    if (orgId) query = query.eq('org_id', orgId)
+    await query
     setNotifications(ns => ns.map(n => ({ ...n, read: true })))
   }
 

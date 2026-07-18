@@ -422,14 +422,17 @@ function App() {
   useEffect(() => { if (orgId) fetchMyOrgs() }, [orgId])
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !orgId) return
     // Use head + count to skip the row payload — we only need the number.
+    // Scoped to the active workspace so the bell only counts this company's
+    // unread; switching company reloads the app and re-scopes to the new org.
     const fetchUnread = async () => {
       if (document.visibilityState === 'hidden') return
       const { count } = await supabase
         .from('notifications')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('org_id', orgId)
         .eq('read', false)
       setUnreadCount(count || 0)
     }
@@ -438,7 +441,7 @@ function App() {
     // still feels prompt without hammering the network in the background.
     const interval = setInterval(fetchUnread, 60000)
     return () => clearInterval(interval)
-  }, [user, focusVersion])
+  }, [user, orgId, focusVersion])
 
   async function fetchProfile() {
     setProfileLoading(true)
@@ -687,7 +690,7 @@ function App() {
           </div>
         </div>
       )}
-      {showNotifications && <NotificationsPanel user={user} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />}
+      {showNotifications && <NotificationsPanel user={user} orgId={orgId} dark={dark} onClose={() => setShowNotifications(false)} onOpenTask={(taskId) => { setView('workspace'); setPendingTaskId(taskId) }} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />}
       {showWelcome && (
         <div onClick={() => setShowWelcome(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backdropFilter: 'blur(4px)' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#1A1A1A', border: '0.5px solid #2A2A2A', borderRadius: '2px', maxWidth: '440px', width: '100%', padding: isMobile ? '40px 28px' : '48px 40px', textAlign: 'center', color: '#F0ECE6' }}>

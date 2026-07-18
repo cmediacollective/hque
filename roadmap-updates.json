@@ -1,5 +1,11 @@
 [
   {
+    "title": "Notifications stay inside their own workspace",
+    "description": "If you belong to more than one company, your notifications no longer cross over. You only see a company's notifications — and its bell count — while you're working in that company; switch companies to see the other's. 'Mark all as read' only clears the workspace you're in. You still get an email either way so you know to switch over.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-18"
+  },
+  {
     "title": "Multi-company members are now assignable on tasks & campaigns",
     "description": "If you invited someone who already has their own HQue account (or belongs to another company), they could see your workspace and appeared under Settings → Team — but they were missing from the 'assign to' list on tasks and campaigns. Fixed: assignment now uses your real team membership, so any actual member is assignable no matter which workspace they're currently working in.",
     "category": "Fix",

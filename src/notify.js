@@ -1,6 +1,9 @@
 import { supabase } from './supabase'
 
 export async function createNotification(orgId, memberName, type, message, profiles, taskId = null, campaignId = null) {
+  // Notifications are workspace-scoped on read, so an org-less row would be
+  // invisible in every company. Refuse to create one without an org_id.
+  if (!orgId) return
   const profile = profiles.find(p => (p.full_name || p.email) === memberName)
   if (!profile) return
   const row = { org_id: orgId, user_id: profile.id, type, message, task_id: taskId }
