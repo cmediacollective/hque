@@ -61,7 +61,9 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
 
   useEffect(() => {
     if (!orgId) return
-    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    // Membership list (org_team), so members whose active workspace is another
+    // company still show up here. See WorkspaceView for the full rationale.
+    supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
   }, [orgId])
 
   // Open a campaign passed in via deep link (?campaign=<id>)

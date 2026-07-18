@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-18
 
+**Fixed: team members who belong to more than one company are now assignable.** If you invited someone who already has their own HQue account (or belongs to another company), they could see your workspace and showed up under Settings → Team — but they were missing from the "assign to" list on tasks and campaigns. The assignment lists were still built from "people whose *active* workspace is this company," which skipped anyone currently working in a different one. They now come from your real team membership (the same source as Settings → Team), so **any actual member is assignable no matter which workspace they're currently in** — on tasks, campaigns, and in reports.
+
 **Call your "Brands/Clients" section whatever fits your team.** Not everyone organizes work by "brands and clients" — some think in departments, categories, teams, or projects. You can now **choose that word for your workspace**: pick it when you create your account, or change it anytime in **Settings → Agency Info** (choose a ready-made option like *Departments* or *Categories*, or type your own). Your choice then replaces "Brand/Client" **everywhere** it appears — the sidebar heading, the "+ New ___" button, the search box, and the labels on task and campaign screens. Every other team is unaffected and keeps the default "Brands/Clients." *(Owners and admins set it; refresh after saving to see it update everywhere.)*
 
 ---

@@ -140,7 +140,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [campaigns, setCampaigns] = useState([])
 
   useEffect(() => {
-    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    // Assignable people = this company's real membership list (org_team), NOT
+    // "profiles whose active company is this org". A member whose active
+    // workspace is elsewhere (a stacked/multi-company member) is still a valid
+    // assignee and must appear here — same source the Settings > Team roster uses.
+    supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
   }, [orgId])
@@ -250,7 +254,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   // small reference lists at the top, plus the active board's tasks/columns.
   useEffect(() => {
     if (focusVersion === 0 || !orgId) return
-    supabase.from('profiles').select('id, email, full_name, avatar_url').eq('org_id', orgId).then(({ data }) => setMembers(data || []))
+    // Assignable people = this company's real membership list (org_team), NOT
+    // "profiles whose active company is this org". A member whose active
+    // workspace is elsewhere (a stacked/multi-company member) is still a valid
+    // assignee and must appear here — same source the Settings > Team roster uses.
+    supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
     if (activeBoard) { fetchColumns(); fetchTasks() }

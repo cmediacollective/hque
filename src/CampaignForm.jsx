@@ -76,8 +76,10 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
       setBrands(data || [])
     }
     const fetchTeam = async () => {
-      const { data } = await supabase.from('profiles').select('id, full_name, email').eq('org_id', orgId).order('full_name', { ascending: true })
-      if (data) setTeamMembers(data)
+      // Membership list (org_team) so stacked members (active in another company)
+      // are still assignable. Sorted by name to match the previous dropdown order.
+      const { data } = await supabase.rpc('org_team', { p_org_id: orgId })
+      if (data) setTeamMembers([...data].sort((a, b) => (a.full_name || '').localeCompare(b.full_name || '')))
     }
     fetchCreators()
     fetchBrands()

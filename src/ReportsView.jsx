@@ -65,7 +65,7 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
     const [{ data: camps }, { data: lnks }, { data: mems }] = await Promise.all([
       supabase.from('campaigns').select('*').eq('org_id', orgId).order('created_at', { ascending: false }),
       supabase.from('campaign_creators').select('campaign_id, creator_id'),
-      supabase.from('profiles').select('id, full_name, email, avatar_url').eq('org_id', orgId)
+      supabase.rpc('org_team', { p_org_id: orgId }) // membership list, not active-company profiles (see WorkspaceView)
     ])
     setCampaigns(camps || [])
     setLinks(lnks || [])
