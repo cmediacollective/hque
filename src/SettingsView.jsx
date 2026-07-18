@@ -30,11 +30,6 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
   const [labelSaving, setLabelSaving] = useState(false)
   const [labelSaved, setLabelSaved] = useState(false)
-  // One-time "New" badge on the Workspace Personalization tab (per user, per device).
-  const seenKey = user ? `hque_seen_personalize_${user.id}` : null
-  const [seenPersonalize, setSeenPersonalize] = useState(() => {
-    try { return seenKey ? localStorage.getItem(seenKey) === '1' : true } catch (e) { return true }
-  })
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles', client_label_singular: '', client_label_plural: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
@@ -94,13 +89,6 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     if (openTab) { setActiveTab(openTab); onTabOpened?.() }
   }, [openTab])
 
-  // Clear the "New" badge once they've actually opened the personalization tab.
-  useEffect(() => {
-    if (activeTab === 'personalize' && !seenPersonalize) {
-      setSeenPersonalize(true)
-      try { if (seenKey) localStorage.setItem(seenKey, '1') } catch (e) {}
-    }
-  }, [activeTab])
 
   async function checkPlatformAdmin() {
     const { data } = await supabase.rpc('is_platform_admin')
@@ -380,7 +368,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           style={{ width: '100%', borderRight: mobile ? 'none' : `0.5px solid ${border}`, borderBottom: mobile ? `0.5px solid ${border}` : 'none', padding: '12px 0', display: 'flex', flexDirection: mobile ? 'row' : 'column', overflowX: mobile ? 'auto' : 'visible', scrollbarWidth: 'none' }}>
           {tabs.map(t => {
             const isPersonalize = t.key === 'personalize'
-            const showNew = isPersonalize && !seenPersonalize && Date.now() < PERSONALIZATION_NEW_UNTIL
+            const showNew = isPersonalize && Date.now() < PERSONALIZATION_NEW_UNTIL
             const badge = showNew ? (
               <span style={{ fontSize: '7px', letterSpacing: '0.12em', color: '#fff', background: '#5b7c99', borderRadius: '2px', padding: '2px 5px' }}>New</span>
             ) : null
