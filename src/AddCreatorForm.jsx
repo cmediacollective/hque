@@ -205,7 +205,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
       const { error: err } = await supabase.from('creators').update(buildPayload()).eq('id', existing.id)
       setAutoSaving(false)
       if (err) setError(err.message)
-      else { setAutoSaved(true); setTimeout(() => setAutoSaved(false), 1500) }
+      else { setAutoSaved(true); setTimeout(() => setAutoSaved(false), 2200) }
     }, 800)
     return () => clearTimeout(t)
   }, [form])
@@ -345,8 +345,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'flex-end', marginTop: '28px' }}>
             {editing ? (
               <>
-                <span style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: autoSaved ? '#5C9E52' : muted, minWidth: '70px', textAlign: 'right' }}>
-                  {autoSaving ? 'Saving…' : autoSaved ? '✓ Saved' : dirty ? 'Saved' : ''}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: autoSaved ? '#5C9E52' : muted, minWidth: '104px', justifyContent: 'flex-end' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: autoSaving ? '#E0A93C' : '#5C9E52', flexShrink: 0 }} />
+                  {autoSaving ? 'Auto-saving…' : autoSaved ? 'Auto-saved' : 'Auto-save on'}
                 </span>
                 <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
               </>
