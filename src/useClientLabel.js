@@ -26,6 +26,17 @@ export const CLIENT_LABEL_PRESETS = [
   { singular: 'Month', plural: 'Months' },
 ]
 
+// Turn the singular a user typed into a sensible plural for the section heading,
+// so they only have to type one word. Handles the common English patterns
+// (Category → Categories, Class → Classes, Client → Clients).
+export function pluralize(word) {
+  const w = (word || '').trim()
+  if (!w) return ''
+  if (/[^aeiou]y$/i.test(w)) return w.slice(0, -1) + 'ies'
+  if (/(s|x|z|ch|sh)$/i.test(w)) return w + 'es'
+  return w + 's'
+}
+
 export function useClientLabel(orgId) {
   const [label, setLabel] = useState(DEFAULT_CLIENT_LABEL)
   useEffect(() => {

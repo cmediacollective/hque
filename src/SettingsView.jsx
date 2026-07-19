@@ -5,7 +5,7 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
-import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL } from './useClientLabel'
+import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL, pluralize } from './useClientLabel'
 
 // A transparent version of a hex colour, so the tab-bar fade starts invisible and
 // ends in the page background rather than fading through grey.
@@ -762,9 +762,13 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                     <option value='custom'>Something else…</option>
                   </select>
                   {sel === 'custom' && (
-                    <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-                      {inp({ value: agencyForm.client_label_singular, onChange: e => setAgencyForm(f => ({ ...f, client_label_singular: e.target.value })), placeholder: 'One (e.g. Client)' })}
-                      {inp({ value: agencyForm.client_label_plural, onChange: e => setAgencyForm(f => ({ ...f, client_label_plural: e.target.value })), placeholder: 'Many (e.g. Clients)' })}
+                    <div style={{ marginTop: '8px' }}>
+                      {inp({ value: agencyForm.client_label_singular, onChange: e => { const v = e.target.value; setAgencyForm(f => ({ ...f, client_label_singular: v, client_label_plural: pluralize(v) })) }, placeholder: 'What do you call one? e.g. Client' })}
+                      {agencyForm.client_label_singular?.trim() && (
+                        <div style={{ fontSize: '10.5px', color: subtle, marginTop: '6px' }}>
+                          The section will be titled "<span style={{ color: text }}>{pluralize(agencyForm.client_label_singular)}</span>" and the button will say "<span style={{ color: text }}>+ New {agencyForm.client_label_singular.trim()}</span>".
+                        </div>
+                      )}
                     </div>
                   )}
                   <div style={{ fontSize: '11px', color: subtle, margin: '8px 0 14px', lineHeight: 1.6 }}>
