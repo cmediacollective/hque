@@ -30,6 +30,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [activeTab, setActiveTab] = useState(initialTab || 'profile')
   const [labelSaving, setLabelSaving] = useState(false)
   const [labelSaved, setLabelSaved] = useState(false)
+  // Tracks that the user explicitly chose "Something else…" — needed because the
+  // seeded custom words can still match a preset, which would otherwise snap the
+  // dropdown back and hide the text boxes.
+  const [customLabelMode, setCustomLabelMode] = useState(false)
   const [agencyForm, setAgencyForm] = useState({ agency_name: '', agency_email: '', agency_website: '', agency_logo_url: '', use_agency_logo: false, timezone: 'America/Los_Angeles', client_label_singular: '', client_label_plural: '' })
   const [senderAccounts, setSenderAccounts] = useState([])
   const [newSender, setNewSender] = useState({ label: '', email: '', gmail_index: '0' })
@@ -735,16 +739,20 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               const curS = agencyForm.client_label_singular?.trim() || 'Brand/Client'
               const curP = agencyForm.client_label_plural?.trim() || 'Brands/Clients'
               const idx = CLIENT_LABEL_PRESETS.findIndex(p => p.singular.toLowerCase() === curS.toLowerCase() && p.plural.toLowerCase() === curP.toLowerCase())
-              const sel = idx >= 0 ? String(idx) : 'custom'
+              // Custom mode when they picked "Something else…", or when the saved
+              // word doesn't match any preset.
+              const sel = (customLabelMode || idx < 0) ? 'custom' : String(idx)
               return field('How you group your work',
                 <>
                   <select
                     value={sel}
                     onChange={e => {
                       if (e.target.value === 'custom') {
-                        // Seed the custom inputs from the current words so they aren't blank.
+                        setCustomLabelMode(true)
+                        // Seed the boxes from the current words so they aren't blank.
                         setAgencyForm(f => ({ ...f, client_label_singular: curS, client_label_plural: curP }))
                       } else {
+                        setCustomLabelMode(false)
                         const p = CLIENT_LABEL_PRESETS[Number(e.target.value)]
                         setAgencyForm(f => ({ ...f, client_label_singular: p.singular, client_label_plural: p.plural }))
                       }
