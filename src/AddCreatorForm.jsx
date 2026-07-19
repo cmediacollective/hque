@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import ExpandableTextarea from './ExpandableTextarea'
 import { useTalentLabels } from './useTalentLabels'
@@ -148,13 +148,8 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     setUploadingPhoto(false)
   }
 
-  async function save() {
-    if (!form.name) return setError('Name is required')
-    if (!form.types?.length) return setError('Select at least one type')
-    setSaving(true)
-    setError('')
-
-    const payload = {
+  function buildPayload() {
+    return {
       ...form,
       type: form.types[0],
       ig_followers: form.ig_followers ? parseInt(form.ig_followers) : null,
@@ -176,17 +171,49 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
       },
       org_id: orgId
     }
+  }
 
-    let err
-    if (existing?.id) {
-      ({ error: err } = await supabase.from('creators').update(payload).eq('id', existing.id))
-    } else {
-      ({ error: err } = await supabase.from('creators').insert([payload]))
-    }
-
+  // Manual save — used when ADDING a new talent (there's no row to auto-save to
+  // yet). Editing an existing talent auto-saves (see the effect below).
+  async function save() {
+    if (!form.name) return setError('Name is required')
+    if (!form.types?.length) return setError('Select at least one type')
+    setSaving(true)
+    setError('')
+    const { error: err } = await supabase.from('creators').insert([buildPayload()])
     setSaving(false)
     if (err) return setError(err.message)
     onSaved()
+    onClose()
+  }
+
+  // Auto-save while editing: debounce form changes and quietly persist them.
+  // Skips the first render and any invalid state (name + at least one type).
+  const editing = !!existing?.id
+  const firstRun = useRef(true)
+  const [autoSaving, setAutoSaving] = useState(false)
+  const [autoSaved, setAutoSaved] = useState(false)
+  const [dirty, setDirty] = useState(false)
+  useEffect(() => {
+    if (!editing) return
+    if (firstRun.current) { firstRun.current = false; return }
+    if (!form.name || !form.types?.length) return
+    setDirty(true)
+    const t = setTimeout(async () => {
+      setAutoSaving(true)
+      setError('')
+      const { error: err } = await supabase.from('creators').update(buildPayload()).eq('id', existing.id)
+      setAutoSaving(false)
+      if (err) setError(err.message)
+      else { setAutoSaved(true); setTimeout(() => setAutoSaved(false), 1500) }
+    }, 800)
+    return () => clearTimeout(t)
+  }, [form])
+
+  // Closing after editing: refresh the roster once so it reflects the auto-saved
+  // changes (auto-save itself doesn't refetch, to avoid churn on every keystroke).
+  function handleClose() {
+    if (editing && dirty) onSaved()
     onClose()
   }
 
@@ -202,7 +229,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
         <div style={{ padding: '24px 28px 4px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
           <div style={{ fontSize: '18px', fontWeight: 500, color: text, letterSpacing: '-0.01em', paddingTop: '2px' }}>{existing ? 'Edit Talent' : 'Add Talent'}</div>
-          <button onClick={onClose} title='Close' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
+          <button onClick={handleClose} title='Close' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
         </div>
 
         <div style={{ padding: '8px 28px 28px' }}>
@@ -316,10 +343,21 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginTop: '18px' }}>{error}</div>}
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'flex-end', marginTop: '28px' }}>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
-            <button onClick={save} disabled={saving} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px', opacity: saving ? 0.6 : 1 }}>
-              {saving ? 'Saving…' : existing ? 'Save changes' : 'Save talent'}
-            </button>
+            {editing ? (
+              <>
+                <span style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: autoSaved ? '#5C9E52' : muted, minWidth: '70px', textAlign: 'right' }}>
+                  {autoSaving ? 'Saving…' : autoSaved ? '✓ Saved' : dirty ? 'Saved' : ''}
+                </span>
+                <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
+              </>
+            ) : (
+              <>
+                <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
+                <button onClick={save} disabled={saving} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px', opacity: saving ? 0.6 : 1 }}>
+                  {saving ? 'Saving…' : 'Save talent'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

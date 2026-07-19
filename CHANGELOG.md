@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-19
 
+**Editing a talent now saves automatically.** When you edit an existing talent, your changes save on their own a moment after you stop typing — no need to hit "Save." A small "Saving… / ✓ Saved" indicator shows the status, and a "Done" button closes it. (Adding a brand-new talent still uses a Save button, since there's nothing to save to until it's created.)
+
 **The Talent page loads faster, especially the photos.** Talent photos now **lazy-load** (only the ones you can see download, instead of the whole roster fetching every image at once) and decode off the main thread, so the page feels quick on open and refresh. Fixed an issue where photos re-downloaded every time you hovered a card or typed in search, and the roster's search/filter now recomputes only when something actually changes — so scrolling, hovering, and searching are noticeably snappier.
 
 ---
