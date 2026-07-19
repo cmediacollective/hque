@@ -340,7 +340,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   )
 
   const tabs = [
-    { key: 'profile', label: 'Profile' },
+    { key: 'profile', label: 'My Profile' },
     { key: 'agency', label: 'Agency Info' },
     { key: 'team', label: 'Team' },
     // Workspace Personalization (owner/admin) holds what you call things — your
@@ -415,7 +415,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
         {activeTab === 'profile' && (
           <div>
-            {sectionTitle('Profile')}
+            {sectionTitle('My Profile')}
             <div style={{ padding: '28px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
                 {avatarUrl
