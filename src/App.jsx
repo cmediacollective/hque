@@ -347,7 +347,14 @@ function App() {
         window.CRISP_WEBSITE_ID = undefined
       } catch (e) {}
     }
-    if (!user) { removeCrisp(); return }
+    // Crisp is the logged-in app's support chat. Public/marketing pages (blog,
+    // pricing, talent profiles, apply, legal, etc.) render even while logged in
+    // and show the marketing chat (HQueChat) instead — loading Crisp there too
+    // would stack two chat buttons. So skip Crisp on those routes.
+    const p = (window.location.pathname || '/').replace(/\/+$/, '') || '/'
+    const onPublicPage = ['/sandbox', '/apply', '/updates', '/privacy', '/terms', '/faq', '/pricing', '/blog', '/redeem'].includes(p)
+      || p.startsWith('/blog/') || p.startsWith('/talent/') || (window.location.search || '').includes('agency=')
+    if (!user || onPublicPage) { removeCrisp(); return }
     window.$crisp = []
     window.CRISP_WEBSITE_ID = '0144cb69-1552-4c18-a032-153183d9030f'
     const s = document.createElement('script')
