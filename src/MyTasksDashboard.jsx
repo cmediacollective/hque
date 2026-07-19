@@ -363,6 +363,12 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     const ySpecific = YEAR_HOLIDAYS[year]?.[key]
     if (ySpecific) return ySpecific
 
+    // Today: Spain won the 2026 World Cup (the final was earlier today) — celebrate
+    // it in place of National Ice Cream Day, which also lands on this date.
+    if (year === 2026 && month === 7 && day === 19) {
+      return { greeting: 'Congratulations Spain — World Cup Champions', note: 'Spain are the 2026 FIFA World Cup champions, lifting the trophy today at MetLife Stadium. Enjoy the win — the to-do list can wait a beat.' }
+    }
+
     // 2. Computed US holidays that shift each year
     if (month === 7 && day === nthDowOfMonth(year, 6, 0, 3)) {
       return { greeting: 'Happy National Ice Cream Day', note: 'Did you know? Americans eat an average of 20 pounds of ice cream per person per year. Today, add a little extra.' }
