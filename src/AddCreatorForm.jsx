@@ -229,7 +229,15 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
         <div style={{ padding: '24px 28px 4px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: bg, zIndex: 1 }}>
           <div style={{ fontSize: '18px', fontWeight: 500, color: text, letterSpacing: '-0.01em', paddingTop: '2px' }}>{existing ? 'Edit Talent' : 'Add Talent'}</div>
-          <button onClick={handleClose} title='Close' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {editing && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: autoSaved ? '#5C9E52' : muted, whiteSpace: 'nowrap' }}>
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: autoSaving ? '#E0A93C' : '#5C9E52', flexShrink: 0 }} />
+                {autoSaving ? 'Auto-saving…' : autoSaved ? 'Auto-saved' : 'Auto-save on'}
+              </span>
+            )}
+            <button onClick={handleClose} title='Close' style={{ background: 'none', border: 'none', color: muted, cursor: 'pointer', fontSize: '22px', lineHeight: 1, padding: '4px', opacity: 0.6 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.6'}>×</button>
+          </div>
         </div>
 
         <div style={{ padding: '8px 28px 28px' }}>
@@ -344,13 +352,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'flex-end', marginTop: '28px' }}>
             {editing ? (
-              <>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: autoSaved ? '#5C9E52' : muted, minWidth: '104px', justifyContent: 'flex-end' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: autoSaving ? '#E0A93C' : '#5C9E52', flexShrink: 0 }} />
-                  {autoSaving ? 'Auto-saving…' : autoSaved ? 'Auto-saved' : 'Auto-save on'}
-                </span>
-                <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
-              </>
+              <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
             ) : (
               <>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
