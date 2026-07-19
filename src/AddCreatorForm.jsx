@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import ExpandableTextarea from './ExpandableTextarea'
 import { useTalentLabels } from './useTalentLabels'
@@ -41,6 +41,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     name: '', types: [], tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
+    manager_user_id: null,
     location: '', notes: '', bio: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
     rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' }
@@ -49,6 +50,15 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [uploadingKit, setUploadingKit] = useState(false)
   const [error, setError] = useState('')
+
+  // Team members, for the "Talent manager" picker (who gets this talent's
+  // booking inquiries). Membership list so any real member is selectable.
+  const [teamMembers, setTeamMembers] = useState([])
+  useEffect(() => {
+    const oid = orgId || existing?.org_id
+    if (!oid) return
+    supabase.rpc('org_team', { p_org_id: oid }).then(({ data }) => setTeamMembers(data || []))
+  }, [orgId, existing?.org_id])
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
   const setHandle = (key, val) => setForm(f => ({ ...f, handles: { ...f.handles, [key]: val } }))
@@ -214,6 +224,16 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           </div>
 
           {field('Location', inp({ value: form.location, onChange: e => set('location', e.target.value), placeholder: 'e.g. Los Angeles, CA' }))}
+
+          {field('Talent Manager',
+            <>
+              <select value={form.manager_user_id || ''} onChange={e => set('manager_user_id', e.target.value || null)} onFocus={fieldFocus} onBlur={fieldBlur} style={inputStyle}>
+                <option value=''>Unassigned — inquiries go to the admin team</option>
+                {teamMembers.map(m => <option key={m.id} value={m.id}>{m.full_name || m.email}</option>)}
+              </select>
+              <div style={{ fontSize: '11px', color: muted, opacity: 0.7, marginTop: '6px' }}>Who gets booking inquiries from this talent's public profile.</div>
+            </>
+          )}
           {field('Photo',
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               {form.photo_url && (

@@ -57,6 +57,29 @@ export default function PublicTalentProfile({ slug }) {
   const niches = Array.isArray(creator.niches) ? creator.niches : []
   const initials = creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)
 
+  const fmt = (n) => {
+    const v = parseInt(n) || 0
+    if (v >= 1000000) return (v / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'
+    if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
+    return v ? v.toLocaleString() : null
+  }
+  const handles = creator.handles || {}
+  const stats = [
+    { label: 'Instagram', val: fmt(creator.ig_followers) },
+    { label: 'TikTok', val: fmt(creator.tiktok_followers) },
+    { label: 'YouTube', val: fmt(creator.yt_subscribers) },
+  ].filter(s => s.val)
+  const socials = [
+    handles.instagram && { key: 'instagram', url: `https://instagram.com/${handles.instagram}` },
+    handles.tiktok && { key: 'tiktok', url: `https://tiktok.com/@${handles.tiktok}` },
+    handles.youtube && { key: 'youtube', url: `https://youtube.com/@${handles.youtube}` },
+  ].filter(Boolean)
+  const socialIcon = (key) => {
+    if (key === 'instagram') return <svg width='17' height='17' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><rect x='2' y='2' width='20' height='20' rx='5' /><circle cx='12' cy='12' r='4' /><circle cx='17.5' cy='6.5' r='1' fill='currentColor' stroke='none' /></svg>
+    if (key === 'tiktok') return <svg width='16' height='16' viewBox='0 0 24 24' fill='currentColor'><path d='M16.5 3c.3 2.3 1.7 3.9 4 4.2v2.7c-1.5.1-2.9-.3-4.2-1.1v6.4c0 3.4-2.5 5.8-5.8 5.8-3 0-5.4-2.2-5.4-5.2 0-3.2 2.6-5.4 6-5.1v2.8c-.5-.1-1-.2-1.5-.1-1.3.1-2.1 1-2 2.4.1 1.2 1 2 2.2 2 1.4 0 2.3-1 2.3-2.6V3h2.4Z' /></svg>
+    return <svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='1.8'><rect x='2' y='5' width='20' height='14' rx='4' /><path d='M10 9l5 3-5 3V9Z' fill='currentColor' stroke='none' /></svg>
+  }
+
   return wrap(
     <div style={{ width: '100%', maxWidth: '560px' }}>
       <div style={{ background: '#FFFFFF', border: `0.5px solid ${border}`, borderRadius: '4px', boxShadow: '0 1px 2px rgba(0,0,0,0.04), 0 10px 30px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
@@ -69,7 +92,35 @@ export default function PublicTalentProfile({ slug }) {
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '32px', lineHeight: 1.1, marginBottom: '10px' }}>{creator.name}</div>
 
           {types && (
-            <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: accent, marginBottom: '20px' }}>{types}</div>
+            <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: accent, marginBottom: creator.location ? '10px' : '20px' }}>{types}</div>
+          )}
+
+          {creator.location && (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', color: muted, marginBottom: '20px' }}>
+              <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' style={{ opacity: 0.8 }}><path d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z' /><circle cx='12' cy='10' r='3' /></svg>
+              {creator.location}
+            </div>
+          )}
+
+          {stats.length > 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${stats.length}, 1fr)`, borderTop: `0.5px solid ${border}`, borderBottom: `0.5px solid ${border}`, margin: '4px 0 22px' }}>
+              {stats.map((s, i) => (
+                <div key={s.label} style={{ padding: '15px 6px', borderLeft: i === 0 ? 'none' : `0.5px solid ${border}` }}>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '21px', fontVariantNumeric: 'tabular-nums' }}>{s.val}</div>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#A8A39B', marginTop: '5px' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {socials.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '24px' }}>
+              {socials.map(s => (
+                <a key={s.key} href={s.url} target='_blank' rel='noopener noreferrer' title={s.key} style={{ width: '40px', height: '40px', borderRadius: '50%', border: `0.5px solid ${border}`, color: '#4A4A46', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                  {socialIcon(s.key)}
+                </a>
+              ))}
+            </div>
           )}
 
           {niches.length > 0 && (
