@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-19
+
+**The Talent page loads faster, especially the photos.** Talent photos now **lazy-load** (only the ones you can see download, instead of the whole roster fetching every image at once) and decode off the main thread, so the page feels quick on open and refresh. Fixed an issue where photos re-downloaded every time you hovered a card or typed in search, and the roster's search/filter now recomputes only when something actually changes — so scrolling, hovering, and searching are noticeably snappier.
+
+---
+
 ## 2026-07-18
 
 **Notifications now stay inside the workspace they belong to.** If you belong to more than one company, your notifications no longer cross over. You only see a company's notifications — and its unread count on the bell — while you're actually working in that company. Get assigned a task in your own company and one in a company you were invited to, and each notification shows up only in its own workspace; switch companies to see the other's. "Mark all as read" also only clears the workspace you're currently in. (You still get an email either way, so you know to switch over.)

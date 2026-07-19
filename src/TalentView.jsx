@@ -1,10 +1,29 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
 import { useTalentLabels } from './useTalentLabels'
+
+// Defined at module scope (not inside TalentView) so its component identity is
+// stable — otherwise React remounts every photo on each hover/search keystroke,
+// re-downloading them. The <img> lazy-loads and decodes off the main thread, so
+// off-screen photos don't all fetch at once on load.
+function Avatar({ creator, size, square, dark }) {
+  const border2 = dark ? '#444' : '#CCC7BF'
+  const text = dark ? '#F0ECE6' : '#1A1A1A'
+  if (!creator) return null
+  const r = square ? '2px' : '50%'
+  if (creator.photo_url) {
+    return <img src={creator.photo_url} alt={creator.name} width={size} height={size} loading="lazy" decoding="async" style={{ width: size, height: size, borderRadius: r, objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0, display: 'block', background: dark ? '#2A2A2A' : '#E0DCD6' }} onError={e => e.target.style.display = 'none'} />
+  }
+  return (
+    <div style={{ width: size, height: size, borderRadius: r, background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.28), color: text, flexShrink: 0 }}>
+      {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
+    </div>
+  )
+}
 
 
 function totalFollowers(creator) {
@@ -99,17 +118,20 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     else { setArchiving(null); fetchCreators() }
   }
 
-  const filtered = (typeFilter === 'All Types'
+  // Memoized so it only recomputes when the roster or a filter changes — not on
+  // every keystroke or hover (hover used to re-run this over the whole roster).
+  const filtered = useMemo(() => (typeFilter === 'All Types'
     ? creators
     : creators.filter(c => c.type === typeFilter || (Array.isArray(c.types) && c.types.includes(typeFilter)))
   )
-  .filter(c => !nicheFilter || (Array.isArray(c.niches) && c.niches.includes(nicheFilter)))
-  .filter(c => {
-    if (!search.trim()) return true
-    const q = search.toLowerCase()
-    return c.name?.toLowerCase().includes(q) || c.handles?.instagram?.toLowerCase().includes(q)
-  })
-  .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    .filter(c => !nicheFilter || (Array.isArray(c.niches) && c.niches.includes(nicheFilter)))
+    .filter(c => {
+      if (!search.trim()) return true
+      const q = search.toLowerCase()
+      return c.name?.toLowerCase().includes(q) || c.handles?.instagram?.toLowerCase().includes(q)
+    })
+    .sort((a, b) => (a.name || '').localeCompare(b.name || '')),
+    [creators, typeFilter, nicheFilter, search])
 
   const chip = (label, active, onClick) => (
     <button onClick={onClick} style={{
@@ -126,18 +148,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     }}>{label}</button>
   )
 
-  function Avatar({ creator, size, square }) {
-    if (!creator) return null
-    const r = square ? '2px' : '50%'
-    if (creator.photo_url) {
-      return <img src={creator.photo_url} alt={creator.name} style={{ width: size, height: size, borderRadius: r, objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0, display: 'block' }} onError={e => e.target.style.display = 'none'} />
-    }
-    return (
-      <div style={{ width: size, height: size, borderRadius: r, background: dark ? '#2A2A2A' : '#E0DCD6', border: `0.5px solid ${border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: Math.round(size * 0.28), color: text, flexShrink: 0 }}>
-        {creator.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
-      </div>
-    )
-  }
 
   const displayType = (c) => {
     if (!c) return ''
@@ -264,7 +274,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
 
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
-                <Avatar creator={c} size={isMobile ? 88 : 96} square={true} />
+                <Avatar creator={c} size={isMobile ? 88 : 96} square={true} dark={dark} />
                 <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
@@ -306,7 +316,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
               onMouseLeave={() => setHovering(null)}
               onClick={() => setSelected(c)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <Avatar creator={c} size={40} square={true} />
+                <Avatar creator={c} size={40} square={true} dark={dark} />
                 <div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text }}>{c.name}</div>
                   <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>

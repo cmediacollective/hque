@@ -1,5 +1,11 @@
 [
   {
+    "title": "Faster Talent page, especially photos",
+    "description": "The Talent roster now loads quicker on open and refresh. Photos lazy-load (only what's on screen downloads, not the whole roster at once) and decode off the main thread, they no longer re-download when you hover a card or type in search, and filtering/searching recomputes only when something actually changes — so the page feels noticeably snappier.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-19"
+  },
+  {
     "title": "Notifications stay inside their own workspace",
     "description": "If you belong to more than one company, your notifications no longer cross over. You only see a company's notifications — and its bell count — while you're working in that company; switch companies to see the other's. 'Mark all as read' only clears the workspace you're in. You still get an email either way so you know to switch over.",
     "category": "Improvement",
