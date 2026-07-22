@@ -4,6 +4,20 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-22
+
+**You can now permanently delete a talent.** Open a talent's profile, hit **Edit**, and there's a small red **Delete talent** at the bottom. To prevent accidents, deleting requires typing the talent's exact name to confirm before the **Delete forever** button unlocks — and it only appears when editing an existing talent, never when adding a new one. Deleting also clears that talent's campaign links and outreach history so the removal doesn't get blocked. Archiving is still there for when you only want to hide someone (recoverable), rather than delete for good.
+
+**Talent search now matches name, handle, or location.** The search bar on the Talent page previously only looked at name and Instagram handle. It now also searches TikTok and YouTube handles and the talent's location. The placeholder reads "Search by name, @handle, or location…".
+
+---
+
+## 2026-07-20
+
+**Revoked comps are now tracked (Settings → Comps).** When you revoke someone's free/lifetime access, it used to simply disappear from the list with no record. Comps now has two tabs — **People with free access** and **Revoked** — so you can see who you've revoked and when. Revoking now asks for an optional note (why you're revoking), which is saved with the record. If you ever grant an account access again after revoking it, the history keeps the old revocation and tags it "Re-granted" so nothing gets overwritten. (The account "Quintessential Leverage," revoked earlier today, has been added to the history retroactively.)
+
+---
+
 ## 2026-07-19
 
 **Editing a talent now saves automatically.** When you edit an existing talent, your changes save on their own a moment after you stop typing — no need to hit "Save." A small "Saving… / ✓ Saved" indicator shows the status, and a "Done" button closes it. (Adding a brand-new talent still uses a Save button, since there's nothing to save to until it's created.)

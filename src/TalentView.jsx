@@ -128,7 +128,12 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     .filter(c => {
       if (!search.trim()) return true
       const q = search.toLowerCase()
-      return c.name?.toLowerCase().includes(q) || c.handles?.instagram?.toLowerCase().includes(q)
+      // Search by name, any social handle, or location.
+      return c.name?.toLowerCase().includes(q)
+        || c.handles?.instagram?.toLowerCase().includes(q)
+        || c.handles?.tiktok?.toLowerCase().includes(q)
+        || c.handles?.youtube?.toLowerCase().includes(q)
+        || c.location?.toLowerCase().includes(q)
     })
     .sort((a, b) => (a.name || '').localeCompare(b.name || '')),
     [creators, typeFilter, nicheFilter, search])
@@ -242,7 +247,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
             style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: subtle, pointerEvents: 'none' }}>
             <circle cx='11' cy='11' r='8' /><line x1='21' y1='21' x2='16.65' y2='16.65' />
           </svg>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search by name or @handle...'
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder='Search by name, @handle, or location...'
             onFocus={e => { e.target.style.borderColor = '#5b7c99'; e.target.style.boxShadow = '0 0 0 2px rgba(91,124,153,0.18)' }}
             onBlur={e => { e.target.style.borderColor = border2; e.target.style.boxShadow = dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)' }}
             style={{ width: '100%', background: dark ? '#1A1A1A' : '#FFFFFF', border: `1px solid ${border2}`, borderRadius: '6px', padding: '8px 12px 8px 32px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box', boxShadow: dark ? '0 1px 2px rgba(0,0,0,0.4)' : '0 1px 2px rgba(0,0,0,0.04)', transition: 'border-color 0.15s, box-shadow 0.15s' }} />

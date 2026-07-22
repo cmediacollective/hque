@@ -148,5 +148,35 @@
     "description": "When you start a paid plan, you're prompted to upload your agency logo so your branding is ready from day one.",
     "category": "Improvement",
     "shipped_at": "2026-06-28"
+  },
+  {
+    "title": "Editing a talent now saves automatically",
+    "description": "When you edit an existing talent, your changes save on their own a moment after you stop typing — no need to hit Save. A small indicator shows the status, and a Done button closes the editor.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-19"
+  },
+  {
+    "title": "The Talent page loads faster, especially the photos",
+    "description": "Talent photos now load only as you scroll to them instead of all at once, so the page feels quick to open. Search and filtering are snappier too.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-19"
+  },
+  {
+    "title": "Revoked free and lifetime access is now tracked",
+    "description": "When you revoke someone's free or lifetime access, Comps now keeps a record with the date and an optional note. Settings → Comps has two tabs — People with free access and Revoked — so nothing disappears without a trace.",
+    "category": "Feature",
+    "shipped_at": "2026-07-20"
+  },
+  {
+    "title": "Search talent by name, handle, or location",
+    "description": "The search bar on the Talent page now matches on a talent's name, any social handle (Instagram, TikTok, or YouTube), or their location.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-22"
+  },
+  {
+    "title": "Delete talent permanently",
+    "description": "You can now permanently delete a talent from the edit view of their profile. To prevent accidents, deletion requires typing the talent's exact name to confirm — and archiving is still there when you only want to hide someone.",
+    "category": "Feature",
+    "shipped_at": "2026-07-22"
   }
 ]

@@ -50,6 +50,11 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [uploadingKit, setUploadingKit] = useState(false)
   const [error, setError] = useState('')
+  // Permanent-delete flow: a confirm dialog that only unlocks once the
+  // talent's exact name is typed, so a stray click can never wipe a profile.
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   // Team members, for the "Talent manager" picker (who gets this talent's
   // booking inquiries). Membership list so any real member is selectable.
@@ -217,6 +222,24 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     onClose()
   }
 
+  const nameMatches = deleteText.trim().toLowerCase() === (existing?.name || '').trim().toLowerCase()
+
+  // Permanent delete. Clear the talent's campaign links and outreach history
+  // first so a foreign-key reference can't block the delete, then remove the
+  // talent row. onSaved() closes the panel and refreshes the roster.
+  async function deleteTalent() {
+    if (!existing?.id || !nameMatches) return
+    setDeleting(true)
+    setError('')
+    const id = existing.id
+    await supabase.from('campaign_creators').delete().eq('creator_id', id)
+    await supabase.from('outreach_logs').delete().eq('creator_id', id)
+    const { error: delErr } = await supabase.from('creators').delete().eq('id', id)
+    setDeleting(false)
+    if (delErr) { setError(delErr.message); return }
+    onSaved()
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, background: overlay, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className='atf-modal atf-scroll' style={{ background: bg, border: `1px solid ${fieldBorder}`, width: '580px', maxWidth: '94vw', maxHeight: '88vh', overflowY: 'auto', borderRadius: '12px' }}>
@@ -352,7 +375,10 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center', justifyContent: 'flex-end', marginTop: '28px' }}>
             {editing ? (
-              <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
+              <>
+                <button onClick={() => { setDeleteText(''); setConfirmingDelete(true) }} style={{ marginRight: 'auto', background: 'none', border: 'none', color: danger, fontSize: '12px', cursor: 'pointer', padding: '4px' }}>Delete talent</button>
+                <button onClick={handleClose} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: dark ? '#FFFFFF' : '#1A1A1A', color: dark ? '#111' : '#FFFFFF', border: 'none', cursor: 'pointer', borderRadius: '6px' }}>Done</button>
+              </>
             ) : (
               <>
                 <button onClick={onClose} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '4px' }}>Cancel</button>
@@ -364,6 +390,38 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           </div>
         </div>
       </div>
+
+      {confirmingDelete && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div style={{ background: bg, border: `1px solid ${fieldBorder}`, padding: '32px', width: '100%', maxWidth: '400px', borderRadius: '12px' }}>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', marginBottom: '8px', color: text }}>
+              Delete {existing?.name} forever?
+            </div>
+            <div style={{ fontSize: '12px', color: muted, marginBottom: '20px', lineHeight: 1.5 }}>
+              This permanently removes {existing?.name || 'this talent'} and their campaign links and outreach history. This cannot be undone.
+            </div>
+            <div style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: muted, marginBottom: '8px' }}>
+              Type <span style={{ color: text, fontWeight: 600 }}>{existing?.name}</span> to confirm
+            </div>
+            <input
+              value={deleteText}
+              onChange={e => setDeleteText(e.target.value)}
+              placeholder={existing?.name || ''}
+              autoFocus
+              style={{ ...inputStyle, marginBottom: '20px' }}
+              onFocus={fieldFocus}
+              onBlur={fieldBlur}
+            />
+            {error && <div style={{ fontSize: '12px', color: danger, marginBottom: '14px' }}>{error}</div>}
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button onClick={() => { setConfirmingDelete(false); setDeleteText(''); setError('') }} style={{ background: 'none', border: 'none', color: muted, fontSize: '13px', cursor: 'pointer', padding: '8px 12px' }}>Cancel</button>
+              <button onClick={deleteTalent} disabled={!nameMatches || deleting} style={{ padding: '10px 20px', fontSize: '13px', fontWeight: 500, background: danger, color: '#fff', border: 'none', borderRadius: '6px', cursor: nameMatches && !deleting ? 'pointer' : 'not-allowed', opacity: nameMatches && !deleting ? 1 : 0.45 }}>
+                {deleting ? 'Deleting…' : 'Delete forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
