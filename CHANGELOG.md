@@ -10,6 +10,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 **Talent search now matches name, handle, or location.** The search bar on the Talent page previously only looked at name and Instagram handle. It now also searches TikTok and YouTube handles and the talent's location. The placeholder reads "Search by name, @handle, or location…".
 
+**Clearer help when password sign-in fails.** If email + password sign-in fails, the login page now explains what to do next — sign in with Google, or use a magic link to sign in without a password — instead of only showing the cryptic "Invalid login credentials." This fixes a dead end for accounts created with Google (which have no password), and there's a friendlier message for the "email not confirmed" case too. Reported by a customer (Lois Goloy) via Product Updates.
+
 ---
 
 ## 2026-07-20
