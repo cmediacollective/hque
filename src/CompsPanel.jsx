@@ -21,8 +21,12 @@ export default function CompsPanel({ dark = true }) {
   const [list, setList] = useState(null)          // array of comped accounts
   const [listError, setListError] = useState(null)
   const [revoking, setRevoking] = useState(null)  // org_id currently being revoked
+  const [tab, setTab] = useState('active')        // 'active' | 'revoked'
+  const [revoked, setRevoked] = useState(null)    // revocation history
+  const [revokedError, setRevokedError] = useState(null)
 
   useEffect(() => { loadList() }, [])
+  useEffect(() => { if (tab === 'revoked' && revoked === null) loadRevoked() }, [tab])
 
   async function loadList() {
     setListError(null)
@@ -38,7 +42,26 @@ export default function CompsPanel({ dark = true }) {
     setList(data || [])
   }
 
+  async function loadRevoked() {
+    setRevokedError(null)
+    const { data, error } = await supabase.rpc('list_revoked_accounts')
+    if (error) {
+      const notFound = error.code === 'PGRST202' || /could not find the function/i.test(error.message || '')
+      setRevokedError(notFound
+        ? 'The revoked list isn’t set up in the database yet — the one-time SQL step still needs to be run.'
+        : `Couldn’t load the list: ${error.message || 'unknown error'}`)
+      setRevoked([])
+      return
+    }
+    setRevoked(data || [])
+  }
+
   const planLabel = (p) => p === 'agency' ? 'Business' : p === 'pro' ? 'Pro' : p === 'starter' ? 'Starter' : '—'
+  const dateLabel = (ts) => {
+    if (!ts) return '—'
+    const d = new Date(ts)
+    return isNaN(d) ? '—' : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+  }
 
   async function grant() {
     const e = email.trim()
@@ -83,13 +106,17 @@ export default function CompsPanel({ dark = true }) {
       ? `⚠️ ${who} redeemed an AppSumo code — this is access they paid for. Revoking will lock them out. Are you absolutely sure?`
       : `Revoke free access for ${who}? They'll lose Business access and be moved to the upgrade screen until they subscribe.`
     if (!window.confirm(warn)) return
+    // Optional note, kept with the revocation record. Cancel here still revokes —
+    // only the confirm above decides that — so treat null as "no reason given".
+    const reason = window.prompt(`Why are you revoking ${who}? (optional — leave blank to skip)`, '') || ''
     setRevoking(row.org_id)
     try {
-      const { data, error } = await supabase.rpc('revoke_lifetime_access', { p_org: row.org_id })
+      const { data, error } = await supabase.rpc('revoke_lifetime_access', { p_org: row.org_id, p_reason: reason })
       if (error || !data?.ok) {
         window.alert(error ? `Couldn’t revoke access: ${error.message || 'unknown error'}` : 'Couldn’t revoke access. Please try again.')
       } else {
         loadList()
+        setRevoked(null)          // history changed — reload it next time the tab opens
       }
     } catch (err) {
       window.alert('Couldn’t reach the server. Please try again.')
@@ -126,8 +153,20 @@ export default function CompsPanel({ dark = true }) {
         {result && <div style={{ marginTop: '14px', fontSize: '12px', lineHeight: 1.6, color: result.ok ? '#5C9E52' : '#C77B5B' }}>{result.msg}</div>}
       </div>
 
-      {/* List */}
-      <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '32px 0 14px' }}>People with free access</div>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '20px', margin: '32px 0 14px', alignItems: 'center' }}>
+        {[['active', 'People with free access'], ['revoked', 'Revoked']].map(([key, label]) => (
+          <button key={key} onClick={() => setTab(key)} style={{
+            background: 'none', border: 'none', padding: '0 0 4px', cursor: 'pointer',
+            fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase',
+            color: tab === key ? '#5b7c99' : subtle,
+            borderBottom: tab === key ? '1px solid #5b7c99' : '1px solid transparent',
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Active list */}
+      {tab === 'active' && (
       <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 0' }}>
         {list === null && <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '16px 24px' }}>Loading…</div>}
         {list && listError && <div style={{ fontSize: '12px', color: '#C77B5B', padding: '16px 24px', lineHeight: 1.6 }}>{listError}</div>}
@@ -150,6 +189,31 @@ export default function CompsPanel({ dark = true }) {
           </div>
         ))}
       </div>
+      )}
+
+      {/* Revoked history */}
+      {tab === 'revoked' && (
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 0' }}>
+        {revoked === null && <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '16px 24px' }}>Loading…</div>}
+        {revoked && revokedError && <div style={{ fontSize: '12px', color: '#C77B5B', padding: '16px 24px', lineHeight: 1.6 }}>{revokedError}</div>}
+        {revoked && !revokedError && revoked.length === 0 && <div style={{ fontSize: '12px', color: muted, padding: '16px 24px' }}>No revocations yet. When you revoke an account it’ll be recorded here.</div>}
+        {revoked && !revokedError && revoked.map(row => (
+          <div key={row.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderTop: `0.5px solid ${border}`, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: '180px' }}>
+              <div style={{ fontSize: '13px', color: text, marginBottom: '3px' }}>{row.org_name || 'Untitled workspace'}</div>
+              <div style={{ fontSize: '11px', color: subtle }}>{row.owner_email || '—'}</div>
+              {row.reason && <div style={{ fontSize: '11px', color: muted, marginTop: '4px', lineHeight: 1.5, fontStyle: 'italic' }}>{row.reason}</div>}
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+              {badge(planLabel(row.plan), accent)}
+              {badge(row.source === 'AppSumo' ? 'AppSumo' : 'Comp', row.source === 'AppSumo' ? '#C7A15B' : '#5C9E52')}
+              {row.currently_lifetime && badge('Re-granted', '#5C9E52')}
+            </div>
+            <div style={{ fontSize: '11px', color: subtle, whiteSpace: 'nowrap' }}>{dateLabel(row.revoked_at)}</div>
+          </div>
+        ))}
+      </div>
+      )}
     </div>
   )
 }
