@@ -282,50 +282,68 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     return 1 + offset + (n - 1) * 7
   }
 
-  // Everyday rotating notes — leaning pop culture, film, music, TV, sports, and
-  // internet lore. Playful, accurate, and off the politics.
+  // Everyday rotating notes — leaning entertainment: behind-the-scenes movie
+  // lore, music records, TV, and pop culture. Playful, accurate, off the politics.
   const FUN_NOTES = [
+    // — Movie magic & behind the scenes —
+    'The rain of green code in "The Matrix" is actually sushi recipes from a Japanese cookbook.',
+    'The whip-vs-swordsman scene in "Raiders of the Lost Ark" was improvised — Harrison Ford was too sick to film the planned fight.',
+    'The chestburster scene in "Alien" (1979) was kept from the cast — their horrified reactions were completely real.',
+    'The DeLorean in "Back to the Future" was almost a refrigerator, until the crew worried kids would climb into fridges.',
+    'Anthony Hopkins is on screen for only about 16 minutes in "The Silence of the Lambs" — and still won Best Actor.',
+    'The mechanical shark in "Jaws" broke down so often that Spielberg mostly hid it — which made the movie far scarier.',
+    'Darth Vader\'s body was played by bodybuilder David Prowse, but James Earl Jones dubbed the voice.',
+    'Marlon Brando stuffed his cheeks with cotton for his "Godfather" audition to sound like a bulldog.',
+    'The "Psycho" shower scene took 78 camera setups for 45 seconds of film — and the knife never once touches skin.',
+    'Sean Connery wore a toupee in every single James Bond film.',
+    'The T. rex roar in "Jurassic Park" is a blend of a baby elephant, a tiger, and an alligator.',
+    'Alfred Hitchcock snuck a quick cameo of himself into nearly all of his films.',
     'Toy Story (1995) was the first feature film made entirely with computer animation.',
-    'The Beatles still hold the record for the most #1 singles on the Billboard Hot 100.',
-    'The Simpsons is the longest-running scripted primetime show in US history.',
-    "The first-ever YouTube video, 'Me at the zoo,' is just 18 seconds long (2005).",
-    'Jaws basically invented the summer blockbuster back in 1975.',
-    'Honey never spoils. Neither do great creative briefs.',
-    'A basketball hoop has been exactly 10 feet high since the game was invented in 1891.',
-    'Beyoncé has won more Grammy Awards than any artist in history.',
-    "Netflix started out mailing DVDs in little red envelopes.",
-    "The 'Wilhelm scream' sound effect has turned up in hundreds of movies since 1951.",
-    'Michael Jackson\'s "Thriller" is the best-selling album of all time.',
-    'Avatar and Titanic — the biggest films of their eras — share the same director.',
-    "Golf is the only sport that's been played on the surface of the Moon.",
-    "Friends was filmed in front of a live studio audience for all 10 seasons.",
-    'The 2026 World Cup is the first ever with 48 teams — and the first co-hosted by three countries.',
+    'Pixar\'s hopping desk lamp, "Luxo Jr.," dates to 1986 and became the studio\'s logo.',
+    'The "Wilhelm scream" sound effect has turned up in hundreds of movies since 1951.',
     "The Hollywood sign originally read 'HOLLYWOODLAND.'",
     "Star Wars came out in 1977 as just 'Star Wars' — the 'Episode IV' subtitle was added later.",
-    'The NBA\'s 24-second shot clock, added in 1954, saved the game from stalling out.',
-    "The first text message ever sent, in 1992, simply said 'Merry Christmas.'",
-    'The M*A*S*H finale in 1983 was watched by over 100 million Americans.',
-    'Video games are now a bigger industry than film and recorded music combined.',
-    'Tennis scoring — 15, 30, 40 — has an origin nobody has fully explained.',
-    'The Oscar statuette is 13.5 inches tall and gold-plated.',
-    "'Happy Birthday' was under copyright until 2016 — films used to pay to use it.",
-    'The Stanley Cup has its own full-time keeper who travels with it year-round.',
     'The first film to win Best Picture, "Wings" (1929), was a silent movie.',
-    'The Olympic rings use five colors so that every national flag shares at least one.',
-    'A vinyl record is one single continuous groove, spiraling inward.',
-    'The @ symbol was picked for email in 1971 because almost nobody else was using it.',
-    'Pixar\'s hopping desk lamp, "Luxo Jr.," dates to 1986 and became the studio\'s logo.',
-    'The inventor of the Frisbee was cremated and made into a Frisbee.',
-    'A "jiffy" is a real unit of time: about 1/100th of a second.',
-    'The clapperboard\'s snap is what lets editors line up picture and sound.',
+    'Avatar and Titanic — the biggest films of their eras — share the same director.',
+    'Jaws basically invented the summer blockbuster back in 1975.',
+    // — Music —
+    'Dolly Parton wrote "Jolene" and "I Will Always Love You" on the very same day.',
+    'Queen\'s "Bohemian Rhapsody" has no chorus, runs nearly six minutes, and the label swore it\'d never get radio play.',
+    'Prince played 27 different instruments himself on his debut album.',
+    'Sia wrote Rihanna\'s "Diamonds" in about 14 minutes.',
+    'The Beatles still hold the record for the most #1 singles on the Billboard Hot 100.',
+    'Beyoncé has won more Grammy Awards than any artist in history.',
+    'Michael Jackson\'s "Thriller" is the best-selling album of all time.',
+    "'Happy Birthday' was under copyright until 2016 — films used to pay to use it.",
+    'A vinyl record is one single continuous groove, spiraling all the way in.',
+    // — TV —
+    'Bob Ross painted every scene three times per episode: one before, one on air, and a detailed one for the how-to book.',
+    'Every episode of "Seinfeld" hides a Superman somewhere on the set.',
+    'SpongeBob\'s creator, Stephen Hillenburg, was a marine biologist before he was an animator.',
+    'The Simpsons is the longest-running scripted primetime show in US history.',
+    "Friends was filmed in front of a live studio audience for all 10 seasons.",
+    'The M*A*S*H finale in 1983 was watched by over 100 million Americans.',
+    "Netflix started out mailing DVDs in little red envelopes.",
+    // — Games & internet —
+    'Nintendo got its start back in 1889 — making playing cards.',
+    'Pac-Man\'s shape was inspired by a pizza with one slice missing.',
+    'Minecraft is the best-selling video game of all time.',
+    'Video games now out-earn film and recorded music combined.',
+    "The first-ever YouTube video, 'Me at the zoo,' is just 18 seconds long (2005).",
+    "The first text message ever sent, in 1992, simply said 'Merry Christmas.'",
     "The word 'emoji' comes from Japanese for 'picture' + 'character' — not from 'emotion.'",
-    'Bubble wrap was originally invented as wallpaper.',
-    'The most-followed people on social media are almost all athletes and pop stars.',
-    'The first domain ever registered was symbolics.com, in 1985.',
-    'A soccer pitch has no single official size — the rules allow a whole range.',
-    "There's a word for the smell of rain: petrichor.",
+    // — Awards, sports & delightfully weird —
     'The Grammys, Oscars, Emmys, and Tonys together make up the "EGOT" — only a handful of people have all four.',
+    'The Oscar statuette is 13.5 inches tall and gold-plated.',
+    'The inventor of the Frisbee was cremated and molded into a Frisbee.',
+    'The man who invented the Pringles can is buried in one.',
+    "Golf is the only sport that's been played on the surface of the Moon.",
+    'A basketball hoop has been exactly 10 feet high since the game was invented in 1891.',
+    'The Stanley Cup has its own full-time keeper who travels with it year-round.',
     'The Super Bowl halftime show sometimes pulls a bigger audience than the game itself.',
+    'Bubble wrap was originally invented as wallpaper.',
+    'Honey never spoils. Neither do great creative briefs.',
+    "There's a word for the smell of rain: petrichor.",
     'The dot over a lowercase i or j is called a tittle.'
   ]
 
@@ -391,9 +409,9 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
     const g = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
     const custom = CUSTOM_NOTES[year]?.[key]
     if (custom) return { greeting: g, intro: custom.intro, note: custom.note }
-    const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 0))
-    const dayOfYear = Math.floor((now - start) / 86400000)
-    return { greeting: g, note: FUN_NOTES[dayOfYear % FUN_NOTES.length] }
+    // Rotate the fun fact every 10 hours (not just once a day).
+    const tenHourBlock = Math.floor(now.getTime() / (10 * 60 * 60 * 1000))
+    return { greeting: g, note: FUN_NOTES[tenHourBlock % FUN_NOTES.length] }
   })()
   const dateLabel = (() => {
     try {

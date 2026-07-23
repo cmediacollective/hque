@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-23
+
+**Fresher, more fun "Did you know?" facts — and they change every 10 hours.** The dashboard greeting's trivia got a refresh: more entertaining, behind-the-scenes movie and music lore (the code rain in "The Matrix" is sushi recipes, the "Jaws" shark kept breaking down, Dolly Parton wrote two classics in one day) in place of the drier ones. They now rotate every 10 hours instead of once a day, so you'll see something new more often.
+
+---
+
 ## 2026-07-22
 
 **You can now permanently delete a talent.** Open a talent's profile, hit **Edit**, and there's a small red **Delete talent** at the bottom. To prevent accidents, deleting requires typing the talent's exact name to confirm before the **Delete forever** button unlocks — and it only appears when editing an existing talent, never when adding a new one. Deleting also clears that talent's campaign links and outreach history so the removal doesn't get blocked. Archiving is still there for when you only want to hide someone (recoverable), rather than delete for good.
