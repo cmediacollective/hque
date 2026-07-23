@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 
+// Turn the auth system's terse errors into something actionable. The most
+// common one — "Invalid login credentials" — is what Google-created accounts
+// (no password set) always get on password sign-in, which leaves people stuck.
+function friendlyAuthError(msg) {
+  const m = (msg || '').toLowerCase()
+  if (m.includes('invalid login credentials'))
+    return "That email and password don't match. If you signed up with Google, use “Continue with Google” above. Or use “Send magic link instead” to sign in without a password."
+  if (m.includes('email not confirmed'))
+    return 'Please confirm your email first — check your inbox for the confirmation link we sent when you signed up.'
+  return msg || 'Something went wrong. Please try again.'
+}
+
 export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,7 +43,7 @@ export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
     setError('')
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
-    if (error) return setError(error.message)
+    if (error) return setError(friendlyAuthError(error.message))
     onLogin(data.user)
   }
 
@@ -41,7 +53,7 @@ export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
     setError('')
     const { error } = await supabase.auth.signInWithOtp({ email })
     setLoading(false)
-    if (error) return setError(error.message)
+    if (error) return setError(friendlyAuthError(error.message))
     setMagicSent(true)
   }
 
@@ -51,7 +63,7 @@ export default function Login({ onLogin, onShowSignUp, agencySlug = null }) {
       provider: 'google',
       options: { redirectTo: 'https://h-que.com' }
     })
-    if (error) { setError(error.message); setLoading(false) }
+    if (error) { setError(friendlyAuthError(error.message)); setLoading(false) }
   }
 
   const inputStyle = { width: '100%', background: '#141414', border: '0.5px solid #2A2A2A', borderRadius: '1px', padding: '10px 12px', fontSize: '13px', color: '#F2EEE8', outline: 'none', boxSizing: 'border-box' }
