@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-23
 
+**"Musician" is now one of the default talent Types.** It's been added to the master default list every new company starts with, and it's been added to every existing company's own Types list too (appended at the end, so nothing you've customized moved). You can rename, reorder, or remove it like any other label under Settings → Talent Labels.
+
 **Fresher, more fun "Did you know?" facts — and they change every 10 hours.** The dashboard greeting's trivia got a refresh: more entertaining, behind-the-scenes movie and music lore (the code rain in "The Matrix" is sushi recipes, the "Jaws" shark kept breaking down, Dolly Parton wrote two classics in one day) in place of the drier ones. They now rotate every 10 hours instead of once a day, so you'll see something new more often.
 
 ---
