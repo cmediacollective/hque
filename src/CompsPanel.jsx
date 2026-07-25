@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { fieldLabelStyle } from './uiStyles'
 
 // Master-admin "Comps" panel (Settings → Comps). Grant someone free, permanent
 // Business access, see everyone who currently has comped/lifetime access, and
@@ -161,8 +162,8 @@ export default function CompsPanel({ dark = true }) {
       <div style={{ display: 'flex', gap: '20px', margin: '32px 0 14px', alignItems: 'center' }}>
         {[['active', 'People with free access'], ['revoked', 'Revoked']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
+            ...fieldLabelStyle(dark),
             background: 'none', border: 'none', padding: '0 0 4px', cursor: 'pointer',
-            fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase',
             color: tab === key ? '#5b7c99' : subtle,
             borderBottom: tab === key ? '1px solid #5b7c99' : '1px solid transparent',
           }}>{label}</button>

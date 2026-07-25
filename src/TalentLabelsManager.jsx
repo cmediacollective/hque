@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
+import { fieldLabelStyle } from './uiStyles'
 
 // Settings > Talent Labels — lets a company customize its own Type and Niche
 // lists. Reads org_talent_labels; all writes go through the SECURITY DEFINER
@@ -77,7 +78,7 @@ export default function TalentLabelsManager({ orgId, dark, colors, mode = 'compa
     persistOrder(kind, arr)
   }
 
-  const eyebrow = { fontSize: '8px', letterSpacing: '0.26em', textTransform: 'uppercase', color: subtle }
+  const eyebrow = fieldLabelStyle(dark)
   const chipStyle = { display: 'inline-flex', alignItems: 'center', gap: '6px', background: card, border: `0.5px solid ${border2}`, borderRadius: '999px', padding: '6px 8px 6px 8px', fontSize: '12px', color: text }
 
   function chip(kind, label) {
@@ -113,7 +114,7 @@ export default function TalentLabelsManager({ orgId, dark, colors, mode = 'compa
     const inputKey = kind === 'type' ? 'type' : 'niche'
     return (
       <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '20px', marginTop: '20px' }}>
-        <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: text, fontWeight: 600, marginBottom: '3px' }}>{title}</div>
+        <div style={{ ...fieldLabelStyle(dark), color: text, fontWeight: 600, marginBottom: '3px' }}>{title}</div>
         <div style={{ fontSize: '12px', color: subtle, marginBottom: '14px' }}>{hint}</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           {list.map(l => chip(kind, l))}

@@ -6,6 +6,7 @@ import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
 import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL, pluralize } from './useClientLabel'
+import { fieldLabelStyle } from './uiStyles'
 
 // A transparent version of a hex colour, so the tab-bar fade starts invisible and
 // ends in the page background rather than fading through grey.
@@ -355,9 +356,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   // to everyone across the agency, so admins can view but not change it.
   const canEditTimezone = currentUserRole === 'owner'
 
-  // Shared field-label style for every Settings form field. Bumped up from the
-  // old 7px/#888 so labels are actually readable; theme-aware for dark mode.
-  const labelStyle = { fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase', color: dark ? '#AAAAAA' : '#5A5A5A' }
+  // Shared field-label style (see src/uiStyles.js) so every Settings label —
+  // and Billing / Comps / Talent Labels / Product Updates — stays in sync.
+  const labelStyle = fieldLabelStyle(dark)
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
       <div style={{ ...labelStyle, marginBottom: '6px' }}>{label}</div>
@@ -374,7 +375,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   )
 
   const sectionDivider = (t) => (
-    <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '24px 0 14px' }}>{t}</div>
+    <div style={{ ...fieldLabelStyle(dark), color: '#5b7c99', margin: '24px 0 14px' }}>{t}</div>
   )
 
   // A grouped card + a bold section heading, so long forms read as tidy sections
@@ -684,7 +685,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <button
                 onClick={() => setShowRoleHelp(v => !v)}
                 style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                <span style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle }}>Role Descriptions</span>
+                <span style={labelStyle}>Role Descriptions</span>
                 <span style={{ fontSize: '9px', color: subtle, marginLeft: 'auto' }}>{showRoleHelp ? '−' : '+'}</span>
               </button>
 
@@ -715,7 +716,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
               <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
+                <div style={{ ...labelStyle, marginBottom: '12px' }}>Invite a team member</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
                   <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} title='Access level for this person' style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 10px', fontSize: '12px', color: text, outline: 'none', cursor: 'pointer', flexShrink: 0 }}>

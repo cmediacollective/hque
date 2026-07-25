@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { fieldLabelStyle } from './uiStyles'
 
 // Admin manager for the public roadmap, embedded in Settings > Product Updates.
 // Only platform admins reach this (gated in SettingsView + enforced by RLS).
@@ -134,7 +135,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
 
   const inputStyle = { width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }
   const selectStyle = { background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '5px 8px', fontSize: '11px', color: text, outline: 'none' }
-  const labelStyle = { fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }
+  const labelStyle = { ...fieldLabelStyle(dark), marginBottom: '6px' }
   const btn = (bg) => ({ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: bg, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' })
 
   // Non-master users (owners, admins, members, customers) get a read-only roadmap.

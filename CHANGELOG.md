@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**Readable labels across every Settings tab.** Extended the bigger, darker field-label style to the tabs that were still using the old tiny/faint one — Team ("Role Descriptions," "Invite a Team Member"), Billing (plan names, "Current Plan," "Danger zone"), Comps (the "People with free access" / "Revoked" tabs), Default Labels, Workspace Personalization, and Product Updates. They all now pull from a single shared style, so the labels stay consistent and can be tweaked in one place going forward instead of drifting apart. Labels that are intentionally colored (a blue active tab, the red "Danger zone") keep their color — just bigger and easier to read.
+
 **Settings field labels are readable now.** The little uppercase labels on Settings forms (Website, Timezone, Agency Logo, Email Notifications, etc.) were tiny and faint (7px, light gray). They're now larger (11px), darker for better contrast, and less stretched — much easier to read. Applied in one shared place so every field label across Settings updates consistently.
 
 **Agency Info, Workspace Personalization, and Default Labels are organized into cards.** These three Settings screens used to be one long plain form. Now related settings are grouped into clean cards — for Agency Info: "Agency Details" (name, email, website, timezone), "Branding" (logo, what's shown, login page), and "Sender Email Accounts." Section headings are now clearly bigger/bolder than field labels so the hierarchy reads at a glance, the input boxes are rounded and white to match the rest of the app, and short fields like Website and Timezone sit side by side to cut down on scrolling.

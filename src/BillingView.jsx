@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { PLANS } from './plans'
+import { fieldLabelStyle } from './uiStyles'
 
 export default function BillingView({ dark = true, orgId, user }) {
   const card = dark ? '#222' : '#FFFFFF'
@@ -12,6 +13,7 @@ export default function BillingView({ dark = true, orgId, user }) {
   const cardShadow = dark
     ? '0 1px 3px rgba(0,0,0,0.45)'
     : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
+  const labelStyle = fieldLabelStyle(dark)
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
@@ -173,7 +175,7 @@ export default function BillingView({ dark = true, orgId, user }) {
       {currentPlan && (
         <div style={{ background: card, border: `0.5px solid #5b7c99`, borderRadius: '6px', boxShadow: cardShadow, padding: '20px 24px', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>Current Plan</div>
+            <div style={{ ...labelStyle, marginBottom: '4px' }}>Current Plan</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>{currentPlan.name} — {currentPlan.price}{currentPlan.period}</div>
           </div>
           <button onClick={openPortal} disabled={portalLoading} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', opacity: portalLoading ? 0.7 : 1 }}>
@@ -192,7 +194,7 @@ export default function BillingView({ dark = true, orgId, user }) {
 
       {pendingPlan && (
         <div style={{ background: card, border: '0.5px solid #5b7c99', borderRadius: '6px', boxShadow: cardShadow, padding: '20px 24px', marginBottom: '24px' }}>
-          <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>One quick step</div>
+          <div style={{ ...labelStyle, marginBottom: '8px' }}>One quick step</div>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '6px' }}>Add your agency logo to continue</div>
           <div style={{ fontSize: '12px', color: muted, lineHeight: 1.6, marginBottom: '16px', maxWidth: '460px' }}>
             Your logo powers your branded login page and white-label workspace. Upload it once here to start your {pendingPlan.name} plan.
@@ -226,7 +228,7 @@ export default function BillingView({ dark = true, orgId, user }) {
                 Current Plan
               </div>
             )}
-            <div style={{ fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '12px' }}>{plan.name}</div>
+            <div style={{ ...labelStyle, marginBottom: '12px' }}>{plan.name}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '3px', marginBottom: '28px' }}>
               <span style={{ fontFamily: 'Georgia, serif', fontSize: '36px', color: text }}>{plan.price}</span>
               <span style={{ fontSize: '12px', color: muted }}>{plan.period}</span>
@@ -262,7 +264,7 @@ export default function BillingView({ dark = true, orgId, user }) {
 
       {/* Danger zone — cancelling and closing are deliberately different things:
           cancelling stops the billing and keeps the data; closing wipes it. */}
-      <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#C77B5B', margin: '48px 0 14px' }}>Danger zone</div>
+      <div style={{ ...labelStyle, color: '#C77B5B', margin: '48px 0 14px' }}>Danger zone</div>
       <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow }}>
 
         {/* Cancel plan (nothing to cancel on a lifetime/comped account) */}
