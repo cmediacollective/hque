@@ -6,6 +6,8 @@ import MyTasksDashboard from './MyTasksDashboard'
 import BrandNotes from './BrandNotes'
 import { useClientLabel } from './useClientLabel'
 import { createNotification, parseMentions, addTaskWatchers } from './notify'
+import { cacheGet, cacheSet } from './dataCache'
+import { BoardSkeleton } from './Skeletons'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
@@ -207,6 +209,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [taskSort, setTaskSort] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('hque.taskSort')) || 'created')
   useEffect(() => { try { localStorage.setItem('hque.taskSort', taskSort) } catch (_) {} }, [taskSort])
   const [tasks, setTasks] = useState([])
+  // True once the active board's columns AND tasks have arrived (from network or
+  // cache). Until then we show a board skeleton instead of empty columns, so a
+  // board never flashes a false "no tasks" state while it's still loading.
+  const [boardReady, setBoardReady] = useState(false)
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('kanban')
   const [showNewTask, setShowNewTask] = useState(null)
@@ -242,12 +248,19 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }, [selectedBrand?.id, userId, showNotes])
 
   useEffect(() => {
-    if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); return }
+    if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); setBoardReady(false); return }
     findOrCreateBoardForBrand(selectedBrand)
   }, [selectedBrand?.id])
 
   useEffect(() => {
-    if (activeBoard) { fetchColumns(); fetchTasks() }
+    if (!activeBoard) { setBoardReady(false); return }
+    // Seed instantly from the per-board cache (columns + tasks) so re-opening a
+    // board doesn't flash empty; then refresh both in the background.
+    const cc = cacheGet(`wscols:${activeBoard.id}`)
+    const ct = cacheGet(`wstasks:${activeBoard.id}`)
+    if (cc && ct) { setColumns(cc); setTasks(ct); setBoardReady(true) }
+    else setBoardReady(false)
+    fetchColumns(); fetchTasks()
   }, [activeBoard?.id])
 
   // Refresh after the tab regains focus from a long absence — re-pull the
@@ -332,18 +345,23 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }
 
   async function fetchColumns() {
-    const { data } = await supabase.from('board_columns').select('*').eq('board_id', activeBoard.id).order('position')
+    const boardId = activeBoard.id
+    const { data } = await supabase.from('board_columns').select('*').eq('board_id', boardId).order('position')
     setColumns(data || [])
+    cacheSet(`wscols:${boardId}`, data || [])
   }
 
   async function fetchTasks() {
-    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').eq('board_id', activeBoard.id).order('position')
+    const boardId = activeBoard.id
+    const { data } = await supabase.from('tasks').select('*, task_assignees(user_id), task_watchers(user_id)').eq('board_id', boardId).order('position')
     const enriched = (data || []).map(t => ({
       ...t,
       assignee_ids: (t.task_assignees || []).map(r => r.user_id),
       watcher_ids: (t.task_watchers || []).map(r => r.user_id)
     }))
     setTasks(enriched)
+    cacheSet(`wstasks:${boardId}`, enriched)
+    setBoardReady(true)
   }
 
   async function syncAssignees(taskId, newIds, taskTitle) {
@@ -583,7 +601,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, lineHeight: 1.2 }}>{selectedBrand.name}</div>
                 <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.14em', marginTop: '3px' }}>
-                  {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                  {boardReady ? `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}` : '…'}
                   {selectedBrand.website && (<> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>)}
                 </div>
               </div>
@@ -625,9 +643,9 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               </div>
             </div>
 
-            {loading && (<div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>)}
+            {(loading || !boardReady) && <BoardSkeleton dark={dark} />}
 
-            {!loading && viewMode === 'kanban' && (
+            {!loading && boardReady && viewMode === 'kanban' && (
               <div style={{ display: 'flex', gap: '14px', background: bg, flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '14px 16px' }}>
                 {columns.map(col => {
                   const accent = columnAccent(col.name)
@@ -719,7 +737,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               </div>
             )}
 
-            {!loading && viewMode === 'list' && (
+            {!loading && boardReady && viewMode === 'list' && (
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px' }}>
                 {columns.map(col => (
                   <div key={col.id} style={{ marginBottom: '24px' }}>

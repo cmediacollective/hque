@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
+import { useCachedResource } from './useCachedResource'
+import { ListSkeleton } from './Skeletons'
 
 export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -10,8 +12,6 @@ export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) 
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
 
-  const [inquiries, setInquiries] = useState([])
-  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('pending')
   const [selected, setSelected] = useState(null)
   const [processing, setProcessing] = useState(null)
@@ -19,21 +19,27 @@ export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) 
   const [orgName, setOrgName] = useState('')
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => { fetchInquiries(); fetchOrg() }, [filter])
-  // Refresh after the tab regains focus from a long absence.
-  useEffect(() => { if (focusVersion > 0) fetchInquiries() }, [focusVersion])
-
-  async function fetchInquiries() {
-    setLoading(true)
-    const { data } = await supabase
+  // Inquiries load through a cached, stale-while-revalidate resource keyed by
+  // org + filter tab, so switching Pending/Approved/Declined (or revisiting)
+  // paints from cache and refetches silently — no empty flash.
+  const inqKey = orgId ? `inquiries:${orgId}:${filter}` : null
+  const { data: inquiriesData, status, refetch } = useCachedResource(inqKey, async () => {
+    const { data, error } = await supabase
       .from('talent_inquiries')
       .select('*')
       .eq('org_id', orgId)
       .eq('status', filter)
       .order('created_at', { ascending: false })
-    setInquiries(data || [])
-    setLoading(false)
-  }
+    if (error) throw error
+    return data || []
+  })
+  const inquiries = inquiriesData || []
+  const loading = status === 'loading'
+  const fetchInquiries = refetch
+
+  useEffect(() => { fetchOrg() }, [filter]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Refresh after the tab regains focus from a long absence (silent background).
+  useEffect(() => { if (focusVersion > 0) refetch() }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function fetchOrg() {
     const { data } = await supabase.from('organizations').select('slug, name').eq('id', orgId).single()
@@ -140,9 +146,16 @@ export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) 
           </div>
         </div>
 
-        {loading && <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>}
+        {loading && <ListSkeleton dark={dark} rows={5} />}
 
-        {!loading && inquiries.length === 0 && (
+        {status === 'error' && (
+          <div style={{ padding: '60px 28px', textAlign: 'center' }}>
+            <div style={{ fontSize: '12px', color: muted, marginBottom: '12px' }}>Couldn't load inquiries.</div>
+            <button onClick={() => refetch()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}>Retry</button>
+          </div>
+        )}
+
+        {status === 'success' && inquiries.length === 0 && (
           <div style={{ padding: '80px 28px', textAlign: 'center' }}>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
               {filter === 'pending' ? 'No pending inquiries' : filter === 'approved' ? 'No approved talent yet' : 'No declined inquiries'}

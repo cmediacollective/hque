@@ -1,5 +1,11 @@
 [
   {
+    "title": "Smoother section loading (no more \"0 results\" flash)",
+    "description": "Moving between Workspace, Campaigns, Talent, Reports, and Inquiries is far less janky. Each section now shows a skeleton placeholder shaped like its real layout instead of a bare \"loading\" line, never briefly flashes a wrong \"0 results\" count while data is still loading, and remembers its data after the first visit — so coming back to a section (or flipping grid/list/board or Active/Archived) appears instantly and refreshes quietly in the background.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-25"
+  },
+  {
     "title": "Agency time zone is now owner-only",
     "description": "The single agency-wide time zone (Settings → Agency info) can now only be changed by the account owner. Admins can still edit the rest of the agency info, but the time zone is read-only for them. It still applies to everyone across the agency — this just keeps the one setting that affects the whole team's calendars with the account owner.",
     "category": "Improvement",

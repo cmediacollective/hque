@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './supabase'
 import CampaignForm from './CampaignForm'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
 import { useClientLabel } from './useClientLabel'
+import { useCachedResource } from './useCachedResource'
+import { cacheSet } from './dataCache'
+import { CardGridSkeleton, ListSkeleton, BoardSkeleton } from './Skeletons'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -40,8 +43,30 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
   const cardShadowHover = dark ? '0 8px 22px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.07), 0 12px 26px rgba(0,0,0,0.11)'
 
-  const [campaigns, setCampaigns] = useState([])
-  const [loading, setLoading] = useState(true)
+  // Campaigns load through a cached, stale-while-revalidate resource keyed by
+  // org + sub-view, so switching grid/list/board (or revisiting the section)
+  // paints instantly from cache and refetches silently — no "0 campaigns" flash.
+  const cacheKey = orgId ? `campaigns:${orgId}:${view}` : null
+  const { data: campaignsData, status, refetch, setData } = useCachedResource(cacheKey, async () => {
+    let q = supabase.from('campaigns').select('*').eq('org_id', orgId)
+    if (view === 'archived') q = q.eq('archived', true)
+    else if (view !== 'board') q = q.eq('archived', false)
+    const { data, error } = await q.order('created_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  })
+  const campaigns = campaignsData || []
+  const loading = status === 'loading'
+  // Optimistic updates go through here so they also land in the cache and
+  // survive navigation. Accepts a value or an updater function, like setState.
+  const setCampaigns = useCallback((updater) => {
+    setData(prev => {
+      const next = typeof updater === 'function' ? updater(prev || []) : updater
+      if (cacheKey) cacheSet(cacheKey, next)
+      return next
+    })
+  }, [setData, cacheKey])
+  const fetchCampaigns = refetch
   const [selected, setSelected] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [hovering, setHovering] = useState(null)
@@ -55,9 +80,19 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
   const [archivedExpanded, setArchivedExpanded] = useState(false)
   const [hoveringCard, setHoveringCard] = useState(null)
 
-  useEffect(() => { fetchCampaigns() }, [orgId, view])
-  // Refresh after the tab regains focus from a long absence.
-  useEffect(() => { if (focusVersion > 0) fetchCampaigns() }, [focusVersion])
+  // Campaign fetching (and cache/status) is handled by useCachedResource above.
+  // When the campaigns change, load their secondary data and reconcile the open
+  // campaign. Runs on both first load and background refreshes.
+  useEffect(() => {
+    if (status !== 'success') return
+    if (campaigns.length) {
+      fetchCreatorCounts(campaigns.map(c => c.id))
+      fetchContacts(campaigns)
+    }
+    setSelected(sel => sel ? campaigns.find(d => d.id === sel.id) || sel : null)
+  }, [campaignsData, status]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Refresh after the tab regains focus from a long absence (silent background).
+  useEffect(() => { if (focusVersion > 0) refetch() }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!orgId) return
@@ -93,21 +128,6 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
     }
     if (window.location.pathname.startsWith('/campaign/')) window.history.replaceState({}, '', '/')
   }, [selected?.id])
-
-  async function fetchCampaigns() {
-    setLoading(true)
-    let q = supabase.from('campaigns').select('*').eq('org_id', orgId)
-    if (view === 'archived') q = q.eq('archived', true)
-    else if (view !== 'board') q = q.eq('archived', false)
-    const { data } = await q.order('created_at', { ascending: false })
-    setCampaigns(data || [])
-    if (data?.length) {
-      fetchCreatorCounts(data.map(c => c.id))
-      fetchContacts(data)
-    }
-    setSelected(sel => sel ? (data || []).find(d => d.id === sel.id) || sel : null)
-    setLoading(false)
-  }
 
   const [campaignTalent, setCampaignTalent] = useState({})
 
@@ -264,7 +284,7 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
 
       <div style={{ padding: '12px 28px', display: 'flex', gap: '6px', alignItems: 'center', borderBottom: `0.5px solid ${border}`, background: bg, flexShrink: 0 }}>
         <span style={{ marginRight: 'auto', fontSize: '9px', color: subtle, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
-          {filtered.length} {filtered.length === 1 ? 'campaign' : 'campaigns'}
+          {loading ? '—' : `${filtered.length} ${filtered.length === 1 ? 'campaign' : 'campaigns'}`}
         </span>
         {view !== 'archived' && (
           <button onClick={() => setShowForm(true)} style={{ padding: '8px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', boxShadow: '0 2px 8px rgba(91,124,153,0.45)' }}>+ Campaign</button>
@@ -281,10 +301,19 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
       </div>
 
       {loading && (
-        <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>
+        view === 'list' && !isMobile ? <ListSkeleton dark={dark} rows={6} />
+          : view === 'board' && !isMobile ? <BoardSkeleton dark={dark} />
+          : <CardGridSkeleton dark={dark} minCol={340} count={6} isMobile={isMobile} />
       )}
 
-      {!loading && filtered.length === 0 && (
+      {status === 'error' && (
+        <div style={{ padding: '60px 28px', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: muted, marginBottom: '12px' }}>Couldn't load campaigns.</div>
+          <button onClick={() => refetch()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}>Retry</button>
+        </div>
+      )}
+
+      {status === 'success' && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
             {search ? 'No results' : view === 'archived' ? 'No archived campaigns' : 'No campaigns yet'}

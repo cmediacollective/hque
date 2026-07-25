@@ -5,6 +5,8 @@ import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
 import { useTalentLabels } from './useTalentLabels'
+import { useCachedResource } from './useCachedResource'
+import { CardGridSkeleton, ListSkeleton } from './Skeletons'
 
 // Defined at module scope (not inside TalentView) so its component identity is
 // stable — otherwise React remounts every photo on each hover/search keystroke,
@@ -37,7 +39,22 @@ function totalFollowers(creator) {
   return total.toLocaleString()
 }
 export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0, openCreatorId, onOpenCreatorHandled }) {
-  const [creators, setCreators] = useState([])
+  // Roster loads through a cached, stale-while-revalidate resource keyed by
+  // org + archived, so toggling Active/Archived (or revisiting) paints from
+  // cache instantly and refetches silently — no empty flash.
+  const talentKey = orgId ? `talent:${orgId}:${showArchived ? 'archived' : 'active'}` : null
+  const { data: creatorsData, status, refetch } = useCachedResource(talentKey, async () => {
+    const { data, error } = await supabase
+      .from('creators')
+      .select('*')
+      .eq('status', showArchived ? 'archived' : 'active')
+      .order('name', { ascending: true })
+    if (error) throw error
+    return data || []
+  })
+  const creators = creatorsData || []
+  const loading = status === 'loading'
+  const fetchCreators = refetch
   // This company's own filter chips (Settings > Talent Labels).
   const { types: orgTypes, niches: orgNiches } = useTalentLabels(orgId)
   const TYPES = ['All Types', ...orgTypes]
@@ -45,7 +62,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
   const [nicheFilter, setNicheFilter] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
   const [selectedCampaign, setSelectedCampaign] = useState(null)
   const [archiving, setArchiving] = useState(null)
@@ -66,9 +82,9 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const cardShadow = dark ? '0 1px 3px rgba(0,0,0,0.45)' : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
   const cardShadowHover = dark ? '0 8px 22px rgba(0,0,0,0.6)' : '0 4px 8px rgba(0,0,0,0.07), 0 12px 26px rgba(0,0,0,0.11)'
 
-  useEffect(() => { fetchCreators() }, [showArchived])
-  // Refresh after the tab regains focus from a long absence.
-  useEffect(() => { if (focusVersion > 0) fetchCreators() }, [focusVersion])
+  // Fetching (and cache/status) is handled by useCachedResource above; its key
+  // already depends on showArchived. Refresh silently after a long tab-away.
+  useEffect(() => { if (focusVersion > 0) refetch() }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open a talent passed in via deep link (/roster/<slug>). Roster view only.
   useEffect(() => {
@@ -100,17 +116,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     if (window.location.pathname.startsWith('/roster/')) window.history.replaceState({}, '', '/')
   }, [selected?.id])
 
-  async function fetchCreators() {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('creators')
-      .select('*')
-      .eq('status', showArchived ? 'archived' : 'active')
-      .order('name', { ascending: true })
-    if (error) console.error(error)
-    else setCreators(data || [])
-    setLoading(false)
-  }
 
   async function archiveCreator(id, restore = false) {
     const { error } = await supabase.from('creators').update({ status: restore ? 'active' : 'archived' }).eq('id', id)
@@ -254,9 +259,20 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         </div>
       </div>
 
-      {loading && <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>}
+      {loading && (
+        (talentView === 'list' && !isMobile)
+          ? <ListSkeleton dark={dark} rows={7} />
+          : <CardGridSkeleton dark={dark} minCol={280} count={8} isMobile={isMobile} />
+      )}
 
-      {!loading && filtered.length === 0 && (
+      {status === 'error' && (
+        <div style={{ padding: '60px 28px', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: muted, marginBottom: '12px' }}>Couldn't load talent.</div>
+          <button onClick={() => refetch()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}>Retry</button>
+        </div>
+      )}
+
+      {status === 'success' && filtered.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>
             {search ? 'No results' : showArchived ? 'No archived talent' : 'No talent yet'}

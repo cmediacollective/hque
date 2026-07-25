@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from './supabase'
+import { useCachedResource } from './useCachedResource'
+import { ReportsSkeleton } from './Skeletons'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -37,18 +39,31 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
 
-  const [campaigns, setCampaigns] = useState([])
-  const [links, setLinks] = useState([])
-  const [members, setMembers] = useState([])
-  const [loading, setLoading] = useState(true)
+  // The three report datasets load together through one cached, stale-while-
+  // revalidate resource keyed by org, so revisiting Reports paints instantly
+  // from cache and refetches silently instead of showing a spinner each time.
+  const reportsKey = orgId ? `reports:${orgId}` : null
+  const { data: reportData, status, refetch } = useCachedResource(reportsKey, async () => {
+    const [{ data: camps }, { data: lnks }, { data: mems }] = await Promise.all([
+      supabase.from('campaigns').select('*').eq('org_id', orgId).order('created_at', { ascending: false }),
+      supabase.from('campaign_creators').select('campaign_id, creator_id'),
+      supabase.rpc('org_team', { p_org_id: orgId }) // membership list, not active-company profiles (see WorkspaceView)
+    ])
+    return { campaigns: camps || [], links: lnks || [], members: mems || [] }
+  })
+  const campaigns = reportData?.campaigns || []
+  const links = reportData?.links || []
+  const members = reportData?.members || []
+  const loading = status === 'loading'
   const [year, setYear] = useState(initialYear || new Date().getFullYear())
   const [month, setMonth] = useState(initialMonth ?? 'all') // 'all' or 0..11
   const [view, setView] = useState('overview') // 'overview' | 'team'
   const [expandedMember, setExpandedMember] = useState(null)
   const [highlightMember, setHighlightMember] = useState(null)
 
-  useEffect(() => { fetchAll() }, [orgId])
-  useEffect(() => { if (focusVersion > 0) fetchAll() }, [focusVersion])
+  // Fetching (and cache/status) is handled by useCachedResource above; it keys
+  // on orgId. Refresh silently after a long tab-away.
+  useEffect(() => { if (focusVersion > 0) refetch() }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Each monthly snapshot has its own shareable URL: /reports/<month>-<year>.
   useEffect(() => {
@@ -59,19 +74,6 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
     const path = month === 'all' ? '/reports' : `/reports/${MONTHS[month].toLowerCase()}-${year}`
     if (window.location.pathname !== path) window.history.replaceState({}, '', path)
   }, [month, year, active])
-
-  async function fetchAll() {
-    setLoading(true)
-    const [{ data: camps }, { data: lnks }, { data: mems }] = await Promise.all([
-      supabase.from('campaigns').select('*').eq('org_id', orgId).order('created_at', { ascending: false }),
-      supabase.from('campaign_creators').select('campaign_id, creator_id'),
-      supabase.rpc('org_team', { p_org_id: orgId }) // membership list, not active-company profiles (see WorkspaceView)
-    ])
-    setCampaigns(camps || [])
-    setLinks(lnks || [])
-    setMembers(mems || [])
-    setLoading(false)
-  }
 
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth()
@@ -260,8 +262,13 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
     )
   }
 
-  if (loading) return (
-    <div style={{ padding: '40px 28px', color: subtle, fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading...</div>
+  if (loading) return <ReportsSkeleton dark={dark} />
+
+  if (status === 'error') return (
+    <div style={{ padding: '60px 28px', textAlign: 'center' }}>
+      <div style={{ fontSize: '12px', color: muted, marginBottom: '12px' }}>Couldn't load reports.</div>
+      <button onClick={() => refetch()} style={{ padding: '7px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px' }}>Retry</button>
+    </div>
   )
 
   return (
