@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**The agency time zone is now owner-only.** The single, agency-wide time zone (Settings → Agency info) can now only be changed by the account owner. Admins can still edit the rest of the agency info, but the time zone shows read-only for them with a short note explaining it's set by the owner. It still applies to everyone across the agency, exactly as before — this just puts the one setting that affects the whole team's calendars in one person's hands.
+
 **React to task comments with emoji.** Under every comment in a workspace task there's now a small reaction button. Click it and pick from five reactions — ❤️ heart, 😊 happy face, 👍🏼 thumbs up, 👎🏼 thumbs down, and ✅ green check mark. Anyone on the team can react to anyone's comment, and click again to remove their reaction. Each reaction shows a count, and hovering over it tells you exactly who reacted. Your own reactions are highlighted.
 
 ---

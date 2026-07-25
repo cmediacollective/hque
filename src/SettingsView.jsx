@@ -323,6 +323,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   // Only owners/admins may edit agency info; members see it read-only.
   const canEditAgency = currentUserRole === 'owner' || currentUserRole === 'admin'
+  // The agency-wide time zone is owner-only — it's set once at setup and applies
+  // to everyone across the agency, so admins can view but not change it.
+  const canEditTimezone = currentUserRole === 'owner'
 
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
@@ -475,7 +478,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             {field('Timezone',
               <select
                 value={agencyForm.timezone}
-                disabled={!canEditAgency}
+                disabled={!canEditTimezone}
                 onChange={e => setAgencyForm(f => ({ ...f, timezone: e.target.value }))}
                 style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
                 <optgroup label='Americas'>
@@ -502,6 +505,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 </optgroup>
                 <option value='UTC'>UTC</option>
               </select>
+            )}
+            {canEditAgency && !canEditTimezone && (
+              <div style={{ fontSize: '10px', color: subtle, marginTop: '-8px', marginBottom: '14px', lineHeight: 1.5 }}>
+                The agency time zone is set by the account owner and applies to everyone.
+              </div>
             )}
             {field('Agency Logo',
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
