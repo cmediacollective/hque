@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**Settings field labels are readable now.** The little uppercase labels on Settings forms (Website, Timezone, Agency Logo, Email Notifications, etc.) were tiny and faint (7px, light gray). They're now larger (11px), darker for better contrast, and less stretched — much easier to read. Applied in one shared place so every field label across Settings updates consistently.
+
 **Agency Info, Workspace Personalization, and Default Labels are organized into cards.** These three Settings screens used to be one long plain form. Now related settings are grouped into clean cards — for Agency Info: "Agency Details" (name, email, website, timezone), "Branding" (logo, what's shown, login page), and "Sender Email Accounts." Section headings are now clearly bigger/bolder than field labels so the hierarchy reads at a glance, the input boxes are rounded and white to match the rest of the app, and short fields like Website and Timezone sit side by side to cut down on scrolling.
 
 **See and change your email on My Profile.** Settings → My Profile now has an Email field showing your current login email, with an "Update email" button so you can change it. For security, changing your email sends a confirmation link to the new address — your email only switches once you click that link. (Your other profile fields still save automatically; email is separate because of the confirmation step.)

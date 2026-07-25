@@ -355,9 +355,12 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   // to everyone across the agency, so admins can view but not change it.
   const canEditTimezone = currentUserRole === 'owner'
 
+  // Shared field-label style for every Settings form field. Bumped up from the
+  // old 7px/#888 so labels are actually readable; theme-aware for dark mode.
+  const labelStyle = { fontSize: '11px', letterSpacing: '0.8px', textTransform: 'uppercase', color: dark ? '#AAAAAA' : '#5A5A5A' }
   const field = (label, children) => (
     <div style={{ marginBottom: '16px' }}>
-      <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: subtle, marginBottom: '6px' }}>{label}</div>
+      <div style={{ ...labelStyle, marginBottom: '6px' }}>{label}</div>
       {children}
     </div>
   )
@@ -494,7 +497,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
               {field('Birthday', inp({ type: 'date', value: profileForm.birthday, onChange: e => setProfileForm(f => ({ ...f, birthday: e.target.value })) }))}
               <div style={{ marginBottom: '18px' }}>
-                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#888', marginBottom: '10px' }}>Email Notifications</div>
+                <div style={{ ...labelStyle, marginBottom: '10px' }}>Email Notifications</div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', border: `0.5px solid ${border}`, borderRadius: '1px' }}>
                   <div>
                     <div style={{ fontSize: '12px', color: text, marginBottom: '2px' }}>Task assignments and mentions</div>
@@ -646,15 +649,15 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '8px', marginBottom: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Label</div>
+                    <div style={{ ...labelStyle, marginBottom: '5px' }}>Label</div>
                     <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Gmail Address</div>
+                    <div style={{ ...labelStyle, marginBottom: '5px' }}>Gmail Address</div>
                     <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                   <div>
-                    <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Index</div>
+                    <div style={{ ...labelStyle, marginBottom: '5px' }}>Index</div>
                     <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                 </div>
