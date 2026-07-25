@@ -26,7 +26,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const cardShadow = dark
     ? '0 1px 3px rgba(0,0,0,0.45)'
     : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
-  const inputBg = dark ? '#141414' : '#F8F7F3'
+  const inputBg = dark ? '#141414' : '#FFFFFF'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
@@ -363,7 +363,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   )
 
   const inp = (props) => (
-    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+    <input {...props} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
   )
 
   const sectionTitle = (t) => (
@@ -372,6 +372,13 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   const sectionDivider = (t) => (
     <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#5b7c99', margin: '24px 0 14px' }}>{t}</div>
+  )
+
+  // A grouped card + a bold section heading, so long forms read as tidy sections
+  // instead of one flat list. Card style matches the Campaigns/Talent cards.
+  const panelStyle = { background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow, padding: '24px', marginBottom: '20px' }
+  const cardHeading = (t) => (
+    <div style={{ fontSize: '15px', fontWeight: 600, color: text, marginBottom: '18px' }}>{t}</div>
   )
 
   const tabs = [
@@ -474,7 +481,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <input type='email' value={emailForm} onChange={e => { setEmailForm(e.target.value); setEmailMsg(null) }} placeholder='you@email.com'
-                      style={{ flex: 1, minWidth: '200px', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                      style={{ flex: 1, minWidth: '200px', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                     <button onClick={changeEmail} disabled={emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()}
                       style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: (emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()) ? 'default' : 'pointer', borderRadius: '1px', opacity: (emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()) ? 0.5 : 1, whiteSpace: 'nowrap' }}>
                       {emailSaving ? 'Sending…' : 'Update email'}
@@ -513,15 +520,18 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 Only owners and admins can edit agency info. You can view it below.
               </div>
             )}
+            <div style={panelStyle}>
+            {cardHeading('Agency Details')}
             {field('Agency Name', inp({ value: agencyForm.agency_name, onChange: e => setAgencyForm(f => ({ ...f, agency_name: e.target.value })), placeholder: 'e.g. cMedia Collective', disabled: !canEditAgency }))}
             {field('Email', inp({ value: agencyForm.agency_email, onChange: e => setAgencyForm(f => ({ ...f, agency_email: e.target.value })), placeholder: 'hello@agency.com', type: 'email', disabled: !canEditAgency }))}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', alignItems: 'start' }}>
             {field('Website', inp({ value: agencyForm.agency_website, onChange: e => setAgencyForm(f => ({ ...f, agency_website: e.target.value })), placeholder: 'https://youragency.com', disabled: !canEditAgency }))}
             {field('Timezone',
               <select
                 value={agencyForm.timezone}
                 disabled={!canEditTimezone}
                 onChange={e => setAgencyForm(f => ({ ...f, timezone: e.target.value }))}
-                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
                 <optgroup label='Americas'>
                   <option value='America/Los_Angeles'>Los Angeles (Pacific)</option>
                   <option value='America/Denver'>Denver (Mountain)</option>
@@ -547,11 +557,16 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <option value='UTC'>UTC</option>
               </select>
             )}
+            </div>
             {canEditAgency && !canEditTimezone && (
-              <div style={{ fontSize: '10px', color: subtle, marginTop: '-8px', marginBottom: '14px', lineHeight: 1.5 }}>
+              <div style={{ fontSize: '10px', color: subtle, marginTop: '4px', lineHeight: 1.5 }}>
                 The agency time zone is set by the account owner and applies to everyone.
               </div>
             )}
+            </div>
+
+            <div style={panelStyle}>
+            {cardHeading('Branding')}
             {field('Agency Logo',
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                 {agencyForm.agency_logo_url && (
@@ -605,8 +620,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <div style={{ fontSize: '11px', color: subtle, marginTop: '8px', lineHeight: 1.6 }}>Your team's sign-in page. {stripePlan ? 'It shows your agency logo.' : 'Once you upload a logo, it appears here on a paid plan.'}</div>
               </div>
             )}
+            </div>
 
-            {sectionDivider('Sender Email Accounts')}
+            <div style={panelStyle}>
+            {cardHeading('Sender Email Accounts')}
             <div style={{ fontSize: '11px', color: subtle, marginBottom: '14px', lineHeight: 1.6 }}>
               Add the Gmail accounts you send outreach from. The Gmail Index is which account slot it's in — check by going to mail.google.com and switching accounts. First account = 0, second = 1, etc.
             </div>
@@ -630,22 +647,26 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 80px', gap: '8px', marginBottom: '16px' }}>
                   <div>
                     <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Label</div>
-                    <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                    <input value={newSender.label} onChange={e => setNewSender(s => ({ ...s, label: e.target.value }))} placeholder='e.g. cMedia' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                   <div>
                     <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Gmail Address</div>
-                    <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                    <input value={newSender.email} onChange={e => setNewSender(s => ({ ...s, email: e.target.value }))} placeholder='you@gmail.com' type='email' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                   <div>
                     <div style={{ fontSize: '7px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '5px' }}>Index</div>
-                    <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                    <input value={newSender.gmail_index} onChange={e => setNewSender(s => ({ ...s, gmail_index: e.target.value }))} placeholder='0' type='number' min='0' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
                   </div>
                 </div>
-                <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '1px', marginBottom: '24px' }}>+ Add Account</button>
-                <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: agencySaving ? 0.7 : 1, display: 'block' }}>
-                  {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
-                </button>
+                <button onClick={addSender} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '6px' }}>+ Add Account</button>
               </>
+            )}
+            </div>
+
+            {canEditAgency && (
+              <button onClick={saveAgency} disabled={agencySaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: agencySaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px', opacity: agencySaving ? 0.7 : 1, display: 'block' }}>
+                {agencySaved ? 'Saved!' : agencySaving ? 'Saving...' : 'Save Changes'}
+              </button>
             )}
           </div>
         )}
@@ -693,8 +714,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
-                  <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} title='Access level for this person' style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 10px', fontSize: '12px', color: text, outline: 'none', cursor: 'pointer', flexShrink: 0 }}>
+                  <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
+                  <select value={inviteRole} onChange={e => setInviteRole(e.target.value)} title='Access level for this person' style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 10px', fontSize: '12px', color: text, outline: 'none', cursor: 'pointer', flexShrink: 0 }}>
                     <option value='member'>Member</option>
                     <option value='admin'>Admin</option>
                   </select>
@@ -784,6 +805,8 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               Make HQue speak your team's language. These settings change wording only — your work, boards, and data are never affected.
             </div>
 
+            <div style={panelStyle}>
+            {cardHeading('Section Naming')}
             {(() => {
               const curS = agencyForm.client_label_singular?.trim() || 'Brand/Client'
               const curP = agencyForm.client_label_plural?.trim() || 'Brands/Clients'
@@ -806,7 +829,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                         setAgencyForm(f => ({ ...f, client_label_singular: p.singular, client_label_plural: p.plural }))
                       }
                     }}
-                    style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                    style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '7px 8px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
                     {CLIENT_LABEL_PRESETS.map((p, i) => <option key={i} value={String(i)}>{p.plural}{i === 0 ? ' (default)' : ''}</option>)}
                     <option value='custom'>Something else…</option>
                   </select>
@@ -823,29 +846,32 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   <div style={{ fontSize: '11px', color: subtle, margin: '8px 0 14px', lineHeight: 1.6 }}>
                     The name for the section where your work is organized — the "Brands/Clients" list. It shows up across the whole workspace. Refresh after saving to see it update everywhere.
                   </div>
-                  <button onClick={saveClientLabel} disabled={labelSaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: labelSaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: labelSaving ? 0.7 : 1 }}>
+                  <button onClick={saveClientLabel} disabled={labelSaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: labelSaved ? '#5C9E52' : '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px', opacity: labelSaving ? 0.7 : 1 }}>
                     {labelSaved ? 'Saved!' : labelSaving ? 'Saving...' : 'Save'}
                   </button>
                 </>
               )
             })()}
+            </div>
 
-            <div style={{ borderTop: `0.5px solid ${border}`, marginTop: '30px', paddingTop: '26px' }}>
+            <div style={panelStyle}>
               <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
             </div>
           </div>
         )}
 
         {activeTab === 'defaults' && isMaster && !previewing && (
-          <TalentLabelsManager mode="defaults" dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+          <div style={panelStyle}>
+            <TalentLabelsManager mode="defaults" dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+          </div>
         )}
 
         {activeTab === 'password' && (
           <div>
             {sectionTitle('Change Password')}
             <div style={{ padding: '24px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
-              {field('New Password', <input type='password' value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} placeholder='Min 8 characters' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
-              {field('Confirm Password', <input type='password' value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder='Repeat new password' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
+              {field('New Password', <input type='password' value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} placeholder='Min 8 characters' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
+              {field('Confirm Password', <input type='password' value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder='Repeat new password' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
               {pwError && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '12px' }}>{pwError}</div>}
               {pwSuccess && <div style={{ fontSize: '11px', color: '#5C9E52', marginBottom: '12px' }}>Password updated successfully.</div>}
               <button onClick={changePassword} disabled={pwSaving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: pwSaving ? 0.7 : 1 }}>
