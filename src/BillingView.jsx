@@ -6,6 +6,12 @@ export default function BillingView({ dark = true, orgId, user }) {
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
+  // Lifted panel-card look for the neutral account-management card (matches the
+  // Campaigns/Talent/Settings cards). Not applied to the plan tiles, which keep
+  // their own accent styling + corner ribbons.
+  const cardShadow = dark
+    ? '0 1px 3px rgba(0,0,0,0.45)'
+    : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
@@ -257,7 +263,7 @@ export default function BillingView({ dark = true, orgId, user }) {
       {/* Danger zone — cancelling and closing are deliberately different things:
           cancelling stops the billing and keeps the data; closing wipes it. */}
       <div style={{ fontSize: '7px', letterSpacing: '0.24em', textTransform: 'uppercase', color: '#C77B5B', margin: '48px 0 14px' }}>Danger zone</div>
-      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow }}>
 
         {/* Cancel plan (nothing to cancel on a lifetime/comped account) */}
         {!isLifetime && (

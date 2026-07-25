@@ -1,5 +1,11 @@
 [
   {
+    "title": "Polished cards on the Settings screens",
+    "description": "The cards across Settings (Change Password, My Profile, the Team panels, and the account-management card under Billing) now have rounded corners and a soft drop shadow to match the lifted card style used on the Campaigns and Talent pages, instead of the old flat, square look.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-25"
+  },
+  {
     "title": "Polished task cards on the Workspace dashboard",
     "description": "The task cards on your Workspace \"My Tasks\" dashboard now have the same lifted look as the Campaigns cards — rounded corners and a soft drop shadow instead of the old flat, square style. Watching/Later cards get a clean white fill; Assigned cards keep their blue so the color coding still reads at a glance.",
     "category": "Improvement",

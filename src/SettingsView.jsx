@@ -20,6 +20,12 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const card = dark ? '#222' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
+  // Lifted panel-card look, matching the Campaigns/Talent cards: rounded corners
+  // + soft drop shadow (theme-aware so dark mode stays dark).
+  const cardRadius = '6px'
+  const cardShadow = dark
+    ? '0 1px 3px rgba(0,0,0,0.45)'
+    : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
   const inputBg = dark ? '#141414' : '#F8F7F3'
   const text = dark ? '#F0ECE6' : '#1A1A1A'
   const muted = dark ? '#999' : '#666'
@@ -423,7 +429,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         {activeTab === 'profile' && (
           <div>
             {sectionTitle('My Profile')}
-            <div style={{ padding: '28px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+            <div style={{ padding: '28px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
                 {avatarUrl
                   ? <img src={avatarUrl} alt='avatar' style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} />
@@ -615,7 +621,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
             {/* What each role can do. Must stay in step with the actual gates:
                 billing is owner-only, everything else admin-level is (owner || admin). */}
-            <div style={{ marginBottom: '20px', padding: '18px 20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+            <div style={{ marginBottom: '20px', padding: '18px 20px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
               <button
                 onClick={() => setShowRoleHelp(v => !v)}
                 style={{ display: 'flex', alignItems: 'center', gap: '7px', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
@@ -649,7 +655,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             </div>
 
             {(currentUserRole === 'owner' || currentUserRole === 'admin') && (
-              <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+              <div style={{ marginBottom: '20px', padding: '20px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: subtle, marginBottom: '12px' }}>Invite a team member</div>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} onKeyDown={e => e.key === 'Enter' && inviteUser()} placeholder='teammate@email.com' type='email' style={{ flex: 1, background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none' }} />
@@ -802,7 +808,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
         {activeTab === 'password' && (
           <div>
             {sectionTitle('Change Password')}
-            <div style={{ padding: '24px', background: card, border: `0.5px solid ${border}`, borderRadius: '1px' }}>
+            <div style={{ padding: '24px', background: card, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow }}>
               {field('New Password', <input type='password' value={pwForm.newPw} onChange={e => setPwForm(f => ({ ...f, newPw: e.target.value }))} placeholder='Min 8 characters' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
               {field('Confirm Password', <input type='password' value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} placeholder='Repeat new password' style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />)}
               {pwError && <div style={{ fontSize: '11px', color: '#e74c3c', marginBottom: '12px' }}>{pwError}</div>}
