@@ -26,6 +26,13 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
   const subtle = dark ? '#777' : '#888'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const outlinedBorder = dark ? '#3A3A3A' : '#B8B0A4'
+  // Lifted-card styling to match the Campaigns cards: white fill (light mode),
+  // rounded corners, soft drop shadow. Theme-aware so dark mode stays dark.
+  const cardBg = dark ? '#1E1E1E' : '#FFFFFF'
+  const cardBorder = dark ? '#2A2A2A' : '#DBD7D0' // rgb(219,215,208) in light mode
+  const cardShadow = dark
+    ? '0 1px 3px rgba(0,0,0,0.45)'
+    : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
 
   const [loading, setLoading] = useState(true)
   const [assignedTasks, setAssignedTasks] = useState([])
@@ -431,7 +438,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
 
     if (filled) {
       return (
-        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', borderRadius: '2px', position: 'relative', cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
+        <div onClick={() => handleTaskClick(t)} style={{ background: '#5b7c99', color: '#fff', padding: '10px 12px', borderRadius: '6px', boxShadow: cardShadow, position: 'relative', cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
           {overdue && <div style={{ position: 'absolute', top: '8px', right: '8px', fontSize: '7px', letterSpacing: '0.16em', fontWeight: 600, color: '#c0392b', background: '#fff', border: '1px solid #c0392b', padding: '1px 6px', borderRadius: '2px' }}>OVERDUE</div>}
           <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: '13px', marginBottom: '6px', paddingRight: overdue ? '52px' : '0', lineHeight: 1.3 }}>{t.title}</div>
           <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: '11px', opacity: 0.6 }}>{brandLine}</div>
@@ -439,7 +446,7 @@ export default function MyTasksDashboard({ userId, orgId, dark = true, brands = 
       )
     }
     return (
-      <div onClick={() => handleTaskClick(t)} style={{ background: 'transparent', color: text, padding: '10px 12px', borderRadius: '2px', border: `0.5px solid ${outlinedBorder}`, cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
+      <div onClick={() => handleTaskClick(t)} style={{ background: cardBg, color: text, padding: '10px 12px', borderRadius: '6px', border: `1px solid ${cardBorder}`, boxShadow: cardShadow, cursor: 'pointer', marginBottom: '6px', fontFamily: "'Inter Tight', sans-serif" }}>
         <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 600, fontSize: '13px', marginBottom: '6px', lineHeight: 1.3 }}>{t.title}</div>
         <div style={{ fontFamily: "'Inter Tight', sans-serif", fontWeight: 400, fontSize: '11px', color: muted, opacity: 0.6 }}>{brandLine}</div>
       </div>

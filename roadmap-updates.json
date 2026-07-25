@@ -1,5 +1,11 @@
 [
   {
+    "title": "Polished task cards on the Workspace dashboard",
+    "description": "The task cards on your Workspace \"My Tasks\" dashboard now have the same lifted look as the Campaigns cards — rounded corners and a soft drop shadow instead of the old flat, square style. Watching/Later cards get a clean white fill; Assigned cards keep their blue so the color coding still reads at a glance.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-25"
+  },
+  {
     "title": "Smoother section loading (no more \"0 results\" flash)",
     "description": "Moving between Workspace, Campaigns, Talent, Reports, and Inquiries is far less janky. Each section now shows a skeleton placeholder shaped like its real layout instead of a bare \"loading\" line, never briefly flashes a wrong \"0 results\" count while data is still loading, and remembers its data after the first visit — so coming back to a section (or flipping grid/list/board or Active/Archived) appears instantly and refreshes quietly in the background.",
     "category": "Improvement",
