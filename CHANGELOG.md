@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**Comps page cleanup.** The cards on the Settings → Comps page (Grant Business Access, plus the people-with-access and Revoked lists) now have the rounded corners and soft shadow to match the rest of the app, and the stray double line that appeared just above the first person in the list is gone.
+
 **Your name shows instead of your email.** The Settings → My Profile card header now shows your Full Name (e.g. "Cherie Marquez") instead of your email address, and the small account widget at the bottom of the left sidebar does the same. If your Full Name is blank, it falls back to your email so it's never empty.
 
 **Settings cards now have the same lifted look.** The cards on the Settings screens (Change Password, My Profile, and the Team panels, plus the account-management card under Billing) were flat and square. They now have rounded corners and a soft drop shadow, matching the Campaigns/Talent cards. The plan pricing tiles under Billing keep their own accent styling.

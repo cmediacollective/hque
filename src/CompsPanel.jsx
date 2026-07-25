@@ -14,6 +14,10 @@ export default function CompsPanel({ dark = true }) {
   const subtle = dark ? '#777' : '#888'
   const inputBg = dark ? '#1A1A1A' : '#FFFFFF'
   const accent = '#5b7c99'
+  // Lifted card look, matching the Campaigns/Talent cards (theme-aware).
+  const cardShadow = dark
+    ? '0 1px 3px rgba(0,0,0,0.45)'
+    : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
 
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
@@ -133,7 +137,7 @@ export default function CompsPanel({ dark = true }) {
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '20px' }}>Comps</div>
 
       {/* Grant */}
-      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '24px' }}>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '24px' }}>
         <div style={{ fontSize: '12px', color: muted, lineHeight: 1.7, marginBottom: '14px', maxWidth: '580px' }}>
           Give someone free, permanent <strong style={{ color: text }}>Business</strong> access — no billing and no trial expiry, ever. Works for people already on a trial and for new people (they just need to sign up and create a workspace first).
         </div>
@@ -167,12 +171,12 @@ export default function CompsPanel({ dark = true }) {
 
       {/* Active list */}
       {tab === 'active' && (
-      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 0' }}>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '8px 0' }}>
         {list === null && <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '16px 24px' }}>Loading…</div>}
         {list && listError && <div style={{ fontSize: '12px', color: '#C77B5B', padding: '16px 24px', lineHeight: 1.6 }}>{listError}</div>}
         {list && !listError && list.length === 0 && <div style={{ fontSize: '12px', color: muted, padding: '16px 24px' }}>No comped accounts yet. Grant one above and it’ll appear here.</div>}
-        {list && !listError && list.map(row => (
-          <div key={row.org_id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderTop: `0.5px solid ${border}`, flexWrap: 'wrap' }}>
+        {list && !listError && list.map((row, i) => (
+          <div key={row.org_id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderTop: i === 0 ? 'none' : `0.5px solid ${border}`, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <div style={{ fontSize: '13px', color: text, marginBottom: '3px' }}>{row.org_name || 'Untitled workspace'}</div>
               <div style={{ fontSize: '11px', color: subtle }}>{row.owner_email || '—'}</div>
@@ -193,12 +197,12 @@ export default function CompsPanel({ dark = true }) {
 
       {/* Revoked history */}
       {tab === 'revoked' && (
-      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 0' }}>
+      <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '8px 0' }}>
         {revoked === null && <div style={{ fontSize: '11px', color: subtle, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '16px 24px' }}>Loading…</div>}
         {revoked && revokedError && <div style={{ fontSize: '12px', color: '#C77B5B', padding: '16px 24px', lineHeight: 1.6 }}>{revokedError}</div>}
         {revoked && !revokedError && revoked.length === 0 && <div style={{ fontSize: '12px', color: muted, padding: '16px 24px' }}>No revocations yet. When you revoke an account it’ll be recorded here.</div>}
-        {revoked && !revokedError && revoked.map(row => (
-          <div key={row.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderTop: `0.5px solid ${border}`, flexWrap: 'wrap' }}>
+        {revoked && !revokedError && revoked.map((row, i) => (
+          <div key={row.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 24px', borderTop: i === 0 ? 'none' : `0.5px solid ${border}`, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <div style={{ fontSize: '13px', color: text, marginBottom: '3px' }}>{row.org_name || 'Untitled workspace'}</div>
               <div style={{ fontSize: '11px', color: subtle }}>{row.owner_email || '—'}</div>
