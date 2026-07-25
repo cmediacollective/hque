@@ -1,5 +1,23 @@
 [
   {
+    "title": "Sign in with Google now shows h-que.com",
+    "description": "When you or your clients sign in with Google, the Google screen now reads “to continue to h-que.com” instead of a long technical web address — a cleaner, more trustworthy first impression. Nothing changes about how you log in.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-25"
+  },
+  {
+    "title": "Talent cards no longer stretch on smaller rosters",
+    "description": "On a roster with only a few talent, the cards were stretching taller than they should and leaving extra empty space at the bottom. They now sit at their natural height and match the look of a fuller roster.",
+    "category": "Fix",
+    "shipped_at": "2026-07-24"
+  },
+  {
+    "title": "“Musician” is now a built-in talent Type",
+    "description": "Musician is now one of the default Types every new roster starts with, and it's been added to existing rosters too — so you can label musical talent without creating a custom Type first. Rename, reorder, or remove it anytime under Settings → Talent Labels.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-23"
+  },
+  {
     "title": "Editing a talent auto-saves",
     "description": "When you edit an existing talent, your changes now save automatically a moment after you stop typing — no need to click Save. A 'Saving… / Saved' indicator shows the status. Adding a brand-new talent still uses a Save button.",
     "category": "Improvement",

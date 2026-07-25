@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-24
+
+**Fixed uneven talent cards when a roster only has a few people.** On rosters with just a handful of talent, the cards were stretching taller to fill the empty screen space, leaving extra white space at the bottom of each card. They now sit at their natural height and match the look of fuller rosters — no more oversized cards on brand-new accounts.
+
+---
+
 ## 2026-07-23
 
 **"Musician" is now one of the default talent Types.** It's been added to the master default list every new company starts with, and it's been added to every existing company's own Types list too (appended at the end, so nothing you've customized moved). You can rename, reorder, or remove it like any other label under Settings → Talent Labels.

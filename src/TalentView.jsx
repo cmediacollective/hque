@@ -268,7 +268,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
       )}
 
       {!loading && (view === 'grid' || isMobile) && filtered.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: isMobile ? '12px' : '16px', flex: 1, overflowY: 'auto', padding: isMobile ? '14px 14px 100px' : '20px 20px 100px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: cols, gap: isMobile ? '12px' : '16px', flex: 1, overflowY: 'auto', alignContent: 'start', padding: isMobile ? '14px 14px 100px' : '20px 20px 100px' }}>
           {filtered.map(c => (
             <div key={c.id}
               style={{ background: cardBg, padding: isMobile ? '16px' : '18px', cursor: 'pointer', position: 'relative', borderRadius: '6px', border: `0.5px solid ${border}`, boxShadow: hovering === c.id ? cardShadowHover : cardShadow, transform: hovering === c.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.16s ease, transform 0.16s ease' }}
