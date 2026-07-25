@@ -59,6 +59,13 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   const [profileSaved, setProfileSaved] = useState(false)
   const [profileLoaded, setProfileLoaded] = useState(false)
 
+  // Email lives in Supabase auth (not the profiles row) and a change requires
+  // email confirmation, so it's edited separately from the auto-saved fields.
+  const [emailForm, setEmailForm] = useState('')
+  const [emailSaving, setEmailSaving] = useState(false)
+  const [emailMsg, setEmailMsg] = useState(null) // { type: 'error' | 'success', text }
+  useEffect(() => { if (user?.email) setEmailForm(user.email) }, [user?.email])
+
   const [pwForm, setPwForm] = useState({ newPw: '', confirm: '' })
   const [pwSaving, setPwSaving] = useState(false)
   const [pwError, setPwError] = useState('')
@@ -226,6 +233,21 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
   }
 
   function removeSender(idx) { setSenderAccounts(s => s.filter((_, i) => i !== idx)) }
+
+  async function changeEmail() {
+    setEmailMsg(null)
+    const next = emailForm.trim()
+    if (!next) return setEmailMsg({ type: 'error', text: 'Enter an email address' })
+    if (next.toLowerCase() === (user?.email || '').toLowerCase()) return setEmailMsg({ type: 'error', text: 'That is already your email.' })
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(next)) return setEmailMsg({ type: 'error', text: 'Enter a valid email address.' })
+    setEmailSaving(true)
+    // Supabase sends a confirmation link to the new address; the email only
+    // changes once that link is clicked, so we don't touch anything locally.
+    const { error } = await supabase.auth.updateUser({ email: next })
+    setEmailSaving(false)
+    if (error) return setEmailMsg({ type: 'error', text: error.message })
+    setEmailMsg({ type: 'success', text: `Almost done — we sent a confirmation link to ${next}. Your email changes once you click it.` })
+  }
 
   async function changePassword() {
     setPwError('')
@@ -448,6 +470,19 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                 </div>
               </div>
               <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '24px' }}>JPG, PNG or GIF. Max 5MB. Your photo appears in the sidebar and team list.</div>
+              {field('Email', (
+                <div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <input type='email' value={emailForm} onChange={e => { setEmailForm(e.target.value); setEmailMsg(null) }} placeholder='you@email.com'
+                      style={{ flex: 1, minWidth: '200px', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                    <button onClick={changeEmail} disabled={emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()}
+                      style={{ padding: '9px 16px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: (emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()) ? 'default' : 'pointer', borderRadius: '1px', opacity: (emailSaving || emailForm.trim().toLowerCase() === (user?.email || '').toLowerCase()) ? 0.5 : 1, whiteSpace: 'nowrap' }}>
+                      {emailSaving ? 'Sending…' : 'Update email'}
+                    </button>
+                  </div>
+                  {emailMsg && <div style={{ fontSize: '11px', color: emailMsg.type === 'error' ? '#e74c3c' : '#5C9E52', marginTop: '8px', lineHeight: 1.5 }}>{emailMsg.text}</div>}
+                </div>
+              ))}
               {field('Full Name', inp({ value: profileForm.full_name, onChange: e => setProfileForm(f => ({ ...f, full_name: e.target.value })), placeholder: 'Your full name' }))}
               {field('Title', inp({ value: profileForm.title, onChange: e => setProfileForm(f => ({ ...f, title: e.target.value })), placeholder: 'e.g. Talent Manager' }))}
               {field('Birthday', inp({ type: 'date', value: profileForm.birthday, onChange: e => setProfileForm(f => ({ ...f, birthday: e.target.value })) }))}

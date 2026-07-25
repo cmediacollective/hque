@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**See and change your email on My Profile.** Settings → My Profile now has an Email field showing your current login email, with an "Update email" button so you can change it. For security, changing your email sends a confirmation link to the new address — your email only switches once you click that link. (Your other profile fields still save automatically; email is separate because of the confirmation step.)
+
 **All Settings cards now match.** Finished standardizing the card styling across every Settings screen — the Billing "Current Plan" bar and Starter/Pro/Business plan cards, the Team members and pending-invites lists, and the Product Updates entry cards all now use the same rounded corners and soft shadow as the rest of the app (they were still flat and square). The blue accent borders on your current/most-popular plan are kept so those still stand out.
 
 **Comps page cleanup.** The cards on the Settings → Comps page (Grant Business Access, plus the people-with-access and Revoked lists) now have the rounded corners and soft shadow to match the rest of the app, and the stray double line that appeared just above the first person in the list is gone.
