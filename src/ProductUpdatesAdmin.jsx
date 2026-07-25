@@ -37,6 +37,10 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
   const muted = dark ? '#999' : '#666'
   const subtle = dark ? '#777' : '#888'
   const accent = '#5b7c99'
+  // Lifted card look, matching the Campaigns/Talent/Settings cards (theme-aware).
+  const cardShadow = dark
+    ? '0 1px 3px rgba(0,0,0,0.45)'
+    : '0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.07)'
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -156,7 +160,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
             <div key={sec.key} style={{ marginBottom: '22px' }}>
               <div style={{ fontSize: '14px', letterSpacing: '0.16em', textTransform: 'uppercase', color: text, fontWeight: 800, marginBottom: '12px' }}>{sec.label}</div>
               {rows.map(item => (
-                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '12px 14px', marginBottom: '8px' }}>
+                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '12px 14px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: item.description ? '4px' : 0, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle, border: `0.5px solid ${border2}`, padding: '2px 5px', borderRadius: '2px' }}>{item.category}</span>
                     <span style={{ fontSize: '13px', fontWeight: 600, color: text }}>{item.title}</span>
@@ -183,7 +187,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
       {!adding ? (
         <button onClick={() => setAdding(true)} style={{ ...btn(accent), marginBottom: '24px' }}>+ New Update</button>
       ) : (
-        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '18px', marginBottom: '24px' }}>
+        <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '18px', marginBottom: '24px' }}>
           <div style={{ marginBottom: '12px' }}>
             <div style={labelStyle}>Title</div>
             <input value={newItem.title} onChange={e => setNewItem({ ...newItem, title: e.target.value })} placeholder='What changed or is coming' style={inputStyle} autoFocus />
@@ -230,7 +234,7 @@ export default function ProductUpdatesAdmin({ dark = true, isMaster = false }) {
               <div style={{ fontSize: '14px', letterSpacing: '0.16em', textTransform: 'uppercase', color: text, fontWeight: 800, marginBottom: '2px' }}>{sec.label} <span style={{ color: subtle, fontWeight: 400, fontSize: '10px' }}>· {rows.length}</span></div>
               <div style={{ fontSize: '10px', color: subtle, marginBottom: '10px' }}>{sec.note}</div>
               {rows.map(item => (
-                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '2px', padding: '12px 14px', marginBottom: '8px' }}>
+                <div key={item.id} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: cardShadow, padding: '12px 14px', marginBottom: '8px' }}>
                   {editing === item.id ? (
                     <div>
                       <input value={draft.title} onChange={e => setDraft({ ...draft, title: e.target.value })} style={{ ...inputStyle, marginBottom: '8px' }} />

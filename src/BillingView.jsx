@@ -171,7 +171,7 @@ export default function BillingView({ dark = true, orgId, user }) {
       <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, marginBottom: '8px' }}>Billing</div>
 
       {currentPlan && (
-        <div style={{ background: card, border: `0.5px solid #5b7c99`, borderRadius: '2px', padding: '20px 24px', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ background: card, border: `0.5px solid #5b7c99`, borderRadius: '6px', boxShadow: cardShadow, padding: '20px 24px', marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>Current Plan</div>
             <div style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: text }}>{currentPlan.name} — {currentPlan.price}{currentPlan.period}</div>
@@ -191,7 +191,7 @@ export default function BillingView({ dark = true, orgId, user }) {
       {error && <div style={{ fontSize: '12px', color: '#e74c3c', marginBottom: '16px' }}>{error}</div>}
 
       {pendingPlan && (
-        <div style={{ background: card, border: '0.5px solid #5b7c99', borderRadius: '2px', padding: '20px 24px', marginBottom: '24px' }}>
+        <div style={{ background: card, border: '0.5px solid #5b7c99', borderRadius: '6px', boxShadow: cardShadow, padding: '20px 24px', marginBottom: '24px' }}>
           <div style={{ fontSize: '8px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '8px' }}>One quick step</div>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '17px', color: text, marginBottom: '6px' }}>Add your agency logo to continue</div>
           <div style={{ fontSize: '12px', color: muted, lineHeight: 1.6, marginBottom: '16px', maxWidth: '460px' }}>
@@ -212,7 +212,7 @@ export default function BillingView({ dark = true, orgId, user }) {
           <div key={plan.key} style={{
             background: card,
             border: `0.5px solid ${plan.key === stripePlan ? '#5b7c99' : plan.recommended ? '#5b7c99' : border}`,
-            borderRadius: '2px', padding: '32px 28px',
+            borderRadius: '6px', boxShadow: cardShadow, padding: '32px 28px',
             display: 'flex', flexDirection: 'column', position: 'relative',
             opacity: stripePlan && plan.key !== stripePlan ? 0.6 : 1
           }}>

@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**All Settings cards now match.** Finished standardizing the card styling across every Settings screen — the Billing "Current Plan" bar and Starter/Pro/Business plan cards, the Team members and pending-invites lists, and the Product Updates entry cards all now use the same rounded corners and soft shadow as the rest of the app (they were still flat and square). The blue accent borders on your current/most-popular plan are kept so those still stand out.
+
 **Comps page cleanup.** The cards on the Settings → Comps page (Grant Business Access, plus the people-with-access and Revoked lists) now have the rounded corners and soft shadow to match the rest of the app, and the stray double line that appeared just above the first person in the list is gone.
 
 **Your name shows instead of your email.** The Settings → My Profile card header now shows your Full Name (e.g. "Cherie Marquez") instead of your email address, and the small account widget at the bottom of the left sidebar does the same. If your Full Name is blank, it falls back to your email so it's never empty.

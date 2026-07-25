@@ -672,7 +672,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow, overflow: 'hidden' }}>
               {teamMembers.map(member => (
                 <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
                   {member.avatar_url
@@ -716,7 +716,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             {visiblePending.length > 0 && (
               <>
                 {sectionDivider('Pending Invitations')}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, borderRadius: '1px', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow, overflow: 'hidden' }}>
                   {visiblePending.map(invite => (
                     <div key={invite.email} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
                       <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: `1px dashed ${border2}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: subtle, fontFamily: 'Georgia, serif', flexShrink: 0 }}>
