@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-25
+
+**React to task comments with emoji.** Under every comment in a workspace task there's now a small reaction button. Click it and pick from five reactions — ❤️ heart, 😊 happy face, 👍🏼 thumbs up, 👎🏼 thumbs down, and ✅ green check mark. Anyone on the team can react to anyone's comment, and click again to remove their reaction. Each reaction shows a count, and hovering over it tells you exactly who reacted. Your own reactions are highlighted.
+
+---
+
 ## 2026-07-24
 
 **Fixed uneven talent cards when a roster only has a few people.** On rosters with just a handful of talent, the cards were stretching taller to fill the empty screen space, leaving extra white space at the bottom of each card. They now sit at their natural height and match the look of fuller rosters — no more oversized cards on brand-new accounts.

@@ -7,6 +7,18 @@ import { useClientLabel } from './useClientLabel'
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const MAX_COMMENT_FILE_BYTES = 5 * 1024 * 1024 // 5 MB per attached file
 
+// The only reactions allowed on comments. Stored in the DB as stable keys
+// ('heart', 'smile', …); the emoji shown — including the neutral-beige
+// medium-light skin tone (🏼) on the thumbs — is display-only, so it can be
+// re-styled here with no data migration.
+const COMMENT_REACTIONS = [
+  { key: 'heart', emoji: '❤️', label: 'Heart' },
+  { key: 'smile', emoji: '😊', label: 'Happy face' },
+  { key: 'thumbsup', emoji: '👍🏼', label: 'Thumbs up' },
+  { key: 'thumbsdown', emoji: '👎🏼', label: 'Thumbs down' },
+  { key: 'check', emoji: '✅', label: 'Check mark' },
+]
+
 export default function TaskDetail({ task, dark, members = [], brands = [], campaigns = [], columns = [], currentBrandId, orgId, onSave, onClose, onDelete, createNotification, parseMentions }) {
   const clientLabel = useClientLabel(orgId)
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
@@ -60,6 +72,9 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   const [commentAttachError, setCommentAttachError] = useState('')
   // Expand the comment box for writing/reviewing longer comments.
   const [commentExpanded, setCommentExpanded] = useState(false)
+  // Emoji reactions on comments, and which comment's reaction picker is open.
+  const [reactions, setReactions] = useState([])
+  const [reactionPickerFor, setReactionPickerFor] = useState(null)
 
   useEffect(() => { fetchComments(); fetchCurrentUser(); fetchAttachments() }, [task.id])
 
@@ -85,6 +100,38 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
       .order('created_at', { ascending: true })
     setComments(data || [])
     setLoadingComments(false)
+    fetchReactions(data || [])
+  }
+
+  // Load every reaction on this task's comments in one query.
+  async function fetchReactions(commentList) {
+    const source = commentList || comments
+    const ids = source.map(c => c.id)
+    if (!ids.length) { setReactions([]); return }
+    const { data } = await supabase
+      .from('task_comment_reactions')
+      .select('*')
+      .in('comment_id', ids)
+    setReactions(data || [])
+  }
+
+  // Toggle the current user's reaction on a comment: remove it if it's already
+  // there, otherwise add it. Optimistic so it feels instant.
+  async function toggleReaction(commentId, emojiKey) {
+    if (!currentUserId) return
+    setReactionPickerFor(null)
+    const mine = reactions.find(r =>
+      r.comment_id === commentId && r.user_id === currentUserId && r.emoji === emojiKey)
+    if (mine) {
+      setReactions(prev => prev.filter(r => r !== mine))
+      await supabase.from('task_comment_reactions').delete()
+        .eq('comment_id', commentId).eq('user_id', currentUserId).eq('emoji', emojiKey)
+    } else {
+      const optimistic = { comment_id: commentId, user_id: currentUserId, emoji: emojiKey }
+      setReactions(prev => [...prev, optimistic])
+      await supabase.from('task_comment_reactions').insert([optimistic])
+    }
+    fetchReactions()
   }
 
   async function postComment() {
@@ -672,6 +719,56 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                         return (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
                             {atts.map(a => attachmentRow(a))}
+                          </div>
+                        )
+                      })()}
+                      {(() => {
+                        // Reactions on this comment: one pill per used emoji
+                        // (emoji + count, hover shows who), then an add button.
+                        const rs = reactions.filter(r => r.comment_id === c.id)
+                        const nameFor = uid => {
+                          if (uid === currentUserId) return 'You'
+                          const m = members.find(mm => mm.id === uid)
+                          return m ? (m.full_name || m.email) : 'Someone'
+                        }
+                        const pickerOpen = reactionPickerFor === c.id
+                        return (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
+                            {COMMENT_REACTIONS.map(def => {
+                              const these = rs.filter(r => r.emoji === def.key)
+                              if (these.length === 0) return null
+                              const mine = these.some(r => r.user_id === currentUserId)
+                              const who = these.map(r => nameFor(r.user_id)).join(', ')
+                              return (
+                                <button key={def.key} onClick={() => toggleReaction(c.id, def.key)}
+                                  title={`${def.label} — ${who}`}
+                                  style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '2px 8px', borderRadius: '11px', cursor: 'pointer', lineHeight: 1.4,
+                                    background: mine ? (dark ? 'rgba(91,124,153,0.28)' : 'rgba(91,124,153,0.14)') : cardBg,
+                                    border: `0.5px solid ${mine ? '#5b7c99' : border}` }}>
+                                  <span style={{ fontSize: '13px' }}>{def.emoji}</span>
+                                  <span style={{ fontSize: '11px', color: mine ? '#5b7c99' : subtle, fontWeight: 500 }}>{these.length}</span>
+                                </button>
+                              )
+                            })}
+                            <div style={{ position: 'relative' }}>
+                              <button onClick={() => setReactionPickerFor(pickerOpen ? null : c.id)}
+                                title='Add reaction'
+                                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '22px', borderRadius: '11px', cursor: 'pointer', background: 'none', border: `0.5px solid ${border}`, color: subtle, padding: 0 }}>
+                                <svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='12' cy='12' r='10'/><path d='M8 14s1.5 2 4 2 4-2 4-2'/><line x1='9' y1='9' x2='9.01' y2='9'/><line x1='15' y1='9' x2='15.01' y2='9'/></svg>
+                              </button>
+                              {pickerOpen && (
+                                <div style={{ position: 'absolute', bottom: '28px', left: 0, zIndex: 20, display: 'flex', gap: '2px', background: panelBg, border: `0.5px solid ${border}`, borderRadius: '20px', padding: '4px 6px', boxShadow: '0 4px 14px rgba(0,0,0,0.22)' }}>
+                                  {COMMENT_REACTIONS.map(def => (
+                                    <button key={def.key} onClick={() => toggleReaction(c.id, def.key)} title={def.label}
+                                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: '3px 4px', borderRadius: '6px' }}
+                                      onMouseEnter={e => e.currentTarget.style.background = dark ? '#242424' : '#F0EEE9'}
+                                      onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                                      {def.emoji}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )
                       })()}

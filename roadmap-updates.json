@@ -1,5 +1,11 @@
 [
   {
+    "title": "React to task comments with emoji",
+    "description": "Comments on workspace tasks now have reactions. Click the reaction button under any comment and pick from five — ❤️ heart, 😊 happy face, 👍🏼 thumbs up, 👎🏼 thumbs down, and ✅ green check mark. Anyone on the team can react to anyone's comment (click again to remove yours). Each reaction shows a count, and hovering over it shows exactly who reacted.",
+    "category": "Feature",
+    "shipped_at": "2026-07-25"
+  },
+  {
     "title": "Sign in with Google now shows h-que.com",
     "description": "When you or your clients sign in with Google, the Google screen now reads “to continue to h-que.com” instead of a long technical web address — a cleaner, more trustworthy first impression. Nothing changes about how you log in.",
     "category": "Improvement",
