@@ -156,6 +156,7 @@ function App() {
   const [myOrgs, setMyOrgs] = useState([])
   const [agencyTz, setAgencyTz] = useState('America/Los_Angeles')
   const [avatarUrl, setAvatarUrl] = useState(null)
+  const [profileFullName, setProfileFullName] = useState('')
   const [orgId, setOrgId] = useState(null)
   const [userRole, setUserRole] = useState(null)
   const [pendingReports, setPendingReports] = useState(null)
@@ -464,8 +465,9 @@ function App() {
     const { error: acceptErr } = await supabase.rpc('accept_pending_invitations')
     if (acceptErr) console.error('Could not apply invitations:', acceptErr.message)
 
-    const { data } = await supabase.from('profiles').select('org_id, avatar_url, role').eq('id', user.id).single()
+    const { data } = await supabase.from('profiles').select('org_id, avatar_url, role, full_name').eq('id', user.id).single()
     setUserRole(data?.role || null)
+    setProfileFullName(data?.full_name || '')
 
     if (data?.org_id) {
       setOrgId(data.org_id)
@@ -794,7 +796,7 @@ function App() {
                     </div>
                 }
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                  <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{profileFullName.trim() || user.email}</div>
                   <button onClick={handleLogout} style={{ marginTop: '4px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: 'none', color: subtle, padding: 0, cursor: 'pointer' }}>Sign out</button>
                 </div>
               </div>

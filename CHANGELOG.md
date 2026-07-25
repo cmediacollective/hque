@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-25
 
+**Your name shows instead of your email.** The Settings → My Profile card header now shows your Full Name (e.g. "Cherie Marquez") instead of your email address, and the small account widget at the bottom of the left sidebar does the same. If your Full Name is blank, it falls back to your email so it's never empty.
+
 **Settings cards now have the same lifted look.** The cards on the Settings screens (Change Password, My Profile, and the Team panels, plus the account-management card under Billing) were flat and square. They now have rounded corners and a soft drop shadow, matching the Campaigns/Talent cards. The plan pricing tiles under Billing keep their own accent styling.
 
 **Workspace dashboard cards now match the Campaigns cards.** The task cards on your Workspace "My Tasks" dashboard (Assigned, Watching, Later/No date) looked flat and square. They now have the same lifted look as the Campaigns cards — rounded corners and a soft drop shadow. The Watching/Later cards get a clean white fill and lighter border; the Assigned cards keep their blue (so the Assigned-vs-Watching color coding and legend still hold), just rounded and lifted.

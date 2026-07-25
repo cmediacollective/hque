@@ -1,5 +1,11 @@
 [
   {
+    "title": "Your name shows instead of your email",
+    "description": "The Settings → My Profile card header now shows your Full Name instead of your email address, and the account widget at the bottom of the left sidebar does too. If your Full Name is blank, it falls back to your email so it's never empty.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-25"
+  },
+  {
     "title": "Polished cards on the Settings screens",
     "description": "The cards across Settings (Change Password, My Profile, the Team panels, and the account-management card under Billing) now have rounded corners and a soft drop shadow to match the lifted card style used on the Campaigns and Talent pages, instead of the old flat, square look.",
     "category": "Improvement",

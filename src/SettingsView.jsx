@@ -438,7 +438,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                     </div>
                 }
                 <div>
-                  <div style={{ fontSize: '14px', color: text, marginBottom: '4px' }}>{user?.email}</div>
+                  <div style={{ fontSize: '14px', color: text, marginBottom: '4px' }}>{profileForm.full_name?.trim() || user?.email}</div>
                   <div style={{ fontSize: '10px', color: roleColor(currentUserRole), letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '14px' }}>{currentUserRole}</div>
                   <input ref={fileRef} type='file' accept='image/*' onChange={uploadAvatar} style={{ display: 'none' }} />
                   <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px', opacity: uploading ? 0.7 : 1 }}>
