@@ -313,7 +313,10 @@ function App() {
   useEffect(() => {
     if (!userRole) return // wait until the role is known
     if ((!isAdmin || !reportsAllowed) && view === 'reports') setView('workspace')
-  }, [userRole, view, reportsAllowed])
+    // Contacts (CRM) is master-account only for now, and hidden in customer
+    // preview, while the feature is being finished.
+    if ((!isMasterAdmin || previewing) && view === 'contacts') setView('workspace')
+  }, [userRole, view, reportsAllowed, isMasterAdmin, previewing])
 
   useEffect(() => {
     if (!user || !userRole || !initialReports) return
@@ -731,7 +734,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isMasterAdmin && !previewing ? [['contacts', 'Contacts']] : []), ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -898,7 +901,7 @@ function App() {
                   <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} focusVersion={focusVersion} />
                 </div>
               )}
-              {visited.has('contacts') && (
+              {isMasterAdmin && !previewing && visited.has('contacts') && (
                 <div style={{ display: view === 'contacts' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <ContactsView dark={dark} orgId={orgId} isMobile={isMobile} focusVersion={focusVersion} stripePlan={demoPlan} />
                 </div>
@@ -925,7 +928,7 @@ function App() {
 
       {isMobile && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
-          {navItems.filter(item => item.key !== 'reports' || (isAdmin && reportsAllowed)).map(item => (
+          {navItems.filter(item => (item.key !== 'reports' || (isAdmin && reportsAllowed)) && (item.key !== 'contacts' || (isMasterAdmin && !previewing))).map(item => (
             <button key={item.key} onClick={() => setView(item.key)} style={{
               flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'

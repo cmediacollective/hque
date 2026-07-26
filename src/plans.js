@@ -62,7 +62,6 @@ export const PLANS = [
 // Values: true (included), false (not included), or a string (e.g. a number/label).
 export const COMPARE = [
   { label: 'Talent / creators', starter: 'Up to 50', pro: 'Unlimited', agency: 'Unlimited' },
-  { label: 'CRM contacts', starter: 'Up to 500', pro: 'Up to 5,000', agency: 'Unlimited' },
   { label: 'Team members', starter: '2', pro: '5', agency: 'Unlimited' },
   { label: 'Talent roster management', starter: true, pro: true, agency: true },
   { label: 'Campaign tracking & outreach', starter: true, pro: true, agency: true },
