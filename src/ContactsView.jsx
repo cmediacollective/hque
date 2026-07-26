@@ -19,9 +19,9 @@ const DEFAULT_TYPES = [
 // Derived, display-only types — pulled live from Talent/Brand records, never
 // stored on a contact, so they can't be chosen when creating a real contact.
 const DERIVED = {
-  talent:  { key: 'talent',  label: 'Talent',            color: '#4A6B7A' },
-  manager: { key: 'manager', label: "Talent's Manager",  color: '#7A9B8E' },
-  company: { key: 'company', label: 'Company',           color: '#37505E' },
+  talent:  { key: 'talent',  label: 'Talent',            color: '#4E8C6A' },  // green
+  manager: { key: 'manager', label: "Talent's Manager",  color: '#8A6FA8' },  // violet
+  company: { key: 'company', label: 'Company',           color: '#37505E' },  // slate
 }
 
 function initials(name) {
