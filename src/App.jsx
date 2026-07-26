@@ -16,6 +16,7 @@ import OrgSwitcher from './OrgSwitcher'
 const TalentView = lazy(() => import('./TalentView'))
 const WorkspaceView = lazy(() => import('./WorkspaceView'))
 const CampaignView = lazy(() => import('./CampaignView'))
+const ContactsView = lazy(() => import('./ContactsView'))
 const ReportsView = lazy(() => import('./ReportsView'))
 const HQMetricsView = lazy(() => import('./HQMetricsView'))
 const SettingsView = lazy(() => import('./SettingsView'))
@@ -674,6 +675,7 @@ function App() {
     { key: 'workspace', label: 'Workspace', pageLabel: 'Workspace' },
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
+    { key: 'contacts', label: 'Contacts', pageLabel: 'Contacts' },
     { key: 'reports', label: 'Reports', pageLabel: 'Campaign Report' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
@@ -729,7 +731,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -896,6 +898,11 @@ function App() {
                   <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} focusVersion={focusVersion} />
                 </div>
               )}
+              {visited.has('contacts') && (
+                <div style={{ display: view === 'contacts' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <ContactsView dark={dark} orgId={orgId} isMobile={isMobile} focusVersion={focusVersion} stripePlan={demoPlan} />
+                </div>
+              )}
               {visited.has('reports') && (
                 <div style={{ display: view === 'reports' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} active={view === 'reports'} initialMonth={pendingReports?.month} initialYear={pendingReports?.year} />
@@ -924,7 +931,7 @@ function App() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'
             }}>
               <span style={{ fontSize: '16px', lineHeight: 1, opacity: view === item.key ? 1 : 0.5 }}>
-                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'reports' ? '▮' : '◎'}
+                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'contacts' ? '◫' : item.key === 'reports' ? '▮' : '◎'}
               </span>
               <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: view === item.key ? '#5b7c99' : muted }}>
                 {item.label}

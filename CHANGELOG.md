@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-26
+
+**New: the CRM (Contacts).** There's now a Contacts tab in the sidebar — one home for every person and company your agency works with: clients, prospects, talent managers, press, and vendors. Each contact holds name, title, company, email, phone, type, tags, an owner, notes, and when you last talked. You can search across everything, filter by type, and link a contact to a client (or leave it standalone). Your existing brand/client contacts automatically appear here as client contacts — nothing to re-enter. Available on every plan, with contact limits by tier: Starter up to 500, Pro up to 5,000, Business unlimited. A usage meter at the top shows where you stand.
+
+---
+
 ## 2026-07-25
 
 **Readable labels across every Settings tab.** Extended the bigger, darker field-label style to the tabs that were still using the old tiny/faint one — Team ("Role Descriptions," "Invite a Team Member"), Billing (plan names, "Current Plan," "Danger zone"), Comps (the "People with free access" / "Revoked" tabs), Default Labels, Workspace Personalization, and Product Updates. They all now pull from a single shared style, so the labels stay consistent and can be tweaked in one place going forward instead of drifting apart. Labels that are intentionally colored (a blue active tab, the red "Danger zone") keep their color — just bigger and easier to read.

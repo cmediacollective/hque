@@ -1,5 +1,11 @@
 [
   {
+    "title": "New: the CRM (Contacts)",
+    "description": "A new Contacts tab puts every person and company you work with — clients, prospects, talent managers, press, and vendors — in one searchable place. Each contact holds title, company, email, phone, type, tags, an owner, notes, and last-contacted date, and can be linked to a client or kept standalone. Your existing client contacts show up automatically. Available on every plan; contact limits by tier (Starter 500, Pro 5,000, Business unlimited).",
+    "category": "Feature",
+    "shipped_at": "2026-07-26"
+  },
+  {
     "title": "Cleaner, better-organized Settings screens",
     "description": "The Agency Info, Workspace Personalization, and Default Labels screens used to be one long plain form. They're now grouped into tidy cards with clear section headings, rounded white input boxes that match the rest of the app, and short fields (like Website and Timezone) laid out side by side so there's less scrolling.",
     "category": "Improvement",
