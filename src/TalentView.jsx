@@ -4,6 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
+import { filterChipStyle } from './uiStyles'
 import { useTalentLabels } from './useTalentLabels'
 import { useCachedResource } from './useCachedResource'
 import { CardGridSkeleton, ListSkeleton } from './Skeletons'
@@ -144,18 +145,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     [creators, typeFilter, nicheFilter, search])
 
   const chip = (label, active, onClick) => (
-    <button onClick={onClick} style={{
-      padding: '5px 12px', fontSize: '9px', letterSpacing: '0.14em',
-      textTransform: 'uppercase',
-      border: `1px solid ${active ? '#5b7c99' : border2}`,
-      borderRadius: '4px', cursor: 'pointer',
-      color: active ? '#fff' : muted,
-      background: active ? '#5b7c99' : (dark ? '#242424' : '#FFFFFF'),
-      boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : (dark ? '0 1px 2px rgba(0,0,0,0.3)' : '0 1px 2px rgba(0,0,0,0.04)'),
-      whiteSpace: 'nowrap', fontWeight: active ? 500 : 400,
-      flexShrink: 0,
-      transition: 'background 0.15s, color 0.15s, box-shadow 0.15s'
-    }}>{label}</button>
+    <button onClick={onClick} style={{ ...filterChipStyle(dark, active), flexShrink: 0 }}>{label}</button>
   )
 
 

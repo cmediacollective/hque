@@ -3,7 +3,7 @@ import { supabase } from './supabase'
 import { useCachedResource } from './useCachedResource'
 import { cacheSet } from './dataCache'
 import { ListSkeleton } from './Skeletons'
-import { fieldLabelStyle } from './uiStyles'
+import { fieldLabelStyle, filterChipStyle, tagPillStyle } from './uiStyles'
 import { planLimits } from './plans'
 import ExpandableTextarea from './ExpandableTextarea'
 
@@ -297,7 +297,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     )
   }
   const pill = (t) => { const color = colorOf(t); return (
-    <span style={{ fontSize: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', fontWeight: 600, padding: '3px 9px', borderRadius: '999px', display: 'inline-flex', alignItems: 'center', gap: '6px', color, background: color + (dark ? '22' : '14'), border: `1px solid ${color}33` }}>
+    <span style={tagPillStyle(dark, color)}>
       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: color }} />{labelOf(t)}
     </span>
   ) }
@@ -350,8 +350,8 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
               const n = counts[t.key] || 0
               if (t.key !== 'all' && n === 0 && !active) return null
               return (
-                <button key={t.key} onClick={() => setTypeFilter(t.key)} style={{ fontSize: '11px', letterSpacing: '0.4px', padding: '6px 12px', borderRadius: '999px', border: `1px solid ${active ? accent : border}`, background: active ? accent : card, color: active ? '#fff' : muted, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '7px' }}>
-                  {t.color && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: t.color }} />}
+                <button key={t.key} onClick={() => setTypeFilter(t.key)} style={filterChipStyle(dark, active)}>
+                  {t.color && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: active ? '#fff' : t.color }} />}
                   {t.label} <span style={{ fontSize: '10px', color: active ? 'rgba(255,255,255,0.75)' : subtle, fontVariantNumeric: 'tabular-nums' }}>{n}</span>
                 </button>
               )
@@ -359,7 +359,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
           : [['all', 'All companies'], ['has', 'Has people'], ['none', 'No people yet']].map(([k, lbl]) => {
               const active = companyFilter === k
               return (
-                <button key={k} onClick={() => setCompanyFilter(k)} style={{ fontSize: '11px', letterSpacing: '0.4px', padding: '6px 12px', borderRadius: '999px', border: `1px solid ${active ? accent : border}`, background: active ? accent : card, color: active ? '#fff' : muted, cursor: 'pointer' }}>{lbl}</button>
+                <button key={k} onClick={() => setCompanyFilter(k)} style={filterChipStyle(dark, active)}>{lbl}</button>
               )
             })}
       </div>

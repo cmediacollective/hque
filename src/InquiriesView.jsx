@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import { useCachedResource } from './useCachedResource'
 import { ListSkeleton } from './Skeletons'
+import { filterChipStyle } from './uiStyles'
 
 export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) {
   const bg = dark ? '#1A1A1A' : '#F8F7F3'
@@ -130,12 +131,9 @@ export default function InquiriesView({ orgId, dark = true, focusVersion = 0 }) 
 
         <div style={{ padding: '12px 28px', borderBottom: `0.5px solid ${border}`, background: bg, display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {['pending', 'approved', 'declined'].map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{
-              padding: '4px 14px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase',
-              border: `0.5px solid ${filter === f ? '#5b7c99' : border2}`,
-              color: filter === f ? '#5b7c99' : muted,
-              background: 'none', cursor: 'pointer', borderRadius: '1px'
-            }}>{f}</button>
+            <button key={f} onClick={() => setFilter(f)} style={filterChipStyle(dark, filter === f)}>
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
           ))}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '10px', color: subtle }}>Your inquiry link:</span>
