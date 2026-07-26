@@ -12,12 +12,16 @@ import ExpandableTextarea from './ExpandableTextarea'
 const TYPES = [
   { key: 'client', label: 'Client', color: '#5b7c99' },
   { key: 'prospect', label: 'Prospect', color: '#A67C52' },
+  { key: 'talent', label: 'Talent', color: '#4A6B7A' },
   { key: 'manager', label: 'Manager', color: '#7A9B8E' },
   { key: 'press', label: 'Press', color: '#9B7A9B' },
   { key: 'vendor', label: 'Vendor', color: '#8E7A5B' },
   { key: 'other', label: 'Other', color: '#8C877D' },
 ]
 const TYPE = Object.fromEntries(TYPES.map(t => [t.key, t]))
+// 'talent' is a live/derived type only (pulled from the Talent records), so it
+// can't be chosen when creating/reclassifying a real contact.
+const EDITABLE_TYPES = TYPES.filter(t => t.key !== 'talent')
 
 function initials(name) {
   const p = (name || '?').trim().split(/\s+/)
@@ -75,36 +79,60 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
   // (owner). Fetched once per org.
   const [brands, setBrands] = useState([])
   const [members, setMembers] = useState([])
+  const [creators, setCreators] = useState([])
+  function fetchCreators() {
+    supabase.from('creators').select('id, name, contact_email, manager_name, manager_email, niches, manager_user_id')
+      .eq('org_id', orgId).eq('status', 'active').then(({ data }) => setCreators(data || []))
+  }
   useEffect(() => {
     if (!orgId) return
     supabase.from('brands').select('id, name, logo_url').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
+    fetchCreators()
   }, [orgId])
-  useEffect(() => { if (focusVersion > 0) refetch() }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (focusVersion > 0) { refetch(); fetchCreators() } }, [focusVersion]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Talent + their managers, surfaced live from the Talent records (never stored
+  // here, so they can't drift and don't count toward the contact limit). Their
+  // shared fields (name, email) write back to the creator record when edited.
+  const derived = useMemo(() => {
+    const out = []
+    for (const cr of creators) {
+      out.push({ id: 'talent:' + cr.id, _src: 'talent', _creatorId: cr.id, name: cr.name, title: 'Talent', company: '', type: 'talent', email: cr.contact_email || null, phone: null, tags: cr.niches || [], owner_user_id: cr.manager_user_id || null, brand_id: null, notes: null, last_contacted_at: null })
+      if ((cr.manager_name || '').trim() || (cr.manager_email || '').trim()) {
+        out.push({ id: 'manager:' + cr.id, _src: 'manager', _creatorId: cr.id, _forTalent: cr.name, name: cr.manager_name || 'Manager', title: cr.name ? `Manager · ${cr.name}` : 'Manager', company: '', type: 'manager', email: cr.manager_email || null, phone: null, tags: [], owner_user_id: null, brand_id: null, notes: null, last_contacted_at: null })
+      }
+    }
+    return out
+  }, [creators])
 
   const brandName = (id) => brands.find(b => b.id === id)?.name || ''
   const memberName = (id) => { const m = members.find(x => x.id === id); return m ? (m.full_name || m.email) : '' }
   const companyOf = (c) => c.company || brandName(c.brand_id) || ''
 
+  // Everything shown in the list = real contacts + the live talent/manager rows.
+  const allRows = useMemo(() => [...contacts, ...derived], [data, derived]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const counts = useMemo(() => {
-    const out = { all: contacts.length }
+    const out = { all: allRows.length }
     for (const t of TYPES) out[t.key] = 0
-    for (const c of contacts) out[c.type || 'other'] = (out[c.type || 'other'] || 0) + 1
+    for (const c of allRows) out[c.type || 'other'] = (out[c.type || 'other'] || 0) + 1
     return out
-  }, [contacts])
+  }, [allRows])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return contacts.filter(c => {
+    return allRows.filter(c => {
       if (typeFilter !== 'all' && (c.type || 'other') !== typeFilter) return false
       if (!q) return true
       return [c.name, c.title, companyOf(c), c.email, c.phone].filter(Boolean).some(v => v.toLowerCase().includes(q))
     })
-  }, [contacts, search, typeFilter, brands]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [allRows, search, typeFilter, brands]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keep the open detail in sync with fresh data.
+  // Keep an open real-contact detail in sync with fresh data. (Talent/manager
+  // rows are derived and reconciled through fetchCreators, so skip them here.)
   useEffect(() => {
-    if (selected) setSelected(s => contacts.find(c => c.id === s.id) || null)
+    if (selected && !selected._src) setSelected(s => contacts.find(c => c.id === s.id) || null)
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
   // Close the quick type menu whenever you switch to a different contact.
   useEffect(() => { setTypeMenuOpen(false) }, [selected?.id])
@@ -122,6 +150,21 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
   async function saveContact() {
     const d = editing
     if (!d.name?.trim() && !d.email?.trim()) { setFormError('Add at least a name or an email.'); return }
+    // Talent / manager rows aren't stored here — write the shared fields straight
+    // back to the talent record so it stays in sync with the Talent page.
+    if (d._src) {
+      setSaving(true); setFormError('')
+      const patch = d._src === 'talent'
+        ? { name: d.name?.trim() || null, contact_email: d.email?.trim() || null }
+        : { manager_name: d.name?.trim() || null, manager_email: d.email?.trim() || null }
+      const { error } = await supabase.from('creators').update(patch).eq('id', d._creatorId)
+      setSaving(false)
+      if (error) { setFormError('Could not save: ' + error.message); return }
+      fetchCreators()
+      setSelected(s => (s && s.id === d.id) ? { ...s, name: d.name, email: d.email } : s)
+      setEditing(null)
+      return
+    }
     setSaving(true); setFormError('')
     const row = {
       name: d.name?.trim() || null,
@@ -249,7 +292,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
         </div>
       )}
 
-      {status === 'success' && contacts.length === 0 && (
+      {status === 'success' && allRows.length === 0 && (
         <div style={{ padding: '80px 28px', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: muted, marginBottom: '10px' }}>No contacts yet</div>
           <div style={{ fontSize: '12px', color: muted, marginBottom: '18px' }}>Add clients, prospects, managers, press, and vendors — all in one place.</div>
@@ -257,7 +300,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
         </div>
       )}
 
-      {status === 'success' && contacts.length > 0 && (
+      {status === 'success' && allRows.length > 0 && (
         <div style={{ flex: 1, display: 'grid', gridTemplateColumns: (selected && !isMobile) ? '1fr 384px' : '1fr', minHeight: 0 }}>
           {/* table */}
           <div style={{ overflowY: 'auto', padding: isMobile ? '8px 8px 100px' : '10px 16px 100px 28px' }}>
@@ -318,13 +361,21 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
       {editing && (
         <div onClick={() => !saving && setEditing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 70, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '10px', boxShadow: '0 20px 60px rgba(0,0,0,0.4)', width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto', padding: '24px' }}>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '19px', color: text, marginBottom: '18px' }}>{editing.id ? 'Edit contact' : 'New contact'}</div>
+            <div style={{ fontFamily: 'Georgia, serif', fontSize: '19px', color: text, marginBottom: editing._src ? '6px' : '18px' }}>{editing._src ? `Edit ${editing._src === 'talent' ? 'talent' : 'manager'}` : editing.id ? 'Edit contact' : 'New contact'}</div>
+            {editing._src && <div style={{ fontSize: '12px', color: subtle, marginBottom: '16px', lineHeight: 1.6 }}>This one lives on your Talent records — changing the name or email here updates the talent, and shows on the Talent page too.</div>}
+            {editing._src ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div><div style={{ ...label, marginBottom: '6px' }}>{editing._src === 'talent' ? 'Talent name' : 'Manager name'}</div><input value={editing.name} onChange={e => setEditing(d => ({ ...d, name: e.target.value }))} style={inputStyle} autoFocus /></div>
+                <div><div style={{ ...label, marginBottom: '6px' }}>Email</div><input value={editing.email} onChange={e => setEditing(d => ({ ...d, email: e.target.value }))} type='email' style={inputStyle} /></div>
+              </div>
+            ) : (
+            <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               <div><div style={{ ...label, marginBottom: '6px' }}>Name</div><input value={editing.name} onChange={e => setEditing(d => ({ ...d, name: e.target.value }))} style={inputStyle} autoFocus /></div>
               <div><div style={{ ...label, marginBottom: '6px' }}>Title / role</div><input value={editing.title} onChange={e => setEditing(d => ({ ...d, title: e.target.value }))} placeholder='e.g. Marketing Lead' style={inputStyle} /></div>
               <div><div style={{ ...label, marginBottom: '6px' }}>Type</div>
                 <select value={editing.type} onChange={e => setEditing(d => ({ ...d, type: e.target.value }))} style={inputStyle}>
-                  {TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
+                  {EDITABLE_TYPES.map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
                 </select>
               </div>
               <div><div style={{ ...label, marginBottom: '6px' }}>Company</div><input value={editing.company} onChange={e => setEditing(d => ({ ...d, company: e.target.value }))} placeholder='Company name' style={inputStyle} /></div>
@@ -349,6 +400,8 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
               <div style={{ ...label, marginBottom: '6px' }}>Notes</div>
               <ExpandableTextarea dark={dark} value={editing.notes} onChange={e => setEditing(d => ({ ...d, notes: e.target.value }))} placeholder='Anything worth remembering about this contact…' style={{ ...inputStyle, minHeight: '70px', resize: 'vertical', fontFamily: 'inherit' }} />
             </div>
+            </>
+            )}
             {formError && <div style={{ fontSize: '11.5px', color: '#c0392b', marginTop: '12px', lineHeight: 1.5 }}>{formError}</div>}
             <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
               <button onClick={saveContact} disabled={saving} style={{ padding: '9px 20px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px', opacity: saving ? 0.7 : 1 }}>{saving ? 'Saving…' : editing.id ? 'Save changes' : 'Add contact'}</button>
@@ -390,45 +443,57 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
           <button onClick={() => setSelected(null)} title='Close' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
         </div>
         <div style={{ margin: '12px 0 4px', position: 'relative', display: 'inline-block' }}>
-          <button onClick={() => setTypeMenuOpen(o => !o)} title='Click to change type' style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-            {pill(c.type)}<span style={{ fontSize: '9px', color: subtle }}>▾</span>
-          </button>
-          {typeMenuOpen && (
+          {c._src ? pill(c.type) : (
             <>
-              <div onClick={() => setTypeMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
-              <div style={{ position: 'absolute', top: '28px', left: 0, zIndex: 20, background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: '0 6px 18px rgba(0,0,0,0.22)', padding: '4px', minWidth: '160px' }}>
-                <div style={{ ...label, padding: '5px 9px 4px' }}>Change type to</div>
-                {TYPES.map(t => (
-                  <button key={t.key} onClick={() => { changeType(c, t.key); setTypeMenuOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'left', background: c.type === t.key ? (dark ? '#242424' : '#F1EFEA') : 'none', border: 'none', padding: '8px 9px', borderRadius: '4px', cursor: 'pointer', fontSize: '12.5px', color: text }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: t.color }} />{t.label}
-                    {c.type === t.key && <span style={{ marginLeft: 'auto', color: accent, fontSize: '11px' }}>✓</span>}
-                  </button>
-                ))}
-              </div>
+              <button onClick={() => setTypeMenuOpen(o => !o)} title='Click to change type' style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                {pill(c.type)}<span style={{ fontSize: '9px', color: subtle }}>▾</span>
+              </button>
+              {typeMenuOpen && (
+                <>
+                  <div onClick={() => setTypeMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
+                  <div style={{ position: 'absolute', top: '28px', left: 0, zIndex: 20, background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: '0 6px 18px rgba(0,0,0,0.22)', padding: '4px', minWidth: '160px' }}>
+                    <div style={{ ...label, padding: '5px 9px 4px' }}>Change type to</div>
+                    {EDITABLE_TYPES.map(t => (
+                      <button key={t.key} onClick={() => { changeType(c, t.key); setTypeMenuOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'left', background: c.type === t.key ? (dark ? '#242424' : '#F1EFEA') : 'none', border: 'none', padding: '8px 9px', borderRadius: '4px', cursor: 'pointer', fontSize: '12.5px', color: text }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: t.color }} />{t.label}
+                        {c.type === t.key && <span style={{ marginLeft: 'auto', color: accent, fontSize: '11px' }}>✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
         <div style={{ display: 'flex', gap: '8px', margin: '16px 0 22px', flexWrap: 'wrap' }}>
-          <button onClick={() => logContactToday(c)} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px' }}>Log contact today</button>
+          {!c._src && <button onClick={() => logContactToday(c)} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px' }}>Log contact today</button>}
           <button onClick={() => startEdit(c)} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '6px' }}>Edit</button>
           {c.email && <a href={`mailto:${c.email}`} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '6px', textDecoration: 'none' }}>Email</a>}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {c.email && <div><div style={{ ...label, marginBottom: '3px' }}>Email</div><a href={`mailto:${c.email}`} style={{ fontSize: '13.5px', color: accent, textDecoration: 'none' }}>{c.email}</a></div>}
           {c.phone && <div><div style={{ ...label, marginBottom: '3px' }}>Phone</div><div style={{ fontSize: '13.5px', color: text, fontVariantNumeric: 'tabular-nums' }}>{c.phone}</div></div>}
-          {kv('Company', c.company || (linkedBrand ? linkedBrand.name : null))}
-          <div><div style={{ ...label, marginBottom: '3px' }}>Linked to</div>
-            {linkedBrand
-              ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '5px 10px', borderRadius: '6px', border: `0.5px solid ${border}`, background: card, fontSize: '12.5px', color: text, boxShadow: cardShadow }}><span style={{ width: '18px', height: '18px', borderRadius: '4px', background: accent, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700 }}>{initials(linkedBrand.name)}</span>{linkedBrand.name}</span>
-              : <span style={{ fontSize: '12.5px', color: subtle }}>Not linked to a client — a standalone contact</span>}
-          </div>
-          {c.tags?.length > 0 && <div><div style={{ ...label, marginBottom: '5px' }}>Tags</div><div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>{c.tags.map((t, i) => <span key={i} style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '999px', background: dark ? 'rgba(91,124,153,0.22)' : 'rgba(91,124,153,0.12)', color: accent, fontWeight: 500 }}>{t}</span>)}</div></div>}
-          {kv('Owner', memberName(c.owner_user_id))}
-          <div><div style={{ ...label, marginBottom: '3px' }}>Last contacted</div><div style={{ fontSize: '13.5px', color: text }}>{timeAgo(c.last_contacted_at)}</div></div>
+          {!c._src && kv('Company', c.company || (linkedBrand ? linkedBrand.name : null))}
+          {c._src ? (
+            <div><div style={{ ...label, marginBottom: '3px' }}>{c._src === 'talent' ? 'Talent record' : 'Manager for'}</div>
+              <div style={{ fontSize: '12.5px', color: text }}>{c._src === 'talent' ? c.name : (c._forTalent || '—')} <span style={{ color: subtle }}>· lives on the Talent page</span></div>
+            </div>
+          ) : (
+            <div><div style={{ ...label, marginBottom: '3px' }}>Linked to</div>
+              {linkedBrand
+                ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '5px 10px', borderRadius: '6px', border: `0.5px solid ${border}`, background: card, fontSize: '12.5px', color: text, boxShadow: cardShadow }}><span style={{ width: '18px', height: '18px', borderRadius: '4px', background: accent, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: 700 }}>{initials(linkedBrand.name)}</span>{linkedBrand.name}</span>
+                : <span style={{ fontSize: '12.5px', color: subtle }}>Not linked to a client — a standalone contact</span>}
+            </div>
+          )}
+          {c.tags?.length > 0 && <div><div style={{ ...label, marginBottom: '5px' }}>{c._src === 'talent' ? 'Niches' : 'Tags'}</div><div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>{c.tags.map((t, i) => <span key={i} style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '999px', background: dark ? 'rgba(91,124,153,0.22)' : 'rgba(91,124,153,0.12)', color: accent, fontWeight: 500 }}>{t}</span>)}</div></div>}
+          {kv(c._src === 'talent' ? 'Talent manager' : 'Owner', memberName(c.owner_user_id))}
+          {!c._src && <div><div style={{ ...label, marginBottom: '3px' }}>Last contacted</div><div style={{ fontSize: '13.5px', color: text }}>{timeAgo(c.last_contacted_at)}</div></div>}
         </div>
         {c.notes && <><div style={{ height: '0.5px', background: border, margin: '20px 0' }} /><div style={{ ...label, marginBottom: '8px' }}>Notes</div><div style={{ fontSize: '13px', color: muted, lineHeight: 1.6, background: bg, border: `0.5px solid ${dark ? '#262626' : '#E7E3DC'}`, borderRadius: '6px', padding: '12px 14px', whiteSpace: 'pre-wrap' }}>{c.notes}</div></>}
-        <div style={{ height: '0.5px', background: border, margin: '20px 0' }} />
-        <button onClick={() => deleteContact(c)} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', borderRadius: '6px' }}>Delete contact</button>
+        {!c._src && <>
+          <div style={{ height: '0.5px', background: border, margin: '20px 0' }} />
+          <button onClick={() => deleteContact(c)} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', borderRadius: '6px' }}>Delete contact</button>
+        </>}
       </div>
     )
   }
