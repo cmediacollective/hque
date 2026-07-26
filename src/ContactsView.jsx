@@ -54,6 +54,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
   const [showLimit, setShowLimit] = useState(false)
+  const [typeMenuOpen, setTypeMenuOpen] = useState(false)
 
   const limit = planLimits(stripePlan).contacts
 
@@ -105,6 +106,8 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
   useEffect(() => {
     if (selected) setSelected(s => contacts.find(c => c.id === s.id) || null)
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Close the quick type menu whenever you switch to a different contact.
+  useEffect(() => { setTypeMenuOpen(false) }, [selected?.id])
 
   function startAdd() {
     if (limit !== Infinity && contacts.length >= limit) { setShowLimit(true); return }
@@ -164,6 +167,15 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     const next = contacts.filter(x => x.id !== c.id)
     setData(next); if (cacheKey) cacheSet(cacheKey, next)
     if (selected?.id === c.id) setSelected(null)
+  }
+
+  async function changeType(c, newType) {
+    if (newType === c.type) return
+    const { data: saved, error } = await supabase.from('brand_contacts').update({ type: newType }).eq('id', c.id).select().single()
+    if (error) { alert('Could not update type: ' + error.message); return }
+    const next = contacts.map(x => x.id === saved.id ? saved : x)
+    setData(next); if (cacheKey) cacheSet(cacheKey, next)
+    setSelected(saved)
   }
 
   async function logContactToday(c) {
@@ -377,7 +389,25 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
           </div>
           <button onClick={() => setSelected(null)} title='Close' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
         </div>
-        <div style={{ margin: '12px 0 4px' }}>{pill(c.type)}</div>
+        <div style={{ margin: '12px 0 4px', position: 'relative', display: 'inline-block' }}>
+          <button onClick={() => setTypeMenuOpen(o => !o)} title='Click to change type' style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            {pill(c.type)}<span style={{ fontSize: '9px', color: subtle }}>▾</span>
+          </button>
+          {typeMenuOpen && (
+            <>
+              <div onClick={() => setTypeMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 10 }} />
+              <div style={{ position: 'absolute', top: '28px', left: 0, zIndex: 20, background: card, border: `0.5px solid ${border}`, borderRadius: '6px', boxShadow: '0 6px 18px rgba(0,0,0,0.22)', padding: '4px', minWidth: '160px' }}>
+                <div style={{ ...label, padding: '5px 9px 4px' }}>Change type to</div>
+                {TYPES.map(t => (
+                  <button key={t.key} onClick={() => { changeType(c, t.key); setTypeMenuOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'left', background: c.type === t.key ? (dark ? '#242424' : '#F1EFEA') : 'none', border: 'none', padding: '8px 9px', borderRadius: '4px', cursor: 'pointer', fontSize: '12.5px', color: text }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: t.color }} />{t.label}
+                    {c.type === t.key && <span style={{ marginLeft: 'auto', color: accent, fontSize: '11px' }}>✓</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
         <div style={{ display: 'flex', gap: '8px', margin: '16px 0 22px', flexWrap: 'wrap' }}>
           <button onClick={() => logContactToday(c)} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: accent, border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '6px' }}>Log contact today</button>
           <button onClick={() => startEdit(c)} style={{ padding: '8px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: muted, cursor: 'pointer', borderRadius: '6px' }}>Edit</button>
