@@ -53,7 +53,7 @@ export function tagPillStyle(dark, color = '#8C877D') {
     borderRadius: '999px',
     whiteSpace: 'nowrap',
     color,
-    background: color + (dark ? '22' : '14'),
-    border: `1px solid ${color}33`,
+    background: color + (dark ? '2E' : '20'),
+    border: `1px solid ${color}66`,
   }
 }
