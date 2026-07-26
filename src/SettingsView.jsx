@@ -5,6 +5,7 @@ import { planLimits } from './plans'
 import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
+import ContactTypesManager from './ContactTypesManager'
 import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL, pluralize } from './useClientLabel'
 import { fieldLabelStyle } from './uiStyles'
 
@@ -861,6 +862,14 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
             <div style={panelStyle}>
               <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
             </div>
+
+            {/* Contact Types — the CRM's category list. Master-only while the
+                CRM (Contacts) is in internal preview. */}
+            {isMaster && !previewing && (
+              <div style={panelStyle}>
+                <ContactTypesManager orgId={orgId} dark={dark} canEdit={currentUserRole === 'owner' || currentUserRole === 'admin'} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+              </div>
+            )}
           </div>
         )}
 
