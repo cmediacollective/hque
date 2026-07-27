@@ -24,8 +24,20 @@ function splitName(name) {
   if (parts.length <= 1) return { first: '', last: parts[0] || '—' }
   return { first: parts.slice(0, -1).join(' '), last: parts[parts.length - 1] }
 }
-function letterOf(name) { const { last, first } = splitName(name); return (last || first || '#')[0].toUpperCase() }
-function sortKey(name) { const { first, last } = splitName(name); return (last + ' ' + first).toLowerCase() }
+// For grouping/sorting we clean the name first: drop parentheticals like
+// "(Bowles)" and anything after a comma (company suffixes like ", 1milk2sugars"),
+// so the A–Z letter comes from the real surname — never a "(", number or symbol.
+function cleanForSort(name) {
+  return (name || '').replace(/\([^)]*\)/g, ' ').split(',')[0].replace(/\s+/g, ' ').trim()
+}
+function surnameOf(name) { const p = cleanForSort(name).split(/\s+/).filter(Boolean); return p.length ? p[p.length - 1] : '' }
+function firstAlpha(s) { const m = (s || '').match(/[a-zA-Z]/); return m ? m[0].toUpperCase() : '' }
+function letterOf(name) { return firstAlpha(surnameOf(name)) || firstAlpha(cleanForSort(name)) || firstAlpha(name) || '#' }
+function sortKey(name) {
+  const p = cleanForSort(name).split(/\s+/).filter(Boolean)
+  const last = p.length ? p[p.length - 1] : '', first = p.slice(0, -1).join(' ')
+  return (last + ' ' + first + ' ' + (name || '')).toLowerCase()
+}
 function pluralize(l) { return /s$/i.test(l) ? l : l + 's' }
 function excerpt(s, n = 46) { s = (s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s }
 function shortDate(ts) {
