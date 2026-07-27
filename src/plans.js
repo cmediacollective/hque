@@ -36,6 +36,7 @@ export const PLANS = [
     features: [
       'Everything in Starter',
       'Unlimited talent',
+      'Contacts CRM (10,000 contacts)',
       '5 team members',
       'Reports & analytics',
       'Priority support',
@@ -50,6 +51,7 @@ export const PLANS = [
     description: 'For established agencies and brands running high-volume talent operations across multiple campaigns and clients.',
     features: [
       'Everything in Pro',
+      'Contacts CRM (unlimited contacts)',
       'Unlimited team members',
       'Full white-label branding',
       'Custom onboarding',
