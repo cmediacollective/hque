@@ -295,7 +295,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
 
   function marker(p) {
     if (p.kind === 'talent') {
-      if (p.photoUrl) return <img src={p.photoUrl} alt="" style={{ width: 44, height: 44, borderRadius: 1, objectFit: 'cover', filter: 'saturate(0.55)', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
+      if (p.photoUrl) return <img src={p.photoUrl} alt="" style={{ width: 44, height: 44, borderRadius: 1, objectFit: 'cover', display: 'block' }} onError={e => { e.target.style.display = 'none' }} />
       return <div style={{ width: 44, height: 44, borderRadius: 1, border: `1px dashed ${dark ? '#3a3a3a' : '#cfc9c0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, letterSpacing: '0.12em', color: dark ? '#666' : '#bbb', fontFamily: UI }}>ADD</div>
     }
     const col = p.kind === 'manager' ? accent : accentSoft
@@ -353,7 +353,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     return (
       <div key={p.id} style={{ border: `1px solid ${accent}`, borderRadius: 1, background: cardBg, margin: '6px 0 4px', display: 'flex', overflow: 'hidden' }}>
         {p.kind === 'talent' && (p.photoUrl
-          ? <img src={p.photoUrl} alt="" style={{ width: 220, flexShrink: 0, objectFit: 'cover', filter: 'saturate(0.55)' }} />
+          ? <img src={p.photoUrl} alt="" style={{ width: 220, flexShrink: 0, objectFit: 'cover' }} />
           : <div style={{ width: 220, flexShrink: 0, background: dark ? '#242424' : '#efece7', display: 'flex', alignItems: 'center', justifyContent: 'center', ...uppLbl, letterSpacing: '0.18em' }}>No photo</div>)}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, padding: '24px 26px 18px' }}>
