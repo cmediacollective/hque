@@ -811,7 +811,7 @@ function App() {
             <div>
               <OrgSwitcher orgs={myOrgs} activeOrgId={orgId} onSwitch={switchOrg} onCreate={createOrg} canCreate={!myOrgs.some(o => o.role === 'owner' && o.is_lifetime)} dark={dark} colors={{ text, subtle, muted, border, nav }} isMobile={isMobile} />
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
-              {view === 'contacts' && <div style={{ fontSize: isMobile ? '11px' : '12px', color: subtle, marginTop: '3px', maxWidth: '64ch', lineHeight: 1.5 }}>Your agency's digital rolodex — everyone you work with in one place, with your talent, their managers and companies pulled in automatically.</div>}
+              {view === 'contacts' && <div style={{ fontSize: isMobile ? '11px' : '12px', color: dark ? '#D2CDC5' : '#3A3A3A', marginTop: '3px', maxWidth: '64ch', lineHeight: 1.5 }}>Your company's digital rolodex — everyone you work with in one place, with your talent, their managers and companies pulled in automatically.</div>}
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {view === 'campaigns' && (
