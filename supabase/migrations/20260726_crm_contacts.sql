@@ -84,7 +84,7 @@ declare
   v_count int;
 begin
   select stripe_plan into v_plan from public.organizations where id = NEW.org_id;
-  v_limit := case v_plan when 'starter' then 500 when 'pro' then 5000 else null end; -- null = unlimited
+  v_limit := case v_plan when 'starter' then 1000 when 'pro' then 10000 else null end; -- null = unlimited
   if v_limit is null then
     return NEW;
   end if;

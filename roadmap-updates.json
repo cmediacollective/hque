@@ -1,5 +1,11 @@
 [
   {
+    "title": "Contacts — your agency CRM, now for everyone",
+    "description": "The new Contacts page is a rolodex-style CRM for everyone your agency works with — clients, prospects, press, vendors, plus your talent, their managers, and companies pulled in automatically. Browse by an A–Z letter rail, click any name to expand its details in place (email, last touch, active campaigns, notes), and open a manager's roster in one click. Talent show a photo, everyone else a clean marker. You can add your own contact types in Settings, and it's on every plan: 1,000 contacts on Starter, 10,000 on Pro, unlimited on Business. Talent, managers, and companies don't count toward the limit.",
+    "category": "Feature",
+    "shipped_at": "2026-07-26"
+  },
+  {
     "title": "Cleaner, better-organized Settings screens",
     "description": "The Agency Info, Workspace Personalization, and Default Labels screens used to be one long plain form. They're now grouped into tidy cards with clear section headings, rounded white input boxes that match the rest of the app, and short fields (like Website and Timezone) laid out side by side so there's less scrolling.",
     "category": "Improvement",

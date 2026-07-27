@@ -15,6 +15,7 @@ export const PLANS = [
     features: [
       'Up to 50 talent',
       '2 team members',
+      'Contacts CRM (1,000 contacts)',
       'Talent roster management',
       'Campaign tracking & outreach',
       'Talent inquiry form',
@@ -62,6 +63,7 @@ export const PLANS = [
 // Values: true (included), false (not included), or a string (e.g. a number/label).
 export const COMPARE = [
   { label: 'Talent / creators', starter: 'Up to 50', pro: 'Unlimited', agency: 'Unlimited' },
+  { label: 'CRM contacts', starter: '1,000', pro: '10,000', agency: 'Unlimited' },
   { label: 'Team members', starter: '2', pro: '5', agency: 'Unlimited' },
   { label: 'Talent roster management', starter: true, pro: true, agency: true },
   { label: 'Campaign tracking & outreach', starter: true, pro: true, agency: true },
@@ -79,7 +81,7 @@ export const COMPARE = [
 // Per-plan hard limits, keyed by organizations.stripe_plan.
 // null (trial) and anything unrecognized get full access — trials are unrestricted.
 export function planLimits(stripePlan) {
-  if (stripePlan === 'starter') return { talent: 50, seats: 2, reports: false, contacts: 500 }
-  if (stripePlan === 'pro') return { talent: Infinity, seats: 5, reports: true, contacts: 5000 }
+  if (stripePlan === 'starter') return { talent: 50, seats: 2, reports: false, contacts: 1000 }
+  if (stripePlan === 'pro') return { talent: Infinity, seats: 5, reports: true, contacts: 10000 }
   return { talent: Infinity, seats: Infinity, reports: true, contacts: Infinity }
 }

@@ -863,13 +863,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
               <TalentLabelsManager orgId={orgId} dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
             </div>
 
-            {/* Contact Types — the CRM's category list. Master-only while the
-                CRM (Contacts) is in internal preview. */}
-            {isMaster && !previewing && (
-              <div style={panelStyle}>
-                <ContactTypesManager orgId={orgId} dark={dark} canEdit={currentUserRole === 'owner' || currentUserRole === 'admin'} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
-              </div>
-            )}
+            {/* Contact Types — the CRM's category list (owners/admins). */}
+            <div style={panelStyle}>
+              <ContactTypesManager orgId={orgId} dark={dark} canEdit={currentUserRole === 'owner' || currentUserRole === 'admin'} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
+            </div>
           </div>
         )}
 
