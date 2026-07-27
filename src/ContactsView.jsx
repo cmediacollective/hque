@@ -321,8 +321,8 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     return [p.title, p.company].filter(Boolean).join(' · ') || (p.type ? '' : '')
   }
   function nameEl(p, big = false) {
-    const { first, last } = splitName(p.name)
-    return <span style={{ fontFamily: SERIF, fontSize: big ? 32 : 16, color: ink, lineHeight: 1.1 }}>{first && <span style={{ fontFamily: UI, fontWeight: 500 }}>{first} </span>}{last}</span>
+    // One consistent font for the whole name — first, surname and any company suffix.
+    return <span style={{ fontFamily: SERIF, fontSize: big ? 32 : 16, fontWeight: big ? 400 : 500, color: ink, lineHeight: 1.1 }}>{p.name}</span>
   }
 
   // ── row ──
