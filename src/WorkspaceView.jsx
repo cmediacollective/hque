@@ -601,7 +601,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               <div style={{ flex: 1 }}>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text, lineHeight: 1.2 }}>{selectedBrand.name}</div>
                 <div style={{ fontSize: '10px', color: subtle, letterSpacing: '0.14em', marginTop: '3px' }}>
-                  {boardReady ? `${tasks.length} ${tasks.length === 1 ? 'task' : 'tasks'}` : '…'}
+                  {boardReady ? (() => {
+                    // Header count is what's still outstanding — done/completed tasks don't count.
+                    const openCount = tasks.filter(t => !doneColumnIds.has(t.column_id)).length
+                    return `${openCount} ${openCount === 1 ? 'task' : 'tasks'}`
+                  })() : '…'}
                   {selectedBrand.website && (<> · <a href={selectedBrand.website} target='_blank' rel='noreferrer' style={{ color: '#5b7c99', textDecoration: 'none' }}>Website ↗</a></>)}
                 </div>
               </div>
