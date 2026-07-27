@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 import { useClientLabel, PERSONALIZATION_NEW_UNTIL } from './useClientLabel'
+import { doneColumnIdsAcrossBoards } from './boardUtils'
 
 // fullWidth: on mobile the brand list is its own full-screen step (you pick a
 // brand, then the board takes the whole screen), so it fills the width instead
@@ -132,7 +133,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     // Fetch boards (to map brand_id ↔ board_id) and all non-archived tasks
     const [boardsRes, tasksRes] = await Promise.all([
       supabase.from('boards').select('id, brand_id').eq('org_id', orgId).neq('status', 'archived'),
-      supabase.from('tasks').select('board_id').eq('org_id', orgId)
+      supabase.from('tasks').select('board_id, column_id').eq('org_id', orgId)
     ])
     const boards = boardsRes.data
     const tasks = tasksRes.data
@@ -141,10 +142,20 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     const boardToBrand = {}
     ;(boards || []).forEach(b => { boardToBrand[b.id] = b.brand_id })
 
+    // These counts are "what's still outstanding", so skip anything in a Done
+    // column — same rule the board header uses, via the shared helper.
+    const boardIds = (boards || []).map(b => b.id)
+    let doneIds = new Set()
+    if (boardIds.length) {
+      const { data: cols } = await supabase.from('board_columns').select('id, board_id, name, position').in('board_id', boardIds)
+      doneIds = doneColumnIdsAcrossBoards(cols)
+    }
+
     // Count tasks per brand
     const counts = {}
     let internal = 0
     ;(tasks || []).forEach(t => {
+      if (doneIds.has(t.column_id)) return
       const brandId = boardToBrand[t.board_id]
       if (brandId) counts[brandId] = (counts[brandId] || 0) + 1
       else if (t.board_id && boardToBrand[t.board_id] === null) internal += 1

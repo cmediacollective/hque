@@ -1,7 +1,7 @@
 [
   {
-    "title": "Board task count no longer counts finished tasks",
-    "description": "The task count under a client's name at the top of their board used to include everything sitting in the Done column, so it never matched what you actually had left. It now counts only outstanding tasks.",
+    "title": "Task counts no longer count finished tasks",
+    "description": "The task count under a client's name at the top of their board, and the number next to each client in the left sidebar, used to include everything sitting in the Done column — so neither matched what you actually had left. Both now count only outstanding tasks, and both use the same rule so they always agree.",
     "category": "Improvement",
     "shipped_at": "2026-07-26"
   },

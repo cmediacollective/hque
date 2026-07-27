@@ -8,9 +8,9 @@ import { useClientLabel } from './useClientLabel'
 import { createNotification, parseMentions, addTaskWatchers } from './notify'
 import { cacheGet, cacheSet } from './dataCache'
 import { BoardSkeleton } from './Skeletons'
+import { DONE_COLUMN_NAMES, doneColumnIds as computeDoneColumnIds } from './boardUtils'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
-const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const PRIORITIES = ['Low', 'Medium', 'High']
 
 function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
@@ -505,18 +505,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     return list
   }
 
-  const doneColumnIds = (() => {
-    const ids = new Set()
-    if (!columns || columns.length === 0) return ids
-    let last = columns[0]
-    columns.forEach(c => {
-      const nameLower = (c.name || '').trim().toLowerCase()
-      if (DONE_COLUMN_NAMES.includes(nameLower)) ids.add(c.id)
-      if (c.position > last.position) last = c
-    })
-    ids.add(last.id)
-    return ids
-  })()
+  const doneColumnIds = computeDoneColumnIds(columns)
 
   // The rightmost column, collapsed by default when it's a "done"-type column,
   // so it stays visible at the board edge without taking a full column's width.

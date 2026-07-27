@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-26
 
-**Board header task count now ignores finished work.** The count under a client's name at the top of their board (e.g. "9 tasks") was including everything in the Done column, so it never matched what you actually had left to do. It now counts only outstanding tasks.
+**Task counts now ignore finished work.** The count under a client's name at the top of their board (e.g. "9 tasks") and the number next to each client in the left sidebar were both including everything in the Done column, so they never matched what you actually had left to do. Both now count only outstanding tasks, and both use the same shared rule so they can't drift apart again.
 
 **Contacts CRM is now live for everyone.** Removed the master-account gate — every account now has the Contacts tab in the sidebar, and Contact Types customization is available to all owners/admins. Contact limits by tier: Starter 1,000, Pro 10,000, Business unlimited (talent, their managers, and companies never count). Added a "CRM contacts" row to the pricing comparison and a "Contacts CRM" bullet to the plans. Requires the one-line Supabase SQL to raise the database-side caps from the preview values.
 
