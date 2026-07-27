@@ -682,6 +682,9 @@ function App() {
 
   const viewLabel = view === 'metrics' ? 'HQue Metrics' : (navItems.find(n => n.key === view)?.pageLabel || navItems.find(n => n.key === view)?.label || 'HQue')
 
+  // "New" badge on the Contacts nav item — auto-hides after two weeks (launched 2026-07-26).
+  const contactsNew = Date.now() < new Date('2026-08-09T23:59:59').getTime()
+
   const viewLoader = (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
       <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.3em', textTransform: 'uppercase' }}>Loading…</div>
@@ -739,7 +742,7 @@ function App() {
                 borderLeft: view === key ? '1.5px solid #5b7c99' : '1.5px solid transparent',
                 textAlign: 'left', cursor: 'pointer', width: '100%',
                 fontWeight: view === key ? '500' : '400'
-              }}>{label}</button>
+              }}>{label}{key === 'contacts' && contactsNew && <span style={{ marginLeft: '8px', fontSize: '7px', letterSpacing: '0.12em', color: '#fff', background: '#5b7c99', borderRadius: '2px', padding: '2px 5px', verticalAlign: 'middle' }}>New</span>}</button>
             ))}
             <MiniCalendar dark={dark} agencyTz={agencyTz} />
             <div style={{ marginTop: 'auto', padding: '0 0 12px' }}>
