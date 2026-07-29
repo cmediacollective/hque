@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-28
+
+**Facebook added to the website footer.** The footer social icons now include Facebook (facebook.com/hqueapp) alongside Instagram and LinkedIn, and Facebook was added to the site's search-engine profile links so Google connects the page to HQue.
+
+---
+
 ## 2026-07-26
 
 **Task counts now ignore finished work.** The count under a client's name at the top of their board (e.g. "9 tasks") and the number next to each client in the left sidebar were both including everything in the Done column, so they never matched what you actually had left to do. Both now count only outstanding tasks, and both use the same shared rule so they can't drift apart again.

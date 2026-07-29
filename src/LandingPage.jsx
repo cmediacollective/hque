@@ -427,7 +427,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
         url: 'https://h-que.com',
         logo: 'https://h-que.com/logo.svg',
         description: 'HQue is the agency operating system for talent and influencer agencies, brands managing talent in-house, and solo talent managers.',
-        sameAs: ['https://instagram.com/theofficialHQue', 'https://www.linkedin.com/company/h-que'],
+        sameAs: ['https://instagram.com/theofficialHQue', 'https://www.linkedin.com/company/h-que', 'https://www.facebook.com/hqueapp/'],
       },
       {
         '@context': 'https://schema.org',
