@@ -1,5 +1,11 @@
 [
   {
+    "title": "Talent filters that stay tidy no matter how many labels you have",
+    "description": "If you've built out a long list of Types and Niches, the Talent filter bar used to show every single one as a chip — stacking up row after row and pushing your roster off the screen. It's now two compact dropdowns: All Types and All Niches. Each one has a search box, so you type a few letters instead of hunting through the whole list, and every label shows how many talent it would bring back — which also makes it easy to spot labels nobody is using. Your current pick sits on the button with an × to clear it, and a running count shows how many talent match. The bar stays one line tall however many labels you add.",
+    "category": "Improvement",
+    "shipped_at": "2026-07-29"
+  },
+  {
     "title": "Task counts no longer count finished tasks",
     "description": "The task count under a client's name at the top of their board, and the number next to each client in the left sidebar, used to include everything sitting in the Done column — so neither matched what you actually had left. Both now count only outstanding tasks, and both use the same rule so they always agree.",
     "category": "Improvement",
