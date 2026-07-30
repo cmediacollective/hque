@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-30
 
-**August holidays added to the dashboard greeting.** August was a blank month — the "Did you know?" panel had nothing between World Emoji Day (Jul 17) and Sep 19. Added six of the big social-media holidays, each with a fact about that specific day: International Cat Day (8th), Book Lovers Day (9th), S'mores Day (10th), National Relaxation Day (15th), Tell a Joke Day (16th) and National Dog Day (26th).
+**August holidays added to the dashboard greeting.** August was a blank month — the "Did you know?" panel had nothing between World Emoji Day (Jul 17) and Sep 19. Added six of the big social-media holidays: International Cat Day (8th), Book Lovers Day (9th), S'mores Day (10th), National Relaxation Day (15th), Tell a Joke Day (16th) and National Dog Day (26th). Each one gets its own label instead of the standard "Did you know?" — "Cat fact", "Word of the day", "Campfire science", "Permission slip", "Dog fact" — and on Tell a Joke Day it actually tells a joke rather than explaining the history of jokes.
 
 ---
 
