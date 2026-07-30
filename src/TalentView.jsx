@@ -145,10 +145,14 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
 
 
-  const displayType = (c) => {
+  // Cards live in a fixed grid, so a talent who carries ten types can't be
+  // allowed to push their own name halfway down the card. Show the first two
+  // and count the rest — the same "+N" shorthand the niches line already uses.
+  // The full list is always on the talent's detail page.
+  const displayType = (c, max = 2) => {
     if (!c) return ''
-    if (Array.isArray(c.types) && c.types.length) return c.types.join(' · ')
-    return c.type || 'Influencer'
+    const list = (Array.isArray(c.types) && c.types.length) ? c.types : (c.type ? [c.type] : ['Influencer'])
+    return list.slice(0, max).join(' · ') + (list.length > max ? ' +' + (list.length - max) : '')
   }
 
   const cols = isMobile ? 'repeat(1, 1fr)' : 'repeat(auto-fill, minmax(280px, 1fr))'
@@ -287,9 +291,12 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', marginBottom: '14px' }}>
                 <Avatar creator={c} size={isMobile ? 88 : 96} square={true} dark={dark} />
                 <div style={{ flex: 1, minWidth: 0, paddingTop: '4px', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px' }}>{displayType(c)}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-                  <div style={{ fontSize: '11px', color: muted, marginBottom: '6px' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>
+                  {/* Every line below is capped to a fixed height so the name,
+                      handle and niches sit on the same baseline on every card,
+                      however many types or niches a talent carries. */}
+                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '4px', lineHeight: 1.6, height: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayType(c)}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontWeight: 600, fontSize: isMobile ? '15px' : '16px', color: text, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                  <div style={{ fontSize: '11px', color: muted, marginBottom: '6px', lineHeight: 1.4, height: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>
                   <div style={{ fontSize: '9px', color: subtle, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.6, height: '16px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{Array.isArray(c.niches) && c.niches.length > 0 ? c.niches.slice(0, 2).join(' · ') + (c.niches.length > 2 ? ' +' + (c.niches.length - 2) : '') : ''}</div>
                 </div>
               </div>
@@ -329,7 +336,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Avatar creator={c} size={40} square={true} dark={dark} />
                 <div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '14px', color: text }}>{c.name}</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontWeight: 600, fontSize: '14px', color: text }}>{c.name}</div>
                   <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{c.handles?.instagram ? <a href={`https://instagram.com/${c.handles.instagram}`} target='_blank' rel='noreferrer' onClick={e => e.stopPropagation()} style={{ color: muted, textDecoration: 'none' }}>@{c.handles.instagram}</a> : ''}</div>
                 </div>
               </div>
