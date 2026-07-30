@@ -4,7 +4,7 @@ import AddCreatorForm from './AddCreatorForm'
 import CreatorDetail from './CreatorDetail'
 import CampaignDetail from './CampaignDetail'
 import { ensureSlug } from './slugUtil'
-import { filterChipStyle } from './uiStyles'
+import FilterMenu from './FilterMenu'
 import { useTalentLabels } from './useTalentLabels'
 import { useCachedResource } from './useCachedResource'
 import { CardGridSkeleton, ListSkeleton } from './Skeletons'
@@ -58,7 +58,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   const fetchCreators = refetch
   // This company's own filter chips (Settings > Talent Labels).
   const { types: orgTypes, niches: orgNiches } = useTalentLabels(orgId)
-  const TYPES = ['All Types', ...orgTypes]
   const NICHES = orgNiches
   const view = talentView
   const [typeFilter, setTypeFilter] = useState('All Types')
@@ -144,9 +143,24 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     .sort((a, b) => (a.name || '').localeCompare(b.name || '')),
     [creators, typeFilter, nicheFilter, search])
 
-  const chip = (label, active, onClick) => (
-    <button onClick={onClick} style={{ ...filterChipStyle(dark, active), flexShrink: 0 }}>{label}</button>
-  )
+  // Each menu row shows how many talent it would return *given the other filter*,
+  // so a label that leads to an empty roster is visible before it's clicked — and
+  // labels nobody has used read as 0.
+  const hasType = (c, t) => c.type === t || (Array.isArray(c.types) && c.types.includes(t))
+  const hasNiche = (c, n) => Array.isArray(c.niches) && c.niches.includes(n)
+
+  const typeCounts = useMemo(() => {
+    const pool = nicheFilter ? creators.filter(c => hasNiche(c, nicheFilter)) : creators
+    return Object.fromEntries(orgTypes.map(t => [t, pool.filter(c => hasType(c, t)).length]))
+  }, [creators, orgTypes, nicheFilter])
+
+  const nicheCounts = useMemo(() => {
+    const pool = typeFilter === 'All Types' ? creators : creators.filter(c => hasType(c, typeFilter))
+    return Object.fromEntries(NICHES.map(n => [n, pool.filter(c => hasNiche(c, n)).length]))
+  }, [creators, NICHES, typeFilter])
+
+  const countForType = t => typeCounts[t] ?? 0
+  const countForNiche = n => nicheCounts[n] ?? 0
 
 
   const displayType = (c) => {
@@ -204,28 +218,34 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
 
       <div style={{ padding: isMobile ? '8px 12px' : '10px 28px', borderBottom: `0.5px solid ${border}`, background: bg }}>
         {!showArchived && (
-          <div style={isMobile
-            ? { display: 'flex', overflowX: 'auto', gap: '5px', alignItems: 'center', paddingBottom: '2px', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }
-            : { display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }
-          }>
-            {TYPES.map(t => {
-              // "All Types" is the "no filter" state — it should only look active
-              // when no niche or specific type is applied, and clicking it clears both.
-              if (t === 'All Types') {
-                const allActive = typeFilter === 'All Types' && !nicheFilter
-                return chip(t, allActive, () => { setTypeFilter('All Types'); setNicheFilter(null) })
-              }
-              return chip(t, typeFilter === t, () => setTypeFilter(typeFilter === t ? 'All Types' : t))
-            })}
-            <div style={{ width: '0.5px', height: '14px', background: border2, margin: '0 2px', flexShrink: 0 }} />
-            {NICHES.map(n => chip(n, nicheFilter === n, () => setNicheFilter(nicheFilter === n ? null : n)))}
-            {!isMobile && (
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-                
-
-
-              </div>
+          // Two dropdowns rather than a chip per label: agencies define their own
+          // Type/Niche lists, and a long one used to wrap the bar over seven rows
+          // and push the roster off screen. This stays one line at any list length.
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <FilterMenu
+              label='All Types'
+              options={orgTypes}
+              value={typeFilter === 'All Types' ? null : typeFilter}
+              onChange={v => setTypeFilter(v || 'All Types')}
+              countFor={countForType}
+              dark={dark} />
+            <FilterMenu
+              label='All Niches'
+              options={NICHES}
+              value={nicheFilter}
+              onChange={setNicheFilter}
+              countFor={countForNiche}
+              dark={dark}
+              align={isMobile ? 'right' : 'left'} />
+            {(typeFilter !== 'All Types' || nicheFilter) && (
+              <button onClick={() => { setTypeFilter('All Types'); setNicheFilter(null) }}
+                style={{ fontSize: '12px', background: 'none', border: 'none', color: muted, cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px', padding: '4px 2px', flexShrink: 0 }}>Clear</button>
             )}
+            <div style={{ marginLeft: 'auto', fontSize: '11.5px', color: subtle, flexShrink: 0 }}>
+              {status === 'success' && (filtered.length === creators.length
+                ? `${creators.length} talent`
+                : `${filtered.length} of ${creators.length}`)}
+            </div>
           </div>
         )}
         {showArchived && (

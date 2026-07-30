@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-29
+
+**Talent filters no longer sprawl.** Agencies with a lot of custom labels were seeing every Type and every Niche rendered as a chip in one long wrapping row — one roster had 25 types and 49 niches, so the filter bar ran seven rows deep and pushed the talent cards off the screen. The two filters are now compact dropdowns: **All Types ▾** and **All Niches ▾**. Each opens a searchable list, so you type a few letters instead of hunting through 70 chips, and every label shows how many talent it would return — which also makes it obvious at a glance which labels nobody is using. Your current pick sits right on the button with an × to clear it, there's a Clear link when both are set, and a running "12 of 48" count sits at the right. The bar is now one line tall no matter how many labels an agency adds.
+
+---
+
 ## 2026-07-28
 
 **Facebook added to the website footer.** The footer social icons now include Facebook (facebook.com/hqueapp) alongside Instagram and LinkedIn, and Facebook was added to the site's search-engine profile links so Google connects the page to HQue.
