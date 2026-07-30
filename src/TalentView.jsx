@@ -143,24 +143,6 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
     .sort((a, b) => (a.name || '').localeCompare(b.name || '')),
     [creators, typeFilter, nicheFilter, search])
 
-  // Each menu row shows how many talent it would return *given the other filter*,
-  // so a label that leads to an empty roster is visible before it's clicked — and
-  // labels nobody has used read as 0.
-  const hasType = (c, t) => c.type === t || (Array.isArray(c.types) && c.types.includes(t))
-  const hasNiche = (c, n) => Array.isArray(c.niches) && c.niches.includes(n)
-
-  const typeCounts = useMemo(() => {
-    const pool = nicheFilter ? creators.filter(c => hasNiche(c, nicheFilter)) : creators
-    return Object.fromEntries(orgTypes.map(t => [t, pool.filter(c => hasType(c, t)).length]))
-  }, [creators, orgTypes, nicheFilter])
-
-  const nicheCounts = useMemo(() => {
-    const pool = typeFilter === 'All Types' ? creators : creators.filter(c => hasType(c, typeFilter))
-    return Object.fromEntries(NICHES.map(n => [n, pool.filter(c => hasNiche(c, n)).length]))
-  }, [creators, NICHES, typeFilter])
-
-  const countForType = t => typeCounts[t] ?? 0
-  const countForNiche = n => nicheCounts[n] ?? 0
 
 
   const displayType = (c) => {
@@ -227,14 +209,12 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
               options={orgTypes}
               value={typeFilter === 'All Types' ? null : typeFilter}
               onChange={v => setTypeFilter(v || 'All Types')}
-              countFor={countForType}
               dark={dark} />
             <FilterMenu
               label='All Niches'
               options={NICHES}
               value={nicheFilter}
               onChange={setNicheFilter}
-              countFor={countForNiche}
               dark={dark}
               align={isMobile ? 'right' : 'left'} />
             {(typeFilter !== 'All Types' || nicheFilter) && (

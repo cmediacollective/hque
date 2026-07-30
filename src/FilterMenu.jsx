@@ -11,8 +11,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 //   options  – array of label strings
 //   value    – the selected label, or null for "no filter"
 //   onChange – called with the new label, or null when cleared
-//   countFor – optional (label) => number, shown at the right of each row
-export default function FilterMenu({ label, options, value, onChange, countFor, dark, align = 'left' }) {
+export default function FilterMenu({ label, options, value, onChange, dark, align = 'left' }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const wrapRef = useRef(null)
@@ -90,7 +89,6 @@ export default function FilterMenu({ label, options, value, onChange, countFor, 
             )}
             {hits.map(o => {
               const active = value === o
-              const n = countFor ? countFor(o) : null
               return (
                 <button key={o}
                   onClick={() => { onChange(active ? null : o); setOpen(false) }}
@@ -99,7 +97,6 @@ export default function FilterMenu({ label, options, value, onChange, countFor, 
                   style={{ display: 'flex', alignItems: 'center', gap: '9px', width: '100%', textAlign: 'left', padding: '7px 9px', fontSize: '12.5px', border: 'none', borderRadius: '6px', background: 'none', color: text, cursor: 'pointer' }}>
                   <span style={{ width: '14px', height: '14px', flexShrink: 0, borderRadius: '4px', border: `1px solid ${active ? accent : border}`, background: active ? accent : 'transparent', color: '#fff', fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{active ? '✓' : ''}</span>
                   <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o}</span>
-                  {n != null && <span style={{ marginLeft: 'auto', fontSize: '11px', color: subtle, flexShrink: 0 }}>{n}</span>}
                 </button>
               )
             })}
