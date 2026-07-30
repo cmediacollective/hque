@@ -433,11 +433,11 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               // character collapsed to a five-pixel smudge that nobody could see.
               <span title='Drag to reorder'
                 onClick={e => e.stopPropagation()}
-                style={{ position: 'absolute', left: '1px', top: 0, bottom: 0, width: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: subtle, cursor: 'grab' }}>
-                <svg width='8' height='14' viewBox='0 0 8 14' fill='currentColor' aria-hidden='true'>
-                  <circle cx='2' cy='3' r='1.2' /><circle cx='6' cy='3' r='1.2' />
-                  <circle cx='2' cy='7' r='1.2' /><circle cx='6' cy='7' r='1.2' />
-                  <circle cx='2' cy='11' r='1.2' /><circle cx='6' cy='11' r='1.2' />
+                style={{ position: 'absolute', left: '1px', top: 0, bottom: 0, width: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: muted, cursor: 'grab' }}>
+                <svg width='9' height='16' viewBox='0 0 9 16' fill='currentColor' aria-hidden='true'>
+                  <circle cx='2.5' cy='3' r='1.4' /><circle cx='6.5' cy='3' r='1.4' />
+                  <circle cx='2.5' cy='8' r='1.4' /><circle cx='6.5' cy='8' r='1.4' />
+                  <circle cx='2.5' cy='13' r='1.4' /><circle cx='6.5' cy='13' r='1.4' />
                 </svg>
               </span>
             )}
