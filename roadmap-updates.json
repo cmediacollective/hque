@@ -1,5 +1,11 @@
 [
   {
+    "title": "Drag your workspace list into the order you want",
+    "description": "Your workspace sidebar has always been alphabetical, which meant the only way to get something to the top was to rename it with a dash or a number in front. Now owners and admins can just hover an entry and drag it by the handle on the left. The order you set is shared with your whole team, alphabetical stays the default until someone drags something, and there's an A–Z button in the header to put it straight back. Anything you add later joins the end of the list, and your personal pins still sit above everything.",
+    "category": "Feature",
+    "shipped_at": "2026-07-29"
+  },
+  {
     "title": "Talent filters that stay tidy no matter how many labels you have",
     "description": "If you've built out a long list of Types and Niches, the Talent filter bar used to show every single one as a chip — stacking up row after row and pushing your roster off the screen. It's now two compact dropdowns: All Types and All Niches. Each one has a search box, so you type a few letters instead of hunting through the whole list, and every label shows how many talent it would bring back — which also makes it easy to spot labels nobody is using. Your current pick sits on the button with an × to clear it, and a running count shows how many talent match. The bar stays one line tall however many labels you add.",
     "category": "Improvement",

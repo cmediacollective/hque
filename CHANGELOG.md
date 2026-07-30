@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-07-29
 
+**Drag your projects into the order you want.** The workspace sidebar was alphabetical only, so workspaces that wanted certain entries at the top were renaming them with a leading dash ("-Admin", "-Finances") to game the sort — a hack that then shows up in exports, board headers and campaign dropdowns. Owners and admins can now hover any entry and drag it by the ⠿ handle on the left. The order is shared with the whole team (matching what the dash-prefix trick already did), alphabetical stays the default until someone drags, and an "A–Z" button in the section header puts it back. Anything added later joins the end of the list. Personal pins (★) still float above everything, unchanged. Requires the Supabase SQL in supabase/migrations/20260730_brand_order.sql.
+
 **Talent filters no longer sprawl.** Agencies with a lot of custom labels were seeing every Type and every Niche rendered as a chip in one long wrapping row — one roster had 25 types and 49 niches, so the filter bar ran seven rows deep and pushed the talent cards off the screen. The two filters are now compact dropdowns: **All Types ▾** and **All Niches ▾**. Each opens a searchable list, so you type a few letters instead of hunting through 70 chips, and every label shows how many talent it would return — which also makes it obvious at a glance which labels nobody is using. Your current pick sits right on the button with an × to clear it, there's a Clear link when both are set, and a running "12 of 48" count sits at the right. The bar is now one line tall no matter how many labels an agency adds.
 
 ---

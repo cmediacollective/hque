@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 import { useClientLabel, PERSONALIZATION_NEW_UNTIL } from './useClientLabel'
@@ -75,6 +75,8 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   const [hovering, setHovering] = useState(null)
   const [openMenuId, setOpenMenuId] = useState(null)
   const [editingBrandId, setEditingBrandId] = useState(null)
+  const [dragOverId, setDragOverId] = useState(null)
+  const dragBrandRef = useRef(null)
   const clientLabel = useClientLabel(orgId)
 
   // One-time nudge for owners/admins: you can now rename this section. Shown
@@ -108,10 +110,17 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     const enriched = (brandsData || []).map(b => ({ ...b, pinned_at: pinMap[b.id] || null }))
     const active = enriched.filter(b => b.status !== 'archived')
     const archived = enriched.filter(b => b.status === 'archived')
+    // Your own pins first, then the workspace's dragged order, then A–Z. A brand
+    // with no position (never dragged, or created after the last reorder) sorts
+    // alphabetically at the end rather than jumping into the middle.
     active.sort((a, b) => {
       if (a.pinned_at && !b.pinned_at) return -1
       if (!a.pinned_at && b.pinned_at) return 1
       if (a.pinned_at && b.pinned_at) return new Date(b.pinned_at) - new Date(a.pinned_at)
+      const ap = a.position, bp = b.position
+      if (ap != null && bp == null) return -1
+      if (ap == null && bp != null) return 1
+      if (ap != null && bp != null && ap !== bp) return ap - bp
       return a.name.localeCompare(b.name)
     })
     setBrands(active)
@@ -249,6 +258,47 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     ? brands.filter(b => b.name.toLowerCase().includes(search.toLowerCase()))
     : brands
 
+  // ── Drag to reorder ────────────────────────────────────────────────────────
+  // Owners/admins only, and only on the plain unfiltered list — dropping onto a
+  // search result would write an order derived from rows you can't see. Pinned
+  // brands are excluded: a pin already decides where it sits.
+  const canReorder = isAdmin && !showArchived && !search
+  const hasCustomOrder = brands.some(b => b.position != null)
+
+  async function persistOrder(ordered) {
+    setBrands(ordered)   // paint immediately; the sidebar shouldn't wait on the round trip
+    const ids = ordered.filter(b => !b.pinned_at).map(b => b.id)
+    const { error: reorderErr } = await supabase.rpc('reorder_brands', { p_org_id: orgId, p_brand_ids: ids })
+    if (reorderErr) { console.error(reorderErr); fetchBrands() }   // put it back if the write was refused
+  }
+
+  function onDropBrand(targetId) {
+    const draggedId = dragBrandRef.current
+    dragBrandRef.current = null
+    setDragOverId(null)
+    if (!draggedId || draggedId === targetId) return
+    const list = [...brands]
+    const from = list.findIndex(b => b.id === draggedId)
+    const to = list.findIndex(b => b.id === targetId)
+    if (from < 0 || to < 0) return
+    const [moved] = list.splice(from, 1)
+    list.splice(to, 0, moved)
+    // Positions are 1..n over the unpinned rows, so re-index after the move.
+    let i = 0
+    persistOrder(list.map(b => b.pinned_at ? b : { ...b, position: ++i }))
+  }
+
+  async function resetOrder() {
+    setBrands(bs => [...bs].map(b => ({ ...b, position: null }))
+      .sort((a, b) => {
+        if (a.pinned_at && !b.pinned_at) return -1
+        if (!a.pinned_at && b.pinned_at) return 1
+        return a.name.localeCompare(b.name)
+      }))
+    const { error: resetErr } = await supabase.rpc('reset_brand_order', { p_org_id: orgId })
+    if (resetErr) { console.error(resetErr); fetchBrands() }
+  }
+
   const initial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
   const colorFromName = (name) => {
@@ -311,6 +361,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             </button>
           )}
+          {canReorder && hasCustomOrder && (
+            <button title='Back to alphabetical order' onClick={resetOrder}
+              style={{ background: 'none', border: 'none', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: subtle, cursor: 'pointer', padding: 0, fontWeight: 500 }}>
+              A–Z
+            </button>
+          )}
         </div>
         {archivedBrands.length > 0 && (
           <button onClick={() => setShowArchived(!showArchived)}
@@ -352,6 +408,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             onClick={() => onSelectBrand?.(b)}
             onMouseEnter={() => setHovering(b.id)}
             onMouseLeave={() => setHovering(null)}
+            draggable={canReorder && !b.pinned_at}
+            onDragStart={() => { dragBrandRef.current = b.id }}
+            onDragEnd={() => { dragBrandRef.current = null; setDragOverId(null) }}
+            onDragOver={e => { if (canReorder && dragBrandRef.current) { e.preventDefault(); setDragOverId(b.id) } }}
+            onDragLeave={() => setDragOverId(d => d === b.id ? null : d)}
+            onDrop={e => { e.preventDefault(); onDropBrand(b.id) }}
             style={{
               padding: '11px 14px',
               display: 'flex',
@@ -360,8 +422,16 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               cursor: 'pointer',
               background: selectedBrandId === b.id ? selectedBg : hovering === b.id ? cardHover : 'transparent',
               borderLeft: selectedBrandId === b.id ? '2px solid #5b7c99' : '2px solid transparent',
+              // The row being dragged over gets the line, so you can see where it lands.
+              boxShadow: dragOverId === b.id && dragBrandRef.current !== b.id ? 'inset 0 2px 0 #5b7c99' : 'none',
+              opacity: dragBrandRef.current === b.id ? 0.4 : 1,
               position: 'relative'
             }}>
+            {canReorder && !b.pinned_at && hovering === b.id && (
+              <span title='Drag to reorder'
+                onClick={e => e.stopPropagation()}
+                style={{ position: 'absolute', left: '2px', color: subtle, cursor: 'grab', fontSize: '10px', letterSpacing: '-2px', lineHeight: 1 }}>⠿</span>
+            )}
             {b.logo_url ? (
               <img src={b.logo_url} alt={b.name} style={{ width: '34px', height: '34px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
             ) : (
