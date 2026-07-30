@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-07-30
+
+**August holidays added to the dashboard greeting.** August was a blank month — the "Did you know?" panel had nothing between World Emoji Day (Jul 17) and Sep 19. Added six of the big social-media holidays, each with a fact about that specific day: International Cat Day (8th), Book Lovers Day (9th), S'mores Day (10th), National Relaxation Day (15th), Tell a Joke Day (16th) and National Dog Day (26th).
+
+---
+
 ## 2026-07-29
 
 **Drag your workspace list into the order you want.** The sidebar was alphabetical only, so anyone who wanted certain entries at the top was renaming them with a leading dash ("-Admin", "-Finances") to game the sort — a hack that then shows up in exports, board headers and campaign dropdowns. Everyone can now hover any entry and drag it by the grip handle on the left. The order is **yours alone** — it's saved per person, so arranging your sidebar never moves anyone else's. Alphabetical stays the default until you drag something, an "A–Z" button in the section header puts it back, and anything added later joins the end of your list. Pins (★) still float above everything, and you can reorder within your pinned group too. Requires the Supabase SQL in supabase/migrations/20260730_user_brand_order.sql.
