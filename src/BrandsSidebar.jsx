@@ -98,21 +98,25 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
 
   async function fetchBrands() {
-    const [brandsRes, pinsRes] = await Promise.all([
+    // Pins and sidebar order are both personal — RLS returns only your rows.
+    const [brandsRes, pinsRes, orderRes] = await Promise.all([
       supabase.from('brands').select('*').eq('org_id', orgId).order('name', { ascending: true }),
-      supabase.from('user_brand_pins').select('brand_id, pinned_at')
+      supabase.from('user_brand_pins').select('brand_id, pinned_at'),
+      supabase.from('user_brand_orders').select('brand_id, position')
     ])
     const brandsData = brandsRes.data
     const pinsData = pinsRes.data
     const pinMap = {}
     ;(pinsData || []).forEach(p => { pinMap[p.brand_id] = p.pinned_at })
+    const orderMap = {}
+    ;(orderRes.data || []).forEach(o => { orderMap[o.brand_id] = o.position })
 
-    const enriched = (brandsData || []).map(b => ({ ...b, pinned_at: pinMap[b.id] || null }))
+    const enriched = (brandsData || []).map(b => ({ ...b, pinned_at: pinMap[b.id] || null, position: orderMap[b.id] ?? null }))
     const active = enriched.filter(b => b.status !== 'archived')
     const archived = enriched.filter(b => b.status === 'archived')
-    // Your own pins first, then the workspace's dragged order, then A–Z. A brand
-    // with no position (never dragged, or created after the last reorder) sorts
-    // alphabetically at the end rather than jumping into the middle.
+    // Your pins first, then your own dragged order, then A–Z. A brand you've
+    // never dragged (or one added since) sorts alphabetically at the end rather
+    // than jumping into the middle of an order you set by hand.
     active.sort((a, b) => {
       if (a.pinned_at && !b.pinned_at) return -1
       if (!a.pinned_at && b.pinned_at) return 1
@@ -260,16 +264,20 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     : brands
 
   // ── Drag to reorder ────────────────────────────────────────────────────────
-  // Owners/admins only, and only on the plain unfiltered list — dropping onto a
-  // search result would write an order derived from rows you can't see. Pinned
-  // brands are excluded: a pin already decides where it sits.
-  const canReorder = isAdmin && !showArchived && !search
+  // Anyone can arrange their own sidebar — the order is stored per user, so it
+  // never moves anyone else's view. Only on the plain unfiltered list, though:
+  // dropping onto a search result would write an order derived from rows that
+  // aren't on screen.
+  const canReorder = !showArchived && !search
   const hasCustomOrder = brands.some(b => b.position != null)
 
   async function persistOrder(ordered) {
     setBrands(ordered)   // paint immediately; the sidebar shouldn't wait on the round trip
-    const { error: reorderErr } = await supabase.rpc('reorder_brands', { p_org_id: orgId, p_brand_ids: ordered.map(b => b.id) })
-    if (reorderErr) { console.error(reorderErr); fetchBrands() }   // put it back if the write was refused
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const rows = ordered.map((b, i) => ({ user_id: user.id, brand_id: b.id, position: i + 1 }))
+    const { error: orderErr } = await supabase.from('user_brand_orders').upsert(rows, { onConflict: 'user_id,brand_id' })
+    if (orderErr) { console.error(orderErr); fetchBrands() }   // put it back if the write was refused
   }
 
   function onDropBrand(targetId) {
@@ -290,13 +298,18 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   }
 
   async function resetOrder() {
+    const ids = brands.map(b => b.id)
     setBrands(bs => [...bs].map(b => ({ ...b, position: null }))
       .sort((a, b) => {
         if (a.pinned_at && !b.pinned_at) return -1
         if (!a.pinned_at && b.pinned_at) return 1
         return a.name.localeCompare(b.name)
       }))
-    const { error: resetErr } = await supabase.rpc('reset_brand_order', { p_org_id: orgId })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    // Scoped to this workspace's brands, so switching companies doesn't wipe
+    // the order you set in another one.
+    const { error: resetErr } = await supabase.from('user_brand_orders').delete().eq('user_id', user.id).in('brand_id', ids)
     if (resetErr) { console.error(resetErr); fetchBrands() }
   }
 
