@@ -116,11 +116,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     active.sort((a, b) => {
       if (a.pinned_at && !b.pinned_at) return -1
       if (!a.pinned_at && b.pinned_at) return 1
-      if (a.pinned_at && b.pinned_at) return new Date(b.pinned_at) - new Date(a.pinned_at)
       const ap = a.position, bp = b.position
       if (ap != null && bp == null) return -1
       if (ap == null && bp != null) return 1
       if (ap != null && bp != null && ap !== bp) return ap - bp
+      // Never dragged: pins keep their newest-first order, everything else A–Z.
+      if (a.pinned_at && b.pinned_at) return new Date(b.pinned_at) - new Date(a.pinned_at)
       return a.name.localeCompare(b.name)
     })
     setBrands(active)
@@ -267,8 +268,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
   async function persistOrder(ordered) {
     setBrands(ordered)   // paint immediately; the sidebar shouldn't wait on the round trip
-    const ids = ordered.filter(b => !b.pinned_at).map(b => b.id)
-    const { error: reorderErr } = await supabase.rpc('reorder_brands', { p_org_id: orgId, p_brand_ids: ids })
+    const { error: reorderErr } = await supabase.rpc('reorder_brands', { p_org_id: orgId, p_brand_ids: ordered.map(b => b.id) })
     if (reorderErr) { console.error(reorderErr); fetchBrands() }   // put it back if the write was refused
   }
 
@@ -281,11 +281,12 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
     const from = list.findIndex(b => b.id === draggedId)
     const to = list.findIndex(b => b.id === targetId)
     if (from < 0 || to < 0) return
+    // Pinned rows always sort above unpinned ones, so a drop across that line
+    // would spring back to where it started. Reorder within a group only.
+    if (!!list[from].pinned_at !== !!list[to].pinned_at) return
     const [moved] = list.splice(from, 1)
     list.splice(to, 0, moved)
-    // Positions are 1..n over the unpinned rows, so re-index after the move.
-    let i = 0
-    persistOrder(list.map(b => b.pinned_at ? b : { ...b, position: ++i }))
+    persistOrder(list.map((b, i) => ({ ...b, position: i + 1 })))
   }
 
   async function resetOrder() {
@@ -408,7 +409,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
             onClick={() => onSelectBrand?.(b)}
             onMouseEnter={() => setHovering(b.id)}
             onMouseLeave={() => setHovering(null)}
-            draggable={canReorder && !b.pinned_at}
+            draggable={canReorder}
             onDragStart={() => { dragBrandRef.current = b.id }}
             onDragEnd={() => { dragBrandRef.current = null; setDragOverId(null) }}
             onDragOver={e => { if (canReorder && dragBrandRef.current) { e.preventDefault(); setDragOverId(b.id) } }}
@@ -427,10 +428,18 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
               opacity: dragBrandRef.current === b.id ? 0.4 : 1,
               position: 'relative'
             }}>
-            {canReorder && !b.pinned_at && hovering === b.id && (
+            {canReorder && hovering === b.id && (
+              // Drawn as an SVG rather than a "⠿" glyph: at this size the
+              // character collapsed to a five-pixel smudge that nobody could see.
               <span title='Drag to reorder'
                 onClick={e => e.stopPropagation()}
-                style={{ position: 'absolute', left: '2px', color: subtle, cursor: 'grab', fontSize: '10px', letterSpacing: '-2px', lineHeight: 1 }}>⠿</span>
+                style={{ position: 'absolute', left: '1px', top: 0, bottom: 0, width: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: subtle, cursor: 'grab' }}>
+                <svg width='8' height='14' viewBox='0 0 8 14' fill='currentColor' aria-hidden='true'>
+                  <circle cx='2' cy='3' r='1.2' /><circle cx='6' cy='3' r='1.2' />
+                  <circle cx='2' cy='7' r='1.2' /><circle cx='6' cy='7' r='1.2' />
+                  <circle cx='2' cy='11' r='1.2' /><circle cx='6' cy='11' r='1.2' />
+                </svg>
+              </span>
             )}
             {b.logo_url ? (
               <img src={b.logo_url} alt={b.name} style={{ width: '34px', height: '34px', objectFit: 'contain', background: '#fff', borderRadius: '3px', padding: '2px', flexShrink: 0, border: `0.5px solid ${border}` }} onError={e => { e.target.style.display = 'none' }} />
