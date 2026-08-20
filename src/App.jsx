@@ -89,6 +89,19 @@ const initialLinkOrgId = (() => {
   return null
 })()
 
+// The task or campaign a link points at, in whichever form the link took
+// (?task=, ?campaign=, or the /task/<id> path). Used to ask the server which
+// company the item lives in when the link itself doesn't say — every link sent
+// before ?org= shipped, and none of them expire.
+const initialLinkTaskId = (() => {
+  try { return new URLSearchParams(window.location.search || '').get('task') || initialTaskId } catch (e) {}
+  return initialTaskId
+})()
+const initialLinkCampaignId = (() => {
+  try { return new URLSearchParams(window.location.search || '').get('campaign') } catch (e) {}
+  return null
+})()
+
 // The full original URL, kept because the deep-link handlers below clean the
 // address bar as soon as they run — switching companies reloads the page, and we
 // need the untouched link to re-open after that reload.
@@ -327,23 +340,52 @@ function App() {
     window.history.replaceState({}, '', initialTaskId ? '/' : window.location.pathname)
   }
 
-  // Links from notification emails carry the company the task/campaign lives in.
-  // If that's not the company you're currently in, switch to it first — otherwise
-  // the item is invisible (every read is scoped to the active company) and the
-  // link looks broken. Waits for the profile, since that's what tells us which
-  // company is active. Switching reloads the app so every view re-scopes cleanly,
-  // with the link intact (minus ?org=, so the reload can't loop).
+  // Open a task or campaign link in the company it actually belongs to. Every
+  // read is scoped to the ACTIVE company, so a link opened from the wrong one
+  // shows nothing and reads as broken.
+  //
+  // Newer links say which company they're for (?org=), and those wait here to be
+  // opened, since we may need to switch first. Older links say nothing — and
+  // they don't expire — so we ask the server which company the item lives in and
+  // switch if it isn't this one. Those have already been opened optimistically
+  // by the handlers above, which keeps the common case (a link for the company
+  // you're already in) instant instead of waiting on a round-trip.
+  //
+  // Waits for the profile, since that's what says which company is active.
+  // Switching reloads the app so every view re-scopes cleanly, with the link
+  // intact minus ?org= so the reload can't loop.
   useEffect(() => {
-    if (!initialLinkOrgId || !user || !orgId) return
-    if (initialLinkOrgId === orgId) { openInitialDeepLink(); return }
+    if (!user || !orgId) return
+    if (!initialLinkOrgId && !initialLinkTaskId && !initialLinkCampaignId) return
     let cancelled = false
-    supabase.rpc('switch_org', { p_org_id: initialLinkOrgId }).then(({ error }) => {
+
+    // Only links that named a company are waiting on us to open them; the rest
+    // are already on screen.
+    const openIfWaiting = () => { if (initialLinkOrgId) openInitialDeepLink() }
+
+    ;(async () => {
+      let target = initialLinkOrgId
+      if (!target) {
+        // Ask which company this item belongs to. Answers only for companies
+        // this user belongs to; anything else comes back empty. A missing
+        // function (the SQL not yet applied) also comes back empty, which just
+        // leaves the old behavior in place rather than breaking the link.
+        const { data } = await supabase.rpc('org_for_deep_link', {
+          p_task_id: initialLinkTaskId || null,
+          p_campaign_id: initialLinkCampaignId || null,
+        })
+        target = data || null
+      }
+      if (cancelled) return
+      if (!target || target === orgId) { openIfWaiting(); return }
+
+      const { error } = await supabase.rpc('switch_org', { p_org_id: target })
       if (cancelled) return
       if (error) {
         // Not a member of that company (removed since, or the link belongs to a
-        // different account) — stay put and try to open it here.
+        // different account) — stay put and open what we can here.
         console.error('Could not open link in its company:', error.message)
-        openInitialDeepLink()
+        openIfWaiting()
         return
       }
       try {
@@ -353,7 +395,8 @@ function App() {
       } catch (e) {
         window.location.replace('/')
       }
-    })
+    })()
+
     return () => { cancelled = true }
   }, [user, orgId])
 

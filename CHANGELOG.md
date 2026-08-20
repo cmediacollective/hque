@@ -12,6 +12,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-08-20
 
+**Old task links open in the right company too.** The fix below only helps links sent after it shipped — but emails don't expire, and every HQue notification already sitting in an inbox carries no company on its link. Those now work as well: when a link doesn't say which company it's for, the app asks the server which company that task or campaign lives in and switches if needed. It answers only for companies you actually belong to. Links that do carry the company still take the direct route, so the common case doesn't wait on a lookup. Requires the Supabase SQL in supabase/migrations/20260820_org_for_deep_link.sql.
+
 **Task links from email open in the right company.** If you belong to more than one company in HQue and you were last working in Company B, clicking "Open task" in an email from Company A dropped you into Company B — where that task doesn't exist, so you'd land on an empty Workspace and have to switch companies by hand and go find it. Notification emails, the daily due-date reminders, and the "Copy link" button on a task now carry the company the task belongs to. Open one and HQue switches you into that company first, then opens the task. If you're already in the right company, nothing changes. Links to a company you're no longer part of simply open where you are, as before.
 
 ---
