@@ -386,7 +386,9 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
   }
 
   async function handleCopyLink() {
-    const url = `${window.location.origin}/?task=${task.id}`
+    // Include the company the task belongs to: a teammate who's in more than
+    // one company gets switched to the right one instead of a blank Workspace.
+    const url = `${window.location.origin}/?task=${task.id}${orgId ? `&org=${orgId}` : ''}`
     try {
       await navigator.clipboard.writeText(url)
     } catch {

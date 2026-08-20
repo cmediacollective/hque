@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-08-20
+
+**Task links from email open in the right company.** If you belong to more than one company in HQue and you were last working in Company B, clicking "Open task" in an email from Company A dropped you into Company B — where that task doesn't exist, so you'd land on an empty Workspace and have to switch companies by hand and go find it. Notification emails, the daily due-date reminders, and the "Copy link" button on a task now carry the company the task belongs to. Open one and HQue switches you into that company first, then opens the task. If you're already in the right company, nothing changes. Links to a company you're no longer part of simply open where you are, as before.
+
+---
+
 ## 2026-07-30
 
 **August holidays added to the dashboard greeting.** August was a blank month — the "Did you know?" panel had nothing between World Emoji Day (Jul 17) and Sep 19. Added six of the big social-media holidays: International Cat Day (8th), Book Lovers Day (9th), S'mores Day (10th), National Relaxation Day (15th), Tell a Joke Day (16th) and National Dog Day (26th). Each one gets its own label instead of the standard "Did you know?" — "Cat fact", "Word of the day", "Campfire science", "Permission slip", "Dog fact" — and on Tell a Joke Day it actually tells a joke rather than explaining the history of jokes.

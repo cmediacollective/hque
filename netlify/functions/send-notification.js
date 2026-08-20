@@ -9,11 +9,23 @@ exports.handler = async (event) => {
   const name = profile.full_name || profile.email
 
   // Deep-link the button straight to the task or campaign this notification is about.
+  // People who belong to more than one company are often "in" a different one
+  // when they click, so the link also carries the company the item lives in —
+  // the app switches to it before opening, instead of showing an empty screen.
   const base = 'https://h-que.com'
   let link = base
   let label = 'Open HQue'
-  if (task_id) { link = `${base}/?task=${encodeURIComponent(task_id)}`; label = 'Open task' }
-  else if (campaign_id) { link = `${base}/?campaign=${encodeURIComponent(campaign_id)}`; label = 'Open campaign' }
+  let orgId = null
+  if (task_id) {
+    const { data: t } = await supabase.from('tasks').select('org_id').eq('id', task_id).maybeSingle()
+    orgId = t?.org_id || null
+  } else if (campaign_id) {
+    const { data: c } = await supabase.from('campaigns').select('org_id').eq('id', campaign_id).maybeSingle()
+    orgId = c?.org_id || null
+  }
+  const orgParam = orgId ? `&org=${encodeURIComponent(orgId)}` : ''
+  if (task_id) { link = `${base}/?task=${encodeURIComponent(task_id)}${orgParam}`; label = 'Open task' }
+  else if (campaign_id) { link = `${base}/?campaign=${encodeURIComponent(campaign_id)}${orgParam}`; label = 'Open campaign' }
 
   // Escape user-supplied text before injecting into HTML, then turn
   // newlines into <br> so multi-line messages (e.g. a quoted comment or

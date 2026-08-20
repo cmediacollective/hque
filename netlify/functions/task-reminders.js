@@ -24,7 +24,7 @@ function esc(s) {
 }
 
 // phase: 'tomorrow' | 'today' | 'overdue'  ->  { subject, html }
-function buildEmail({ phase, name, taskTitle, brandName, dueYmd, taskId }) {
+function buildEmail({ phase, name, taskTitle, brandName, dueYmd, taskId, orgId }) {
   const due = prettyDate(dueYmd)
   const variants = {
     tomorrow: {
@@ -50,7 +50,7 @@ function buildEmail({ phase, name, taskTitle, brandName, dueYmd, taskId }) {
   <p style="font-size:15px;line-height:1.5;margin:10px 0 2px;"><strong>${esc(taskTitle)}</strong></p>
   ${brandName ? `<p style="font-size:12px;color:#888;margin:0 0 12px;">${esc(brandName)}</p>` : '<div style="height:6px;"></div>'}
   <p style="font-size:14px;color:#555;line-height:1.7;margin:8px 0 24px;">${v.line}</p>
-  <a href="${APP_URL}/?task=${taskId}" style="display:inline-block;padding:11px 26px;background:#5b7c99;color:#fff;text-decoration:none;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;">Open task</a>
+  <a href="${APP_URL}/?task=${taskId}${orgId ? `&org=${orgId}` : ''}" style="display:inline-block;padding:11px 26px;background:#5b7c99;color:#fff;text-decoration:none;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;">Open task</a>
   <p style="margin-top:34px;font-size:11px;color:#aaa;">You're receiving this because you're assigned to this task in HQue. You can turn off email notifications in your profile settings.</p>
 </div>`
   return { subject: v.subject, html }
@@ -78,7 +78,7 @@ async function runReminders() {
 
   const { data: tasks } = await supabase
     .from('tasks')
-    .select('id, title, due_date, column_id, board_id')
+    .select('id, title, due_date, column_id, board_id, org_id')
     .in('due_date', [tomorrow, today, yesterday])
 
   if (!tasks || tasks.length === 0) return { checked: 0, sent: 0 }
@@ -143,7 +143,10 @@ async function runReminders() {
         taskTitle: t.title,
         brandName,
         dueYmd: t.due_date,
-        taskId: t.id
+        taskId: t.id,
+        // Carries the company the task lives in, so someone who belongs to
+        // several lands in the right one instead of an empty Workspace.
+        orgId: t.org_id
       })
       if (await sendEmail(p.email, subject, html)) sent++
       else skipped++

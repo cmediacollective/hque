@@ -79,6 +79,24 @@ const initialTaskId = (() => {
   return null
 })()
 
+// Captured at module load — the company a deep link belongs to (?org=<id>, added
+// to task/campaign links in notification emails and to copied task links). If the
+// person is currently "in" a different company, the app switches to this one
+// before opening the item; without it the link lands on an empty screen, because
+// every read is scoped to the active company.
+const initialLinkOrgId = (() => {
+  try { return new URLSearchParams(window.location.search || '').get('org') } catch (e) {}
+  return null
+})()
+
+// The full original URL, kept because the deep-link handlers below clean the
+// address bar as soon as they run — switching companies reloads the page, and we
+// need the untouched link to re-open after that reload.
+const initialLinkUrl = (() => {
+  try { return (window.location.pathname || '/') + (window.location.search || '') } catch (e) {}
+  return '/'
+})()
+
 // Reports route: /reports (admin only) or a month snapshot /reports/<month>-<year>.
 const MONTH_SLUGS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 const initialReports = (() => {
@@ -231,6 +249,7 @@ function App() {
 
   // Deep link: /?task=<id> opens that task in Workspace
   useEffect(() => {
+    if (initialLinkOrgId) return   // company-aware handler below owns this link
     const params = new URLSearchParams(window.location.search)
     const taskId = params.get('task')
     if (!taskId) return
@@ -244,6 +263,7 @@ function App() {
 
   // Deep link: /?campaign=<id> opens that campaign in Campaigns
   useEffect(() => {
+    if (initialLinkOrgId) return   // company-aware handler below owns this link
     const params = new URLSearchParams(window.location.search)
     const campaignId = params.get('campaign')
     if (!campaignId) return
@@ -285,11 +305,57 @@ function App() {
 
   // Deep link: /task/<id> → open that task in the Workspace.
   useEffect(() => {
+    if (initialLinkOrgId) return   // company-aware handler below owns this link
     if (!user || !initialTaskId) return
     setView('workspace')
     setPendingTaskId(initialTaskId)
     window.history.replaceState({}, '', '/')
   }, [user])
+
+  // Open a captured deep link (?task= / ?campaign= / ?brand_notes= / /task/<id>)
+  // once we know we're in the right company, then clean the address bar.
+  function openInitialDeepLink() {
+    let params
+    try { params = new URLSearchParams(new URL(initialLinkUrl, window.location.origin).search) }
+    catch (e) { params = new URLSearchParams() }
+    const taskId = params.get('task') || initialTaskId
+    const campaignId = params.get('campaign')
+    const brandId = params.get('brand_notes')
+    if (taskId) { setView('workspace'); setPendingTaskId(taskId) }
+    else if (campaignId) { setView('campaigns'); setPendingCampaignId(campaignId) }
+    else if (brandId) { setView('workspace'); setPendingBrandNotesId(brandId) }
+    window.history.replaceState({}, '', initialTaskId ? '/' : window.location.pathname)
+  }
+
+  // Links from notification emails carry the company the task/campaign lives in.
+  // If that's not the company you're currently in, switch to it first — otherwise
+  // the item is invisible (every read is scoped to the active company) and the
+  // link looks broken. Waits for the profile, since that's what tells us which
+  // company is active. Switching reloads the app so every view re-scopes cleanly,
+  // with the link intact (minus ?org=, so the reload can't loop).
+  useEffect(() => {
+    if (!initialLinkOrgId || !user || !orgId) return
+    if (initialLinkOrgId === orgId) { openInitialDeepLink(); return }
+    let cancelled = false
+    supabase.rpc('switch_org', { p_org_id: initialLinkOrgId }).then(({ error }) => {
+      if (cancelled) return
+      if (error) {
+        // Not a member of that company (removed since, or the link belongs to a
+        // different account) — stay put and try to open it here.
+        console.error('Could not open link in its company:', error.message)
+        openInitialDeepLink()
+        return
+      }
+      try {
+        const url = new URL(initialLinkUrl, window.location.origin)
+        url.searchParams.delete('org')
+        window.location.replace(url.pathname + url.search)
+      } catch (e) {
+        window.location.replace('/')
+      }
+    })
+    return () => { cancelled = true }
+  }, [user, orgId])
 
   const isAdmin = userRole === 'owner' || userRole === 'admin'
   // Billing (plan changes, payment, cancellation) is owner-only — not admin.
@@ -324,6 +390,7 @@ function App() {
 
   // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
   useEffect(() => {
+    if (initialLinkOrgId) return   // company-aware handler below owns this link
     const params = new URLSearchParams(window.location.search)
     const brandId = params.get('brand_notes')
     if (!brandId) return

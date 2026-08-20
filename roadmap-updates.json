@@ -1,5 +1,11 @@
 [
   {
+    "title": "Task links from email open in the right company",
+    "description": "If you're part of more than one company in HQue, opening a task from an email used to drop you into whichever company you last had open — so a task from Company A would come up empty if you were sitting in Company B, and you'd have to switch companies and hunt for it yourself. Now the link knows which company the task belongs to: HQue switches you into that company and opens the task for you. This covers notification emails, the daily due-date reminders, and any task link a teammate copies and sends you.",
+    "category": "Improvement",
+    "shipped_at": "2026-08-20"
+  },
+  {
     "title": "Drag your workspace list into the order you want",
     "description": "Your workspace sidebar has always been alphabetical, which meant the only way to get something to the top was to rename it with a dash or a number in front. Now you can just hover an entry and drag it by the handle on the left. The order is yours alone — arranging your sidebar never changes what your teammates see. Alphabetical stays the default until you drag something, there's an A–Z button in the header to put it straight back, and anything you add later joins the end of your list. Your pins still sit above everything, and you can reorder those too.",
     "category": "Feature",
