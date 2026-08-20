@@ -374,6 +374,16 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   // null if the destination can't be prepared, so the save falls back to a
   // normal edit and the task stays put rather than going missing.
   async function prepareMove(targetBrandId, fromColumnId) {
+    // Only an active entry can receive a task. The picker already leaves
+    // archived ones out, but it was drawn from a list read when the panel
+    // opened — re-check now, in case a teammate archived the destination while
+    // this task sat open. Archiving is how an entry is retired, so dropping a
+    // live task into one would hide it.
+    if (targetBrandId) {
+      const { data: dest } = await supabase.from('brands').select('status').eq('id', targetBrandId).maybeSingle()
+      if (!dest) return { blocked: 'no longer exists.' }
+      if (dest.status === 'archived') return { blocked: 'has since been archived, so it can\'t take new tasks.' }
+    }
     const boardId = await boardIdForBrand(targetBrandId || null)
     if (!boardId) return null
     const { data: destCols } = await supabase.from('board_columns').select('id, name').eq('board_id', boardId).order('position')
@@ -492,9 +502,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // task's board_id changes; nothing is recreated.
     const fromBrandId = activeBoard?.brand_id || ''
     const toBrandId = form.target_brand_id ?? fromBrandId
-    const move = (toBrandId || '') !== fromBrandId
+    const attempted = (toBrandId || '') !== fromBrandId
       ? await prepareMove(toBrandId || null, form.column_id)
       : null
+    // A blocked attempt saves the rest of the edit and leaves the task where it
+    // is, rather than moving it somewhere it would disappear.
+    const move = attempted && !attempted.blocked ? attempted : null
 
     await supabase.from('tasks').update({
       title: form.title, description: form.description || null, priority: form.priority,
@@ -535,6 +548,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
         const msg = `${currentUserName()} updated "${form.title}":\n${lines.join('\n')}`
         await notifyTaskWatchers(form.id, msg)
       }
+    }
+
+    if (attempted?.blocked) {
+      const name = brands.find(b => b.id === toBrandId)?.name || 'That entry'
+      setMovedNotice({ error: true, message: `Didn't move "${form.title}" — ${name} ${attempted.blocked}` })
     }
 
     if (move) {
@@ -720,13 +738,17 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
             </div>
 
             {movedNotice && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: dark ? 'rgba(91,124,153,0.12)' : '#EEF3F7', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: movedNotice.error ? (dark ? 'rgba(192,57,43,0.14)' : '#FDECEA') : (dark ? 'rgba(91,124,153,0.12)' : '#EEF3F7'), flexShrink: 0 }}>
                 <span style={{ fontSize: '12px', color: text, flex: 1, minWidth: 0 }}>
-                  Moved <strong style={{ fontWeight: 600 }}>{movedNotice.title}</strong> to {movedNotice.brand.name} · {movedNotice.columnName}
+                  {movedNotice.error ? movedNotice.message : (
+                    <>Moved <strong style={{ fontWeight: 600 }}>{movedNotice.title}</strong> to {movedNotice.brand.name} · {movedNotice.columnName}</>
+                  )}
                 </span>
-                <button onClick={() => { const b = movedNotice.brand; setMovedNotice(null); setSelectedBrand(b) }} style={{ padding: '5px 13px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 600 }}>
-                  Go there
-                </button>
+                {!movedNotice.error && (
+                  <button onClick={() => { const b = movedNotice.brand; setMovedNotice(null); setSelectedBrand(b) }} style={{ padding: '5px 13px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 600 }}>
+                    Go there
+                  </button>
+                )}
                 <button onClick={() => setMovedNotice(null)} title='Dismiss' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '15px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
               </div>
             )}
