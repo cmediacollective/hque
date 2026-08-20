@@ -6,6 +6,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-08-20
 
+**Move a task to a different Brand/Client.** A task was stuck wherever it was created — if something filed under Dr. Browns actually belonged to KEO Marketing (or January's task belonged in February), the only way across was to delete it and retype it, losing every comment, file and bit of history. Open the task and the **Brand/Client** dropdown now moves it. Nothing is copied or recreated, so its comments, files, assignees, watchers and full history travel with it. It keeps its status wherever the destination has a column of the same name — a task In Progress stays In Progress — and starts in the first column otherwise. A line under the dropdown says exactly where it's going before you press Save. Once moved, a bar on the board confirms where it went with a **Go there** button, the sidebar counts on both entries update straight away, and anyone watching the task gets told about the move in their usual update email. Archived entries aren't offered as destinations.
+
+---
+
+## 2026-08-20
+
 **Task links from email open in the right company.** If you belong to more than one company in HQue and you were last working in Company B, clicking "Open task" in an email from Company A dropped you into Company B — where that task doesn't exist, so you'd land on an empty Workspace and have to switch companies by hand and go find it. Notification emails, the daily due-date reminders, and the "Copy link" button on a task now carry the company the task belongs to. Open one and HQue switches you into that company first, then opens the task. If you're already in the right company, nothing changes. Links to a company you're no longer part of simply open where you are, as before.
 
 ---

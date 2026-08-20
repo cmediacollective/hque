@@ -1,5 +1,11 @@
 [
   {
+    "title": "Move a task to a different Brand/Client",
+    "description": "Tasks used to be stuck wherever you first created them. If something filed under one client really belonged to another — or a task in January belonged in February — your only option was to delete it and type it out again, losing all its comments, files and history. Now you just open the task and change the Brand/Client dropdown. The task moves across with everything attached to it: comments, files, who's assigned, who's watching, the lot. It keeps its status if the destination has a column with the same name, and a note under the dropdown tells you exactly where it's going before you save. After the move you get a confirmation with a button to jump straight there, and anyone watching the task is told it moved.",
+    "category": "Feature",
+    "shipped_at": "2026-08-20"
+  },
+  {
     "title": "Task links from email open in the right company",
     "description": "If you're part of more than one company in HQue, opening a task from an email used to drop you into whichever company you last had open — so a task from Company A would come up empty if you were sitting in Company B, and you'd have to switch companies and hunt for it yourself. Now the link knows which company the task belongs to: HQue switches you into that company and opens the task for you. This covers notification emails, the daily due-date reminders, and any task link a teammate copies and sends you.",
     "category": "Improvement",

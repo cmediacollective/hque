@@ -147,7 +147,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // workspace is elsewhere (a stacked/multi-company member) is still a valid
     // assignee and must appear here — same source the Settings > Team roster uses.
     supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
-    supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
+    supabase.from('brands').select('id, name, logo_url, website, status').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
   }, [orgId])
 
@@ -221,6 +221,12 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   const [dragOver, setDragOver] = useState(null)
   const [showNotes, setShowNotes] = useState(false)
   const [notesNew, setNotesNew] = useState(false)
+  // Set right after a task is moved to another Brand/Client's board, so the
+  // person who moved it gets told where it went (it vanishes from this board)
+  // and can follow it in one click.
+  const [movedNotice, setMovedNotice] = useState(null)
+  // Bumped after a move so the sidebar re-counts both entries involved.
+  const [countsVersion, setCountsVersion] = useState(0)
 
   // Whether this user has unseen activity in the selected brand's notes.
   // True if the notes were edited within the last 48 hours and the user
@@ -248,6 +254,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   }, [selectedBrand?.id, userId, showNotes])
 
   useEffect(() => {
+    setMovedNotice(null)   // belongs to the board you moved it from
     if (!selectedBrand) { setActiveBoard(null); setColumns([]); setTasks([]); setBoardReady(false); return }
     findOrCreateBoardForBrand(selectedBrand)
   }, [selectedBrand?.id])
@@ -272,7 +279,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // workspace is elsewhere (a stacked/multi-company member) is still a valid
     // assignee and must appear here — same source the Settings > Team roster uses.
     supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
-    supabase.from('brands').select('id, name, logo_url, website').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
+    supabase.from('brands').select('id, name, logo_url, website, status').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
     supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
     if (activeBoard) { fetchColumns(); fetchTasks() }
   }, [focusVersion])
@@ -342,6 +349,39 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       setActiveBoard(newBoard)
     }
     setLoading(false)
+  }
+
+  // The board that holds a given Brand/Client's tasks — created with the default
+  // columns if that entry has never been opened. Same rule as clicking it in the
+  // sidebar, minus the state changes, so it's safe to call while looking at
+  // another board. Pass null for the "Unassigned" board.
+  async function boardIdForBrand(brandId) {
+    let query = supabase.from('boards').select('id').eq('org_id', orgId).neq('status', 'archived').order('created_at', { ascending: true })
+    query = brandId ? query.eq('brand_id', brandId) : query.is('brand_id', null)
+    const { data } = await query.limit(1).maybeSingle()
+    if (data) return data.id
+    const name = brandId ? (brands.find(b => b.id === brandId)?.name || 'Untitled') : 'Unassigned'
+    const { data: created } = await supabase.from('boards').insert([{ name, org_id: orgId, brand_id: brandId || null, status: 'active' }]).select('id').single()
+    if (!created) return null
+    await supabase.from('board_columns').insert(DEFAULT_COLUMNS.map((n, i) => ({ board_id: created.id, name: n, position: i })))
+    return created.id
+  }
+
+  // Work out where a task should land on another Brand/Client's board before
+  // writing anything, so the move is a single update. It keeps its status when
+  // the destination has a column of the same name (a task In Progress stays in
+  // progress) and otherwise starts in the destination's first column. Returns
+  // null if the destination can't be prepared, so the save falls back to a
+  // normal edit and the task stays put rather than going missing.
+  async function prepareMove(targetBrandId, fromColumnId) {
+    const boardId = await boardIdForBrand(targetBrandId || null)
+    if (!boardId) return null
+    const { data: destCols } = await supabase.from('board_columns').select('id, name').eq('board_id', boardId).order('position')
+    if (!destCols || destCols.length === 0) return null
+    const wanted = (columns.find(c => c.id === fromColumnId)?.name || '').trim().toLowerCase()
+    const dest = destCols.find(c => (c.name || '').trim().toLowerCase() === wanted) || destCols[0]
+    const { count } = await supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('column_id', dest.id)
+    return { boardId, columnId: dest.id, position: count || 0, columnName: dest.name }
   }
 
   async function fetchColumns() {
@@ -429,6 +469,15 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     return me?.full_name || me?.email || 'Someone'
   }
 
+  // The Brand/Client list offered when moving a task: active entries only, plus
+  // whichever one the task sits on today, so an archived entry still shows as its
+  // own home (and stays selectable) until the task is moved off it.
+  const brandsForMove = (() => {
+    const active = brands.filter(b => b.status !== 'archived')
+    const current = brands.find(b => b.id === selectedBrand?.id)
+    return current && !active.some(b => b.id === current.id) ? [current, ...active] : active
+  })()
+
   function formatDueDate(d) {
     if (!d) return 'no date'
     return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -436,11 +485,32 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
 
   async function updateTask(form) {
     const old = tasks.find(t => t.id === form.id)
-    await supabase.from('tasks').update({ title: form.title, description: form.description || null, priority: form.priority, due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing, column_id: form.column_id, campaign_id: form.campaign_id || null }).eq('id', form.id)
+
+    // Did they pick a different Brand/Client? Then this save is a move: the task
+    // changes board. Everything hanging off it — comments, files, assignees,
+    // watchers, its whole history — rides along untouched, because only the
+    // task's board_id changes; nothing is recreated.
+    const fromBrandId = activeBoard?.brand_id || ''
+    const toBrandId = form.target_brand_id ?? fromBrandId
+    const move = (toBrandId || '') !== fromBrandId
+      ? await prepareMove(toBrandId || null, form.column_id)
+      : null
+
+    await supabase.from('tasks').update({
+      title: form.title, description: form.description || null, priority: form.priority,
+      due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing,
+      column_id: move ? move.columnId : form.column_id,
+      campaign_id: form.campaign_id || null,
+      ...(move ? { board_id: move.boardId, position: move.position } : {})
+    }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
     await addTaskWatchers(form.id, [...(form.assignee_ids || []), ...mentioned])
+
+    const movedToBrand = move && toBrandId ? brands.find(b => b.id === toBrandId) : null
+    const movedFromName = selectedBrand?.name || 'Unassigned'
+    const movedToName = movedToBrand?.name || 'Unassigned'
 
     // Diff key fields and notify watchers (one combined email) if anything changed.
     if (old) {
@@ -451,15 +521,28 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       if ((old.due_date || null) !== (form.due_date || null)) {
         lines.push(`• Due date: ${formatDueDate(old.due_date)} → ${formatDueDate(form.due_date)}`)
       }
-      if (old.column_id !== form.column_id) {
+      // On a move the status line is redundant — the move line below already
+      // says which column it landed in on the new board.
+      if (!move && old.column_id !== form.column_id) {
         const oldCol = columns.find(c => c.id === old.column_id)?.name || 'a column'
         const newCol = columns.find(c => c.id === form.column_id)?.name || 'a column'
         lines.push(`• Status: ${oldCol} → ${newCol}`)
+      }
+      if (move) {
+        lines.push(`• ${clientLabel.singular}: ${movedFromName} → ${movedToName} (now in ${move.columnName})`)
       }
       if (lines.length) {
         const msg = `${currentUserName()} updated "${form.title}":\n${lines.join('\n')}`
         await notifyTaskWatchers(form.id, msg)
       }
+    }
+
+    if (move) {
+      // The task no longer belongs to the board we're looking at, so close it
+      // and say where it went — otherwise it just disappears off the screen.
+      setEditingTask(null)
+      setMovedNotice({ title: form.title, columnName: move.columnName, brand: movedToBrand || { id: '__internal', name: 'Unassigned' } })
+      setCountsVersion(v => v + 1)
     }
 
     fetchTasks()
@@ -565,7 +648,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           the phone until you pick a brand, then the board gets the full width.
           A 220px column next to a board leaves ~170px for the board on a phone. */}
       {(!isMobile || !selectedBrand) && (
-        <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} fullWidth={isMobile} isAdmin={isAdmin} onOpenSettings={onOpenSettings} />
+        <BrandsSidebar dark={dark} orgId={orgId} selectedBrandId={selectedBrand?.id} onSelectBrand={setSelectedBrand} fullWidth={isMobile} isAdmin={isAdmin} onOpenSettings={onOpenSettings} countsVersion={countsVersion} />
       )}
 
       <div style={{ flex: 1, display: isMobile && !selectedBrand ? 'none' : 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -635,6 +718,18 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                 })}
               </div>
             </div>
+
+            {movedNotice && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: dark ? 'rgba(91,124,153,0.12)' : '#EEF3F7', flexShrink: 0 }}>
+                <span style={{ fontSize: '12px', color: text, flex: 1, minWidth: 0 }}>
+                  Moved <strong style={{ fontWeight: 600 }}>{movedNotice.title}</strong> to {movedNotice.brand.name} · {movedNotice.columnName}
+                </span>
+                <button onClick={() => { const b = movedNotice.brand; setMovedNotice(null); setSelectedBrand(b) }} style={{ padding: '5px 13px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '4px', flexShrink: 0, fontWeight: 600 }}>
+                  Go there
+                </button>
+                <button onClick={() => setMovedNotice(null)} title='Dismiss' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '15px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
+              </div>
+            )}
 
             {(loading || !boardReady) && <BoardSkeleton dark={dark} />}
 
@@ -774,7 +869,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
           task={editingTask}
           dark={dark}
           members={members}
-          brands={[]}
+          brands={brandsForMove}
           campaigns={campaigns}
           columns={columns}
           currentBrandId={selectedBrand?.id}

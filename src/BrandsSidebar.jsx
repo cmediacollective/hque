@@ -46,7 +46,7 @@ function findBrandMatch(name, list) {
   return best
 }
 
-export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false, isAdmin = false, onOpenSettings }) {
+export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onSelectBrand, fullWidth = false, isAdmin = false, onOpenSettings, countsVersion = 0 }) {
   const bg = dark ? '#0D0D0D' : '#FFFFFF'
   const border = dark ? '#2A2A2A' : '#DBD7D0'
   const border2 = dark ? '#3A3A3A' : '#CCC7BF'
@@ -95,7 +95,9 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
   }
 
   useEffect(() => { if (orgId) { fetchBrands(); fetchBoardCounts() } }, [orgId])
-  useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId])
+  // countsVersion is bumped by the board when a task moves to another entry —
+  // both the old and new entry's counts change while you stay on the same board.
+  useEffect(() => { if (orgId) { fetchBoardCounts() } }, [selectedBrandId, countsVersion])
 
   async function fetchBrands() {
     // Pins and sidebar order are both personal — RLS returns only your rows.

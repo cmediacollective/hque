@@ -140,7 +140,10 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
     setPostingComment(true)
     if (onSave) {
       try {
-        await onSave(form)
+        // Posting a comment saves any edits in the panel too — but never acts on
+        // a Brand/Client change that hasn't been saved yet. Moving the task is
+        // deliberate, so it only happens when they actually press Save.
+        await onSave({ ...form, target_brand_id: undefined })
         setRecentlySaved(true)
         setTimeout(() => setRecentlySaved(false), 2500)
       } catch (_) { /* non-blocking */ }
@@ -622,15 +625,30 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
             )}
           </div>
 
-          {brands.length > 0 && (
-            <>
-              {sectionLabel(clientLabel.singular)}
-              <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '24px', boxSizing: 'border-box' }}>
-                <option value=''>Unassigned</option>
-                {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
-            </>
-          )}
+          {brands.length > 0 && (() => {
+            // Changing this picker moves the task to that Brand/Client's board.
+            // Nothing is copied or recreated, so its comments, files, assignees
+            // and history all travel with it — but it does leave this board, so
+            // say so plainly before they hit Save.
+            const startingBrandId = currentBrandId === '__internal' ? '' : (currentBrandId ?? '')
+            const movingTo = (form.target_brand_id || '') !== startingBrandId
+              ? (brands.find(b => b.id === form.target_brand_id)?.name || 'Unassigned')
+              : null
+            return (
+              <>
+                {sectionLabel(clientLabel.singular)}
+                <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: movingTo ? '8px' : '24px', boxSizing: 'border-box' }}>
+                  <option value=''>Unassigned</option>
+                  {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                </select>
+                {movingTo && (
+                  <div style={{ fontSize: '11px', color: muted, lineHeight: 1.5, marginBottom: '24px' }}>
+                    Save moves this task to <strong style={{ color: text, fontWeight: 600 }}>{movingTo}</strong>, keeping its status where that list has a matching column. Comments, files and everything else come with it.
+                  </div>
+                )}
+              </>
+            )
+          })()}
 
           {campaigns.length > 0 && (
             <>
