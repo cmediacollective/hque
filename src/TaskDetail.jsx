@@ -628,36 +628,46 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
           {brands.length > 0 && (() => {
             // Changing this picker moves the task to that Brand/Client's board.
             // Nothing is copied or recreated, so its comments, files, assignees
-            // and history all travel with it — but it does leave this board, so
-            // say so plainly before they hit Save.
+            // and history all travel with it — but it does leave this board.
+            //
+            // It's labelled as the action ("Move to another Brand/Client"), not
+            // as a field, and always carries a line saying where the task lives
+            // today: shown as a plain detail next to an identical-looking
+            // campaign picker, nobody reads it as something they can act on.
             const startingBrandId = currentBrandId === '__internal' ? '' : (currentBrandId ?? '')
+            const startingName = brands.find(b => b.id === startingBrandId)?.name || 'Unassigned'
             const movingTo = (form.target_brand_id || '') !== startingBrandId
               ? (brands.find(b => b.id === form.target_brand_id)?.name || 'Unassigned')
               : null
             return (
-              <>
-                {sectionLabel(clientLabel.singular)}
-                <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: movingTo ? '8px' : '24px', boxSizing: 'border-box' }}>
+              <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '22px', marginBottom: '24px' }}>
+                {sectionLabel(`Move to another ${clientLabel.singular}`)}
+                <select value={form.target_brand_id || ''} onChange={e => setForm(f => ({ ...f, target_brand_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${movingTo ? '#5b7c99' : border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
                   <option value=''>Unassigned</option>
                   {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
-                {movingTo && (
-                  <div style={{ fontSize: '11px', color: muted, lineHeight: 1.5, marginBottom: '24px' }}>
-                    Save moves this task to <strong style={{ color: text, fontWeight: 600 }}>{movingTo}</strong>, keeping its status where that list has a matching column. Comments, files and everything else come with it.
-                  </div>
-                )}
-              </>
+                <div style={{ fontSize: '11px', color: muted, lineHeight: 1.5 }}>
+                  {movingTo ? (
+                    <>Save moves this task to <strong style={{ color: text, fontWeight: 600 }}>{movingTo}</strong>, keeping its status where that list has a matching column. Comments, files and everything else come with it.</>
+                  ) : (
+                    <>This task lives in <strong style={{ color: text, fontWeight: 600 }}>{startingName}</strong>. Pick a different one to move it there — its comments, files and history come along.</>
+                  )}
+                </div>
+              </div>
             )
           })()}
 
           {campaigns.length > 0 && (
-            <>
+            <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '22px', marginBottom: '24px' }}>
               {sectionLabel('Linked campaign')}
-              <select value={form.campaign_id || ''} onChange={e => setForm(f => ({ ...f, campaign_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '24px', boxSizing: 'border-box' }}>
+              <select value={form.campaign_id || ''} onChange={e => setForm(f => ({ ...f, campaign_id: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', marginBottom: '8px', boxSizing: 'border-box' }}>
                 <option value=''>Not linked</option>
                 {campaigns.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-            </>
+              <div style={{ fontSize: '11px', color: muted, lineHeight: 1.5 }}>
+                Optional. Ties this task to a campaign for reporting — it does not move the task.
+              </div>
+            </div>
           )}
 
           <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '24px', marginTop: '8px', marginBottom: '8px' }}>
