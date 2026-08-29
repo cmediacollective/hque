@@ -64,10 +64,28 @@ export default function IntegrationsView({ dark = true, orgId, canManage, allowe
 
   const connected = !!(status && status.connected)
 
+  const looksLikeWebhook = (v) => /^https?:\/\/hooks\.slack\.com\//i.test(v.trim())
+
+  // The webhook URL is long and the two boxes sit together, so pasting it into
+  // "Channel name" is the obvious slip. Catch it and move it rather than
+  // failing validation and making them work out which box was wrong.
+  function onChannelChange(value) {
+    if (looksLikeWebhook(value)) {
+      setWebhook(value.trim())
+      setChannel('')
+      setMsg({ type: 'success', text: "That's the webhook URL — moved it up to the Webhook URL box for you. Channel name is just a label, like #hq." })
+      return
+    }
+    setChannel(value)
+  }
+
   async function connect() {
     setMsg(null)
     const url = webhook.trim()
-    if (!url) return setMsg({ type: 'error', text: 'Paste the webhook URL from Slack first.' })
+    if (!url) return setMsg({ type: 'error', text: 'Paste your webhook URL into the Webhook URL box above.' })
+    if (!looksLikeWebhook(url)) {
+      return setMsg({ type: 'error', text: "That doesn't look like a Slack webhook. The Webhook URL box needs the long link from Slack, starting https://hooks.slack.com/services/ — the channel name goes in the box below it." })
+    }
     setSaving(true)
 
     const { error } = await supabase.rpc('slack_connect', {
@@ -299,17 +317,20 @@ export default function IntegrationsView({ dark = true, orgId, canManage, allowe
         </div>
       ) : instructions}
 
-      <div style={{ marginBottom: '16px' }}>
-        <div style={{ ...labelStyle, marginBottom: '6px' }}>Webhook URL</div>
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ ...labelStyle, marginBottom: '6px' }}>Webhook URL <span style={{ color: '#5b7c99', textTransform: 'none', letterSpacing: 0 }}>— paste here</span></div>
         <input value={webhook} onChange={e => setWebhook(e.target.value)} placeholder='https://hooks.slack.com/services/...'
-          style={{ width: '100%', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+          autoComplete='off' spellCheck={false}
+          style={{ width: '100%', background: inputBg, border: `1px solid ${webhook.trim() ? border2 : '#5b7c99'}`, borderRadius: '6px', padding: '11px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+        <div style={{ fontSize: '11px', color: subtle, marginTop: '6px' }}>The long link from Slack, starting https://hooks.slack.com/services/</div>
       </div>
 
       <div style={{ marginBottom: '18px' }}>
-        <div style={{ ...labelStyle, marginBottom: '6px' }}>Channel name</div>
-        <input value={channel} onChange={e => setChannel(e.target.value)} placeholder='#hq'
+        <div style={{ ...labelStyle, marginBottom: '6px' }}>Channel name <span style={{ textTransform: 'none', letterSpacing: 0, color: subtle }}>(optional)</span></div>
+        <input value={channel} onChange={e => onChannelChange(e.target.value)} placeholder='#hq'
+          autoComplete='off'
           style={{ width: '100%', maxWidth: '260px', background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '6px', padding: '9px 12px', fontSize: '13px', color: text, outline: 'none', boxSizing: 'border-box' }} />
-        <div style={{ fontSize: '11px', color: subtle, marginTop: '6px' }}>Just so this screen can remind you where it's posting.</div>
+        <div style={{ fontSize: '11px', color: subtle, marginTop: '6px' }}>Just a name for this screen, so it can remind you where it's posting — not the URL.</div>
       </div>
 
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
