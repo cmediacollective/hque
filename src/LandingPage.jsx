@@ -40,6 +40,27 @@ const FAKE_CAMPAIGNS = [
   { brand: 'Earth Foods', name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent', color: '#4A7C59', initial: 'WF', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/Earth Foods.svg' },
 ]
 
+// Campaigns as the app groups them: by brand, several campaigns to a card.
+const FAKE_BRAND_GROUPS = [
+  { brand: 'Mineral Beauty', color: '#D4A0A0', initial: 'M', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/MINERAL.svg', total: '$31,200',
+    campaigns: [
+      { name: 'Lotus Fall Collection', status: 'ACTIVE', budget: '$24,000', talent: '4 talent' },
+      { name: 'Holiday Gifting', status: 'PITCH', budget: '$7,200', talent: '2 talent' },
+    ] },
+  { brand: 'High Athletics', color: '#1A1A1A', initial: 'H', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/High Athletics.svg', total: '$18,500',
+    campaigns: [
+      { name: 'In-Store Activation', status: 'ACTIVE', budget: '$18,500', talent: '3 talent' },
+    ] },
+  { brand: 'New Skin', color: '#C8A2C8', initial: 'N', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/NEW SKIN.svg', total: '$12,000',
+    campaigns: [
+      { name: 'Oceanside Launch', status: 'PITCH', budget: '$12,000', talent: '2 talent' },
+    ] },
+  { brand: 'Earth Foods', color: '#4A7C59', initial: 'E', logo: 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/campaign-logos/Earth Foods.svg', total: '$9,200',
+    campaigns: [
+      { name: 'Creator Series', status: 'COMPLETED', budget: '$9,200', talent: '5 talent' },
+    ] },
+]
+
 const FAKE_TASKS = [
   { title: 'Send contracts — Lumière', col: 'IN PROGRESS', priority: 'HIGH', date: 'Apr 12' },
   { title: 'Review UGC deliverables', col: 'IN PROGRESS', priority: 'MEDIUM', date: 'Apr 14' },
@@ -57,12 +78,32 @@ const FAKE_STATS = [
   { label: 'TALENT', value: '24' },
 ]
 
+// Order and labels mirror the app's own left-hand nav, so the demo reads as a
+// screenshot of the product rather than an artist's impression of it.
 const SCREENS = [
-  { label: 'Reports', key: 'reports', eyebrow: 'Your business at a glance', caption: 'See every campaign, payment, and talent relationship — all in one view.' },
-  { label: 'Talent Database', key: 'talent', eyebrow: 'Your full roster, one place', caption: 'Your full roster, filtered by type, with follower counts and engagement rates ready to go.' },
-  { label: 'Campaigns', key: 'campaigns', eyebrow: 'Every deal, every status', caption: 'Track every brand deal from pitch to payment, across all your clients.' },
   { label: 'Workspace', key: 'workspace', eyebrow: 'The work, organized', caption: 'Keep the team aligned with tasks, priorities, and deadlines built around your talent work.' },
+  { label: 'Campaigns', key: 'campaigns', eyebrow: 'Every deal, every status', caption: 'Track every brand deal from pitch to payment, grouped by the client it belongs to.' },
+  { label: 'Talent Database', key: 'talent', eyebrow: 'Your full roster, one place', caption: 'Your full roster, filtered by type and niche, with follower counts and engagement rates ready to go.' },
+  { label: 'Contacts', key: 'contacts', eyebrow: 'Everyone you work with', caption: 'Clients, press, vendors, managers — your whole rolodex, filed A–Z alongside your talent.' },
+  { label: 'Reports', key: 'reports', eyebrow: 'Your business at a glance', caption: 'See every campaign, payment, and talent relationship — all in one view.' },
 ]
+
+const SCREEN_ICON = { workspace: '⊞', campaigns: '▦', talent: '◉', contacts: '◫', reports: '▮' }
+
+// Contacts on the marketing demo. Sorted by surname and grouped under a letter,
+// the way the real A–Z rail does it.
+const FAKE_CONTACTS = [
+  { letter: 'A', name: 'Mia Anders', kind: 'Press', detail: 'The Style Desk' },
+  { letter: 'A', name: 'Dane Ashford', kind: 'Brand', detail: 'Mineral Beauty' },
+  { letter: 'B', name: 'Teo Briggs', kind: 'Talent', detail: '@teobriggs', photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face' },
+  { letter: 'B', name: 'Nia Brandt', kind: 'Manager', detail: '3 talent' },
+  { letter: 'C', name: 'Elena Cortez', kind: 'Vendor', detail: 'Studio rental' },
+  { letter: 'M', name: 'Ava Monroe', kind: 'Talent', detail: '@avamonroe', photo: 'https://images.unsplash.com/flagged/photo-1572129063552-570d721b9d5e?w=100&h=100&fit=crop&crop=face' },
+]
+
+// Muted marker colours per contact type, matching the real page's approach of a
+// coloured dot for everyone who isn't talent (talent get their photo).
+const CONTACT_KIND_COLOR = { Press: '#B08968', Brand: '#5b7c99', Manager: '#7D8471', Vendor: '#A0785A', Talent: '#5b7c99' }
 
 const FEATURES = [
   { num: '01', title: 'Your entire roster, one place.', body: 'Every talent profile, contact, social handle, rate card, and outreach history — organized and accessible so your team can move fast and book the right person every time.' },
@@ -114,13 +155,13 @@ function MobileAppPreview({ activeScreen, setActiveScreen, stopRotation }) {
           <div style={{ padding: '0 16px 16px' }}>
             {SCREENS[activeScreen].key === 'talent' && (
               <div>
-                <div style={{ display: 'flex', gap: '5px', marginBottom: '10px', flexWrap: 'wrap' }}>
-                  {['All', 'Influencer', 'UGC', 'Wellness'].map((chip, i) => {
-                    const active = i === 0
-                    return (
-                      <span key={chip} style={{ padding: '3px 8px', fontSize: '7px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#DBD7D0'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 1px 4px rgba(91,124,153,0.3)' : '0 1px 2px rgba(0,0,0,0.04)' }}>{chip}</span>
-                    )
-                  })}
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px', alignItems: 'center' }}>
+                  {['All Types', 'All Niches'].map(label => (
+                    <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '5px 11px', fontSize: '9px', lineHeight: 1, border: '1px solid #DBD7D0', background: '#FFFFFF', color: '#666', borderRadius: '999px', whiteSpace: 'nowrap' }}>
+                      {label}
+                      <svg width='7' height='7' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><polyline points='6 9 12 15 18 9' /></svg>
+                    </span>
+                  ))}
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   {FAKE_TALENT.slice(0, 4).map((t, i) => (
@@ -146,20 +187,22 @@ function MobileAppPreview({ activeScreen, setActiveScreen, stopRotation }) {
             )}
             {SCREENS[activeScreen].key === 'campaigns' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {FAKE_CAMPAIGNS.slice(0, 3).map((c, i) => (
-                  <div key={i} style={{ background: '#fff', borderRadius: '6px', padding: '12px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                {FAKE_BRAND_GROUPS.slice(0, 3).map(group => (
+                  <div key={group.brand} style={{ background: '#fff', borderRadius: '6px', padding: '12px 12px 4px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                      <BrandLogo color={c.color} initial={c.initial} size={32} logo={c.logo} />
+                      <BrandLogo color={group.color} initial={group.initial} size={32} logo={group.logo} />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '12px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand}</div>
-                        <div style={{ fontSize: '8px', color: '#999', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{c.talent}</div>
+                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '12px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.brand}</div>
+                        <div style={{ fontSize: '8px', color: '#999' }}>{group.campaigns.length} campaign{group.campaigns.length === 1 ? '' : 's'} · {group.total}</div>
                       </div>
-                      <StatusBadge status={c.status} />
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '6px', borderTop: '0.5px solid #EDE8E1' }}>
-                      <div style={{ fontSize: '10px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0, marginRight: '8px' }}>{c.name}</div>
-                      <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
-                    </div>
+                    {group.campaigns.map(c => (
+                      <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 0', borderTop: '0.5px solid #EDE8E1' }}>
+                        <div style={{ fontSize: '10px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 }}>{c.name}</div>
+                        <div style={{ fontSize: '10px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
+                        <StatusBadge status={c.status} />
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -188,6 +231,34 @@ function MobileAppPreview({ activeScreen, setActiveScreen, stopRotation }) {
                           </div>
                         )
                       })}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            {SCREENS[activeScreen].key === 'contacts' && (
+              <div style={{ background: '#fff', borderRadius: '6px', padding: '4px 12px', border: '0.5px solid #E0DCD6', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                {FAKE_CONTACTS.slice(0, 5).map((c, i) => {
+                  const newLetter = i === 0 || FAKE_CONTACTS[i - 1].letter !== c.letter
+                  return (
+                    <div key={c.name}>
+                      {newLetter && (
+                        <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '11px', color: '#5b7c99', padding: '8px 0 3px', borderBottom: '0.5px solid #EDE8E1', marginBottom: '3px' }}>{c.letter}</div>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 0' }}>
+                        {c.photo ? (
+                          <img src={c.photo} alt={c.name} style={{ width: '22px', height: '22px', borderRadius: '3px', objectFit: 'cover', flexShrink: 0 }} />
+                        ) : (
+                          <span style={{ width: '22px', height: '22px', borderRadius: '3px', background: '#F4F1EC', border: '0.5px solid #E8E4DE', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: CONTACT_KIND_COLOR[c.kind] || '#aaa' }} />
+                          </span>
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '10px', color: '#1A1A1A' }}>{c.name}</div>
+                          <div style={{ fontSize: '8px', color: '#bbb' }}>{c.detail}</div>
+                        </div>
+                        <span style={{ padding: '2px 9px', fontSize: '8px', lineHeight: 1.4, borderRadius: '999px', border: '1px solid #E0DCD6', color: '#888' }}>{c.kind}</span>
+                      </div>
                     </div>
                   )
                 })}
@@ -224,7 +295,7 @@ function MobileAppPreview({ activeScreen, setActiveScreen, stopRotation }) {
             {SCREENS.map((s, i) => (
               <button key={i} onClick={() => { setActiveScreen(i); stopRotation && stopRotation() }} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                 <span style={{ fontSize: '14px', opacity: i === activeScreen ? 1 : 0.4 }}>
-                  {i === 0 ? '◉' : i === 1 ? '▦' : i === 2 ? '⊞' : '▮'}
+                  {SCREEN_ICON[s.key]}
                 </span>
                 <span style={{ fontSize: '7px', letterSpacing: '0.08em', textTransform: 'uppercase', color: i === activeScreen ? '#5b7c99' : '#aaa' }}>{s.label.split(' ')[0]}</span>
               </button>
@@ -261,14 +332,17 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
 
           {SCREENS[activeScreen].key === 'talent' && (
             <div>
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
-                {['All Types', 'Influencer', 'UGC', 'Actor', 'Wellness', 'Beauty', 'Fashion', 'Travel'].map((chip, i) => {
-                  const active = i === 0
-                  return (
-                    <span key={chip} style={{ padding: '4px 10px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `1px solid ${active ? '#5b7c99' : '#DBD7D0'}`, background: active ? '#5b7c99' : '#FFFFFF', color: active ? '#fff' : '#888', borderRadius: '4px', whiteSpace: 'nowrap', boxShadow: active ? '0 2px 6px rgba(91,124,153,0.35)' : '0 1px 2px rgba(0,0,0,0.04)', fontWeight: active ? 500 : 400 }}>{chip}</span>
-                  )
-                })}
-                <span style={{ marginLeft: 'auto', padding: '4px 12px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', borderRadius: '4px', boxShadow: '0 2px 6px rgba(91,124,153,0.35)' }}>+ Talent</span>
+              {/* Two dropdowns, matching the real filter bar — it stopped being a
+                  row of chips once rosters grew long enough to wrap. */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', alignItems: 'center' }}>
+                {['All Types', 'All Niches'].map(label => (
+                  <span key={label} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '6px 13px', fontSize: '10px', lineHeight: 1, border: '1px solid #DBD7D0', background: '#FFFFFF', color: '#666', borderRadius: '999px', whiteSpace: 'nowrap' }}>
+                    {label}
+                    <svg width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'><polyline points='6 9 12 15 18 9' /></svg>
+                  </span>
+                ))}
+                <span style={{ fontSize: '10px', color: '#aaa' }}>24 talent</span>
+                <span style={{ marginLeft: 'auto', padding: '6px 14px', fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', borderRadius: '3px', boxShadow: '0 2px 6px rgba(91,124,153,0.35)' }}>+ Talent</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
                 {FAKE_TALENT.map((t, i) => (
@@ -299,28 +373,29 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
             </div>
           )}
 
+          {/* One card per BRAND, with that brand's campaigns listed inside — the
+              settled layout. The logo appears once, not once per campaign. */}
           {SCREENS[activeScreen].key === 'campaigns' && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-              {FAKE_CAMPAIGNS.map((c, i) => (
-                <div key={i} style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '16px 18px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+              {FAKE_BRAND_GROUPS.map(group => (
+                <div key={group.brand} style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '16px 18px 8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <BrandLogo color={c.color} initial={c.initial} size={40} logo={c.logo} />
+                    <BrandLogo color={group.color} initial={group.initial} size={40} logo={group.logo} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#1A1A1A', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.brand}</div>
-                      <div style={{ fontSize: '9px', letterSpacing: '0.12em', color: '#999', textTransform: 'uppercase' }}>{c.talent}</div>
-                    </div>
-                    <StatusBadge status={c.status} />
-                  </div>
-                  <div style={{ paddingTop: '10px', borderTop: '0.5px solid #EDE8E1', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '7px', letterSpacing: '0.18em', color: '#5b7c99', textTransform: 'uppercase', marginBottom: '3px' }}>Campaign</div>
-                      <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '12px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
-                      <div style={{ fontSize: '7px', color: '#bbb', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '2px' }}>Budget</div>
+                      <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#1A1A1A', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{group.brand}</div>
+                      <div style={{ fontSize: '9px', color: '#999' }}>{group.campaigns.length} campaign{group.campaigns.length === 1 ? '' : 's'} · {group.total}</div>
                     </div>
                   </div>
+                  {group.campaigns.map(c => (
+                    <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderTop: '0.5px solid #EDE8E1' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '11px', color: '#1A1A1A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</div>
+                        <div style={{ fontSize: '9px', color: '#bbb' }}>{c.talent}</div>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#1A1A1A', fontWeight: 500 }}>{c.budget}</div>
+                      <StatusBadge status={c.status} />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -359,6 +434,53 @@ function DesktopAppPreview({ activeScreen, setActiveScreen }) {
                   </div>
                 )
               })}
+            </div>
+          )}
+
+          {/* Contacts: the A–Z rail down the side, serif letter dividers, and a
+              photo for talent / coloured marker for everyone else. */}
+          {SCREENS[activeScreen].key === 'contacts' && (
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', paddingTop: '4px', flexShrink: 0 }}>
+                {['A', 'B', 'C', 'D', 'E', 'M', 'R', 'S', 'T', 'V'].map(l => {
+                  const has = FAKE_CONTACTS.some(c => c.letter === l)
+                  return <span key={l} style={{ fontSize: '9px', letterSpacing: '0.1em', color: has ? '#5b7c99' : '#ccc', fontWeight: has ? 500 : 400 }}>{l}</span>
+                })}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', alignItems: 'center' }}>
+                  {['All Types', 'Talent', 'Brand', 'Press'].map((label, i) => (
+                    <span key={label} style={{ padding: '6px 13px', fontSize: '10px', lineHeight: 1, border: `1px solid ${i === 0 ? '#5b7c99' : '#DBD7D0'}`, background: i === 0 ? '#5b7c99' : '#FFFFFF', color: i === 0 ? '#fff' : '#666', borderRadius: '999px', whiteSpace: 'nowrap' }}>{label}</span>
+                  ))}
+                  <span style={{ marginLeft: 'auto', fontSize: '10px', color: '#aaa' }}>1,204 contacts</span>
+                </div>
+                <div style={{ background: '#FFFFFF', border: '0.5px solid #E0DCD6', borderRadius: '6px', padding: '4px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                  {FAKE_CONTACTS.slice(0, 4).map((c, i) => {
+                    const newLetter = i === 0 || FAKE_CONTACTS[i - 1].letter !== c.letter
+                    return (
+                      <div key={c.name}>
+                        {newLetter && (
+                          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: '13px', color: '#5b7c99', padding: '10px 0 4px', borderBottom: '0.5px solid #EDE8E1', marginBottom: '4px' }}>{c.letter}</div>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 0' }}>
+                          {c.photo ? (
+                            <img src={c.photo} alt={c.name} style={{ width: '26px', height: '26px', borderRadius: '3px', objectFit: 'cover', flexShrink: 0 }} />
+                          ) : (
+                            <span style={{ width: '26px', height: '26px', borderRadius: '3px', background: '#F4F1EC', border: '0.5px solid #E8E4DE', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: CONTACT_KIND_COLOR[c.kind] || '#aaa' }} />
+                            </span>
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '11px', color: '#1A1A1A' }}>{c.name}</div>
+                            <div style={{ fontSize: '9px', color: '#bbb' }}>{c.detail}</div>
+                          </div>
+                          <span style={{ padding: '3px 10px', fontSize: '9px', lineHeight: 1, borderRadius: '999px', border: '1px solid #E0DCD6', color: '#888', background: '#FDFCFA' }}>{c.kind}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           )}
 

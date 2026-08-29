@@ -1,5 +1,11 @@
 [
   {
+    "title": "Landing page demo updated to match the product",
+    "description": "The interactive preview on our home page had fallen behind the app. Contacts is now in it as a fifth screen with the A–Z rail it actually has, Campaigns groups by client the way the real page does instead of showing one card per campaign, and the Talent screen shows the Type and Niche dropdowns that replaced the old filter chips. The sidebar and mobile tab bar now match the app's own order and icons. Everything shown is still made-up sample data.",
+    "category": "Improvement",
+    "shipped_at": "2026-08-29"
+  },
+  {
     "title": "Slack notifications for assignments and overdue tasks",
     "description": "HQue now talks to Slack. In Settings → Integrations, an owner or admin connects a Slack webhook and points it at a channel — most teams will want something like #hq. From then on, two things show up there: when a task is assigned to someone, and when a task goes past its due date. That's it, on purpose — no running commentary on every comment and edit, because a channel that repeats everything gets muted within a week. Each message tags the person it's about, so an assignment actually reaches them; add each teammate's Slack member ID on the same screen and HQue @-mentions them properly. Three toggles let you control what gets posted, and a test message goes out the moment you connect so you know it's working. Available on Pro and Business.",
     "category": "Feature",
