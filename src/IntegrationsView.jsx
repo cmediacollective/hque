@@ -64,13 +64,20 @@ export default function IntegrationsView({ dark = true, orgId, canManage, allowe
 
   const connected = !!(status && status.connected)
 
-  const looksLikeWebhook = (v) => /^https?:\/\/hooks\.slack\.com\//i.test(v.trim())
+  // Matches the database's check exactly, so the browser can never wave through
+  // something the server will then reject. Host only — Slack is a better judge
+  // of the rest of the URL than a pattern here is.
+  const looksLikeWebhook = (v) => /^https:\/\/hooks\.slack\.com\//i.test(v.trim())
+  // Deliberately looser: used only to spot a URL pasted into the channel box so
+  // it can be moved to the right one. Catching an http:// paste here means the
+  // person gets a useful message instead of silent confusion.
+  const looksPasted = (v) => /^https?:\/\/hooks\.slack\.com\//i.test(v.trim())
 
   // The webhook URL is long and the two boxes sit together, so pasting it into
   // "Channel name" is the obvious slip. Catch it and move it rather than
   // failing validation and making them work out which box was wrong.
   function onChannelChange(value) {
-    if (looksLikeWebhook(value)) {
+    if (looksPasted(value)) {
       setWebhook(value.trim())
       setChannel('')
       setMsg({ type: 'success', text: "That's the webhook URL — moved it up to the Webhook URL box for you. Channel name is just a label, like #hq." })
@@ -84,7 +91,7 @@ export default function IntegrationsView({ dark = true, orgId, canManage, allowe
     const url = webhook.trim()
     if (!url) return setMsg({ type: 'error', text: 'Paste your webhook URL into the Webhook URL box above.' })
     if (!looksLikeWebhook(url)) {
-      return setMsg({ type: 'error', text: "That doesn't look like a Slack webhook. The Webhook URL box needs the long link from Slack, starting https://hooks.slack.com/services/ — the channel name goes in the box below it." })
+      return setMsg({ type: 'error', text: "That doesn't look like a Slack webhook. The Webhook URL box needs the long link from Slack, starting https://hooks.slack.com/ — the channel name goes in the box below it." })
     }
     setSaving(true)
 
