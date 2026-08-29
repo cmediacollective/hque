@@ -67,12 +67,12 @@ const SCREENS = [
 const FEATURES = [
   { num: '01', title: 'Your entire roster, one place.', body: 'Every talent profile, contact, social handle, rate card, and outreach history — organized and accessible so your team can move fast and book the right person every time.' },
   { num: '02', title: 'Campaigns that close.', body: 'From first pitch to final payment, track every campaign in one place. Know exactly what\'s active, what\'s pending, and what needs attention before it becomes a problem.' },
-  { num: '03', title: 'A workspace built for your team.', body: 'Tasks, deliverables, and team collaboration — all tied to the campaigns and talent you\'re already managing. No more switching between five tools to get one thing done.' },
+  { num: '03', title: 'A workspace built for your team.', body: 'Tasks, deliverables, and team collaboration — all tied to the campaigns and talent you\'re already managing. Connect Slack and assignments and overdue work land in your channel, so nothing needs chasing. No more switching between five tools to get one thing done.' },
 ]
 
 const PLANS = [
   { name: 'Starter', slug: 'starter', price: '$49', description: 'For entrepreneurs and small teams just getting started.', features: ['Up to 50 talent', '2 team members', 'Campaigns & outreach', 'Talent inquiry form'] },
-  { name: 'Pro', slug: 'pro', price: '$99', description: 'For growing agencies and brand teams that need more power.', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'], highlight: true },
+  { name: 'Pro', slug: 'pro', price: '$99', description: 'For growing agencies and brand teams that need more power.', features: ['Unlimited talent', '5 team members', 'Reports & analytics', 'Slack integration', 'Priority support'], highlight: true },
   { name: 'Business', slug: 'business', price: '$199', description: 'For established agencies and teams running multiple campaigns and clients.', features: ['Unlimited everything', 'Unlimited team members', 'Full white-label branding', 'Custom onboarding', 'Dedicated support'] },
 ]
 

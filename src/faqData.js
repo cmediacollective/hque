@@ -12,5 +12,6 @@ export const FAQS = [
   { q: 'What happens after my trial ends?', a: "You'll be prompted to choose a plan to continue. Your data is never deleted — if you need more time, reach out to us at support@h-que.com." },
   { q: 'Can I cancel anytime?', a: "Yes. No long-term contracts. Cancel anytime from your billing settings and you'll retain access until the end of your billing period." },
   { q: 'Do you offer discounts for smaller agencies?', a: 'We built the Starter plan at $49/month specifically for smaller teams.' },
+  { q: 'Does HQue connect to Slack?', a: 'Yes, on the Pro and Business plans. In Settings → Integrations you connect a Slack channel, and HQue posts there when a task is assigned to someone and when a task goes overdue — tagging the person it belongs to. It stays deliberately quiet beyond that: no running commentary on every comment and edit, so the channel is worth keeping unmuted.' },
   { q: "Where can I see what's new, what's been fixed, and what's coming next?", a: "We keep a live product updates page at https://h-que.com/updates. It shows everything that's been shipped (new features, improvements, and bug fixes), what we're currently building, and what's planned. You can also submit your own feature requests or report an issue directly from that page." },
 ]

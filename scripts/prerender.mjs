@@ -34,7 +34,7 @@ const PRICING = [
   { name: 'Starter', price: '$49', period: '/month', desc: 'For entrepreneurs and small teams who need a clean, simple way to manage talent and run campaigns.',
     features: ['Up to 50 talent', '2 team members', 'Campaign tracking & outreach', 'Payment tracking', 'Branded login page'] },
   { name: 'Pro', price: '$99', period: '/month', desc: 'For agencies and brand teams scaling their campaigns and ready for deeper analytics and workflows.',
-    features: ['Everything in Starter', 'Unlimited talent', '5 team members', 'Reports & analytics', 'Priority support'] },
+    features: ['Everything in Starter', 'Unlimited talent', '5 team members', 'Reports & analytics', 'Slack integration', 'Priority support'] },
   { name: 'Business', price: '$199', period: '/month', desc: 'For established agencies running high-volume talent operations across multiple campaigns and clients.',
     features: ['Everything in Pro', 'Unlimited team members', 'Full white-label branding', 'Custom onboarding', 'Dedicated account support'] },
 ]
@@ -114,6 +114,7 @@ function homeContent() {
     ['Campaign tracking', 'Follow every campaign from pitch to paid, with nothing slipping.'],
     ['Payments', 'Know what\'s owed, what\'s paid, and what\'s overdue at a glance.'],
     ['Team & tasks', 'Assign work, track deliverables, and keep everyone in sync.'],
+    ['Slack integration', 'Assignments and overdue tasks post to your Slack channel, tagging whoever they belong to.'],
   ]
   return `
     <p style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:#5b7c99;">The platform built for talent-driven work</p>
