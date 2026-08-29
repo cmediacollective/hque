@@ -229,8 +229,38 @@ export default function IntegrationsView({ dark = true, orgId, canManage, allowe
         {/* ── Connect form ─────────────────────────────────────────────── */}
         {canManage && (!connected || editing) && (
           <div style={{ borderTop: `0.5px solid ${border}`, paddingTop: '20px' }}>
-            <div style={{ fontSize: '12px', color: muted, lineHeight: 1.8, marginBottom: '18px' }}>
-              In Slack: <strong style={{ color: text }}>Apps → Incoming Webhooks → Add to Slack</strong>, choose the channel you want HQue to post in (we'd suggest something like <span style={{ color: text }}>#hq</span>), then copy the Webhook URL it gives you and paste it below.
+            {/* Slack buries webhooks several screens deep and the old "Apps →
+                Incoming Webhooks" route is a legacy corner of their UI, so spell
+                out the current path and hand them the starting link rather than
+                letting them go hunting. */}
+            <div style={{ background: dark ? '#1A1A1A' : '#F4F1EC', border: `0.5px solid ${border}`, borderRadius: '6px', padding: '18px 20px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: text, marginBottom: '4px' }}>Getting your webhook URL from Slack</div>
+              <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, marginBottom: '16px' }}>
+                A webhook is the private address HQue posts to. It takes about two minutes, and you only do it once.
+              </div>
+
+              <ol style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: muted, lineHeight: 1.9 }}>
+                <li>Open Slack's app page and choose <strong style={{ color: text }}>Create New App</strong> → <strong style={{ color: text }}>From scratch</strong>.</li>
+                <li>Name it <strong style={{ color: text }}>HQue</strong>, pick your workspace, then <strong style={{ color: text }}>Create App</strong>.</li>
+                <li>In the left-hand menu click <strong style={{ color: text }}>Incoming Webhooks</strong>, and switch <strong style={{ color: text }}>Activate Incoming Webhooks</strong> on.</li>
+                <li>Scroll down to <strong style={{ color: text }}>Add New Webhook to Workspace</strong>, pick the channel HQue should post in — something like <strong style={{ color: text }}>#hq</strong> — and click <strong style={{ color: text }}>Allow</strong>.</li>
+                <li>Copy the <strong style={{ color: text }}>Webhook URL</strong> it gives you and paste it below.</li>
+              </ol>
+
+              <a href='https://api.slack.com/apps' target='_blank' rel='noopener noreferrer' style={{
+                display: 'inline-flex', alignItems: 'center', gap: '7px', marginTop: '16px',
+                padding: '9px 16px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase',
+                border: `0.5px solid ${border2}`, borderRadius: '3px', color: muted, textDecoration: 'none',
+              }}>
+                Open Slack app page
+                <svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+                  <path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' /><polyline points='15 3 21 3 21 9' /><line x1='10' y1='14' x2='21' y2='3' />
+                </svg>
+              </a>
+
+              <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.7, marginTop: '14px' }}>
+                Opens in a new tab. Some workspaces only let admins create apps — if you don't see the option, ask whoever runs your Slack to do steps 1–5 and send you the URL.
+              </div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
