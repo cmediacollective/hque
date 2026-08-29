@@ -2,6 +2,7 @@ import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
 import Footer from './Footer'
+import PromoPopup from './PromoPopup'
 import { PLANS, COMPARE } from './plans'
 
 const FAQS = [
@@ -9,7 +10,7 @@ const FAQS = [
   { q: 'Can I switch plans later?', a: 'Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing cycle.' },
   { q: 'What happens when my trial ends?', a: 'Once your 14-day trial ends, you\'ll be prompted to choose a plan to continue. If you don\'t upgrade, your account will be paused — no charges, no surprises.' },
   { q: 'Can I cancel anytime?', a: 'Yes. There are no long-term contracts. You can cancel your subscription at any time from your account settings, and you won\'t be charged again.' },
-  { q: 'Do you offer discounts?', a: 'The Starter plan at $49/month is built for smaller teams, solo entrepreneurs, and those just getting started. If you have specific needs or want to discuss volume pricing, reach out to support@h-que.com.' },
+  { q: 'Do you offer discounts?', a: 'New customers get 50% off their first month with the code WELCOME50 — enter it at checkout under "Add promotion code". It works on any plan. The Starter plan at $49/month is also built for smaller teams and solo entrepreneurs. For volume pricing, reach out to support@h-que.com.' },
 ]
 
 export default function PricingPage({ onGetStarted }) {
@@ -178,6 +179,7 @@ export default function PricingPage({ onGetStarted }) {
       </div>
 
       <Footer />
+      <PromoPopup onGetStarted={onGetStarted} />
     </div>
   )
 }

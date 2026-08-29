@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import MarketingNav from './MarketingNav'
 import Footer from './Footer'
 import HQueChat from './HQueChat'
+import PromoPopup from './PromoPopup'
 
 const BASE = 'https://wxdxkbhnfaamxpbpulrg.supabase.co/storage/v1/object/public/talent-videos/'
 const VIDEOS = [
@@ -887,6 +888,7 @@ export default function LandingPage({ onGetStarted, onSignIn }) {
 
       <Footer />
     <HQueChat />
+    <PromoPopup onGetStarted={onGetStarted} />
     </div>
   )
 }

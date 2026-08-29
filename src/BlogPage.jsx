@@ -4,6 +4,7 @@ import { POSTS } from './BlogData'
 import MarketingNav from './MarketingNav'
 import Footer from './Footer'
 import HQueChat from './HQueChat'
+import PromoPopup from './PromoPopup'
 
 function SpotlightCard({ post, height = '220px', titleSize = '17px', showExcerpt = false, wide = false }) {
   const [hovered, setHovered] = useState(false)
@@ -143,7 +144,7 @@ export default function BlogPage({ onGetStarted }) {
     }).catch(() => {})
     fetch('/.netlify/functions/subscribe-klaviyo', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: trimmed, firstName: 'Blog Subscriber', stage: 'leads' })
+      body: JSON.stringify({ email: trimmed, firstName: 'Blog Subscriber', stage: 'leads', source: 'blog-newsletter' })
     }).catch(() => {})
   }
 
@@ -295,6 +296,7 @@ export default function BlogPage({ onGetStarted }) {
 
       <Footer />
       <HQueChat />
+      <PromoPopup onGetStarted={onGetStarted} />
     </div>
   )
 }

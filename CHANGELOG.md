@@ -6,6 +6,16 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-08-29
 
+**Launch-offer popup on the marketing site, and email sources are now tagged.** A popup on the public pages offers 50% off the first month in exchange for an email, then reveals the code (WELCOME50) with a copy button and a link into the free trial. It's deliberately restrained: on desktop it waits until the cursor leaves the window — the moment someone's going anyway — on mobile it waits 25 seconds, it never returns once dismissed or submitted, and it stays away entirely from anyone who already gave their email through the chat widget. It appears on the landing page, pricing, FAQ and blog, never inside the app.
+
+Separately, every email captured on the marketing site now records **where it came from** in Klaviyo — `promo-welcome50`, `chat-widget`, `blog-newsletter` or `footer` — so the Leads list can be segmented by campaign instead of being one undifferentiated pile. Previously all four doors looked identical once the address landed, which would have made "did the popup work?" unanswerable. The source is only written when supplied, so Stripe, AppSumo and the winback job still move people between lists without overwriting how they first arrived.
+
+The "Do you offer discounts?" answer on both the FAQ and pricing pages used to say no in so many words; it now names the offer and the code.
+
+---
+
+## 2026-08-29
+
 **The demo on the landing page now matches the actual product.** The interactive app preview on h-que.com had drifted a long way from what HQue looks like today. Contacts was missing from it entirely, even though it shipped in July and is on every plan — it's now a fifth screen, with the A–Z letter rail, photos for talent and coloured markers for everyone else, exactly as the real page does it. Campaigns was showing one card per campaign with the brand logo repeated on each; it now groups by brand, one card per client with that client's campaigns listed inside, which is how the real page has worked for months. The Talent screen's row of filter chips is now the two dropdowns (All Types, All Niches) that replaced them. The sidebar lists the sections in the app's own order and the mobile tab bar uses the app's own icons, keyed to each screen so reordering can't mislabel them again. All the demo data is still invented — no real client, talent, or figure appears anywhere on it.
 
 ---

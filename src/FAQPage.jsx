@@ -2,6 +2,7 @@ import useSEO from './useSEO'
 import { useState } from 'react'
 import MarketingNav from './MarketingNav'
 import Footer from './Footer'
+import PromoPopup from './PromoPopup'
 import Linkify from './Linkify'
 import { FAQS } from './faqData'
 
@@ -72,6 +73,7 @@ export default function FAQPage({ onGetStarted, onSignIn }) {
       </div>
 
       <Footer />
+      <PromoPopup onGetStarted={onGetStarted} />
     </div>
   )
 }

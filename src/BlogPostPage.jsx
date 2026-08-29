@@ -3,6 +3,7 @@ import { POSTS } from './BlogData'
 import MarketingNav from './MarketingNav'
 import Footer from './Footer'
 import HQueChat from './HQueChat'
+import PromoPopup from './PromoPopup'
 
 export default function BlogPostPage({ slug, onGetStarted }) {
   const post = POSTS.find(p => p.slug === slug)
@@ -135,6 +136,7 @@ export default function BlogPostPage({ slug, onGetStarted }) {
 
       <Footer />
       <HQueChat />
+      <PromoPopup onGetStarted={onGetStarted} />
     </div>
   )
 }

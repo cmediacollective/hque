@@ -5,6 +5,12 @@
 //
 //   stage: 'leads' | 'nonsubscribers' | 'subscribers' | 'winback'
 //
+// An optional { source } records WHERE a contact came from (the promo popup, the
+// chat widget, the blog box) as a profile property, so the Leads list can be
+// segmented by campaign instead of being one undifferentiated pile. It's only
+// written when supplied, so the server-side callers — Stripe, AppSumo, winback —
+// move people between lists without overwriting how they first arrived.
+//
 // Best-effort by design: callers should not let a Klaviyo failure affect their
 // own work (a payment, a redemption, a signup).
 
@@ -23,7 +29,10 @@ const headers = () => ({
   Authorization: `Klaviyo-API-Key ${API_KEY}`,
 })
 
-async function subscribeToList(listId, email) {
+async function subscribeToList(listId, email, source) {
+  const attributes = { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } }
+  if (source) attributes.properties = { hque_source: source }
+
   const res = await fetch('https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs', {
     method: 'POST',
     headers: headers(),
@@ -31,7 +40,7 @@ async function subscribeToList(listId, email) {
       data: {
         type: 'profile-subscription-bulk-create-job',
         attributes: {
-          profiles: { data: [{ type: 'profile', attributes: { email, subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } } } }] },
+          profiles: { data: [{ type: 'profile', attributes }] },
         },
         relationships: { list: { data: { type: 'list', id: listId } } },
       },
@@ -59,13 +68,13 @@ async function removeFromList(listId, profileId) {
 }
 
 // Move an email to `stage`: add to that list, remove from the other three.
-async function syncStage(email, stage) {
+async function syncStage(email, stage, { source } = {}) {
   const target = LISTS[stage]
   if (!API_KEY || !target || !email) {
     console.error('klaviyo syncStage: missing config/args', { hasKey: !!API_KEY, stage, hasList: !!target, hasEmail: !!email })
     return false
   }
-  await subscribeToList(target, email)
+  await subscribeToList(target, email, source)
   const profileId = await getProfileId(email)
   if (profileId) {
     const others = Object.entries(LISTS).filter(([k, v]) => k !== stage && v).map(([, v]) => v)
