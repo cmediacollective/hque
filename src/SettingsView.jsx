@@ -6,6 +6,7 @@ import BillingView from './BillingView'
 import ProductUpdatesAdmin from './ProductUpdatesAdmin'
 import TalentLabelsManager from './TalentLabelsManager'
 import ContactTypesManager from './ContactTypesManager'
+import IntegrationsView from './IntegrationsView'
 import { CLIENT_LABEL_PRESETS, PERSONALIZATION_NEW_UNTIL, pluralize } from './useClientLabel'
 import { fieldLabelStyle } from './uiStyles'
 
@@ -394,6 +395,9 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     // group name + Talent Labels. Default Labels (master only) seeds new companies.
     ...((currentUserRole === 'owner' || currentUserRole === 'admin') ? [{ key: 'personalize', label: 'Workspace Personalization' }] : []),
     ...(isMaster && !previewing ? [{ key: 'defaults', label: 'Default Labels' }] : []),
+    // Shown on every plan, including Starter: they get the locked card with an
+    // upgrade button rather than no tab at all.
+    { key: 'integrations', label: 'Integrations' },
     { key: 'password', label: 'Password' },
     // Billing is owner-only: plan changes, payment, and cancellation stay with
     // the one person who owns the account, not every admin.
@@ -874,6 +878,16 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
           <div style={panelStyle}>
             <TalentLabelsManager mode="defaults" dark={dark} colors={{ text, muted, subtle, border, border2, inputBg, card, accent: '#5b7c99' }} />
           </div>
+        )}
+
+        {activeTab === 'integrations' && (
+          <IntegrationsView
+            dark={dark}
+            orgId={orgId}
+            canManage={currentUserRole === 'owner' || currentUserRole === 'admin'}
+            allowed={planLimits(stripePlan).integrations}
+            onUpgrade={currentUserRole === 'owner' ? () => setActiveTab('billing') : null}
+          />
         )}
 
         {activeTab === 'password' && (

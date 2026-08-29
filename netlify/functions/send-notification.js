@@ -1,12 +1,27 @@
 const { createClient } = require('@supabase/supabase-js')
+const { postAssignment } = require('./slack-lib')
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method not allowed' }
   const { user_id, type, message, task_id, campaign_id } = JSON.parse(event.body)
   const { data: profile } = await supabase.from('profiles').select('email, email_notifications, full_name').eq('id', user_id).single()
-  if (!profile || !profile.email_notifications) return { statusCode: 200, body: JSON.stringify({ skipped: true }) }
+  if (!profile) return { statusCode: 200, body: JSON.stringify({ skipped: true }) }
   const name = profile.full_name || profile.email
+
+  // Slack (Settings → Integrations) carries assignments only, and posts to the
+  // company's channel rather than to a person — so it runs before, and
+  // independently of, the personal email toggle below. Someone who has turned
+  // email off still gets tagged in the channel.
+  if (type === 'assignment' && task_id) {
+    try {
+      await postAssignment(supabase, { taskId: task_id, assigneeId: user_id, assigneeName: name })
+    } catch (e) {
+      console.error('send-notification: Slack post failed', e)
+    }
+  }
+
+  if (!profile.email_notifications) return { statusCode: 200, body: JSON.stringify({ skipped: 'email' }) }
 
   // Deep-link the button straight to the task or campaign this notification is about.
   // People who belong to more than one company are often "in" a different one

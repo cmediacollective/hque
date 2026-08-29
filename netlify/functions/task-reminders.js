@@ -1,6 +1,8 @@
 // Daily scheduled job: emails task assignees when a task is due tomorrow,
-// due today, or overdue (due yesterday). Scheduled via netlify.toml.
+// due today, or overdue (due yesterday), and posts the overdue ones to the
+// company's Slack channel if they've connected one. Scheduled via netlify.toml.
 const { createClient } = require('@supabase/supabase-js')
+const { postOverdue } = require('./slack-lib')
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 const RESEND_KEY = process.env.VITE_RESEND_API_KEY
@@ -152,7 +154,29 @@ async function runReminders() {
       else skipped++
     }
   }
-  return { checked: tasks.length, open: openTasks.length, sent, skipped }
+
+  // Slack (Settings → Integrations) only carries the overdue ones — the point of
+  // the channel is "this slipped", not a daily digest of everything upcoming.
+  // Sent whether or not the assignee takes email, since it posts to the
+  // company's channel rather than to them.
+  let slacked = 0
+  for (const t of openTasks) {
+    if (phaseByDate[t.due_date] !== 'overdue') continue
+    const brandName = brandNameById[brandIdByBoard[t.board_id]] || ''
+    for (const uid of (assigneesByTask[t.id] || [])) {
+      const p = profileById[uid]
+      try {
+        const ok = await postOverdue(supabase, {
+          task: t, assigneeId: uid, assigneeName: p ? (p.full_name || p.email) : '', brandName
+        })
+        if (ok) slacked++
+      } catch (e) {
+        console.error('task-reminders: Slack post failed', e)
+      }
+    }
+  }
+
+  return { checked: tasks.length, open: openTasks.length, sent, skipped, slacked }
 }
 
 exports.handler = async () => {

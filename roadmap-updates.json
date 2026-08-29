@@ -1,5 +1,11 @@
 [
   {
+    "title": "Slack notifications for assignments and overdue tasks",
+    "description": "HQue now talks to Slack. In Settings → Integrations, an owner or admin connects a Slack webhook and points it at a channel — most teams will want something like #hq. From then on, two things show up there: when a task is assigned to someone, and when a task goes past its due date. That's it, on purpose — no running commentary on every comment and edit, because a channel that repeats everything gets muted within a week. Each message tags the person it's about, so an assignment actually reaches them; add each teammate's Slack member ID on the same screen and HQue @-mentions them properly. Three toggles let you control what gets posted, and a test message goes out the moment you connect so you know it's working. Available on Pro and Business.",
+    "category": "Feature",
+    "shipped_at": "2026-08-29"
+  },
+  {
     "title": "Move a task to a different Brand/Client",
     "description": "Tasks used to be stuck wherever you first created them. If something filed under one client really belonged to another — or a task in January belonged in February — your only option was to delete it and type it out again, losing all its comments, files and history. Now you just open the task and change the Brand/Client dropdown. The task moves across with everything attached to it: comments, files, who's assigned, who's watching, the lot. It keeps its status if the destination has a column with the same name, and a note under the dropdown tells you exactly where it's going before you save. After the move you get a confirmation with a button to jump straight there, and anyone watching the task is told it moved.",
     "category": "Feature",

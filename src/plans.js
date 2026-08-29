@@ -39,6 +39,7 @@ export const PLANS = [
       'Contacts CRM (10,000 contacts)',
       '5 team members',
       'Reports & analytics',
+      'Slack integration',
       'Priority support',
     ],
   },
@@ -74,6 +75,7 @@ export const COMPARE = [
   { label: 'Payment tracking', starter: true, pro: true, agency: true },
   { label: 'Branded login page', starter: true, pro: true, agency: true },
   { label: 'Reports & analytics', starter: false, pro: true, agency: true },
+  { label: 'Slack integration', starter: false, pro: true, agency: true },
   { label: 'Full white-label branding', starter: false, pro: false, agency: true },
   { label: 'Custom onboarding', starter: false, pro: false, agency: true },
   { label: 'Early access to new features', starter: false, pro: false, agency: true },
@@ -83,7 +85,7 @@ export const COMPARE = [
 // Per-plan hard limits, keyed by organizations.stripe_plan.
 // null (trial) and anything unrecognized get full access — trials are unrestricted.
 export function planLimits(stripePlan) {
-  if (stripePlan === 'starter') return { talent: 50, seats: 2, reports: false, contacts: 1000 }
-  if (stripePlan === 'pro') return { talent: Infinity, seats: 5, reports: true, contacts: 10000 }
-  return { talent: Infinity, seats: Infinity, reports: true, contacts: Infinity }
+  if (stripePlan === 'starter') return { talent: 50, seats: 2, reports: false, contacts: 1000, integrations: false }
+  if (stripePlan === 'pro') return { talent: Infinity, seats: 5, reports: true, contacts: 10000, integrations: true }
+  return { talent: Infinity, seats: Infinity, reports: true, contacts: Infinity, integrations: true }
 }
