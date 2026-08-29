@@ -15,6 +15,7 @@ import { useState, useEffect, useRef } from 'react'
 // PROMO_CODE must match the promotion code created in Stripe exactly, or people
 // will be told at checkout that it isn't valid.
 const PROMO_CODE = 'WELCOME50'
+const PROMO_EYEBROW = 'Welcome!'          // rendered uppercase by the style below
 const PROMO_HEADLINE = '50% off your first month'
 
 const GOOGLE_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyvyIlOEgMAP_UOT4O07lUzQpB6MPJ5pipONT7Fem1IynGiDolHRfTQMQxWDtfIDk7e/exec'
@@ -127,7 +128,7 @@ export default function PromoPopup({ onGetStarted }) {
 
         {!done ? (
           <>
-            <div style={{ fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>Launch offer</div>
+            <div style={{ fontSize: '9px', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#5b7c99', marginBottom: '14px' }}>{PROMO_EYEBROW}</div>
             <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontSize: mobile ? '26px' : '30px', color: '#F0ECE6', lineHeight: 1.15, marginBottom: '14px', letterSpacing: '-0.02em' }}>
               {PROMO_HEADLINE}
             </div>
