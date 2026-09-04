@@ -1,5 +1,11 @@
 [
   {
+    "title": "Repeating tasks",
+    "description": "Work that comes back every week no longer has to be retyped. Open any task and there's a new Repeat setting under Due Date: every day, every weekday, every week (pick which days), every 2 weeks, every month, every 3 months or every year. It can run forever, stop on a date, or stop after a set number of times — and a line underneath tells you in plain English exactly what you've just set up, so nobody has to guess what \"weekly\" means. The next one appears when you tick the current one off: drag the card into Done and a fresh copy lands at the start of your board, dated by the rule and already assigned to the same people. That's deliberate — there's only ever one live copy, so your board can't fill up with duplicates while you're away. The new task brings the title, description, priority, assignees, watchers, client and linked campaign with it; comments and files stay with the finished one, so last week's conversation doesn't follow you into this week. A small ↻ on the card shows which tasks repeat.",
+    "category": "Feature",
+    "shipped_at": "2026-09-04"
+  },
+  {
     "title": "Choose what each team member can see",
     "description": "Until now, anyone you added to your team could see everything — Workspace, Campaigns, Talent and Contacts. Access is now decided person by person. Every member always gets the Workspace, so the brands, boards and tasks they need to do their job. Campaigns, Talent and Contacts are optional extras you switch on for the individual, from their row in Settings → Team, or when you send the invitation in the first place. So a freelancer brought in for one client's boards need never see your talent roster, and someone hired to look after bookings can have Talent and nothing else. Only Owners and Admins can hand out access, and they always see every section themselves. Nothing changes for anyone already on your team — they keep everything they have today; the workspace-only default applies to people you invite from now on.",
     "category": "Feature",
