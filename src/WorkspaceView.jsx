@@ -517,21 +517,31 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // is, rather than moving it somewhere it would disappear.
     const move = attempted && !attempted.blocked ? attempted : null
 
-    await supabase.from('tasks').update({
+    const basePatch = {
       title: form.title, description: form.description || null, priority: form.priority,
       due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing,
       column_id: move ? move.columnId : form.column_id,
       campaign_id: form.campaign_id || null,
-      // The repeat rule. The database reads these when the task reaches a Done
-      // column and makes the next one itself — see the tasks_spawn_repeat trigger.
+      ...(move ? { board_id: move.boardId, position: move.position } : {})
+    }
+    // The repeat rule. The database reads these when the task reaches a Done
+    // column and makes the next one itself — see the tasks_spawn_repeat trigger.
+    const repeatPatch = {
       repeat_freq: form.repeat_freq || null,
       repeat_weekdays: form.repeat_freq === 'weekly' ? (form.repeat_weekdays || null) : null,
       repeat_monthly_mode: form.repeat_freq === 'monthly' ? (form.repeat_monthly_mode || 'date') : null,
       repeat_ends: form.repeat_freq ? (form.repeat_ends || 'never') : 'never',
       repeat_until: form.repeat_freq && form.repeat_ends === 'on' ? (form.repeat_until || null) : null,
       repeat_times: form.repeat_freq && form.repeat_ends === 'after' ? (form.repeat_times || null) : null,
-      ...(move ? { board_id: move.boardId, position: move.position } : {})
-    }).eq('id', form.id)
+    }
+
+    const { error: saveErr } = await supabase.from('tasks').update({ ...basePatch, ...repeatPatch }).eq('id', form.id)
+    // 42703 = "column does not exist". The repeat columns arrive in a separate
+    // database step; until that has been run, sending them would fail the whole
+    // save and lose the edit. Save everything else instead.
+    if (saveErr?.code === '42703') {
+      await supabase.from('tasks').update(basePatch).eq('id', form.id)
+    }
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
     if (form.watcher_ids) await syncWatchers(form.id, form.watcher_ids, form.title)
     const mentioned = await parseMentions(form.description, orgId, `You were mentioned in: ${form.title}`, members, form.id)
