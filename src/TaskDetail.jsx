@@ -3,6 +3,7 @@ import { supabase } from './supabase'
 import { addTaskWatchers } from './notify'
 import Linkify from './Linkify'
 import { useClientLabel } from './useClientLabel'
+import { REPEAT_OPTIONS, DAY_SHORT, describeRepeat } from './repeatUtils'
 
 const DONE_COLUMN_NAMES = ['done', 'completed', 'complete', 'shipped', 'closed']
 const MAX_COMMENT_FILE_BYTES = 5 * 1024 * 1024 // 5 MB per attached file
@@ -532,10 +533,121 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
                 <input type='date' value={form.due_date || ''} onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
               )}
               <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: text, cursor: 'pointer', marginTop: '6px' }}>
-                <input type='checkbox' checked={!!form.is_ongoing} onChange={e => setForm(f => ({ ...f, is_ongoing: e.target.checked, due_date: e.target.checked ? '' : f.due_date }))} />
+                <input type='checkbox' checked={!!form.is_ongoing} onChange={e => setForm(f => ({ ...f, is_ongoing: e.target.checked, due_date: e.target.checked ? '' : f.due_date, repeat_freq: e.target.checked ? null : f.repeat_freq }))} />
                 Ongoing (no due date)
               </label>
             </div>
+          </div>
+
+          {/* Repeat. Off for every task until someone turns it on, and mutually
+              exclusive with "Ongoing" — a repeat has to have a date to count from.
+              The green line at the bottom is the point of the whole section: it
+              says in plain words what has just been set up. */}
+          <div style={{ marginBottom: '22px' }}>
+            {sectionLabel('Repeat')}
+            <select
+              value={form.repeat_freq || ''}
+              onChange={e => {
+                const freq = e.target.value || null
+                setForm(f => {
+                  const next = { ...f, repeat_freq: freq }
+                  if (!freq) return next
+                  // Turning a repeat on needs a date, so it cancels "Ongoing"
+                  // and falls back to today if nothing was set.
+                  next.is_ongoing = false
+                  if (!next.due_date) next.due_date = new Date().toISOString().slice(0, 10)
+                  // Sensible starting points, so the sentence below is never blank.
+                  if (freq === 'weekly' && !(next.repeat_weekdays || []).length) {
+                    next.repeat_weekdays = [new Date(next.due_date + 'T00:00:00').getDay()]
+                  }
+                  if (freq === 'monthly' && !next.repeat_monthly_mode) next.repeat_monthly_mode = 'date'
+                  if (!next.repeat_ends) next.repeat_ends = 'never'
+                  return next
+                })
+              }}
+              style={{ width: '100%', background: inputBg, border: `0.5px solid ${form.repeat_freq ? '#5b7c99' : border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+              {REPEAT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+
+            {form.repeat_freq === 'weekly' && (
+              <div style={{ marginTop: '14px' }}>
+                {sectionLabel('On')}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                  {DAY_SHORT.map((label, dow) => {
+                    const on = (form.repeat_weekdays || []).includes(dow)
+                    return (
+                      <button
+                        key={label}
+                        type='button'
+                        onClick={() => setForm(f => {
+                          const days = new Set(f.repeat_weekdays || [])
+                          if (days.has(dow)) days.delete(dow); else days.add(dow)
+                          // Never leave it with nothing chosen — that would mean
+                          // "weekly on no day", which has no answer.
+                          if (days.size === 0) return f
+                          return { ...f, repeat_weekdays: [...days].sort((a, b) => a - b) }
+                        })}
+                        style={{ fontSize: '11px', padding: '4px 11px', borderRadius: '999px', lineHeight: 1.5, background: on ? '#5b7c99' : 'none', border: `0.5px solid ${on ? '#5b7c99' : border2}`, color: on ? '#fff' : muted, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {form.repeat_freq === 'monthly' && (
+              <div style={{ marginTop: '14px' }}>
+                {sectionLabel('Each month')}
+                <select value={form.repeat_monthly_mode || 'date'} onChange={e => setForm(f => ({ ...f, repeat_monthly_mode: e.target.value }))}
+                  style={{ width: '100%', background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                  <option value='date'>On the same date</option>
+                  <option value='weekday'>On the same weekday</option>
+                </select>
+              </div>
+            )}
+
+            {form.repeat_freq && (
+              <div style={{ marginTop: '14px' }}>
+                {sectionLabel('Ends')}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select value={form.repeat_ends || 'never'} onChange={e => setForm(f => ({ ...f, repeat_ends: e.target.value }))}
+                    style={{ flex: 1, minWidth: 0, background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }}>
+                    <option value='never'>Never</option>
+                    <option value='on'>On a date</option>
+                    <option value='after'>After a number of times</option>
+                  </select>
+                  {form.repeat_ends === 'on' && (
+                    <input type='date' value={form.repeat_until || ''} onChange={e => setForm(f => ({ ...f, repeat_until: e.target.value }))}
+                      style={{ flex: 1, minWidth: 0, background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                  )}
+                  {form.repeat_ends === 'after' && (
+                    <input type='number' min='1' value={form.repeat_times || ''} placeholder='12' onChange={e => setForm(f => ({ ...f, repeat_times: e.target.value ? parseInt(e.target.value, 10) : null }))}
+                      style={{ width: '92px', flexShrink: 0, background: inputBg, border: `0.5px solid ${border}`, borderRadius: '1px', padding: '8px 10px', fontSize: '12px', color: text, outline: 'none', boxSizing: 'border-box' }} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {form.repeat_freq && (() => {
+              const sentence = describeRepeat({
+                freq: form.repeat_freq,
+                weekdays: form.repeat_weekdays,
+                monthlyMode: form.repeat_monthly_mode,
+                ends: form.repeat_ends,
+                until: form.repeat_until,
+                times: form.repeat_times,
+                done: form.repeat_done,
+                dueDate: form.due_date,
+              })
+              if (!sentence) return null
+              return (
+                <div style={{ display: 'flex', gap: '9px', alignItems: 'flex-start', marginTop: '14px', background: dark ? '#1C2622' : '#E9F0EC', border: '0.5px solid #7A9B8E', borderRadius: '4px', padding: '10px 12px' }}>
+                  <span style={{ color: '#7A9B8E', fontSize: '13px', lineHeight: 1.3, flexShrink: 0 }}>↻</span>
+                  <span style={{ fontSize: '11.5px', color: text, lineHeight: 1.55 }}>{sentence}</span>
+                </div>
+              )
+            })()}
           </div>
 
           {sectionLabel('Assigned to')}
@@ -890,7 +1002,7 @@ export default function TaskDetail({ task, dark, members = [], brands = [], camp
           </div>
 
           <div style={{ borderTop: `0.5px solid ${border}`, marginTop: '32px', paddingTop: '16px' }}>
-            <button onClick={() => { if (confirm('Delete this task?')) { onDelete(task.id); onClose() } }} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', borderRadius: '1px' }}>
+            <button onClick={async () => { if (!task.repeat_freq && !confirm('Delete this task?')) return; if (await onDelete(task.id) !== false) onClose() }} style={{ padding: '7px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', borderRadius: '1px' }}>
               Delete task
             </button>
           </div>

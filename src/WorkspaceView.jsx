@@ -9,6 +9,7 @@ import { createNotification, parseMentions, addTaskWatchers } from './notify'
 import { cacheGet, cacheSet } from './dataCache'
 import { BoardSkeleton } from './Skeletons'
 import { DONE_COLUMN_NAMES, doneColumnIds as computeDoneColumnIds } from './boardUtils'
+import { formatDay } from './repeatUtils'
 
 const DEFAULT_COLUMNS = ['To Do', 'In Progress', 'Review', 'Hold', 'Done']
 const PRIORITIES = ['Low', 'Medium', 'High']
@@ -228,6 +229,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
   // person who moved it gets told where it went (it vanishes from this board)
   // and can follow it in one click.
   const [movedNotice, setMovedNotice] = useState(null)
+  const [repeatNotice, setRepeatNotice] = useState(null)
   // Bumped after a move so the sidebar re-counts both entries involved.
   const [countsVersion, setCountsVersion] = useState(0)
 
@@ -520,6 +522,14 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       due_date: form.is_ongoing ? null : (form.due_date || null), is_ongoing: !!form.is_ongoing,
       column_id: move ? move.columnId : form.column_id,
       campaign_id: form.campaign_id || null,
+      // The repeat rule. The database reads these when the task reaches a Done
+      // column and makes the next one itself — see the tasks_spawn_repeat trigger.
+      repeat_freq: form.repeat_freq || null,
+      repeat_weekdays: form.repeat_freq === 'weekly' ? (form.repeat_weekdays || null) : null,
+      repeat_monthly_mode: form.repeat_freq === 'monthly' ? (form.repeat_monthly_mode || 'date') : null,
+      repeat_ends: form.repeat_freq ? (form.repeat_ends || 'never') : 'never',
+      repeat_until: form.repeat_freq && form.repeat_ends === 'on' ? (form.repeat_until || null) : null,
+      repeat_times: form.repeat_freq && form.repeat_ends === 'after' ? (form.repeat_times || null) : null,
       ...(move ? { board_id: move.boardId, position: move.position } : {})
     }).eq('id', form.id)
     if (form.assignee_ids) await syncAssignees(form.id, form.assignee_ids, form.title)
@@ -561,6 +571,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
       setMovedNotice({ error: true, message: `Didn't move "${form.title}" — ${name} ${attempted.blocked}` })
     }
 
+    // Ticked off from the Status dropdown: the trigger has already made the next
+    // one, so say so rather than letting a new card appear out of nowhere.
+    if (form.repeat_freq && !move
+        && doneColumnIds.has(form.column_id) && !doneColumnIds.has(old?.column_id)) {
+      announceRepeat(form.id).catch(() => {})
+    }
+
     if (move) {
       // The task no longer belongs to the board we're looking at, so close it
       // and say where it went — otherwise it just disappears off the screen.
@@ -579,6 +596,13 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     await supabase.from('tasks').update({ column_id: newColumnId }).eq('id', taskId)
     setTasks(ts => ts.map(t => t.id === taskId ? { ...t, column_id: newColumnId } : t))
 
+    // Dragged into Done and it repeats — the database has just created the next
+    // one, so refresh the board and say what happened.
+    if (task?.repeat_freq && doneColumnIds.has(newColumnId) && !doneColumnIds.has(oldColumnId)) {
+      await announceRepeat(taskId)
+      fetchTasks()
+    }
+
     if (task) {
       const oldCol = columns.find(c => c.id === oldColumnId)?.name || 'a column'
       const newCol = columns.find(c => c.id === newColumnId)?.name || 'a column'
@@ -587,9 +611,23 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     }
   }
 
+  // Read back what the database created when a repeating task was finished, so
+  // the banner can name the real date rather than guessing at it.
+  async function announceRepeat(taskId) {
+    const { data: finished } = await supabase.from('tasks').select('title, repeat_next_id').eq('id', taskId).maybeSingle()
+    if (!finished?.repeat_next_id) return
+    const { data: next } = await supabase.from('tasks').select('due_date').eq('id', finished.repeat_next_id).maybeSingle()
+    setRepeatNotice({ title: finished.title, due: next?.due_date || null })
+  }
+
   async function deleteTask(taskId) {
+    // Deleting the live copy of a repeating task ends the series — there is no
+    // separate "series" to keep, so this is the only warning anyone gets.
+    const task = tasks.find(t => t.id === taskId)
+    if (task?.repeat_freq && !confirm(`"${task.title}" repeats. Deleting it stops the repeat — no new copies will be created. Delete it?`)) return false
     await supabase.from('tasks').delete().eq('id', taskId)
     setTasks(ts => ts.filter(t => t.id !== taskId))
+    return true
   }
 
   const priorityColor = (p) => p === 'High' ? '#c0392b' : p === 'Medium' ? '#5b7c99' : '#777'
@@ -759,6 +797,17 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
               </div>
             )}
 
+            {repeatNotice && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 28px', borderBottom: `0.5px solid ${border}`, background: dark ? 'rgba(122,155,142,0.14)' : '#E9F0EC', flexShrink: 0 }}>
+                <span style={{ color: '#7A9B8E', fontSize: '14px', lineHeight: 1, flexShrink: 0 }}>↻</span>
+                <span style={{ fontSize: '12px', color: text, flex: 1, minWidth: 0 }}>
+                  Repeated <strong style={{ fontWeight: 600 }}>{repeatNotice.title}</strong>
+                  {repeatNotice.due ? <> — the next one is due {formatDay(repeatNotice.due)}.</> : '.'}
+                </span>
+                <button onClick={() => setRepeatNotice(null)} title='Dismiss' style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '15px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
+              </div>
+            )}
+
             {(loading || !boardReady) && <BoardSkeleton dark={dark} />}
 
             {!loading && boardReady && viewMode === 'kanban' && (
@@ -810,6 +859,7 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px' }}>{task.priority}</span>
                               {task.is_ongoing ? <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#7A9B8E', border: '0.5px solid #7A9B8E', padding: '2px 6px' }}>Ongoing</span> : task.due_date && <span style={{ fontSize: '11px', fontWeight: 400, color: muted, opacity: 0.6 }}>{new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>}
+                              {task.repeat_freq && <span title='This task repeats' style={{ fontSize: '11px', color: '#7A9B8E', border: '0.5px solid #7A9B8E', borderRadius: '999px', padding: '0 7px', lineHeight: 1.6 }}>↻</span>}
                               {renderAvatars(task)}
                             </div>
                             <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 2px', flexShrink: 0 }}>×</button>
@@ -869,13 +919,16 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
                         onClick={() => setEditingTask({ ...task })}
                         onMouseEnter={() => setHoveringTask(task.id)}
                         onMouseLeave={() => setHoveringTask(null)}
-                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 76px 72px 76px 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+                        style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '6px', padding: '16px 18px', marginBottom: '8px', cursor: 'pointer', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 76px 98px 76px 24px', gap: '12px', alignItems: 'center', opacity: doneColumnIds.has(task.column_id) ? 0.55 : 1, boxShadow: hoveringTask === task.id ? taskShadowHover : taskShadow, transform: hoveringTask === task.id ? 'translateY(-2px)' : 'none', transition: 'box-shadow 0.15s ease, transform 0.15s ease', fontFamily: "'Inter Tight', 'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
                         <div style={{ minWidth: 0, overflow: 'hidden' }}>
                           <div style={{ fontSize: '13px', fontWeight: 600, color: text, marginBottom: '3px', textDecoration: doneColumnIds.has(task.column_id) ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.title}</div>
                           {task.description && <div style={{ fontSize: '12px', fontWeight: 400, color: muted, opacity: 0.6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{task.description}</div>}
                         </div>
                         <span style={{ fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', color: priorityColor(task.priority), border: `0.5px solid ${priorityColor(task.priority)}`, padding: '2px 6px', textAlign: 'center', borderRadius: '1px', whiteSpace: 'nowrap', justifySelf: 'start' }}>{task.priority}</span>
-                        <div style={{ fontSize: '12px', fontWeight: 400, color: task.is_ongoing ? '#7A9B8E' : muted, opacity: task.is_ongoing ? 1 : 0.6, whiteSpace: 'nowrap' }}>{task.is_ongoing ? 'Ongoing' : (task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—')}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                          {task.repeat_freq && <span title='This task repeats' style={{ fontSize: '11px', color: '#7A9B8E', border: '0.5px solid #7A9B8E', borderRadius: '999px', padding: '0 6px', lineHeight: 1.6, flexShrink: 0 }}>↻</span>}
+                          <span style={{ fontSize: '12px', fontWeight: 400, color: task.is_ongoing ? '#7A9B8E' : muted, opacity: task.is_ongoing ? 1 : 0.6, whiteSpace: 'nowrap' }}>{task.is_ongoing ? 'Ongoing' : (task.due_date ? new Date(task.due_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—')}</span>
+                        </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{renderAvatars(task)}</div>
                         <button onClick={e => { e.stopPropagation(); deleteTask(task.id) }} style={{ background: 'none', border: 'none', color: subtle, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: 0, justifySelf: 'start' }}>×</button>
                       </div>

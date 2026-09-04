@@ -6,6 +6,20 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-09-04
 
+**Repeating tasks.** Work that comes back every week no longer has to be retyped. Open any task and there's a new **Repeat** setting under Due Date: every day, every weekday, every week (pick which days), every 2 weeks, every month (same date or same weekday), every 3 months, or every year. It can run forever, stop on a date, or stop after a set number of times. A green line underneath spells out in plain words exactly what you've set up — "Repeats every Friday. When you mark this Done, the next one appears — due Fri, Sep 12" — and rewrites itself as you change the settings, so nobody has to guess what "weekly" means.
+
+The next copy appears **when you tick the current one off**, not on a timer. Drag the card into Done and a fresh one lands at the start of the board, already assigned to the same people, dated by the rule; a green bar across the top confirms it and names the date. That was a deliberate choice over a calendar-driven version: there is only ever one live copy, so the board can't fill up with duplicates while someone's away, and nothing runs in the background that could quietly stop working. The trade-off is stated plainly — if nobody finishes it, no new one appears and the existing card simply goes overdue, exactly as it does today.
+
+The copy carries the title, description, priority, assignees, watchers, Brand/Client, linked campaign, and the repeat rule itself. It deliberately does not carry comments or files — those stay with the finished task in Done, along with the record of who completed it, so last week's conversation doesn't follow you into this week. A small ↻ marker on the card shows at a glance which tasks repeat, in the same sage green already used for "Ongoing"; the two settings are mutually exclusive, since a repeat needs a date to count from. Deleting a repeating task warns that it ends the series, because there's nothing else to delete.
+
+It lives in a database trigger rather than in the app, so every way of finishing a task counts — dragging the card, the Status dropdown, and anything added later. A task can only ever produce one successor, so dragging a finished card out of Done and back in can't mint duplicates.
+
+Requires the Supabase SQL in supabase/migrations/20260904_repeating_tasks.sql.
+
+---
+
+## 2026-09-04
+
 **Decide what each teammate can see.** Members used to get the whole app the moment they joined — Workspace, Campaigns, Talent and Contacts, all of it, with no way to narrow it down. Now access is per person, and an Owner or Admin decides.
 
 Every Member always gets the **Workspace** — brands, boards and tasks. **Campaigns**, **Talent** and **Contacts** are optional, and each one is switched on or off for that individual in Settings → Team. A person's row now shows what they can see as a set of pills: tap one to grant it, tap again to take it back. You can also make the choice when you send the invitation, so someone brought in purely for talent bookings can land with Talent on and nothing else. Sections a Member hasn't been given simply aren't in their sidebar — and if a link points them at one, they land back on their Workspace rather than a blank screen.
