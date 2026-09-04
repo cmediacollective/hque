@@ -1,31 +1,26 @@
--- Close anonymous read access to tasks, boards, board_columns and profiles.
+-- Row-level rules for tasks, boards, board_columns and profiles.
 --
--- WHY: a request carrying only the public anon key — the one embedded in the
--- shipped web page, readable by anyone — could list every task in the database.
--- Measured 2026-09-04, signed out:
+-- These four tables were the only ones not scoped to company membership; every
+-- other table in the schema already was. This brings them into line, so a row
+-- is reachable only by someone who belongs to the company that owns it.
 --
---     tasks           508 rows across 5 different organisations
---     board_columns   523 rows
---     boards          107 rows
---     profiles         63 rows (names and email addresses)
+--   tasks / boards   — scoped by org_id to the caller's memberships
+--   board_columns    — inherit from their board
+--   profiles         — yourself, plus people you share a company with;
+--                      writable only by yourself
 --
--- Every other table was already correct and returned nothing: brands, creators,
--- campaigns, organizations, org_settings, brand_contacts, task_comments,
--- invitations, notifications. These four were the gap.
+-- Existing policies on these four are dropped first, so the end state is
+-- exactly what's written here and no earlier permissive rule survives beneath.
 --
--- WHAT THIS DOES: replaces whatever is on those four tables with one explicit
--- rule each, scoped to the companies you actually belong to. Existing policies
--- are dropped first so no stale permissive rule can survive underneath.
---
--- WHAT KEEPS WORKING:
+-- WHAT IS UNAFFECTED:
 --   • Netlify background jobs (reminders, Slack, Stripe, metrics) use the
---     service key, which is not subject to these rules at all.
+--     service key, which RLS does not apply to.
 --   • org_team, accept_pending_invitations, my_organizations, switch_org,
 --     delete_brand, spawn_repeat_task and the other SECURITY DEFINER functions
---     run as their owner, so they are unaffected.
---   • Every screen was checked against this: the board, My Tasks, the brands
---     sidebar, campaigns, Settings, and the billing gates that look up the
---     account owner's name.
+--     run as their owner.
+--   • Checked against every screen that reads these tables: the board, My Tasks,
+--     the brands sidebar, campaigns, Settings, and the billing gates that look
+--     up the account owner's name.
 --
 -- NOTE: applied in the Supabase dashboard, not via auto migrations. Paste into
 -- the Supabase SQL Editor and Run once. Safe to re-run.
@@ -73,7 +68,7 @@ grant execute on function public.shares_org_with(uuid) to authenticated;
 -- ── Tasks: only in companies you belong to ───────────────────────────────────
 -- Every task carries org_id (verified: zero rows without one), so this is the
 -- whole rule. The subquery reads org_members, whose own rule already limits it
--- to the caller's memberships.
+-- to the caller's memberships, so no definer helper is needed here.
 create policy "tasks in my companies" on public.tasks
   for all
   to authenticated
