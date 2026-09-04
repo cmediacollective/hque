@@ -135,7 +135,7 @@ function TaskForm({ initial, onSave, onCancel, dark, members = [] }) {
   )
 }
 
-export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0, isAdmin = false, onOpenSettings }) {
+export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_Angeles', dark = true, openTaskId = null, onOpenTaskHandled, openBrandNotesId = null, onOpenBrandNotesHandled, isMobile = false, focusVersion = 0, isAdmin = false, canSeeCampaigns = true, onOpenSettings }) {
   const clientLabel = useClientLabel(orgId)
   const [members, setMembers] = useState([])
   const [brands, setBrands] = useState([])
@@ -148,8 +148,11 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // assignee and must appear here — same source the Settings > Team roster uses.
     supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website, status').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
-    supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
-  }, [orgId])
+    // Only for people who are allowed to see Campaigns — this list is what
+    // fills the "Linked campaign" picker on a task, so for anyone without that
+    // section it stays empty and the picker doesn't appear at all.
+    if (canSeeCampaigns) supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
+  }, [orgId, canSeeCampaigns])
 
   const cleanedUpRef = useRef(false)
   useEffect(() => {
@@ -280,7 +283,10 @@ export default function WorkspaceView({ orgId, userId, agencyTz = 'America/Los_A
     // assignee and must appear here — same source the Settings > Team roster uses.
     supabase.rpc('org_team', { p_org_id: orgId }).then(({ data }) => setMembers(data || []))
     supabase.from('brands').select('id, name, logo_url, website, status').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
-    supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
+    // Only for people who are allowed to see Campaigns — this list is what
+    // fills the "Linked campaign" picker on a task, so for anyone without that
+    // section it stays empty and the picker doesn't appear at all.
+    if (canSeeCampaigns) supabase.from('campaigns').select('id, name').eq('org_id', orgId).eq('archived', false).order('created_at', { ascending: false }).then(({ data }) => setCampaigns(data || []))
     if (activeBoard) { fetchColumns(); fetchTasks() }
   }, [focusVersion])
 

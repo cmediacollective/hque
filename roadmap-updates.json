@@ -1,5 +1,11 @@
 [
   {
+    "title": "Choose what each team member can see",
+    "description": "Until now, anyone you added to your team could see everything — Workspace, Campaigns, Talent and Contacts. Access is now decided person by person. Every member always gets the Workspace, so the brands, boards and tasks they need to do their job. Campaigns, Talent and Contacts are optional extras you switch on for the individual, from their row in Settings → Team, or when you send the invitation in the first place. So a freelancer brought in for one client's boards need never see your talent roster, and someone hired to look after bookings can have Talent and nothing else. Only Owners and Admins can hand out access, and they always see every section themselves. Nothing changes for anyone already on your team — they keep everything they have today; the workspace-only default applies to people you invite from now on.",
+    "category": "Feature",
+    "shipped_at": "2026-09-04"
+  },
+  {
     "title": "Landing page demo updated to match the product",
     "description": "The interactive preview on our home page had fallen behind the app. Contacts is now in it as a fifth screen with the A–Z rail it actually has, Campaigns groups by client the way the real page does instead of showing one card per campaign, and the Talent screen shows the Type and Niche dropdowns that replaced the old filter chips. The sidebar and mobile tab bar now match the app's own order and icons. Everything shown is still made-up sample data.",
     "category": "Improvement",

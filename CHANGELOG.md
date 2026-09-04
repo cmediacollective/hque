@@ -4,6 +4,20 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-09-04
+
+**Decide what each teammate can see.** Members used to get the whole app the moment they joined — Workspace, Campaigns, Talent and Contacts, all of it, with no way to narrow it down. Now access is per person, and an Owner or Admin decides.
+
+Every Member always gets the **Workspace** — brands, boards and tasks. **Campaigns**, **Talent** and **Contacts** are optional, and each one is switched on or off for that individual in Settings → Team. A person's row now shows what they can see as a set of pills: tap one to grant it, tap again to take it back. You can also make the choice when you send the invitation, so someone brought in purely for talent bookings can land with Talent on and nothing else. Sections a Member hasn't been given simply aren't in their sidebar — and if a link points them at one, they land back on their Workspace rather than a blank screen.
+
+Owners and Admins are never limited: they always see every section, so there's nothing to switch on for them, and their rows say so.
+
+Nobody currently on a team loses anything. Everyone who already has an account, and every invitation already sent, keeps all four sections exactly as before — the workspace-only default applies only to people invited from now on. If you want to narrow an existing teammate down, switch the sections off on their row.
+
+Requires the Supabase SQL in supabase/migrations/20260904_member_section_access.sql.
+
+---
+
 ## 2026-08-29
 
 **Welcome popup on the marketing site, and email sources are now tagged.** A popup on the public pages offers 50% off the first month in exchange for an email, then reveals the code (WELCOME50) with a copy button and a link into the free trial. It's deliberately restrained: on desktop it waits until the cursor leaves the window — the moment someone's going anyway — on mobile it waits 25 seconds, it never returns once dismissed or submitted, and it stays away entirely from anyone who already gave their email through the chat widget. It appears on the landing page, pricing, FAQ and blog, never inside the app.

@@ -191,6 +191,10 @@ function App() {
   const [profileFullName, setProfileFullName] = useState('')
   const [orgId, setOrgId] = useState(null)
   const [userRole, setUserRole] = useState(null)
+  // Which optional sections this person may open in THIS company. Owners and
+  // admins always see everything; a Member gets Workspace plus whatever an
+  // owner/admin has switched on for them in Settings → Team.
+  const [sectionAccess, setSectionAccess] = useState({ campaigns: true, talent: true, contacts: true })
   const [pendingReports, setPendingReports] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
@@ -404,6 +408,12 @@ function App() {
   // Billing (plan changes, payment, cancellation) is owner-only — not admin.
   const isOwner = userRole === 'owner'
 
+  // Workspace and Settings belong to everyone, and Reports has its own
+  // admin + Pro-plan gate below. Campaigns, Talent and Contacts are the three
+  // a Member only sees if an owner or admin has granted them.
+  const OPTIONAL_SECTIONS = ['campaigns', 'talent', 'contacts']
+  const canSee = (key) => isAdmin || !OPTIONAL_SECTIONS.includes(key) || !!sectionAccess[key]
+
   // Open Settings on a specific tab from anywhere (e.g. the sidebar rename pencil).
   const openSettingsTab = (tab) => { setPendingSettingsTab(tab); setView('settings') }
 
@@ -430,6 +440,13 @@ function App() {
     setView('reports')
     setPendingReports(initialReports)
   }, [user, userRole, reportsAllowed])
+
+  // A Member who loses access to a section mid-session (or follows a link into
+  // one they were never given) lands back on the Workspace, not an empty screen.
+  useEffect(() => {
+    if (!userRole) return // wait until the role is known
+    if (!canSee(view)) setView('workspace')
+  }, [userRole, view, sectionAccess])
 
   // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
   useEffect(() => {
@@ -583,10 +600,26 @@ function App() {
     if (data?.org_id) {
       setOrgId(data.org_id)
       fetchAgencyName(data.org_id)
+      // Awaited so the nav is already correct on first paint — no flash of a
+      // section this person isn't allowed to open.
+      await fetchSectionAccess(data.org_id)
     }
 
     if (data?.avatar_url) setAvatarUrl(data.avatar_url)
     setProfileLoading(false)
+  }
+
+  // Per-person section access, read from this company's membership row.
+  // select('*') rather than a column list so the app still runs before the
+  // access columns are added to the database: a missing column reads as
+  // undefined, which we treat as "allowed" — i.e. exactly today's behavior.
+  async function fetchSectionAccess(oid) {
+    const { data } = await supabase.from('org_members').select('*').eq('org_id', oid).eq('user_id', user.id).maybeSingle()
+    setSectionAccess({
+      campaigns: data?.access_campaigns !== false,
+      talent: data?.access_talent !== false,
+      contacts: data?.access_contacts !== false,
+    })
   }
 
   async function fetchAgencyName(oid) {
@@ -844,7 +877,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].filter(([key]) => canSee(key)).map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -985,10 +1018,10 @@ function App() {
                   fetch effects every time the user switches sections. */}
               {visited.has('workspace') && (
                 <div style={{ display: view === 'workspace' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} focusVersion={focusVersion} isAdmin={isAdmin} onOpenSettings={openSettingsTab} />
+                  <WorkspaceView dark={dark} orgId={orgId} userId={user?.id} agencyTz={agencyTz} openTaskId={pendingTaskId} onOpenTaskHandled={() => setPendingTaskId(null)} openBrandNotesId={pendingBrandNotesId} onOpenBrandNotesHandled={() => setPendingBrandNotesId(null)} isMobile={isMobile} focusVersion={focusVersion} isAdmin={isAdmin} canSeeCampaigns={canSee('campaigns')} onOpenSettings={openSettingsTab} />
                 </div>
               )}
-              {visited.has('talent') && (
+              {canSee('talent') && visited.has('talent') && (
                 <div style={{ display: view === 'talent' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   {visitedTalentTabs.has('roster') && (
                     <div style={{ display: talentTab === 'roster' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
@@ -1007,12 +1040,12 @@ function App() {
                   )}
                 </div>
               )}
-              {visited.has('campaigns') && (
+              {canSee('campaigns') && visited.has('campaigns') && (
                 <div style={{ display: view === 'campaigns' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <CampaignView dark={dark} orgId={orgId} campaignView={campaignView} openCampaignId={pendingCampaignId} onOpenCampaignHandled={() => setPendingCampaignId(null)} focusVersion={focusVersion} />
                 </div>
               )}
-              {visited.has('contacts') && (
+              {canSee('contacts') && visited.has('contacts') && (
                 <div style={{ display: view === 'contacts' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <ContactsView dark={dark} orgId={orgId} isMobile={isMobile} focusVersion={focusVersion} stripePlan={demoPlan} />
                 </div>
@@ -1039,7 +1072,7 @@ function App() {
 
       {isMobile && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: nav, borderTop: `0.5px solid ${border}`, display: 'flex', zIndex: 50 }}>
-          {navItems.filter(item => (item.key !== 'reports' || (isAdmin && reportsAllowed))).map(item => (
+          {navItems.filter(item => (item.key !== 'reports' || (isAdmin && reportsAllowed))).filter(item => canSee(item.key)).map(item => (
             <button key={item.key} onClick={() => setView(item.key)} style={{
               flex: 1, padding: '10px 4px 8px', background: 'none', border: 'none', cursor: 'pointer',
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'

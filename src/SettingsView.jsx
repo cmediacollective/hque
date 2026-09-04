@@ -76,6 +76,10 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('member')
+  // Optional sections to hand the invitee on day one. Workspace isn't listed —
+  // everyone gets it.
+  const [inviteAccess, setInviteAccess] = useState({ campaigns: false, talent: false, contacts: false })
+  const [savingAccess, setSavingAccess] = useState(null)
   const [showRoleHelp, setShowRoleHelp] = useState(true)
   const [inviting, setInviting] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
@@ -284,7 +288,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
     // Store the invitation so when they log in we can auto-attach them to the org
     const { error: inviteErr } = await supabase.from('invitations').upsert(
-      [{ email, org_id: orgId, role: inviteRole }],
+      [{ email, org_id: orgId, role: inviteRole,
+         // Admins get everything anyway; only a Member's grants are meaningful.
+         access_campaigns: inviteRole === 'admin' || inviteAccess.campaigns,
+         access_talent:    inviteRole === 'admin' || inviteAccess.talent,
+         access_contacts:  inviteRole === 'admin' || inviteAccess.contacts }],
       { onConflict: 'email,org_id' }
     )
 
@@ -312,6 +320,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     setInviting(false)
     setInviteMsg(emailOk ? `Invite sent to ${email}` : `Invite saved, but the email couldn't be sent to ${email}.`)
     setInviteEmail('')
+    setInviteAccess({ campaigns: false, talent: false, contacts: false })
     fetchTeam()
     setTimeout(() => setInviteMsg(''), 5000)
   }
@@ -334,6 +343,18 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
     fetchTeam()
   }
 
+  // Turn one optional section on or off for one member. Owners/admins only —
+  // the RPC re-checks that, so a member poking at the API gets nowhere.
+  async function updateAccess(userId, section, enabled) {
+    setSavingAccess(`${userId}:${section}`)
+    // Show the new state straight away; fetchTeam below is the source of truth.
+    setTeamMembers(ms => ms.map(m => m.id === userId ? { ...m, [`access_${section}`]: enabled } : m))
+    const { error } = await supabase.rpc('set_member_access', { p_org_id: orgId, p_user_id: userId, p_section: section, p_enabled: enabled })
+    setSavingAccess(null)
+    if (error) alert(`Could not update access: ${error.message}`)
+    fetchTeam()
+  }
+
   async function removeUser(member) {
     const displayName = member.full_name || member.email
     if (!confirm(`Remove ${displayName} from the team? They will lose access to this company immediately.`)) return
@@ -349,11 +370,35 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
 
   const roleColor = (r) => r === 'owner' ? '#5b7c99' : r === 'admin' ? '#888' : '#666'
 
+  // A rounded on/off pill for one section. Pass no onToggle to render it
+  // read-only — that's what a Member looking at the team list gets.
+  const sectionPill = (key, label, on, onToggle, title) => (
+    <button
+      key={key}
+      type='button'
+      title={title}
+      onClick={onToggle}
+      disabled={!onToggle}
+      style={{
+        fontSize: '11px', padding: '4px 12px', borderRadius: '999px', lineHeight: 1.5,
+        background: on ? '#5b7c99' : 'none',
+        border: `0.5px solid ${on ? '#5b7c99' : border2}`,
+        color: on ? '#fff' : muted,
+        cursor: onToggle ? 'pointer' : 'default',
+        whiteSpace: 'nowrap',
+      }}>{label}</button>
+  )
+
   // Pending invites that haven't been accepted and aren't already members.
   const visiblePending = pendingInvites.filter(inv => !teamMembers.some(m => (m.email || '').toLowerCase() === inv.email.toLowerCase()))
 
   // Only owners/admins may edit agency info; members see it read-only.
   const canEditAgency = currentUserRole === 'owner' || currentUserRole === 'admin'
+  // Same people decide roles, invites, and who can see which section.
+  const canManageTeam = currentUserRole === 'owner' || currentUserRole === 'admin'
+  // The sections a Member only gets when they're granted them. Workspace is
+  // deliberately absent — everyone has it, always.
+  const OPTIONAL_SECTIONS = [['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts']]
   // The agency-wide time zone is owner-only — it's set once at setup and applies
   // to everyone across the agency, so admins can view but not change it.
   const canEditTimezone = currentUserRole === 'owner'
@@ -699,7 +744,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   {[
                     { role: 'Owner', color: '#5b7c99', summary: 'Runs the workspace and controls the money.', can: 'Everything an Admin can do, plus billing: change or cancel the plan, and update the payment method. The Owner is the person who created this workspace — there is only one, and they can’t be removed or switched to another role.' },
                     { role: 'Admin', color: '#888', summary: 'Runs the workspace day to day, but can’t touch billing.', can: 'Invite and remove teammates, change roles, edit agency info, and view Reports. Can’t change the plan, pay, or cancel the account.' },
-                    { role: 'Member', color: '#666', summary: 'Day-to-day access to the work itself.', can: 'Use brands, boards, tasks, campaigns, and talent. Can’t invite or remove teammates, change roles, see billing, or view Reports.' },
+                    { role: 'Member', color: '#666', summary: 'Day-to-day access to the work itself.', can: 'Always gets the Workspace — brands, boards, and tasks. Campaigns, Talent, and Contacts are optional, and only appear for them once an Owner or Admin switches them on below. Can’t invite or remove teammates, change roles, see billing, or view Reports.' },
                   ].map(r => (
                     <div key={r.role} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                       {/* Fixed width, not minWidth: "MEMBER" is wider than "OWNER"/"ADMIN"
@@ -714,6 +759,7 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                   ))}
                   <div style={{ fontSize: '11px', color: subtle, lineHeight: 1.6, borderTop: `0.5px solid ${border}`, paddingTop: '12px' }}>
                     Reports also require a Pro or Business plan, so a Member won’t see them even on those plans.
+                    <br />Owners and Admins always see every section, so there is nothing to switch on for them.
                   </div>
                 </div>
               )}
@@ -732,44 +778,84 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                     {inviting ? 'Sending...' : 'Send Invite'}
                   </button>
                 </div>
+                {inviteRole === 'member' && (
+                  <div style={{ marginTop: '14px' }}>
+                    <div style={{ fontSize: '11px', color: subtle, marginBottom: '8px', lineHeight: 1.6 }}>What they'll be able to see</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                      {sectionPill('invite-workspace', 'Workspace', true, null, 'Every member gets the Workspace')}
+                      {OPTIONAL_SECTIONS.map(([key, label]) =>
+                        sectionPill(`invite-${key}`, label, inviteAccess[key], () => setInviteAccess(a => ({ ...a, [key]: !a[key] })), `Turn ${label} on or off for this person`)
+                      )}
+                    </div>
+                  </div>
+                )}
                 {inviteMsg && <div style={{ fontSize: '11px', color: inviteMsg.startsWith('Error') ? '#e74c3c' : '#5C9E52', marginTop: '10px' }}>{inviteMsg}</div>}
-                <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>They'll receive a magic link to sign in (no password needed), and join with the access level you pick above.</div>
+                <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', lineHeight: 1.6 }}>
+                  They'll receive a magic link to sign in (no password needed), and join with the access level you pick above.
+                  {inviteRole === 'member'
+                    ? ' Workspace always comes with a Member — the rest is up to you, and you can change it any time below.'
+                    : ' Admins see every section.'}
+                </div>
               </div>
             )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: border, border: `0.5px solid ${border}`, borderRadius: cardRadius, boxShadow: cardShadow, overflow: 'hidden' }}>
               {teamMembers.map(member => (
-                <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', background: card }}>
-                  {member.avatar_url
-                    ? <img src={member.avatar_url} alt={member.email} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
-                    : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.role === 'owner' ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
-                        {member.email?.charAt(0).toUpperCase()}
+                <div key={member.id} style={{ padding: '14px 16px', background: card }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {member.avatar_url
+                      ? <img src={member.avatar_url} alt={member.email} style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover', border: `0.5px solid ${border2}`, flexShrink: 0 }} onError={e => e.target.style.display = 'none'} />
+                      : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: member.role === 'owner' ? '#5b7c99' : dark ? '#2A2A2A' : '#E0DCD6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#fff', fontFamily: 'Georgia, serif', flexShrink: 0 }}>
+                          {member.email?.charAt(0).toUpperCase()}
+                        </div>
+                    }
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.full_name || member.email}</div>
+                      {member.title && <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{member.title}</div>}
+                      {member.id === user?.id && <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>You</div>}
+                    </div>
+                    {member.role === 'owner' ? (
+                      <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', border: '0.5px solid #5b7c99', padding: '3px 8px', borderRadius: '1px' }}>Owner</span>
+                    ) : (
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <select
+                          value={member.role || 'member'}
+                          onChange={e => updateRole(member.id, e.target.value)}
+                          disabled={currentUserRole !== 'owner' && currentUserRole !== 'admin'}
+                          style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
+                          <option value='admin'>Admin</option>
+                          <option value='member'>Member</option>
+                        </select>
+                        {(currentUserRole === 'owner' || currentUserRole === 'admin') && member.id !== user?.id && (
+                          <button
+                            onClick={() => removeUser(member)}
+                            title='Remove from team'
+                            style={{ background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '1px' }}>
+                            Remove
+                          </button>
+                        )}
                       </div>
-                  }
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{member.full_name || member.email}</div>
-                    {member.title && <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>{member.title}</div>}
-                    {member.id === user?.id && <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>You</div>}
+                    )}
                   </div>
-                  {member.role === 'owner' ? (
-                    <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#5b7c99', border: '0.5px solid #5b7c99', padding: '3px 8px', borderRadius: '1px' }}>Owner</span>
+
+                  {/* What this person can open. Owners and admins always see
+                      everything, so only a Member gets switches. */}
+                  {member.role === 'owner' || member.role === 'admin' ? (
+                    <div style={{ fontSize: '11px', color: subtle, marginTop: '10px', marginLeft: '48px', lineHeight: 1.6 }}>Sees every section.</div>
                   ) : (
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <select
-                        value={member.role || 'member'}
-                        onChange={e => updateRole(member.id, e.target.value)}
-                        disabled={currentUserRole !== 'owner' && currentUserRole !== 'admin'}
-                        style={{ background: inputBg, border: `0.5px solid ${border2}`, borderRadius: '1px', padding: '4px 8px', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', color: muted, outline: 'none', cursor: 'pointer' }}>
-                        <option value='admin'>Admin</option>
-                        <option value='member'>Member</option>
-                      </select>
-                      {(currentUserRole === 'owner' || currentUserRole === 'admin') && member.id !== user?.id && (
-                        <button
-                          onClick={() => removeUser(member)}
-                          title='Remove from team'
-                          style={{ background: 'none', border: `0.5px solid ${border2}`, color: '#c0392b', cursor: 'pointer', fontSize: '9px', letterSpacing: '0.12em', textTransform: 'uppercase', padding: '4px 10px', borderRadius: '1px' }}>
-                          Remove
-                        </button>
+                    <div style={{ marginTop: '10px', marginLeft: '48px', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', color: subtle, marginRight: '4px' }}>Can see</span>
+                      {sectionPill(`${member.id}-workspace`, 'Workspace', true, null, 'Every member gets the Workspace')}
+                      {OPTIONAL_SECTIONS.map(([key, label]) =>
+                        sectionPill(
+                          `${member.id}-${key}`,
+                          label,
+                          member[`access_${key}`] !== false,
+                          canManageTeam && savingAccess !== `${member.id}:${key}`
+                            ? () => updateAccess(member.id, key, member[`access_${key}`] === false)
+                            : null,
+                          canManageTeam ? `Turn ${label} on or off for ${member.full_name || member.email}` : undefined
+                        )
                       )}
                     </div>
                   )}
@@ -791,6 +877,11 @@ export default function SettingsView({ dark = true, user, orgId, onAgencyNameCha
                         <div style={{ fontSize: '13px', color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{invite.email}</div>
                         <div style={{ fontSize: '10px', color: muted, marginTop: '2px' }}>
                           Invited as {invite.role || 'member'}{invite.created_at ? ` · ${new Date(invite.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                        </div>
+                        <div style={{ fontSize: '10px', color: subtle, marginTop: '2px' }}>
+                          {(invite.role || 'member') === 'member'
+                            ? `Will see ${['Workspace', ...OPTIONAL_SECTIONS.filter(([k]) => invite[`access_${k}`] !== false).map(([, l]) => l)].join(', ')}`
+                            : 'Will see every section'}
                         </div>
                       </div>
                       <span style={{ fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', color: '#b8860b', border: '0.5px solid #b8860b', padding: '3px 8px', borderRadius: '1px', whiteSpace: 'nowrap' }}>Pending</span>
