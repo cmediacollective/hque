@@ -48,18 +48,25 @@ export default function OnePagerDialog({ creator, orgId, stripePlan, dark = true
   // Branding is fetched when the dialog opens, so the export click itself is
   // synchronous — an awaited window.open gets caught by the popup blocker.
   //
-  // Same rule as the roster export: only Business prints its own logo with no
-  // HQue footer. Starter and Pro always get the HQue wordmark and "Powered by".
+  // The logo is whatever Settings → Agency Info holds: the uploaded
+  // agency_logo_url, printed only when that page's "Logo Shown" toggle is set to
+  // "My logo" (use_agency_logo). That toggle says it governs PDF exports, so the
+  // one-pager honours it the same way the roster export does — and, like the
+  // roster export, own-branding is a Business-plan feature; Starter and Pro get
+  // the HQue mark and the "Powered by HQue" line.
   const businessBrand = stripePlan === 'agency'
-  const [brand, setBrand] = useState({ agencyName: 'HQue', logoUrl: null, businessBrand })
+  const hqueLogoUrl = `${window.location.origin}/logo.svg`
+  const [brand, setBrand] = useState({ agencyName: 'HQue', logoUrl: null, hqueLogoUrl, businessBrand })
   useEffect(() => {
     if (!orgId) return
     let cancelled = false
     supabase.from('org_settings').select('*').eq('org_id', orgId).maybeSingle().then(({ data }) => {
       if (cancelled) return
+      const ownLogo = businessBrand && data?.use_agency_logo && data?.agency_logo_url
       setBrand({
         agencyName: (businessBrand && data?.agency_name) || 'HQue',
-        logoUrl: (businessBrand && data?.use_agency_logo) ? data.agency_logo_url : null,
+        logoUrl: ownLogo ? data.agency_logo_url : null,
+        hqueLogoUrl,
         businessBrand,
       })
     })

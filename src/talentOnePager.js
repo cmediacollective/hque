@@ -171,11 +171,16 @@ export function buildOnePagerHtml(creator, pitch = {}, brand = {}) {
     </div>` : ''
 
   // ---- Header ---------------------------------------------------------------
-  // Business tier prints their own logo; everyone else gets the HQue wordmark
-  // and the "Powered by" line, matching the roster export's branding rule.
-  const headerMark = brand.businessBrand && brand.logoUrl
-    ? `<img src="${esc(brand.logoUrl)}" alt="${esc(brand.agencyName || '')}" style="max-height:34px;max-width:190px;object-fit:contain;display:block;" />`
-    : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:0.24em;color:${ACCENT};text-transform:uppercase;">${esc(brand.agencyName || 'HQue')}</div>`
+  // brand.logoUrl is the logo from Settings → Agency Info, and the caller has
+  // already applied the "Logo Shown" toggle and the plan rule — it arrives set
+  // only when this account should actually print its own mark. Otherwise the
+  // HQue logo goes in, on the dark chip it needs (the asset is white), which is
+  // what the roster export in App.jsx does.
+  const headerMark = brand.logoUrl
+    ? `<img src="${esc(brand.logoUrl)}" alt="${esc(brand.agencyName || '')}" style="max-height:38px;max-width:190px;object-fit:contain;display:block;" />`
+    : (brand.hqueLogoUrl
+      ? `<div style="background:#1A1A1A;border-radius:4px;padding:10px 14px;display:inline-flex;align-items:center;"><img src="${esc(brand.hqueLogoUrl)}" alt="HQue" style="height:20px;width:auto;display:block;" /></div>`
+      : `<div style="font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:0.24em;color:${ACCENT};text-transform:uppercase;">${esc(brand.agencyName || 'HQue')}</div>`)
 
   const eyebrow = pitch.client || types
   const poweredBy = !brand.businessBrand
