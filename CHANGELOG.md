@@ -6,6 +6,22 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-09-09
 
+**Pull a talent's numbers from Instagram.** Editing a talent now has a **Pull from Instagram** button under Performance. It reads the handle already on the record and fills in follower count, average engagement, engagement rate, and average views where Instagram returns them — averaged across their recent posts, so a one-pager stops being typed from scratch.
+
+It fills four fields and deliberately stops there. Story reach, story views, link clicks and the audience gender/age split are **not** missing because of a setting or a cheaper plan: they exist only inside the creator's own Instagram Insights, and Instagram gives them to nobody else — not to us, and not to the data vendors charging $16,200 a year, who sell estimates of them. The button says as much after every pull rather than leaving anyone guessing why six boxes became four.
+
+A pull never overwrites a number that came back empty, so figures typed in by hand survive a refresh. The engagement rate it calculates is the follower-based one — the public formula — which is not the reach-based rate a media kit usually quotes, and the field is labelled accordingly.
+
+Errors come back in plain words: an expired token says it needs regenerating, a creator on a personal account says personal accounts can't be looked up, and hitting Instagram's hourly cap says to try again in an hour.
+
+Needs a one-time free setup — a Meta app and two Netlify variables, about 15 minutes, written up click-by-click in docs/instagram-metrics-setup.md. Until that's done the button explains itself instead of failing.
+
+Every lookup runs through one Instagram account under Meta's Standard Access, which covers an agency using it for itself but not other customers pulling through the same token. So the button stays restricted to the account that owns the connection until the app has been through Meta's App Review. That review is free but takes 4-6 weeks, and it's also what would unlock the private half of the numbers, with each creator authorising HQue directly.
+
+---
+
+## 2026-09-09
+
 **Talent one-pagers.** Open any talent and there's a new **One-pager** button beside Edit. It exports a full-page PDF sheet — the kind you send a brand when you're pitching one person: their photo and handle, the bio, headline numbers down the left, a metrics block, what they'll deliver and what it costs, with your logo at the top.
 
 Two kinds of information go on that sheet, so they're entered in two different places. The talent's own details — photo, bio, followers, performance numbers, audience split — live on their record, because they're the same in every pitch. Who it's for, the deliverables, the terms and the price are typed into the export dialog each time, because those change with every brand and shouldn't be stored against the person.

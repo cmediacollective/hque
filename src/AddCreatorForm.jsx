@@ -98,6 +98,54 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     ...f,
     audience: { ...f.audience, ages: f.audience.ages.map((a, j) => j === i ? { ...a, [key]: val } : a) }
   }))
+
+  // "Pull from Instagram" — fills the numbers Instagram will tell us from the
+  // handle alone (followers, avg engagement, avg views where available, and a
+  // follower-based engagement rate). Everything else on this form stays manual
+  // because it only exists in the creator's own Insights; see the note under
+  // the Performance heading.
+  const [pulling, setPulling] = useState(false)
+  const [pullResult, setPullResult] = useState(null)
+
+  async function pullFromInstagram() {
+    const handle = (form.handles.instagram || '').trim().replace(/^@/, '')
+    if (!handle) return setPullResult({ error: 'Add their Instagram handle above first.' })
+    setPulling(true)
+    setPullResult(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/.netlify/functions/instagram-metrics?handle=${encodeURIComponent(handle)}`, {
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+      })
+      const body = await res.json()
+      if (body.configured === false) {
+        setPullResult({ error: body.reason === 'not_permitted'
+          ? 'Pulling from Instagram isn’t switched on for this account yet.'
+          : 'Instagram isn’t connected yet — see docs/instagram-metrics-setup.md for the one-time setup.' })
+      } else if (!body.ok) {
+        setPullResult({ error: body.error || 'Couldn’t reach Instagram.' })
+      } else {
+        // Only overwrite what actually came back — a null from the API means
+        // "not available", which must not wipe a number typed in by hand.
+        const m = body.metrics || {}
+        setForm(f => ({
+          ...f,
+          ig_followers: body.followers || f.ig_followers,
+          engagement_rate: m.engagement_rate ?? f.engagement_rate,
+          metrics: {
+            ...f.metrics,
+            avg_engagement: m.avg_engagement ?? f.metrics.avg_engagement,
+            avg_views: m.avg_views ?? f.metrics.avg_views,
+          },
+        }))
+        const got = ['followers', m.avg_engagement != null && 'avg engagement', m.avg_views != null && 'avg views', m.engagement_rate != null && 'engagement rate'].filter(Boolean)
+        setPullResult({ ok: `Filled ${got.join(', ')} from ${body.posts_sampled} recent posts. Story reach, story views, link clicks and the audience split can’t be pulled — those are still yours to fill in.` })
+      }
+    } catch (e) {
+      setPullResult({ error: e.message })
+    }
+    setPulling(false)
+  }
   const toggleType = (t) => setForm(f => ({ ...f, types: toggleChip(f.types, t) }))
   const toggleNiche = (n) => setForm(f => ({ ...f, niches: toggleChip(f.niches, n) }))
 
@@ -397,9 +445,24 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           </div>
 
           {sectionLabel('Performance')}
-          <div style={{ fontSize: '11px', color: muted, opacity: 0.8, marginBottom: '14px', lineHeight: 1.6 }}>
-            From the talent&rsquo;s own Instagram Insights &mdash; these can&rsquo;t be looked up from a handle. Fill in what you have; the one-pager leaves out anything blank.
+          <div style={{ fontSize: '11px', color: muted, opacity: 0.8, marginBottom: '12px', lineHeight: 1.6 }}>
+            Pull what Instagram makes public, then fill in the rest by hand. Story reach, story views, link clicks and the audience split exist only in the creator&rsquo;s own Insights &mdash; no tool can fetch those from a handle. Anything left blank is left off the one-pager.
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', flexWrap: 'wrap' }}>
+            <button onClick={pullFromInstagram} disabled={pulling} style={{
+              padding: '7px 14px', fontSize: '12px', borderRadius: '6px', cursor: pulling ? 'default' : 'pointer',
+              border: `1px solid ${fieldBorder}`, background: fieldBg, color: text, opacity: pulling ? 0.6 : 1
+            }}>{pulling ? 'Pulling…' : 'Pull from Instagram'}</button>
+            <span style={{ fontSize: '11px', color: muted, opacity: 0.7 }}>Fills followers, avg engagement and engagement rate.</span>
+          </div>
+          {pullResult && (
+            <div style={{
+              fontSize: '11.5px', lineHeight: 1.6, marginBottom: '14px', padding: '10px 12px', borderRadius: '6px',
+              color: pullResult.error ? '#c9a14a' : muted,
+              background: pullResult.error ? 'rgba(201,161,74,0.09)' : fieldBg,
+              border: `1px solid ${pullResult.error ? 'rgba(201,161,74,0.25)' : fieldBorder}`
+            }}>{pullResult.error || pullResult.ok}</div>
+          )}
           {field('Period', inp({ value: form.metrics.period, onChange: e => setMetric('period', e.target.value), placeholder: 'Last 30 days' }))}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             {field('Avg views', inp({ value: form.metrics.avg_views, onChange: e => setMetric('avg_views', e.target.value), placeholder: '0', type: 'number' }))}
