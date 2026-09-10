@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import AddCreatorForm from './AddCreatorForm'
+import OnePagerDialog from './OnePagerDialog'
 import Linkify from './Linkify'
 
 const METHODS = ['Email', 'Instagram DM', 'Phone', 'WhatsApp', 'Other']
@@ -136,7 +137,7 @@ function OutreachForm({ creatorId, creatorEmail, campaigns, onSaved, onCancel, d
   )
 }
 
-export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, dark = true }) {
+export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaign, orgId, stripePlan, dark = true }) {
   const panelBg = dark ? '#1A1A1A' : '#F8F7F3'
   const panelBorder = dark ? '#2A2A2A' : '#DBD7D0'
   const panelText = dark ? '#F2EEE8' : '#1A1A1A'
@@ -144,6 +145,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
   const panelCard = dark ? '#222' : '#FFFFFF'
   const panelHover = dark ? '#222' : '#ECEAE4'
   const [editing, setEditing] = useState(false)
+  const [onePager, setOnePager] = useState(false)
   const [campaigns, setCampaigns] = useState([])
   const [allCampaigns, setAllCampaigns] = useState([])
   const [outreachLogs, setOutreachLogs] = useState([])
@@ -277,6 +279,22 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
     </div>
   )
 
+  // Performance numbers, shown only when they've actually been filled in — an
+  // empty grid of dashes would read as "this talent has no reach".
+  const METRIC_KEYS = ['avg_views', 'avg_engagement', 'avg_story_reach', 'avg_story_views', 'avg_link_clicks', 'reach_engagement_rate']
+  const hasMetrics = METRIC_KEYS.some(k => Number(creator.metrics?.[k]) > 0)
+  const ages = (Array.isArray(creator.audience?.ages) ? creator.audience.ages : []).filter(a => a?.label && Number(a.pct) > 0)
+  const hasAudience = Number(creator.audience?.female) > 0 || Number(creator.audience?.male) > 0 || ages.length > 0
+
+  const metricTile = (label, value, suffix = '') => (
+    <div style={{ padding: '12px 13px', background: panelCard, borderRadius: '2px' }}>
+      <div style={{ fontSize: '16px', color: panelText, fontWeight: 500, marginBottom: '4px', fontVariantNumeric: 'tabular-nums' }}>
+        {Number(value) > 0 ? Number(value).toLocaleString() + suffix : '—'}
+      </div>
+      <div style={{ fontSize: '8px', color: panelMuted, letterSpacing: '0.18em', textTransform: 'uppercase' }}>{label}</div>
+    </div>
+  )
+
   const rateRow = (label, value) => value ? (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: `0.5px solid ${panelBorder}` }}>
       <div style={{ fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: panelMuted }}>{label}</div>
@@ -302,6 +320,16 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
         />
       )}
 
+      {onePager && (
+        <OnePagerDialog
+          creator={creator}
+          orgId={orgId}
+          stripePlan={stripePlan}
+          dark={dark}
+          onClose={() => setOnePager(false)}
+        />
+      )}
+
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', justifyContent: 'flex-end' }} onClick={e => e.target === e.currentTarget && onClose()}>
         <div style={{ width: '560px', background: panelBg, height: '100vh', overflowY: 'auto', borderLeft: `0.5px solid ${panelBorder}`, display: 'flex', flexDirection: 'column' }}>
 
@@ -321,6 +349,7 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button onClick={() => setEditing(true)} style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>Edit</button>
+              <button onClick={() => setOnePager(true)} title='Export a full-page PDF sheet for this talent' style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', cursor: 'pointer', borderRadius: '1px' }}>One-pager</button>
               {creator.media_kit_url && (
                 <a href={creator.media_kit_url} target='_blank' rel='noreferrer' style={{ padding: '6px 14px', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'none', border: '0.5px solid #5b7c99', color: '#5b7c99', textDecoration: 'none', borderRadius: '1px' }}>Media Kit ↗</a>
               )}
@@ -336,6 +365,41 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               {stat('YouTube', 'Subscribers', creator.yt_subscribers?.toLocaleString())}
               {stat('Engagement', 'Rate', creator.engagement_rate ? `${creator.engagement_rate}%` : null)}
             </div>
+
+            {hasMetrics && (
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted }}>Performance · {creator.metrics.period || 'Last 30 days'}</div>
+                  {creator.metrics.updated_at && <div style={{ fontSize: '10px', color: panelMuted, opacity: 0.75 }}>Updated {creator.metrics.updated_at}</div>}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                  {metricTile('Avg views', creator.metrics.avg_views)}
+                  {metricTile('Avg engagement', creator.metrics.avg_engagement)}
+                  {metricTile('Reach eng rate', creator.metrics.reach_engagement_rate, '%')}
+                  {metricTile('Avg story reach', creator.metrics.avg_story_reach)}
+                  {metricTile('Avg story views', creator.metrics.avg_story_views)}
+                  {metricTile('Avg link clicks', creator.metrics.avg_link_clicks)}
+                </div>
+              </div>
+            )}
+
+            {hasAudience && (
+              <div style={{ marginBottom: '28px' }}>
+                <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Audience</div>
+                {(creator.audience.female || creator.audience.male) && (
+                  <div style={{ display: 'flex', gap: '20px', fontSize: '13px', color: panelText, marginBottom: ages.length ? '12px' : 0 }}>
+                    {creator.audience.female ? <span>Female <strong style={{ fontWeight: 600 }}>{creator.audience.female}%</strong></span> : null}
+                    {creator.audience.male ? <span>Male <strong style={{ fontWeight: 600 }}>{creator.audience.male}%</strong></span> : null}
+                  </div>
+                )}
+                {ages.map(a => (
+                  <div key={a.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: `0.5px solid ${panelBorder}`, fontSize: '12.5px', color: panelText }}>
+                    <span style={{ color: panelMuted }}>{a.label}</span>
+                    <strong style={{ fontWeight: 600 }}>{a.pct}%</strong>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div style={{ marginBottom: '28px', padding: '16px', background: panelCard, border: `0.5px solid ${panelBorder}`, borderRadius: '2px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>

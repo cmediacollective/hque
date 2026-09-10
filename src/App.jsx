@@ -1025,12 +1025,12 @@ function App() {
                 <div style={{ display: view === 'talent' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   {visitedTalentTabs.has('roster') && (
                     <div style={{ display: talentTab === 'roster' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} focusVersion={focusVersion} openCreatorId={pendingCreatorId} onOpenCreatorHandled={() => setPendingCreatorId(null)} />
+                      <TalentView key={refresh} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={false} onToggleArchived={() => setTalentTab('archived')} talentView={talentView} focusVersion={focusVersion} openCreatorId={pendingCreatorId} onOpenCreatorHandled={() => setPendingCreatorId(null)} stripePlan={demoPlan} />
                     </div>
                   )}
                   {visitedTalentTabs.has('archived') && (
                     <div style={{ display: talentTab === 'archived' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                      <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} focusVersion={focusVersion} />
+                      <TalentView key={'archived'} dark={dark} orgId={orgId} isMobile={isMobile} showArchived={true} onToggleArchived={() => setTalentTab('roster')} talentView={talentView} focusVersion={focusVersion} stripePlan={demoPlan} />
                     </div>
                   )}
                   {visitedTalentTabs.has('inquiries') && (

@@ -4,6 +4,22 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-09-09
+
+**Talent one-pagers.** Open any talent and there's a new **One-pager** button beside Edit. It exports a full-page PDF sheet — the kind you send a brand when you're pitching one person: their photo and handle, the bio, headline numbers down the left, a metrics block, what they'll deliver and what it costs, with your logo at the top.
+
+Two kinds of information go on that sheet, so they're entered in two different places. The talent's own details — photo, bio, followers, performance numbers, audience split — live on their record, because they're the same in every pitch. Who it's for, the deliverables, the terms and the price are typed into the export dialog each time, because those change with every brand and shouldn't be stored against the person.
+
+Editing a talent now has a **Performance** section for the numbers brands ask for: average views, average engagement, reach engagement rate, average story reach, average story views and average link clicks, plus a period label so a sheet says what window it covers. Under it, **Audience breakdown** takes the female/male split and up to three top age groups. All of it is optional — anything left blank is simply left off the sheet rather than printed as a zero. The talent panel shows these numbers back to you with the date they were last changed, so a stale sheet is obvious before you send it.
+
+These figures are typed in, not fetched. Followers and likes are public, but reach, story views, link clicks and audience demographics exist only inside the creator's own Instagram Insights — there is no way to look them up from a handle. The fields are shaped so an automated feed could fill them in later without anything having to be re-entered.
+
+The sheet opens in a new tab and hands off to the browser's print dialog, where **Save as PDF** produces the file — the same approach as the existing roster export, so what you see in the tab is exactly what prints. Business plans print their own logo with no HQue footer; Starter and Pro get the HQue mark and a "Powered by HQue" line, matching how the roster export already works.
+
+Requires the Supabase SQL in supabase/migrations/20260909_talent_performance_metrics.sql.
+
+---
+
 ## 2026-09-04
 
 **Repeating tasks.** Work that comes back every week no longer has to be retyped. Open any task and there's a new **Repeat** setting under Due Date: every day, every weekday, every week (pick which days), every 2 weeks, every month (same date or same weekday), every 3 months, or every year. It can run forever, stop on a date, or stop after a set number of times. A green line underneath spells out in plain words exactly what you've set up — "Repeats every Friday. When you mark this Done, the next one appears — due Fri, Sep 12" — and rewrites itself as you change the settings, so nobody has to guess what "weekly" means.

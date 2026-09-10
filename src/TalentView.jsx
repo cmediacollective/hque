@@ -39,7 +39,7 @@ function totalFollowers(creator) {
   if (total >= 1000) return (total / 1000).toFixed(1).replace(/\.0$/, '') + 'K'
   return total.toLocaleString()
 }
-export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0, openCreatorId, onOpenCreatorHandled }) {
+export default function TalentView({ dark = true, orgId, isMobile = false, showArchived = false, onToggleArchived, talentView = 'grid', focusVersion = 0, openCreatorId, onOpenCreatorHandled, stripePlan }) {
   // Roster loads through a cached, stale-while-revalidate resource keyed by
   // org + archived, so toggling Active/Archived (or revisiting) paints from
   // cache instantly and refetches silently — no empty flash.
@@ -164,6 +164,7 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
         <CreatorDetail
           creator={selected}
           orgId={orgId}
+          stripePlan={stripePlan}
           onClose={() => setSelected(null)}
           onSaved={() => { setSelected(null); fetchCreators() }}
           dark={dark}

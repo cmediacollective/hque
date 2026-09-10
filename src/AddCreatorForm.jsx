@@ -8,6 +8,26 @@ const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
+// Performance numbers a brand asks for. Most of these are only visible in the
+// talent's own Instagram Insights — there's no way to look them up from a
+// handle — so they're typed in from whatever the talent sends over.
+const EMPTY_METRICS = {
+  period: 'Last 30 days', avg_views: '', avg_engagement: '', avg_story_reach: '',
+  avg_story_views: '', avg_link_clicks: '', reach_engagement_rate: ''
+}
+// Three age bands is what fits the one-pager; the reference sheets all show 2-3.
+const EMPTY_AUDIENCE = {
+  female: '', male: '',
+  ages: [{ label: '', pct: '' }, { label: '', pct: '' }, { label: '', pct: '' }]
+}
+// Pad a saved age list back out to three editable rows.
+const agesToForm = (ages) => {
+  const rows = (Array.isArray(ages) ? ages : []).map(a => ({ label: a?.label || '', pct: a?.pct ?? '' }))
+  while (rows.length < 3) rows.push({ label: '', pct: '' })
+  return rows.slice(0, 3)
+}
+const numOrNull = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : null }
+
 export default function AddCreatorForm({ onClose, onSaved, existing, dark = true, orgId }) {
   // This company's own label lists. Falls back to the talent's org when editing
   // from the detail panel (which doesn't pass orgId). Chips always include any
@@ -36,6 +56,8 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     types: existing.types || (existing.type ? [existing.type] : []),
     rates: existing.rates || { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' },
     handles: existing.handles || { instagram: '', tiktok: '', youtube: '' },
+    metrics: { ...EMPTY_METRICS, ...(existing.metrics || {}) },
+    audience: { ...EMPTY_AUDIENCE, ...(existing.audience || {}), ages: agesToForm(existing.audience?.ages) },
     niches: existing.niches || []
   } : {
     name: '', types: [], tier: '', primary_platform: '',
@@ -44,7 +66,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     manager_user_id: null,
     location: '', notes: '', bio: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
-    rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' }
+    rates: { feed: '', story: '', reel: '', tiktok: '', youtube: '', misc: '' },
+    metrics: { ...EMPTY_METRICS },
+    audience: { ...EMPTY_AUDIENCE }
   })
   const [saving, setSaving] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
@@ -68,6 +92,12 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
   const setHandle = (key, val) => setForm(f => ({ ...f, handles: { ...f.handles, [key]: val } }))
   const setRate = (key, val) => setForm(f => ({ ...f, rates: { ...f.rates, [key]: val } }))
+  const setMetric = (key, val) => setForm(f => ({ ...f, metrics: { ...f.metrics, [key]: val } }))
+  const setAudience = (key, val) => setForm(f => ({ ...f, audience: { ...f.audience, [key]: val } }))
+  const setAge = (i, key, val) => setForm(f => ({
+    ...f,
+    audience: { ...f.audience, ages: f.audience.ages.map((a, j) => j === i ? { ...a, [key]: val } : a) }
+  }))
   const toggleType = (t) => setForm(f => ({ ...f, types: toggleChip(f.types, t) }))
   const toggleNiche = (n) => setForm(f => ({ ...f, niches: toggleChip(f.niches, n) }))
 
@@ -153,6 +183,29 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     setUploadingPhoto(false)
   }
 
+  // Blank metric fields are stored as null so the one-pager can tell "not
+  // measured" from a real zero and leave the block off the sheet. The date
+  // stamp only moves when a number actually changed — editing the bio shouldn't
+  // make month-old Insights look freshly checked.
+  function buildMetrics() {
+    const next = {
+      period: form.metrics.period || 'Last 30 days',
+      avg_views: numOrNull(form.metrics.avg_views),
+      avg_engagement: numOrNull(form.metrics.avg_engagement),
+      avg_story_reach: numOrNull(form.metrics.avg_story_reach),
+      avg_story_views: numOrNull(form.metrics.avg_story_views),
+      avg_link_clicks: numOrNull(form.metrics.avg_link_clicks),
+      reach_engagement_rate: numOrNull(form.metrics.reach_engagement_rate),
+    }
+    const prev = existing?.metrics || {}
+    const unchanged = Object.keys(next).every(k => (prev[k] ?? null) === next[k])
+    return {
+      ...next,
+      source: prev.source || 'manual',
+      updated_at: (unchanged && prev.updated_at) ? prev.updated_at : new Date().toISOString().slice(0, 10),
+    }
+  }
+
   function buildPayload() {
     return {
       ...form,
@@ -173,6 +226,14 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
         instagram: form.handles.instagram?.replace('@', ''),
         tiktok: form.handles.tiktok?.replace('@', ''),
         youtube: form.handles.youtube?.replace('@', ''),
+      },
+      metrics: buildMetrics(),
+      audience: {
+        female: numOrNull(form.audience.female),
+        male: numOrNull(form.audience.male),
+        ages: form.audience.ages
+          .filter(a => a.label?.trim() && numOrNull(a.pct) !== null)
+          .map(a => ({ label: a.label.trim(), pct: numOrNull(a.pct) })),
       },
       org_id: orgId
     }
@@ -334,6 +395,33 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
             {field('YT Subscribers', inp({ value: form.yt_subscribers, onChange: e => set('yt_subscribers', e.target.value), placeholder: '0', type: 'number' }))}
             {field('Eng Rate %', inp({ value: form.engagement_rate, onChange: e => set('engagement_rate', e.target.value), placeholder: '0.0', type: 'number' }))}
           </div>
+
+          {sectionLabel('Performance')}
+          <div style={{ fontSize: '11px', color: muted, opacity: 0.8, marginBottom: '14px', lineHeight: 1.6 }}>
+            From the talent&rsquo;s own Instagram Insights &mdash; these can&rsquo;t be looked up from a handle. Fill in what you have; the one-pager leaves out anything blank.
+          </div>
+          {field('Period', inp({ value: form.metrics.period, onChange: e => setMetric('period', e.target.value), placeholder: 'Last 30 days' }))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+            {field('Avg views', inp({ value: form.metrics.avg_views, onChange: e => setMetric('avg_views', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('Avg engagement', inp({ value: form.metrics.avg_engagement, onChange: e => setMetric('avg_engagement', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('Reach eng rate %', inp({ value: form.metrics.reach_engagement_rate, onChange: e => setMetric('reach_engagement_rate', e.target.value), placeholder: '0.0', type: 'number' }))}
+            {field('Avg story reach', inp({ value: form.metrics.avg_story_reach, onChange: e => setMetric('avg_story_reach', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('Avg story views', inp({ value: form.metrics.avg_story_views, onChange: e => setMetric('avg_story_views', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('Avg link clicks', inp({ value: form.metrics.avg_link_clicks, onChange: e => setMetric('avg_link_clicks', e.target.value), placeholder: '0', type: 'number' }))}
+          </div>
+
+          {sectionLabel('Audience breakdown')}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {field('Female %', inp({ value: form.audience.female, onChange: e => setAudience('female', e.target.value), placeholder: '0.0', type: 'number' }))}
+            {field('Male %', inp({ value: form.audience.male, onChange: e => setAudience('male', e.target.value), placeholder: '0.0', type: 'number' }))}
+          </div>
+          <div style={{ fontSize: '11px', fontWeight: 500, color: muted, marginBottom: '8px' }}>Top age groups</div>
+          {form.audience.ages.map((a, i) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 110px', gap: '12px', marginBottom: '10px' }}>
+              {inp({ value: a.label, onChange: e => setAge(i, 'label', e.target.value), placeholder: i === 0 ? '35\u201344' : 'Age range' })}
+              {inp({ value: a.pct, onChange: e => setAge(i, 'pct', e.target.value), placeholder: '%', type: 'number' })}
+            </div>
+          ))}
 
           {sectionLabel('Rates')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
