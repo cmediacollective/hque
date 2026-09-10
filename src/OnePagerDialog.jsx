@@ -48,12 +48,14 @@ export default function OnePagerDialog({ creator, orgId, stripePlan, dark = true
   // Branding is fetched when the dialog opens, so the export click itself is
   // synchronous — an awaited window.open gets caught by the popup blocker.
   //
-  // The logo is whatever Settings → Agency Info holds: the uploaded
-  // agency_logo_url, printed only when that page's "Logo Shown" toggle is set to
-  // "My logo" (use_agency_logo). That toggle says it governs PDF exports, so the
-  // one-pager honours it the same way the roster export does — and, like the
-  // roster export, own-branding is a Business-plan feature; Starter and Pro get
-  // the HQue mark and the "Powered by HQue" line.
+  // If the agency uploaded a logo in Settings → Agency Info, that logo goes on
+  // the sheet. Deliberately NOT behind that page's "Logo Shown" toggle, unlike
+  // the roster export: a one-pager is a document you hand a brand while pitching,
+  // so having uploaded a logo is enough of a signal to use it. The HQue mark is
+  // only the fallback for an account that hasn't uploaded one.
+  //
+  // Own-branding stays a Business-plan feature, matching the rest of white-label;
+  // Starter and Pro get the HQue mark and the "Powered by HQue" line.
   const businessBrand = stripePlan === 'agency'
   const hqueLogoUrl = `${window.location.origin}/logo.svg`
   const [brand, setBrand] = useState({ agencyName: 'HQue', logoUrl: null, hqueLogoUrl, businessBrand })
@@ -62,10 +64,9 @@ export default function OnePagerDialog({ creator, orgId, stripePlan, dark = true
     let cancelled = false
     supabase.from('org_settings').select('*').eq('org_id', orgId).maybeSingle().then(({ data }) => {
       if (cancelled) return
-      const ownLogo = businessBrand && data?.use_agency_logo && data?.agency_logo_url
       setBrand({
         agencyName: (businessBrand && data?.agency_name) || 'HQue',
-        logoUrl: ownLogo ? data.agency_logo_url : null,
+        logoUrl: (businessBrand && data?.agency_logo_url) || null,
         hqueLogoUrl,
         businessBrand,
       })
