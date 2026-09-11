@@ -16,6 +16,8 @@ A pitch and its lead are one record, so "View lead →" and "Sent →" hop betwe
 
 **Campaign types.** *Seeding* is gone from the campaign type dropdowns; the existing Seeding campaigns are relabelled Gifting.
 
+**Later the same day: the data moved.** All 306 pitches from the standalone board were imported into HQue — every one matched to its talent and to who pitched it, notes and all. Bailey now logs pitches straight into HQue (and reads them from there for the follow-up sweep), and the old site is read-only behind a "This moved to HQue" banner; its database is kept as the backup.
+
 Who this is for: cMedia's own team (everyone in the company, not just admins). Other companies don't see the section yet — it becomes a per-member switch like Contacts once it's settled. The campaign side of this — a lead becoming a campaign with one click, and the *Pitch* campaign status retiring — is the next step.
 
 ---

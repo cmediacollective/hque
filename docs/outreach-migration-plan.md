@@ -1,6 +1,9 @@
 # Outreach → HQue: migration plan
 
-**Status:** agreed with Cherie on 2026-09-11, nothing built yet.
+**Status:** steps 0, 1 and 2 done on 2026-09-11 — the section is live at
+h-que.com, all 306 pitches are imported (`scripts/import-outreach.mjs`),
+Bailey writes to HQue (`~/bailey` commit 5857020, deployed to Fly), and the
+standalone site is read-only behind a "moved to HQue" banner. Step 3 is next.
 **Written by:** the Claude Code session in `~/cmedia-outreach-pipeline` (the
 standalone outreach tool), as a handoff to the HQue session. Read this whole
 file before starting step 1. Everything in "Verified in code" was checked
