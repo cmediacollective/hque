@@ -471,7 +471,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
 
         {field('Campaign Type *',
           selectEl(form.campaign_type || 'Paid', e => set('campaign_type', e.target.value),
-            ['Paid', 'Non-paid', 'Gifting', 'Seeding', 'Media'].map(ty => <option key={ty} value={ty}>{ty}</option>)
+            ['Paid', 'Non-paid', 'Gifting', 'Media'].map(ty => <option key={ty} value={ty}>{ty}</option>)
           )
         )}
 

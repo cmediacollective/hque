@@ -4,6 +4,22 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-09-11
+
+**Outreach — cold pitches and leads, inside HQue (cMedia only for now).** A new **Outreach** section in the sidebar, switched on per company. It's the standalone outreach board brought in-house, so a pitch takes seconds to log — client, who pitched it, type, brand, status, contact, two dates and a note — and nothing else is required.
+
+**Outreach tab.** Four numbers up top (total pitches, active in pipeline, response rate, successes), a pipeline bar by status, Active / Closed lists, client chips split into Talent and Media brands, and dropdowns for status, type and who pitched it, plus search. Chip counts are taken *after* the dropdowns and search have run, so a chip's number is always what clicking it shows. Rows expand to a running notes log — every note is dated and kept, and pasting a whole email in is fine. Brand A→Z, 50 to a page.
+
+**Leads tab.** Any paid-partnership pitch can be tracked as a lead (press and PR pitches can't). Leads carry the campaign, deal value, stage (Identified → Proposal sent → In negotiation → Verbal yes → Closed won / lost), a likelihood gauge, timing and next step. Picking a stage sets the likelihood; you can override it. Stats show open leads, pipeline value, the pipeline weighted by likelihood, and closed-won total. **Client report** opens a light, print-ready page for the selected client — in progress with gauge and next step, closed won, closed lost with reason — for Print / Save as PDF or CSV. Owner, contact email and notes are deliberately left off it.
+
+A pitch and its lead are one record, so "View lead →" and "Sent →" hop between the two tabs. "Stop tracking as lead" keeps the pitch and drops the lead half.
+
+**Campaign types.** *Seeding* is gone from the campaign type dropdowns; the existing Seeding campaigns are relabelled Gifting.
+
+Who this is for: cMedia's own team (everyone in the company, not just admins). Other companies don't see the section yet — it becomes a per-member switch like Contacts once it's settled. The campaign side of this — a lead becoming a campaign with one click, and the *Pitch* campaign status retiring — is the next step.
+
+---
+
 ## 2026-09-09
 
 **Pull a talent's numbers from Instagram.** Editing a talent now has a **Pull from Instagram** button under Performance. It reads the handle already on the record and fills in follower count, average engagement, engagement rate, and average views where Instagram returns them — averaged across their recent posts, so a one-pager stops being typed from scratch.

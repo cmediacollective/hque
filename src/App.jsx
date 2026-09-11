@@ -17,6 +17,7 @@ const TalentView = lazy(() => import('./TalentView'))
 const WorkspaceView = lazy(() => import('./WorkspaceView'))
 const CampaignView = lazy(() => import('./CampaignView'))
 const ContactsView = lazy(() => import('./ContactsView'))
+const OutreachView = lazy(() => import('./OutreachView'))
 const ReportsView = lazy(() => import('./ReportsView'))
 const HQMetricsView = lazy(() => import('./HQMetricsView'))
 const SettingsView = lazy(() => import('./SettingsView'))
@@ -195,6 +196,10 @@ function App() {
   // admins always see everything; a Member gets Workspace plus whatever an
   // owner/admin has switched on for them in Settings → Team.
   const [sectionAccess, setSectionAccess] = useState({ campaigns: true, talent: true, contacts: true })
+  // Outreach (pitches + leads) is switched on per company — cMedia only for
+  // now. Everyone in a flagged company sees it; it's not a member-level
+  // switch yet. Read from organizations.outreach_enabled.
+  const [outreachEnabled, setOutreachEnabled] = useState(false)
   const [pendingReports, setPendingReports] = useState(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
@@ -412,7 +417,10 @@ function App() {
   // admin + Pro-plan gate below. Campaigns, Talent and Contacts are the three
   // a Member only sees if an owner or admin has granted them.
   const OPTIONAL_SECTIONS = ['campaigns', 'talent', 'contacts']
-  const canSee = (key) => isAdmin || !OPTIONAL_SECTIONS.includes(key) || !!sectionAccess[key]
+  const canSee = (key) => {
+    if (key === 'outreach') return outreachEnabled
+    return isAdmin || !OPTIONAL_SECTIONS.includes(key) || !!sectionAccess[key]
+  }
 
   // Open Settings on a specific tab from anywhere (e.g. the sidebar rename pencil).
   const openSettingsTab = (tab) => { setPendingSettingsTab(tab); setView('settings') }
@@ -446,7 +454,7 @@ function App() {
   useEffect(() => {
     if (!userRole) return // wait until the role is known
     if (!canSee(view)) setView('workspace')
-  }, [userRole, view, sectionAccess])
+  }, [userRole, view, sectionAccess, outreachEnabled])
 
   // Deep link: /?brand_notes=<id> opens that brand's notes in Workspace
   useEffect(() => {
@@ -620,6 +628,10 @@ function App() {
       talent: data?.access_talent !== false,
       contacts: data?.access_contacts !== false,
     })
+    // Its own small query, so a company whose database hasn't got the column
+    // yet loses nothing but this one section.
+    const { data: org } = await supabase.from('organizations').select('outreach_enabled').eq('id', oid).maybeSingle()
+    setOutreachEnabled(org?.outreach_enabled === true)
   }
 
   async function fetchAgencyName(oid) {
@@ -819,6 +831,7 @@ function App() {
     { key: 'campaigns', label: 'Campaigns', pageLabel: 'Campaigns' },
     { key: 'talent', label: 'Talent', pageLabel: 'Talent' },
     { key: 'contacts', label: 'Contacts', pageLabel: 'Contacts' },
+    { key: 'outreach', label: 'Outreach', pageLabel: 'Outreach' },
     { key: 'reports', label: 'Reports', pageLabel: 'Campaign Report' },
     { key: 'settings', label: 'Settings', pageLabel: 'Settings' },
   ]
@@ -877,7 +890,7 @@ function App() {
                 <img src="/logo.svg" alt="HQue" style={{ width: '140px', height: 'auto', display: 'block', filter: dark ? 'none' : 'invert(1)' }} />
               )}
             </div>
-            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].filter(([key]) => canSee(key)).map(([key, label]) => (
+            {[['workspace', 'Workspace'], ['campaigns', 'Campaigns'], ['talent', 'Talent'], ['contacts', 'Contacts'], ['outreach', 'Outreach'], ...(isAdmin && reportsAllowed ? [['reports', 'Reports']] : []), ...(isMasterAdmin && isAdmin && !previewing ? [['metrics', 'HQue Metrics']] : [])].filter(([key]) => canSee(key)).map(([key, label]) => (
               <button key={key} onClick={() => setView(key)} style={{
                 padding: view === key ? '9px 20px 9px 14.5px' : '9px 16px',
                 fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -958,6 +971,7 @@ function App() {
               <OrgSwitcher orgs={myOrgs} activeOrgId={orgId} onSwitch={switchOrg} onCreate={createOrg} canCreate={!myOrgs.some(o => o.role === 'owner' && o.is_lifetime)} dark={dark} colors={{ text, subtle, muted, border, nav }} isMobile={isMobile} />
               <div style={{ fontFamily: 'Georgia, serif', fontSize: isMobile ? '20px' : '26px', fontWeight: 'normal', color: text }}>{viewLabel}</div>
               {view === 'contacts' && <div style={{ fontSize: isMobile ? '11px' : '12px', color: dark ? '#D2CDC5' : '#3A3A3A', marginTop: '3px', maxWidth: '64ch', lineHeight: 1.5 }}>Your company's digital rolodex — everyone you work with in one place, with your talent, their managers and companies pulled in automatically.</div>}
+              {view === 'outreach' && <div style={{ fontSize: isMobile ? '11px' : '12px', color: dark ? '#D2CDC5' : '#3A3A3A', marginTop: '3px', maxWidth: '64ch', lineHeight: 1.5 }}>Cold pitches and the paid partnerships they turn into. A campaign is created only once a deal is real.</div>}
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {view === 'campaigns' && (
@@ -1050,6 +1064,11 @@ function App() {
                   <ContactsView dark={dark} orgId={orgId} isMobile={isMobile} focusVersion={focusVersion} stripePlan={demoPlan} />
                 </div>
               )}
+              {canSee('outreach') && visited.has('outreach') && (
+                <div style={{ display: view === 'outreach' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
+                  <OutreachView dark={dark} orgId={orgId} userId={user?.id} isMobile={isMobile} focusVersion={focusVersion} agencyName={agencyName} />
+                </div>
+              )}
               {visited.has('reports') && (
                 <div style={{ display: view === 'reports' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
                   <ReportsView dark={dark} orgId={orgId} focusVersion={focusVersion} active={view === 'reports'} initialMonth={pendingReports?.month} initialYear={pendingReports?.year} />
@@ -1078,7 +1097,7 @@ function App() {
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px'
             }}>
               <span style={{ fontSize: '16px', lineHeight: 1, opacity: view === item.key ? 1 : 0.5 }}>
-                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'contacts' ? '◫' : item.key === 'reports' ? '▮' : '◎'}
+                {item.key === 'talent' ? '◉' : item.key === 'campaigns' ? '▦' : item.key === 'workspace' ? '⊞' : item.key === 'contacts' ? '◫' : item.key === 'outreach' ? '◇' : item.key === 'reports' ? '▮' : '◎'}
               </span>
               <span style={{ fontSize: '8px', letterSpacing: '0.1em', textTransform: 'uppercase', color: view === item.key ? '#5b7c99' : muted }}>
                 {item.label}

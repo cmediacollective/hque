@@ -45,3 +45,11 @@
     color: #FFFFFF;
   }
 }
+
+/* Outreach → Leads → Client report: printed on its own, with the app hidden
+   behind it. The report is portalled onto <body> next to #root. */
+@media print {
+  body:has(.lead-report) > #root { display: none !important; }
+  .lead-report { position: static !important; overflow: visible !important; background: #fff !important; }
+  .lead-report .no-print { display: none !important; }
+}
