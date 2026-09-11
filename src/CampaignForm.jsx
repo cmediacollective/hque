@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import BrandDetail from './BrandDetail'
 import { useClientLabel } from './useClientLabel'
+import { campaignStatuses, defaultCampaignStatus } from './campaignStatuses'
 
 export default function CampaignForm({ orgId, existing, onClose, onSaved, onDeleted, dark }) {
   const clientLabel = useClientLabel(orgId)
@@ -28,7 +29,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
     brand_website: existing.brand_website || '',
     contact_id: existing.contact_id || '',
     campaign_type: existing.campaign_type || 'Paid',
-    status: existing.status || 'Pitch',
+    status: existing.status || defaultCampaignStatus(),
     pitched_by: existing.pitched_by || '',
     campaign_manager: existing.campaign_manager || '',
     closed_by: existing.closed_by || '',
@@ -43,7 +44,7 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
     notes: existing.notes || '',
     talent_ids: existing.campaign_creators?.map(ct => ct.creator_id) || [],
   } : {
-    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', contact_id: '', campaign_type: 'Paid', status: 'Pitch',
+    name: '', brand_id: '', brand: '', brand_logo_url: '', brand_website: '', contact_id: '', campaign_type: 'Paid', status: defaultCampaignStatus(),
     pitched_by: '', campaign_manager: '', closed_by: '', budget: '',
     start_date: '', end_date: '', deliverables: '', deliverables_link: '',
     timeline: '', brief_url: '', contract_url: '', notes: '', talent_ids: []
@@ -476,8 +477,8 @@ export default function CampaignForm({ orgId, existing, onClose, onSaved, onDele
         )}
 
         {field('Status *',
-          selectEl(form.status || 'Pitch', e => set('status', e.target.value),
-            ['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)
+          selectEl(form.status || defaultCampaignStatus(), e => set('status', e.target.value),
+            campaignStatuses(form.status).map(s => <option key={s} value={s}>{s}</option>)
           )
         )}
 

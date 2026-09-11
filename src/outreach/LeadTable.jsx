@@ -22,6 +22,8 @@ export default function LeadTable({
   onEdit,
   onRemove,
   onOpenPitch,
+  onMakeCampaign,
+  onOpenCampaign,
   memberName,
   clientKind,
   dark,
@@ -118,6 +120,14 @@ export default function LeadTable({
                       </div>
                     )}
                     <div>
+                      <div style={detailLabel}>Campaign</div>
+                      {lead.campaign_id ? (
+                        <button type="button" onClick={() => onOpenCampaign?.(lead.campaign_id)} style={t.btnText}>Open campaign →</button>
+                      ) : (
+                        <div style={{ fontSize: 12, color: t.mut2, fontFamily: UI }}>Not yet</div>
+                      )}
+                    </div>
+                    <div>
                       <div style={detailLabel}>Outreach</div>
                       <button type="button" onClick={() => onOpenPitch(lead)} title="Open this pitch on the Outreach tab" style={{ ...t.btnText, display: 'inline-flex', alignItems: 'center', gap: 8, textAlign: 'left' }}>
                         <span style={{ width: 7, height: 7, borderRadius: 1, flex: 'none', background: pitchStatus.bar }} />
@@ -133,6 +143,9 @@ export default function LeadTable({
 
                   <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginTop: 18, flexWrap: 'wrap' }}>
                     <button type="button" onClick={() => onEdit(lead)} style={t.btnSolid}>Edit lead</button>
+                    {!lead.campaign_id && (
+                      <button type="button" onClick={() => onMakeCampaign(lead)} style={t.btnText}>Make it a campaign</button>
+                    )}
                     {/* The pitch stays; only the lead half of the row is cleared. */}
                     <DeleteControl onConfirm={() => onRemove(lead.id)} label="Stop tracking as lead" confirmLabel="Confirm — keep the pitch, drop the lead" dark={dark} />
                   </div>

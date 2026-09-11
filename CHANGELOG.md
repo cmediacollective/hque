@@ -6,6 +6,16 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-09-11
 
+**A lead becomes a campaign with one click.** In Outreach, any pitch or lead now has **Make it a campaign**. It asks for three things — the campaign name (pre-filled), the type, and whether it starts at Contract Pending or Active — and builds the campaign from what Outreach already knows: the brand (added to your Brands if it isn't there), the contact (added to Contacts if new), the talent, who pitched it, the deal value as the budget, and the latest note. The pitch is marked Success, the lead Closed won, and the two link to each other: **Campaign →** from Outreach, and the campaign remembers which pitch it came from.
+
+**No more "Pitch" campaigns for companies with Outreach.** With pitches living in Outreach, a campaign only exists once a deal is real — so for cMedia the *Pitch* status is gone from every campaign dropdown, new campaigns start at **Contract Pending**, and the board's first lane is Contract Pending instead of Pitch. The three campaigns that were still sitting at Pitch (Frida, Mommy's Bliss, Bebcare) were moved into Outreach as a lead, a lead, and a gifting offer, and archived. Companies that don't have Outreach keep Pitch exactly as before — nothing changed for them.
+
+**Reports know about Outreach.** For companies with Outreach, the Reports overview has an Outreach block: pitches sent, response rate, open leads, the pipeline weighted by likelihood, and how many became campaigns — broken down by person and by client for the selected month or year. The old "Pitched" figures (which counted Pitch-status campaigns) drop away, and the headline stats now say *Campaigns* and *Campaign close rate* rather than pitches.
+
+---
+
+## 2026-09-11
+
 **Outreach — cold pitches and leads, inside HQue (cMedia only for now).** A new **Outreach** section in the sidebar, switched on per company. It's the standalone outreach board brought in-house, so a pitch takes seconds to log — client, who pitched it, type, brand, status, contact, two dates and a note — and nothing else is required.
 
 **Outreach tab.** Four numbers up top (total pitches, active in pipeline, response rate, successes), a pipeline bar by status, Active / Closed lists, client chips split into Talent and Media brands, and dropdowns for status, type and who pitched it, plus search. Chip counts are taken *after* the dropdowns and search have run, so a chip's number is always what clicking it shows. Rows expand to a running notes log — every note is dated and kept, and pasting a whole email in is fine. Brand A→Z, 50 to a page.

@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from 'react'
 import { supabase } from './supabase'
 import { useCachedResource } from './useCachedResource'
 import { ReportsSkeleton } from './Skeletons'
+import { outreachEnabled } from './campaignStatuses'
+import { usePitches } from './outreach/usePitches'
+import { RESPONDED_STATUSES, DELIVERED_STATUSES, isOpenStage, weightedValue, WON_STAGE, formatMoney } from './outreach/constants'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
 const brandColor = (name) => {
@@ -55,6 +58,11 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
   const links = reportData?.links || []
   const members = reportData?.members || []
   const loading = status === 'loading'
+
+  // With Outreach on, pitching happens there, not as 'Pitch' campaigns — so
+  // the report reads pitches from the Outreach table and says so.
+  const hasOutreach = outreachEnabled()
+  const { pitches: allPitches } = usePitches(hasOutreach ? orgId : null, { focusVersion })
   const [year, setYear] = useState(initialYear || new Date().getFullYear())
   const [month, setMonth] = useState(initialMonth ?? 'all') // 'all' or 0..11
   const [view, setView] = useState('overview') // 'overview' | 'team'
@@ -145,6 +153,43 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
   const teamIdsOf = (c) => [...new Set([c.pitched_by, c.campaign_manager, c.closed_by].filter(Boolean))]
   const memberById = (id) => members.find(m => m.id === id)
   const memberName = (id) => { const m = memberById(id); return m?.full_name || m?.email || 'Unknown' }
+
+  // Outreach for the period: a pitch belongs to the month it was sent (or
+  // logged, for drafts). Same year/month scope as the campaigns above.
+  const pitchDate = (p) => { const d = p.sent_on || p.created_at; return d ? (String(d).includes('T') ? new Date(d) : new Date(d + 'T00:00:00')) : null }
+  const scopedPitches = useMemo(() => allPitches.filter(p => {
+    const d = pitchDate(p)
+    return d && d.getFullYear() === year && (month === 'all' || d.getMonth() === month)
+  }), [allPitches, year, month])
+
+  const outreach = useMemo(() => {
+    if (!hasOutreach) return null
+    const tally = (list) => {
+      const sent = list.filter(p => DELIVERED_STATUSES.includes(p.status)).length
+      const responded = list.filter(p => RESPONDED_STATUSES.includes(p.status)).length
+      const leads = list.filter(p => p.is_lead)
+      const open = leads.filter(l => isOpenStage(l.stage))
+      return {
+        pitches: list.length, sent, responded,
+        rate: sent ? Math.round((responded / sent) * 100) : null,
+        leads: leads.length, openLeads: open.length,
+        weighted: open.reduce((s, l) => s + weightedValue(l), 0),
+        won: leads.filter(l => l.stage === WON_STAGE).reduce((s, l) => s + (Number(l.amount) || 0), 0),
+        campaigns: list.filter(p => p.campaign_id).length,
+      }
+    }
+    const groupBy = (key) => {
+      const map = new Map()
+      scopedPitches.forEach(p => { const k = key(p) || ''; if (!map.has(k)) map.set(k, []); map.get(k).push(p) })
+      return [...map.entries()].map(([k, list]) => ({ key: k, ...tally(list) })).sort((a, b) => b.sent - a.sent || b.pitches - a.pitches)
+    }
+    return {
+      total: tally(scopedPitches),
+      byPerson: groupBy(p => p.pitched_by).map(r => ({ ...r, name: r.key ? memberName(r.key) : 'Unassigned' })),
+      byClient: groupBy(p => p.client_name).map(r => ({ ...r, name: r.key || 'No client' })),
+    }
+  }, [hasOutreach, scopedPitches, members]) // eslint-disable-line react-hooks/exhaustive-deps
+
 
   const daysSince = (iso) => {
     if (!iso) return null
@@ -254,7 +299,7 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
     const total = p.campaigns.length || 1
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {barRow('Pitched', p.pitch, total, STAGE_COLOR.Pitched, false)}
+        {!hasOutreach && barRow('Pitched', p.pitch, total, STAGE_COLOR.Pitched, false)}
         {barRow('Active', p.active, total, STAGE_COLOR.Active, false)}
         {barRow('Closed', p.closed, total, STAGE_COLOR.Closed, true)}
         {barRow('Managing', p.managing, total, MANAGING_COLOR, false)}
@@ -323,12 +368,12 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
               <RateRing percent={primary.rate} />
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: text }}>Pitch-to-close rate</div>
+                <div style={{ fontSize: '11px', color: text }}>{hasOutreach ? 'Campaign close rate' : 'Pitch-to-close rate'}</div>
                 <div style={{ fontSize: '11px', color: subtle, marginTop: '2px' }}>{primary.dealsClosed} of {primary.pitchesSent}</div>
               </div>
             </div>
             <div style={{ flex: 1, minWidth: '240px', display: 'flex', gap: '28px', flexWrap: 'wrap' }}>
-              {bigStat(primary.pitchesSent, 'Pitches sent')}
+              {bigStat(primary.pitchesSent, hasOutreach ? 'Campaigns' : 'Pitches sent')}
               {bigStat(primary.dealsClosed === 0 ? '0' : primary.dealsClosed, primary.dealsClosed === 0 ? 'Deals closed — nothing yet' : 'Deals closed', primary.dealsClosed === 0 ? STAGE_COLOR.Stalled : undefined)}
               {bigStat(primary.peopleInvolved, 'People involved')}
             </div>
@@ -373,6 +418,58 @@ export default function ReportsView({ dark = true, orgId, focusVersion = 0, acti
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Outreach — pitches and leads for the period, per person and per client */}
+          {outreach && (
+            <div style={{ background: card, border: `0.5px solid ${border}`, borderRadius: '4px', padding: '24px', marginTop: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '4px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '18px', color: text }}>Outreach</div>
+                <div style={{ fontSize: '10px', color: muted }}>{periodLabel} — pitches by date sent</div>
+              </div>
+              <div style={{ display: 'flex', gap: '28px', flexWrap: 'wrap', margin: '18px 0 22px' }}>
+                {bigStat(outreach.total.sent, 'Pitches sent')}
+                {bigStat(outreach.total.rate === null ? '—' : outreach.total.rate + '%', `Response rate · ${outreach.total.responded} replied`)}
+                {bigStat(outreach.total.openLeads, 'Open leads')}
+                {bigStat(formatMoney(outreach.total.weighted), 'Weighted pipeline')}
+                {bigStat(outreach.total.campaigns, 'Became campaigns')}
+              </div>
+              {[['By person', outreach.byPerson], ['By client', outreach.byClient]].map(([label, rows]) => rows.length > 0 && (
+                <div key={label} style={{ marginTop: '14px' }}>
+                  <div style={{ fontSize: '10px', letterSpacing: '0.07em', color: text, opacity: 0.4, marginBottom: '6px' }}>{label}</div>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '520px' }}>
+                      <thead>
+                        <tr style={{ fontSize: '9px', color: muted, textAlign: 'right' }}>
+                          <th style={{ textAlign: 'left', fontWeight: 400, padding: '6px 0' }}></th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Sent</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Replied</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Rate</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Leads</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Weighted</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Won</th>
+                          <th style={{ fontWeight: 400, padding: '6px 0 6px 12px' }}>Campaigns</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map(r => (
+                          <tr key={r.key} style={{ fontSize: '12px', color: text, textAlign: 'right', borderTop: `0.5px solid ${border}` }}>
+                            <td style={{ textAlign: 'left', padding: '8px 0', fontWeight: 500 }}>{r.name}</td>
+                            <td style={{ padding: '8px 0 8px 12px' }}>{r.sent}</td>
+                            <td style={{ padding: '8px 0 8px 12px', color: muted }}>{r.responded}</td>
+                            <td style={{ padding: '8px 0 8px 12px' }}>{r.rate === null ? '—' : r.rate + '%'}</td>
+                            <td style={{ padding: '8px 0 8px 12px' }}>{r.leads}</td>
+                            <td style={{ padding: '8px 0 8px 12px' }}>{r.weighted ? formatMoney(r.weighted) : '—'}</td>
+                            <td style={{ padding: '8px 0 8px 12px', color: STAGE_COLOR.Closed }}>{r.won ? formatMoney(r.won) : '—'}</td>
+                            <td style={{ padding: '8px 0 8px 12px' }}>{r.campaigns || '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 

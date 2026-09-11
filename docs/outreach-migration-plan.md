@@ -3,7 +3,11 @@
 **Status:** steps 0, 1 and 2 done on 2026-09-11 — the section is live at
 h-que.com, all 306 pitches are imported (`scripts/import-outreach.mjs`),
 Bailey writes to HQue (`~/bailey` commit 5857020, deployed to Fly), and the
-standalone site is read-only behind a "moved to HQue" banner. Step 3 is next.
+standalone site is read-only behind a "moved to HQue" banner. Step 3 is done
+too: "Make it a campaign", Pitch status retired (for outreach-enabled companies
+only — other customers still use it, see `src/campaignStatuses.js`), the three
+Pitch-status campaigns migrated and archived, Outreach block in Reports.
+Step 4 (per-member switch + announcement) is what's left.
 **Written by:** the Claude Code session in `~/cmedia-outreach-pipeline` (the
 standalone outreach tool), as a handoff to the HQue session. Read this whole
 file before starting step 1. Everything in "Verified in code" was checked

@@ -6,6 +6,7 @@ import { ensureSlug } from './slugUtil'
 import { useClientLabel } from './useClientLabel'
 import { useCachedResource } from './useCachedResource'
 import { cacheSet } from './dataCache'
+import { campaignStatuses, defaultCampaignStatus, boardColumns } from './campaignStatuses'
 import { CardGridSkeleton, ListSkeleton, BoardSkeleton } from './Skeletons'
 
 const BRAND_COLORS = ['#5b7c99', '#7A9B8E', '#A67C52', '#9B7A9B', '#8E7A5B', '#4A6B7A', '#7A5B6B', '#6B7A4A']
@@ -16,14 +17,8 @@ const brandColor = (name) => {
 }
 const brandInitial = (name) => (name || '?').trim().charAt(0).toUpperCase()
 
-const BOARD_COLUMNS = [
-  { key: 'Pitch', label: 'Pitch' },
-  { key: 'Active', label: 'Active' },
-  { key: 'Pending Payment', label: 'Pending Payment' },
-  { key: 'Completed', label: 'Completed' },
-  { key: 'Cancelled', label: 'Cancelled' },
-  { key: '__archived', label: 'Archived' }
-]
+// Lanes come from campaignStatuses.js: the first is Pitch, or Contract Pending
+// for a company whose pitches live in Outreach.
 
 export default function CampaignView({ dark = true, orgId, campaignView = 'grid', openCampaignId, onOpenCampaignHandled, focusVersion = 0 }) {
   const clientLabel = useClientLabel(orgId)
@@ -387,12 +382,12 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
                             {['Paid', 'Non-paid', 'Gifting', 'Media'].map(t => <option key={t} value={t}>{t}</option>)}
                           </select>
                           <select
-                            value={c.status || 'Pitch'}
+                            value={c.status || defaultCampaignStatus()}
                             onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
                             onClick={e => e.stopPropagation()}
                             title='Status'
                             style={{ padding: '2px 18px 2px 8px', fontSize: '8px', letterSpacing: '0.16em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 5px center' }}>
-                            {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
+                            {campaignStatuses(c.status).map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                           {c.budget != null && <span style={{ fontSize: '11px', color: text, fontWeight: 500 }}>${Number(c.budget).toLocaleString()}</span>}
                           {(c.start_date || c.end_date) && <span style={{ fontSize: '11px', color: muted }}>{[formatDate(c.start_date), formatDate(c.end_date)].filter(Boolean).join(' – ')}</span>}
@@ -467,11 +462,11 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
               </select>
 
               <select
-                value={c.status || 'Pitch'}
+                value={c.status || defaultCampaignStatus()}
                 onChange={e => { e.stopPropagation(); updateCampaignField(c.id, 'status', e.target.value) }}
                 onClick={e => e.stopPropagation()}
                 style={{ padding: '3px 16px 3px 8px', fontSize: '8px', letterSpacing: '0.14em', textTransform: 'uppercase', border: `0.5px solid ${statusColor(c.status)}`, color: statusColor(c.status), borderRadius: '1px', background: 'none', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 24 24' fill='none' stroke='${encodeURIComponent(statusColor(c.status))}' stroke-width='3' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 4px center', width: 'fit-content' }}>
-                {['Pitch', 'Contract Pending', 'Active', 'Pending Payment', 'Completed', 'Cancelled', 'Dead'].map(s => <option key={s} value={s}>{s}</option>)}
+                {campaignStatuses(c.status).map(s => <option key={s} value={s}>{s}</option>)}
               </select>
 
               <div style={{ fontSize: '11px', color: muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -506,11 +501,11 @@ export default function CampaignView({ dark = true, orgId, campaignView = 'grid'
 
       {!loading && view === 'board' && !isMobile && (
         <div style={{ flex: 1, overflowX: 'auto', overflowY: 'hidden', padding: '16px 20px 100px', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-          {BOARD_COLUMNS.map(col => {
+          {boardColumns().map(col => {
             const isArchivedCol = col.key === '__archived'
             const colCampaigns = isArchivedCol
               ? filtered.filter(c => c.archived)
-              : filtered.filter(c => !c.archived && (c.status || 'Pitch') === col.key)
+              : filtered.filter(c => !c.archived && (c.status || defaultCampaignStatus()) === col.key)
             const collapsed = isArchivedCol && !archivedExpanded
             const colWidth = collapsed ? 56 : 280
             const isOver = dragOverCol === col.key

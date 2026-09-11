@@ -39,6 +39,8 @@ export default function PitchTable({
   onDelete,
   onTrackLead,
   onViewLead,
+  onMakeCampaign,
+  onOpenCampaign,
   memberName,
   clientKind,
   dark,
@@ -130,7 +132,9 @@ export default function PitchTable({
                   <div style={{ ...cell, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ width: 7, height: 7, borderRadius: 1, background: m.bar, flex: 'none' }} />
                     <span style={{ fontSize: 11.5, color: m.color, lineHeight: 1.4 }}>{statusLabel(pitch.status)}</span>
-                    {pitch.is_lead && <span title="Tracked as a lead" style={{ ...t.uppLbl, fontSize: '8px', color: t.accent, border: `1px solid ${t.accent}`, borderRadius: 999, padding: '2px 6px' }}>Lead</span>}
+                    {pitch.campaign_id
+                      ? <span title="Became a campaign" style={{ ...t.uppLbl, fontSize: '8px', color: '#fff', background: t.accent, border: `1px solid ${t.accent}`, borderRadius: 999, padding: '2px 6px' }}>Campaign</span>
+                      : pitch.is_lead && <span title="Tracked as a lead" style={{ ...t.uppLbl, fontSize: '8px', color: t.accent, border: `1px solid ${t.accent}`, borderRadius: 999, padding: '2px 6px' }}>Lead</span>}
                   </div>
                 </div>
 
@@ -147,9 +151,16 @@ export default function PitchTable({
                       {/* Paid partnerships only: press and PR pitches never become leads. */}
                       {pitch.is_lead ? (
                         <button type="button" onClick={() => onViewLead(pitch)} style={t.btnText}>View lead →</button>
-                      ) : canTrackAsLead(pitch) ? (
+                      ) : canTrackAsLead(pitch) && !pitch.campaign_id ? (
                         <button type="button" onClick={() => onTrackLead(pitch)} style={t.btnText}>Track as lead</button>
                       ) : null}
+
+                      {/* The deal is real: it becomes a campaign, and the link is kept both ways. */}
+                      {pitch.campaign_id ? (
+                        <button type="button" onClick={() => onOpenCampaign?.(pitch.campaign_id)} style={t.btnText}>Campaign →</button>
+                      ) : (
+                        <button type="button" onClick={() => onMakeCampaign(pitch)} style={t.btnText}>Make it a campaign</button>
+                      )}
 
                       <DeleteControl onConfirm={() => onDelete(pitch.id)} confirmLabel={pitch.is_lead ? 'Confirm delete (and its lead)' : 'Confirm delete'} dark={dark} />
                     </div>

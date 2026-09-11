@@ -15,6 +15,8 @@ import PitchModal from './outreach/PitchModal'
 import LeadTable from './outreach/LeadTable'
 import LeadModal from './outreach/LeadModal'
 import LeadReport from './outreach/LeadReport'
+import MakeCampaignModal from './outreach/MakeCampaignModal'
+import { createCampaignFromPitch } from './outreach/makeCampaign'
 
 // ── HQue Outreach ───────────────────────────────────────────────────────────
 // Cold outreach (pitches) and the paid-partnership pipeline (leads), ported
@@ -39,7 +41,7 @@ const clientKey = (row) => row.creator_id || `name:${row.client_name}`
 // Open leads read most-likely-to-close first; the archive tabs read A to Z.
 const byLikelihood = (a, b) => (b.likelihood || 0) - (a.likelihood || 0) || byBrand(a, b)
 
-export default function OutreachView({ dark = true, orgId, userId, isMobile = false, focusVersion = 0, agencyName = 'HQue' }) {
+export default function OutreachView({ dark = true, orgId, userId, isMobile = false, focusVersion = 0, agencyName = 'HQue', onOpenCampaign }) {
   const t = tokens(dark)
   const statuses = useMemo(() => statusMeta(dark), [dark])
   const stages = useMemo(() => stageMeta(dark), [dark])
@@ -70,6 +72,7 @@ export default function OutreachView({ dark = true, orgId, userId, isMobile = fa
   const [pitchModal, setPitchModal] = useState(null)   // { pitch } — pitch null = new
   const [leadModal, setLeadModal] = useState(null)     // { pitch } — pitch null = new lead, is_lead false = track
   const [reportOpen, setReportOpen] = useState(false)
+  const [campaignModal, setCampaignModal] = useState(null) // { pitch } — becoming a campaign
   const [actionError, setActionError] = useState('')
 
   // ── Outreach filters ─────────────────────────────────────────────────────
@@ -247,6 +250,19 @@ export default function OutreachView({ dark = true, orgId, userId, isMobile = fa
 
   const run = (fn) => fn().catch((e) => setActionError(e.message || 'Something went wrong.'))
 
+  // The deal is real. Create the campaign, then close the loop on this side:
+  // the pitch is a success, the lead (if it is one) is won, and both link across.
+  const makeCampaign = async (fields) => {
+    const pitch = campaignModal.pitch
+    const campaign = await createCampaignFromPitch(orgId, pitch, fields)
+    await updatePitch(pitch.id, {
+      campaign_id: campaign.id,
+      status: SUCCESS_STATUS,
+      ...(pitch.is_lead ? { stage: WON_STAGE, likelihood: 100, lost_reason: null } : {}),
+    })
+    setCampaignModal(null)
+  }
+
   const deletePitch = (id) => run(async () => {
     await removePitch(id)
     setExpandedId((c) => (c === id ? null : c))
@@ -369,6 +385,7 @@ export default function OutreachView({ dark = true, orgId, userId, isMobile = fa
                 expandedId={expandedId} onToggleRow={(id) => setExpandedId((c) => (c === id ? null : id))}
                 onEdit={(p) => setPitchModal({ pitch: p })} onDelete={deletePitch}
                 onTrackLead={(p) => setLeadModal({ pitch: p })} onViewLead={viewLeadForPitch}
+                onMakeCampaign={(p) => setCampaignModal({ pitch: p })} onOpenCampaign={onOpenCampaign}
                 memberName={memberName} clientKind={kindOf} dark={dark}
               />
             </>
@@ -401,6 +418,7 @@ export default function OutreachView({ dark = true, orgId, userId, isMobile = fa
                 rows={leadRows} emptyMessage={leadEmptyMessage}
                 expandedId={leadExpandedId} onToggleRow={(id) => setLeadExpandedId((c) => (c === id ? null : id))}
                 onEdit={(l) => setLeadModal({ pitch: l })} onRemove={removeLead} onOpenPitch={openPitchFromLead}
+                onMakeCampaign={(l) => setCampaignModal({ pitch: l })} onOpenCampaign={onOpenCampaign}
                 memberName={memberName} clientKind={kindOf} dark={dark}
               />
               {leads.length > 0 && (
@@ -418,6 +436,9 @@ export default function OutreachView({ dark = true, orgId, userId, isMobile = fa
       )}
       {leadModal && (
         <LeadModal key={leadModal.pitch?.id || 'new'} pitch={leadModal.pitch} clients={clients} members={members} userId={userId} dark={dark} onClose={() => setLeadModal(null)} onSave={saveLead} />
+      )}
+      {campaignModal && (
+        <MakeCampaignModal key={campaignModal.pitch.id} pitch={campaignModal.pitch} memberName={memberName} dark={dark} onClose={() => setCampaignModal(null)} onCreate={makeCampaign} />
       )}
       {reportOpen && (
         <LeadReport scope={reportScope} leads={reportLeads} agencyName={agencyName} memberName={memberName} onClose={() => setReportOpen(false)} />

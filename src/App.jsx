@@ -7,6 +7,7 @@ import InviteRecovery from './InviteRecovery'
 import TrialBanner from './TrialBanner'
 import AddCreatorForm from './AddCreatorForm'
 import { planLimits } from './plans'
+import { setOutreachEnabled as setOutreachFlag } from './campaignStatuses'
 import NotificationsPanel from './NotificationsPanel'
 import MiniCalendar from './MiniCalendar'
 import OrgSwitcher from './OrgSwitcher'
@@ -632,6 +633,8 @@ function App() {
     // yet loses nothing but this one section.
     const { data: org } = await supabase.from('organizations').select('outreach_enabled').eq('id', oid).maybeSingle()
     setOutreachEnabled(org?.outreach_enabled === true)
+    // Campaign status lists read this too (no 'Pitch' once Outreach is on).
+    setOutreachFlag(org?.outreach_enabled === true)
   }
 
   async function fetchAgencyName(oid) {
@@ -1066,7 +1069,7 @@ function App() {
               )}
               {canSee('outreach') && visited.has('outreach') && (
                 <div style={{ display: view === 'outreach' ? 'flex' : 'none', flex: 1, flexDirection: 'column', minHeight: 0 }}>
-                  <OutreachView dark={dark} orgId={orgId} userId={user?.id} isMobile={isMobile} focusVersion={focusVersion} agencyName={agencyName} />
+                  <OutreachView dark={dark} orgId={orgId} userId={user?.id} isMobile={isMobile} focusVersion={focusVersion} agencyName={agencyName} onOpenCampaign={(campaignId) => { setView('campaigns'); setPendingCampaignId(campaignId) }} />
                 </div>
               )}
               {visited.has('reports') && (
