@@ -6,6 +6,8 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-09-30
 
+**Health check and tune-up (Behind the scenes).** There's now a one-command health check, `npm run health`. It changes nothing: it builds the app, counts code-checker issues, checks the app's add-ons for security warnings, and confirms the live site, the Product Updates page and Supabase are all answering. The build tools (Vite, Tailwind, the code checker) were updated to their latest minor versions, which cleared all four high-severity add-on warnings; the core app libraries (React, Supabase) were left alone until someone can click through after updating them. The code checker now understands the server-side code and deliberate placeholders, so its count dropped from 371 to 169 and no longer cries wolf. Two moderate warnings remain inside the Google Analytics connection for HQ Metrics; fixing them needs a major upgrade, so they were left.
+
 **Media brands no longer show up as talent.** Momé and Mommish are cMedia's media brands, not creators, so the Talent section now hides any record labeled *Media brand*. That covers the roster (active and archived), search, the PDF and CSV roster exports, and the talent count used for the plan limit. Nothing was deleted or archived: both records stay put, their 203 linked pitches are untouched, and they still appear in Outreach, campaigns and the client dropdown on pitches. Records with no type at all still show as talent.
 
 ---

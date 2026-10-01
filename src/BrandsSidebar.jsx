@@ -228,7 +228,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
 
   // Use the existing brand instead of creating a duplicate — restores it first
   // if it was archived, then selects it and closes the new-brand form.
-  function useExistingBrand(brand) {
+  function openExistingBrand(brand) {
     setShowNewBrand(false)
     setNewBrandName('')
     setNewBrandWebsite('')
@@ -596,7 +596,7 @@ export default function BrandsSidebar({ dark = true, orgId, selectedBrandId, onS
                   {dupMatch.kind === 'exact' ? 'This brand already exists: ' : 'Possible duplicate of: '}
                   <b>{dupMatch.brand.name}</b>{dupMatch.brand.status === 'archived' ? <span style={{ color: muted }}> · archived</span> : ''}
                 </div>
-                <button onClick={() => useExistingBrand(dupMatch.brand)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
+                <button onClick={() => openExistingBrand(dupMatch.brand)} style={{ padding: '5px 10px', fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase', background: '#5b7c99', border: 'none', color: '#fff', cursor: 'pointer', borderRadius: '1px' }}>
                   {dupMatch.brand.status === 'archived' ? 'Restore & open' : 'Open it'}
                 </button>
               </div>

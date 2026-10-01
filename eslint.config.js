@@ -23,7 +23,16 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // Unused catch errors and `_` placeholders are deliberate, not dead code.
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_', caughtErrors: 'none' }],
+    },
+  },
+  // Server-side code (Netlify functions, build scripts) runs in Node, not the
+  // browser — give it Node's globals (process, require, Buffer…).
+  {
+    files: ['netlify/**/*.{js,mjs}', 'scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.commonjs },
     },
   },
 ])
