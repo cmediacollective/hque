@@ -7,6 +7,7 @@ import { ensureSlug } from './slugUtil'
 import FilterMenu from './FilterMenu'
 import { useTalentLabels } from './useTalentLabels'
 import { useCachedResource } from './useCachedResource'
+import { excludeMediaBrands } from './talentFilters'
 import { CardGridSkeleton, ListSkeleton } from './Skeletons'
 
 // Defined at module scope (not inside TalentView) so its component identity is
@@ -45,10 +46,10 @@ export default function TalentView({ dark = true, orgId, isMobile = false, showA
   // cache instantly and refetches silently — no empty flash.
   const talentKey = orgId ? `talent:${orgId}:${showArchived ? 'archived' : 'active'}` : null
   const { data: creatorsData, status, refetch } = useCachedResource(talentKey, async () => {
-    const { data, error } = await supabase
+    const { data, error } = await excludeMediaBrands(supabase
       .from('creators')
       .select('*')
-      .eq('status', showArchived ? 'archived' : 'active')
+      .eq('status', showArchived ? 'archived' : 'active'))
       .order('name', { ascending: true })
     if (error) throw error
     return data || []

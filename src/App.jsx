@@ -7,6 +7,7 @@ import InviteRecovery from './InviteRecovery'
 import TrialBanner from './TrialBanner'
 import AddCreatorForm from './AddCreatorForm'
 import { planLimits } from './plans'
+import { excludeMediaBrands } from './talentFilters'
 import { setOutreachEnabled as setOutreachFlag } from './campaignStatuses'
 import NotificationsPanel from './NotificationsPanel'
 import MiniCalendar from './MiniCalendar'
@@ -247,7 +248,7 @@ function App() {
   // Count active talent to enforce the plan's talent limit. RLS scopes to the org.
   useEffect(() => {
     if (!orgId) return
-    supabase.from('creators').select('id', { count: 'exact', head: true }).eq('status', 'active')
+    excludeMediaBrands(supabase.from('creators').select('id', { count: 'exact', head: true }).eq('status', 'active'))
       .then(({ count }) => { if (typeof count === 'number') setTalentCount(count) })
   }, [orgId, refresh])
   const [authError, setAuthError] = useState(initialAuthError)
@@ -720,7 +721,7 @@ function App() {
 
   async function handleCSVExport() {
     if (!orgId) return
-    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
+    const { data: creators } = await excludeMediaBrands(supabase.from('creators').select('*').eq('status', 'active')).order('name', { ascending: true })
     if (!creators || creators.length === 0) return
     const headers = ['Name', 'Type', 'Niches', 'Instagram', 'TikTok', 'YouTube', 'IG Followers', 'TikTok Followers', 'YT Subscribers', 'Engagement Rate', 'Feed Rate', 'Reel Rate', 'Story Rate', 'TikTok Rate', 'YouTube Rate', 'Location', 'Tier', 'Contact Email', 'Manager', 'Manager Email']
     const rows = creators.map(cr => [
@@ -759,7 +760,7 @@ function App() {
   async function handleExport() {
     if (!orgId) return
     setExporting(true)
-    const { data: creators } = await supabase.from('creators').select('*').eq('status', 'active').order('name', { ascending: true })
+    const { data: creators } = await excludeMediaBrands(supabase.from('creators').select('*').eq('status', 'active')).order('name', { ascending: true })
     if (!creators || creators.length === 0) { setExporting(false); return }
     const toImg = (url, name) => url ? `<img src="${url}" alt="${name}" style="width:64px;height:64px;object-fit:cover;border-radius:4px;border:1px solid #e0e0e0;display:block;" onerror="this.style.display='none'" />` : `<div style="width:64px;height:64px;border-radius:4px;border:1px solid #e0e0e0;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:20px;color:#999;">${name?.split(' ').map(n => n[0]).join('').slice(0,2)}</div>`
     const rows = creators.map(c => {

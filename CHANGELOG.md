@@ -4,6 +4,12 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-09-30
+
+**Media brands no longer show up as talent.** Momé and Mommish are cMedia's media brands, not creators, so the Talent section now hides any record labeled *Media brand*. That covers the roster (active and archived), search, the PDF and CSV roster exports, and the talent count used for the plan limit. Nothing was deleted or archived: both records stay put, their 203 linked pitches are untouched, and they still appear in Outreach, campaigns and the client dropdown on pitches. Records with no type at all still show as talent.
+
+---
+
 ## 2026-09-11
 
 **A lead becomes a campaign with one click.** In Outreach, any pitch or lead now has **Make it a campaign**. It asks for three things — the campaign name (pre-filled), the type, and whether it starts at Contract Pending or Active — and builds the campaign from what Outreach already knows: the brand (added to your Brands if it isn't there), the contact (added to Contacts if new), the talent, who pitched it, the deal value as the budget, and the latest note. The pitch is marked Success, the lead Closed won, and the two link to each other: **Campaign →** from Outreach, and the campaign remembers which pitch it came from.
