@@ -1,5 +1,11 @@
 [
   {
+    "title": "Phone, title and agency for talent managers",
+    "description": "Talent managers can now have a phone number, title and agency, not just a name and email. Add them on the talent form or from the manager's card in Contacts, where a change updates every talent that manager represents.",
+    "category": "Improvement",
+    "shipped_at": "2026-10-20"
+  },
+  {
     "title": "Talent tier set automatically from followers",
     "description": "When you add or update a talent's Instagram, TikTok or YouTube followers, their tier (Nano, Micro, Mid, Macro or Mega) now fills itself in from the combined total, for every talent, however they were added. Talent without follower numbers can still have a tier chosen by hand.",
     "category": "Improvement",

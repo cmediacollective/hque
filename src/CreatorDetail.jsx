@@ -476,12 +476,13 @@ export default function CreatorDetail({ creator, onClose, onSaved, onOpenCampaig
               {creator.handles?.youtube && row('YouTube', creator.handles.youtube, `https://youtube.com/${creator.handles.youtube}`)}
             </div>
 
-            {(creator.contact_email || creator.manager_name || creator.manager_email) && (
+            {(creator.contact_email || creator.manager_name || creator.manager_email || creator.manager_phone) && (
               <div style={{ marginBottom: '28px' }}>
                 <div style={{ fontSize: '8px', letterSpacing: '0.22em', textTransform: 'uppercase', color: panelMuted, marginBottom: '10px' }}>Contact</div>
                 {row('Talent Email', creator.contact_email, `https://mail.google.com/mail/?view=cm&to=${creator.contact_email}`)}
-                {row('Manager', creator.manager_name)}
+                {row('Manager', [creator.manager_name, creator.manager_title, creator.manager_company].filter(Boolean).join(' · '))}
                 {row('Manager Email', creator.manager_email, `https://mail.google.com/mail/?view=cm&to=${creator.manager_email}`)}
+                {row('Manager Phone', creator.manager_phone, creator.manager_phone ? `tel:${creator.manager_phone}` : undefined)}
               </div>
             )}
 

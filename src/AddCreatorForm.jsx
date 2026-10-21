@@ -76,6 +76,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     name: '', types: [], tier: '', primary_platform: '',
     niches: [], ig_followers: '', tiktok_followers: '', yt_subscribers: '',
     engagement_rate: '', contact_email: '', manager_name: '', manager_email: '',
+    manager_title: '', manager_company: '', manager_phone: '',
     manager_user_id: null,
     location: '', notes: '', bio: '', photo_url: '', media_kit_url: '',
     handles: { instagram: '', tiktok: '', youtube: '' },
@@ -518,7 +519,12 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
             {field('Talent Email', inp({ value: form.contact_email, onChange: e => set('contact_email', e.target.value), placeholder: 'email@example.com' }))}
             {field('Manager Name', inp({ value: form.manager_name, onChange: e => set('manager_name', e.target.value), placeholder: 'Manager name' }))}
           </div>
-          {field('Manager Email', inp({ value: form.manager_email, onChange: e => set('manager_email', e.target.value), placeholder: 'manager@example.com' }))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {field('Manager Email', inp({ value: form.manager_email, onChange: e => set('manager_email', e.target.value), placeholder: 'manager@example.com' }))}
+            {field('Manager Phone', inp({ value: form.manager_phone || '', onChange: e => set('manager_phone', e.target.value), placeholder: 'Phone' }))}
+            {field('Manager Title', inp({ value: form.manager_title || '', onChange: e => set('manager_title', e.target.value), placeholder: 'e.g. Senior Talent Manager' }))}
+            {field('Manager Agency', inp({ value: form.manager_company || '', onChange: e => set('manager_company', e.target.value), placeholder: 'Agency or company' }))}
+          </div>
 
           {field('Media Kit',
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>

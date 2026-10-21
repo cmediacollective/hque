@@ -106,7 +106,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
   const [campByBrand, setCampByBrand] = useState({})
 
   const fetchBrands = () => supabase.from('brands').select('id, name, logo_url, website, phone').eq('org_id', orgId).order('name').then(({ data }) => setBrands(data || []))
-  const fetchCreators = () => supabase.from('creators').select('id, name, contact_email, manager_name, manager_email, niches, manager_user_id, photo_url').eq('org_id', orgId).eq('status', 'active').then(({ data }) => setCreators(data || []))
+  const fetchCreators = () => supabase.from('creators').select('id, name, contact_email, manager_name, manager_email, manager_phone, manager_title, manager_company, niches, manager_user_id, photo_url').eq('org_id', orgId).eq('status', 'active').then(({ data }) => setCreators(data || []))
   const fetchTypes = () => supabase.from('org_contact_types').select('key, label, color, position').eq('org_id', orgId).order('position').then(({ data }) => setOrgTypes(data && data.length ? data : DEFAULT_TYPES))
   async function fetchCampaigns() {
     const [{ data: camps }, { data: links }] = await Promise.all([
@@ -148,7 +148,12 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
       if (!mn && !me) continue
       const key = (me || mn).toLowerCase()
       if (!m.has(key)) m.set(key, { id: 'manager:' + key, kind: 'manager', _managerKey: key, name: mn || me, email: me || '', roleLabel: 'Manager', roster: [] })
-      m.get(key).roster.push(cr)
+      const mg = m.get(key)
+      mg.roster.push(cr)
+      // The same manager can sit on several talent records; take the first filled-in value.
+      mg.phone = mg.phone || (cr.manager_phone || '').trim()
+      mg.title = mg.title || (cr.manager_title || '').trim()
+      mg.company = mg.company || (cr.manager_company || '').trim()
     }
     return [...m.values()].map(mg => {
       const camps = new Set()
@@ -229,7 +234,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     setFormError('')
     if (p.kind === 'company') return setEditing({ _src: 'company', _brandId: p._brandId, name: p.name, website: p.website, phone: p.phone })
     if (p.kind === 'talent') return setEditing({ _src: 'talent', _creatorId: p._creatorId, name: p.name, email: p.email })
-    if (p.kind === 'manager') return setEditing({ _src: 'manager', _managerKey: p._managerKey, _rosterIds: p.roster.map(r => r.id), name: p.name, email: p.email })
+    if (p.kind === 'manager') return setEditing({ _src: 'manager', _managerKey: p._managerKey, _rosterIds: p.roster.map(r => r.id), name: p.name, email: p.email, phone: p.phone || '', title: p.title || '', company: p.company || '' })
     const c = p._raw
     setEditing({ ...c, brand_id: c.brand_id || '', owner_user_id: c.owner_user_id || '', tags: (c.tags || []).join(', '), last_contacted_at: c.last_contacted_at ? c.last_contacted_at.slice(0, 10) : '' })
   }
@@ -253,7 +258,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     if (d._src === 'manager') {
       setSaving(true); setFormError('')
       const ids = (d._rosterIds || []).map(x => x.replace('talent:', ''))
-      const { error } = await supabase.from('creators').update({ manager_name: d.name?.trim() || null, manager_email: d.email?.trim() || null }).in('id', ids)
+      const { error } = await supabase.from('creators').update({ manager_name: d.name?.trim() || null, manager_email: d.email?.trim() || null, manager_phone: d.phone?.trim() || null, manager_title: d.title?.trim() || null, manager_company: d.company?.trim() || null }).in('id', ids)
       setSaving(false); if (error) return setFormError('Could not save: ' + error.message)
       fetchCreators(); setEditing(null); return
     }
@@ -316,7 +321,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
 
   function subline(p) {
     if (p.kind === 'talent') return p.rep ? `rep ${p.rep}` : 'unrepresented'
-    if (p.kind === 'manager') return p.rosterCount === 1 ? `manages ${p.roster[0].name}` : `${p.rosterCount} talent`
+    if (p.kind === 'manager') return [p.company, p.rosterCount === 1 ? `manages ${p.roster[0].name}` : `${p.rosterCount} talent`].filter(Boolean).join(' · ')
     if (p.kind === 'company') return [p.website && p.website.replace(/^https?:\/\//, ''), p.peopleCount ? `${p.peopleCount} ${p.peopleCount === 1 ? 'person' : 'people'}` : ''].filter(Boolean).join(' · ')
     return [p.title, p.company].filter(Boolean).join(' · ') || (p.type ? '' : '')
   }
@@ -354,7 +359,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
     const bigRoster = p.kind === 'manager' && p.rosterCount > 6
     let sub
     if (p.kind === 'talent') sub = <>Talent · {p.rep ? <>rep <span style={{ color: accent }}>{p.rep}</span></> : 'unrepresented'}</>
-    else if (p.kind === 'manager') sub = <>Manager · {p.rosterCount > 1 ? <span style={{ color: accent, cursor: 'pointer' }} onClick={() => openRoster(p._managerKey)}>{p.rosterCount} talent on roster</span> : <>manages {p.roster[0]?.name}</>}</>
+    else if (p.kind === 'manager') sub = <>{[p.title || 'Manager', p.company].filter(Boolean).join(', ')} · {p.rosterCount > 1 ? <span style={{ color: accent, cursor: 'pointer' }} onClick={() => openRoster(p._managerKey)}>{p.rosterCount} talent on roster</span> : <>manages {p.roster[0]?.name}</>}</>
     else if (p.kind === 'company') sub = <>Company{p.peopleCount ? ` · ${p.peopleCount} ${p.peopleCount === 1 ? 'person' : 'people'}` : ''}</>
     else sub = <>{p.roleLabel}{p.company ? ` · ${p.company}` : ''}</>
 
@@ -383,7 +388,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
             <div><div style={fieldLbl}>Email</div><div style={{ fontSize: 13.5, color: p.email ? accent : mut2, fontFamily: UI }}>{p.email || '—'}</div></div>
             <div><div style={fieldLbl}>Last touch</div><div style={{ fontSize: 13.5, color: body, fontFamily: UI }}>{p.lastTouch ? `${timeAgo(p.lastTouch)} · note added` : '—'}</div></div>
             <div><div style={fieldLbl}>Active campaigns</div><div style={{ fontSize: 13.5, color: body, fontFamily: UI }}>{metaCampaigns}</div></div>
-            {p.kind === 'company' && p.phone && <div><div style={fieldLbl}>Phone</div><div style={{ fontSize: 13.5, color: body, fontFamily: UI }}>{p.phone}</div></div>}
+            {(p.kind === 'company' || p.kind === 'manager') && p.phone && <div><div style={fieldLbl}>Phone</div><div style={{ fontSize: 13.5, color: body, fontFamily: UI }}>{p.phone}</div></div>}
           </div>
 
           {/* inline note composer */}
@@ -533,7 +538,7 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
               {editing._src === 'company' ? 'Edit company' : editing._src === 'talent' ? 'Edit talent' : editing._src === 'manager' ? 'Edit manager' : editing.id ? 'Edit contact' : 'New contact'}
             </div>
             {editing._src === 'company' && <div style={{ fontSize: 12, color: mut, marginBottom: 16, lineHeight: 1.6 }}>This company lives on your Brands — changes here update the brand.</div>}
-            {(editing._src === 'talent' || editing._src === 'manager') && <div style={{ fontSize: 12, color: mut, marginBottom: 16, lineHeight: 1.6 }}>This lives on your Talent records — the name/email update there too{editing._src === 'manager' ? ', across every talent they manage' : ''}.</div>}
+            {(editing._src === 'talent' || editing._src === 'manager') && <div style={{ fontSize: 12, color: mut, marginBottom: 16, lineHeight: 1.6 }}>This lives on your Talent records — {editing._src === 'manager' ? 'these details update' : 'the name/email update'} there too{editing._src === 'manager' ? ', across every talent they manage' : ''}.</div>}
 
             {editing._src === 'company' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -545,6 +550,11 @@ export default function ContactsView({ dark = true, orgId, isMobile = false, foc
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div><label style={fieldLbl}>{editing._src === 'talent' ? 'Talent name' : 'Manager name'}</label><input value={editing.name} onChange={e => setEditing(d => ({ ...d, name: e.target.value }))} style={inputStyle} autoFocus /></div>
                 <div><label style={fieldLbl}>Email</label><input value={editing.email} onChange={e => setEditing(d => ({ ...d, email: e.target.value }))} type="email" style={inputStyle} /></div>
+                {editing._src === 'manager' && <>
+                  <div><label style={fieldLbl}>Phone</label><input value={editing.phone} onChange={e => setEditing(d => ({ ...d, phone: e.target.value }))} style={inputStyle} /></div>
+                  <div><label style={fieldLbl}>Title / role</label><input value={editing.title} onChange={e => setEditing(d => ({ ...d, title: e.target.value }))} placeholder="e.g. Senior Talent Manager" style={inputStyle} /></div>
+                  <div><label style={fieldLbl}>Agency / company</label><input value={editing.company} onChange={e => setEditing(d => ({ ...d, company: e.target.value }))} style={inputStyle} /></div>
+                </>}
               </div>
             ) : (
               <>
