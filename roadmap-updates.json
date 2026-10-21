@@ -1,5 +1,11 @@
 [
   {
+    "title": "Talent tier set automatically from followers",
+    "description": "When you add or update a talent's Instagram, TikTok or YouTube followers, their tier (Nano, Micro, Mid, Macro or Mega) now fills itself in from the combined total. You can still choose a different tier by hand.",
+    "category": "Improvement",
+    "shipped_at": "2026-10-20"
+  },
+  {
     "title": "Security and reliability updates",
     "description": "We updated the tools HQue is built with to their latest secure versions and added a routine health check that confirms the app, sign-in and database are all running smoothly.",
     "category": "Improvement",

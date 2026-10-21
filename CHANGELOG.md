@@ -4,6 +4,14 @@ A plain-English log of everything shipped. Newest at the top.
 
 ---
 
+## 2026-10-20
+
+**Tier fills itself in from follower counts.** On the add/edit talent form, typing or changing an Instagram, TikTok or YouTube number now sets the Tier automatically from the combined total: under 25K Nano, 25K–100K Micro, 100K–200K Mid, 200K–1M Macro, 1M and up Mega. You can still pick a different tier by hand; it stays until a follower number changes again. Existing talent keep their current tier until someone edits their numbers.
+
+**Vite security update (Behind the scenes).** Updated Vite to 8.3.4 to clear a high-severity advisory in its local development server. The live site wasn't affected.
+
+---
+
 ## 2026-09-30
 
 **Health check and tune-up (Behind the scenes).** There's now a one-command health check, `npm run health`. It changes nothing: it builds the app, counts code-checker issues, checks the app's add-ons for security warnings, and confirms the live site, the Product Updates page and Supabase are all answering. The build tools (Vite, Tailwind, the code checker) were updated to their latest minor versions, which cleared all four high-severity add-on warnings; the core app libraries (React, Supabase) were left alone until someone can click through after updating them. The code checker now understands the server-side code and deliberate placeholders, so its count dropped from 371 to 169 and no longer cries wolf. Two moderate warnings remain inside the Google Analytics connection for HQ Metrics; fixing them needs a major upgrade, so they were left.

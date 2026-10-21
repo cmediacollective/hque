@@ -6,6 +6,18 @@ import { useTalentLabels } from './useTalentLabels'
 const PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Pinterest', 'LinkedIn']
 const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
+// Tier follows total reach (Instagram + TikTok + YouTube). Each number is the
+// floor for that tier; anything under Micro's floor is Nano.
+const TIER_FLOORS = [['Mega', 1000000], ['Macro', 200000], ['Mid', 100000], ['Micro', 25000]]
+const tierFor = f => {
+  const total = ['ig_followers', 'tiktok_followers', 'yt_subscribers'].reduce((n, k) => n + (parseInt(f[k]) || 0), 0)
+  if (!total) return f.tier
+  return (TIER_FLOORS.find(([, floor]) => total >= floor) || ['Nano'])[0]
+}
+// Re-tiers only when a follower count changes, so a hand-picked tier sticks
+// until the numbers move.
+const withTier = f => ({ ...f, tier: tierFor(f) })
+
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
 // Performance numbers a brand asks for. Most of these are only visible in the
@@ -90,6 +102,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
   }, [orgId, existing?.org_id])
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
+  const setFollowers = (key, val) => setForm(f => withTier({ ...f, [key]: val }))
   const setHandle = (key, val) => setForm(f => ({ ...f, handles: { ...f.handles, [key]: val } }))
   const setRate = (key, val) => setForm(f => ({ ...f, rates: { ...f.rates, [key]: val } }))
   const setMetric = (key, val) => setForm(f => ({ ...f, metrics: { ...f.metrics, [key]: val } }))
@@ -128,7 +141,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
         // Only overwrite what actually came back — a null from the API means
         // "not available", which must not wipe a number typed in by hand.
         const m = body.metrics || {}
-        setForm(f => ({
+        setForm(f => withTier({
           ...f,
           ig_followers: body.followers || f.ig_followers,
           engagement_rate: m.engagement_rate ?? f.engagement_rate,
@@ -438,9 +451,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
 
           {sectionLabel('Audience')}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px' }}>
-            {field('IG Followers', inp({ value: form.ig_followers, onChange: e => set('ig_followers', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('TikTok Followers', inp({ value: form.tiktok_followers, onChange: e => set('tiktok_followers', e.target.value), placeholder: '0', type: 'number' }))}
-            {field('YT Subscribers', inp({ value: form.yt_subscribers, onChange: e => set('yt_subscribers', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('IG Followers', inp({ value: form.ig_followers, onChange: e => setFollowers('ig_followers', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('TikTok Followers', inp({ value: form.tiktok_followers, onChange: e => setFollowers('tiktok_followers', e.target.value), placeholder: '0', type: 'number' }))}
+            {field('YT Subscribers', inp({ value: form.yt_subscribers, onChange: e => setFollowers('yt_subscribers', e.target.value), placeholder: '0', type: 'number' }))}
             {field('Eng Rate %', inp({ value: form.engagement_rate, onChange: e => set('engagement_rate', e.target.value), placeholder: '0.0', type: 'number' }))}
           </div>
 
