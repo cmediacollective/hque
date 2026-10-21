@@ -6,7 +6,7 @@ A plain-English log of everything shipped. Newest at the top.
 
 ## 2026-10-20
 
-**Tier fills itself in from follower counts.** On the add/edit talent form, typing or changing an Instagram, TikTok or YouTube number now sets the Tier automatically from the combined total: under 25K Nano, 25K–100K Micro, 100K–200K Mid, 200K–1M Macro, 1M and up Mega. You can still pick a different tier by hand; it stays until a follower number changes again. Existing talent keep their current tier until someone edits their numbers.
+**Tier fills itself in from follower counts.** On the add/edit talent form, typing or changing an Instagram, TikTok or YouTube number now sets the Tier automatically from the combined total: under 25K Nano, 25K–100K Micro, 100K–200K Mid, 200K–1M Macro, 1M and up Mega. It's enforced in the database for every company, so talent added any other way (the inquiry form, imports) get the same rule; the form shows it as *Tier (from followers)* and only talent with no follower numbers can have a tier picked by hand. All existing talent were re-tiered once: 119 of 214 changed across six companies (Momé 63, C Media Collective 44, HQue Marketing 6, The Encouragement Company 3, THAEI 2, Motherly 1). Everyone's previous tier is saved in `creators_tier_backup_20261020`, and the migration file explains how to restore it.
 
 **Vite security update (Behind the scenes).** Updated Vite to 8.3.4 to clear a high-severity advisory in its local development server. The live site wasn't affected.
 

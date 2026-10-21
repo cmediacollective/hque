@@ -7,15 +7,16 @@ const PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Pinterest', 'LinkedIn']
 const TIERS = ['Nano', 'Micro', 'Mid', 'Macro', 'Mega']
 
 // Tier follows total reach (Instagram + TikTok + YouTube). Each number is the
-// floor for that tier; anything under Micro's floor is Nano.
+// floor for that tier; anything under Micro's floor is Nano. The database
+// applies the same rule on every save (supabase/migrations/20261020_auto_talent_tier.sql),
+// so keep the two in sync. Only talent with no follower numbers get a hand-picked tier.
 const TIER_FLOORS = [['Mega', 1000000], ['Macro', 200000], ['Mid', 100000], ['Micro', 25000]]
+const totalFollowers = f => ['ig_followers', 'tiktok_followers', 'yt_subscribers'].reduce((n, k) => n + (parseInt(f[k]) || 0), 0)
 const tierFor = f => {
-  const total = ['ig_followers', 'tiktok_followers', 'yt_subscribers'].reduce((n, k) => n + (parseInt(f[k]) || 0), 0)
+  const total = totalFollowers(f)
   if (!total) return f.tier
   return (TIER_FLOORS.find(([, floor]) => total >= floor) || ['Nano'])[0]
 }
-// Re-tiers only when a follower count changes, so a hand-picked tier sticks
-// until the numbers move.
 const withTier = f => ({ ...f, tier: tierFor(f) })
 
 const toggleChip = (arr, val) => arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
@@ -271,6 +272,7 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
     return {
       ...form,
       type: form.types[0],
+      tier: tierFor(form),
       ig_followers: form.ig_followers ? parseInt(form.ig_followers) : null,
       tiktok_followers: form.tiktok_followers ? parseInt(form.tiktok_followers) : null,
       yt_subscribers: form.yt_subscribers ? parseInt(form.yt_subscribers) : null,
@@ -399,7 +401,9 @@ export default function AddCreatorForm({ onClose, onSaved, existing, dark = true
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            {field('Tier', sel({ value: form.tier, onChange: e => set('tier', e.target.value) }, TIERS))}
+            {totalFollowers(form) > 0
+              ? field('Tier (from followers)', sel({ value: tierFor(form), disabled: true, title: 'Set automatically from Instagram + TikTok + YouTube followers' }, TIERS))
+              : field('Tier', sel({ value: form.tier, onChange: e => set('tier', e.target.value) }, TIERS))}
             {field('Primary Platform', sel({ value: form.primary_platform, onChange: e => set('primary_platform', e.target.value) }, PLATFORMS))}
           </div>
 

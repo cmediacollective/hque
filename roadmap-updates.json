@@ -1,7 +1,7 @@
 [
   {
     "title": "Talent tier set automatically from followers",
-    "description": "When you add or update a talent's Instagram, TikTok or YouTube followers, their tier (Nano, Micro, Mid, Macro or Mega) now fills itself in from the combined total. You can still choose a different tier by hand.",
+    "description": "When you add or update a talent's Instagram, TikTok or YouTube followers, their tier (Nano, Micro, Mid, Macro or Mega) now fills itself in from the combined total, for every talent, however they were added. Talent without follower numbers can still have a tier chosen by hand.",
     "category": "Improvement",
     "shipped_at": "2026-10-20"
   },
